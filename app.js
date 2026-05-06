@@ -43,13 +43,14 @@ let state = {
 
 function makeDemoData(mode) {
   const rows = [];
-  const start = new Date("2025-08-11T00:00:00");
+  const end = new Date();
+  end.setHours(0, 0, 0, 0);
   let close = mode === "weighted" ? 7810 : 7740;
   let drift = mode === "weighted" ? 3.6 : 2.3;
 
-  for (let i = 0; i < 280; i += 1) {
-    const date = new Date(start);
-    date.setDate(start.getDate() + i);
+  for (let i = 279; i >= 0; i -= 1) {
+    const date = new Date(end);
+    date.setDate(end.getDate() - i);
     if (date.getDay() === 0 || date.getDay() === 6) continue;
 
     const wave = Math.sin(i / 13) * 48 + Math.cos(i / 31) * 82;
@@ -306,7 +307,7 @@ function updateSummary(data, analysis) {
   if (state.dataMeta) {
     els.chartSubhead.textContent = `${state.dataMeta.instrument_name || "棕榈油连续"} | 最新 ${state.dataMeta.latest_date} | 来源 ${state.dataMeta.source}`;
   } else {
-    els.chartSubhead.textContent = state.imported || state.autoLoaded ? "已载入 P0 连续合约 CSV 数据" : "示例数据，可通过 CSV 替换为真实行情";
+    els.chartSubhead.textContent = state.imported || state.autoLoaded ? "已载入 P0 连续合约 CSV 数据" : "示例数据：未自动载入 CSV 时显示，日期不会超过今天";
   }
   els.lastPrice.textContent = analysis.last.close.toFixed(0);
   els.lastChange.textContent = `${formatSigned(analysis.change)} (${formatPct(analysis.changePct)})`;
@@ -441,7 +442,10 @@ els.priceCanvas.addEventListener("mouseleave", () => {
 });
 
 async function autoLoadCsv() {
-  if (location.protocol === "file:") return;
+  if (location.protocol === "file:") {
+    console.warn("CSV auto-load needs http:// or https://. Open through a local server or GitHub Pages.");
+    return;
+  }
   try {
     const [response, metaResponse] = await Promise.all([
       fetch("data/palm_oil_p0_daily.csv", { cache: "no-store" }),

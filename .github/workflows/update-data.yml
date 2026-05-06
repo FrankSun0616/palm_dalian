@@ -35,12 +35,14 @@ jobs:
 
       - name: Update CSV
         run: python update_data.py
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update palm oil P0 data"
-          file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json
+          file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json data/ai_analysis.json
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

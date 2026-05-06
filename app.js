@@ -7,7 +7,6 @@ const els = {
   csvInput: document.getElementById("csvInput"),
   reloadBtn: document.getElementById("reloadBtn"),
   demoBtn: document.getElementById("demoBtn"),
-  modeButtons: Array.from(document.querySelectorAll(".market-switch button")),
   lastPrice: document.getElementById("lastPrice"),
   lastChange: document.getElementById("lastChange"),
   signalText: document.getElementById("signalText"),
@@ -28,7 +27,14 @@ const els = {
   scoreFill: document.getElementById("scoreFill"),
   signalList: document.getElementById("signalList"),
   scenarioList: document.getElementById("scenarioList"),
-  riskTable: document.getElementById("riskTable")
+  riskTable: document.getElementById("riskTable"),
+  aiMeta: document.getElementById("aiMeta"),
+  aiBias: document.getElementById("aiBias"),
+  aiSummary: document.getElementById("aiSummary"),
+  aiList: document.getElementById("aiList"),
+  aiSupport: document.getElementById("aiSupport"),
+  aiResistance: document.getElementById("aiResistance"),
+  aiRisk: document.getElementById("aiRisk")
 };
 
 const colors = {
@@ -40,8 +46,7 @@ const colors = {
 };
 
 let state = {
-  mode: "weighted",
-  data: makeDemoData("weighted"),
+  data: makeDemoData(),
   imported: false,
   autoLoaded: false,
   dataMeta: null,
@@ -56,12 +61,12 @@ function setLoadStatus(status, detail = "") {
   els.dataFreshness.textContent = detail;
 }
 
-function makeDemoData(mode) {
+function makeDemoData() {
   const rows = [];
   const end = new Date();
   end.setHours(0, 0, 0, 0);
-  let close = mode === "weighted" ? 7810 : 7740;
-  let drift = mode === "weighted" ? 3.6 : 2.3;
+  let close = 7740;
+  const drift = 2.3;
 
   for (let i = 279; i >= 0; i -= 1) {
     const date = new Date(end);
@@ -465,8 +470,7 @@ function updateLegend(maPeriods) {
 }
 
 function updateSummary(data, analysis) {
-  const modeName = state.mode === "weighted" ? "加权" : "连续";
-  els.chartTitle.textContent = `P ${modeName}日线`;
+  els.chartTitle.textContent = "P0 棕榈油连续日线";
   if (state.dataMeta) {
     els.chartSubhead.textContent = `${state.dataMeta.instrument_name || "棕榈油连续"} | 最新 ${state.dataMeta.latest_date} | 来源 ${state.dataMeta.source}`;
   } else {
@@ -621,19 +625,6 @@ function parseCsv(text) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-els.modeButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    els.modeButtons.forEach((item) => item.classList.remove("active"));
-    button.classList.add("active");
-    state.mode = button.dataset.mode;
-    state.data = makeDemoData(state.mode);
-    state.imported = false;
-    state.autoLoaded = false;
-    state.dataMeta = null;
-    draw();
-  });
-});
-
 els.periodSelect.addEventListener("change", draw);
 els.maSelect.addEventListener("change", draw);
 els.reloadBtn.addEventListener("click", () => {
@@ -641,7 +632,7 @@ els.reloadBtn.addEventListener("click", () => {
 });
 
 els.demoBtn.addEventListener("click", () => {
-  state.data = makeDemoData(state.mode);
+  state.data = makeDemoData();
   state.imported = false;
   state.autoLoaded = false;
   state.dataMeta = null;
@@ -721,12 +712,8 @@ async function autoLoadCsv() {
     if (rows.length < 20) throw new Error(`CSV有效数据少于20行: ${rows.length}`);
     state.dataMeta = metaResponse.ok ? await metaResponse.json() : null;
     state.data = rows;
-    state.mode = "continuous";
     state.imported = false;
     state.autoLoaded = true;
-    els.modeButtons.forEach((button) => {
-      button.classList.toggle("active", button.dataset.mode === "continuous");
-    });
     draw();
   } catch (error) {
     setLoadStatus("加载失败", error.message || "未知错误");
@@ -734,7 +721,39 @@ async function autoLoadCsv() {
   }
 }
 
+async function autoLoadAiAnalysis() {
+  if (location.protocol === "file:") return;
+  try {
+    const cacheBust = `t=${Date.now()}`;
+    const response = await fetch(`data/ai_analysis.json?${cacheBust}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`AI HTTP ${response.status}`);
+    const ai = await response.json();
+    updateAiPanel(ai);
+  } catch (error) {
+    els.aiMeta.textContent = "AI 分析读取失败";
+    els.aiSummary.textContent = error.message || "未知错误";
+    els.aiBias.textContent = "--";
+    els.aiList.innerHTML = "";
+  }
+}
+
+function updateAiPanel(ai) {
+  els.aiBias.textContent = ai.bias || "--";
+  els.aiBias.className = /多|强/.test(ai.bias || "") ? "up" : /空|弱/.test(ai.bias || "") ? "down" : "";
+  const status = ai.status === "ok" ? "DeepSeek" : "规则备用";
+  const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
+  els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"} | 生成 ${generated}`;
+  els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
+  const items = Array.isArray(ai.analysis) ? ai.analysis : [];
+  els.aiList.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+  els.aiSupport.textContent = Number(ai.watch_levels?.support || 0) ? Number(ai.watch_levels.support).toFixed(0) : "--";
+  els.aiResistance.textContent = Number(ai.watch_levels?.resistance || 0) ? Number(ai.watch_levels.resistance).toFixed(0) : "--";
+  els.aiRisk.textContent = ai.risk_note || "本分析仅供行情研究，不构成投资建议。";
+}
+
 window.addEventListener("resize", draw);
 draw();
 autoLoadCsv();
+autoLoadAiAnalysis();
 setInterval(autoLoadCsv, 60 * 1000);
+setInterval(autoLoadAiAnalysis, 60 * 1000);

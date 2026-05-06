@@ -1,12 +1,12 @@
 # 大连棕榈油连续行情 K 线分析
 
-这是一个纯静态网页，用于查看大连棕榈油加权/连续行情的 K 线和涨跌结构。
+这是一个纯静态网页，用于查看大连棕榈油 `P0` 连续合约日线的 K 线、规则技术分析和 DeepSeek 日线分析。
 
 ## 使用方法
 
 直接打开 `index.html` 可以看内置示例数据。
 
-当前已验证的数据口径是大连棕榈油 `P0` 连续合约，即 `棕榈油连续`，不是单独的第三方加权指数。
+当前已验证的数据口径是大连商品交易所棕榈油 `P0` 连续合约，即 `棕榈油连续`。
 
 如果要自动加载最新 CSV，请先更新数据，然后用本地服务器打开：
 
@@ -20,6 +20,12 @@ python3 -m http.server 8080
 页面也支持手动导入 CSV 替换行情。
 
 线上部署和自动更新见 `DEPLOY.md`。
+
+DeepSeek AI 分析需要在 GitHub repo 的 `Settings -> Secrets and variables -> Actions` 中添加 secret：
+
+```text
+DEEPSEEK_API_KEY
+```
 
 GitHub Pages 目标地址：
 

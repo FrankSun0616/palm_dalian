@@ -32,8 +32,18 @@ GitHub can throttle scheduled workflows, so exact execution time is not guarante
 
 The same workflow updates the CSV and deploys the static site to GitHub Pages.
 
+## DeepSeek AI Analysis
+
+To enable AI analysis, add this GitHub Actions secret:
+
+```text
+DEEPSEEK_API_KEY
+```
+
+The key must not be committed to the repository. When configured, `update_data.py` writes `data/ai_analysis.json`; the webpage refreshes that file every minute.
+
 You can also run it manually from GitHub Actions with `Run workflow`.
 
 ## Important Limitation
 
-This validates the `P0` continuous contract for 大连棕榈油. It is not a separate third-party weighted index. If you need a true weighted index, you need a vendor that publishes that exact weighted series.
+This validates the `P0` continuous contract for 大连棕榈油.

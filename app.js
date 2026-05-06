@@ -14,13 +14,20 @@ const els = {
   upDays: document.getElementById("upDays"),
   winRate: document.getElementById("winRate"),
   volatility: document.getElementById("volatility"),
+  dataStatus: document.getElementById("dataStatus"),
+  dataFreshness: document.getElementById("dataFreshness"),
   chartTitle: document.getElementById("chartTitle"),
   chartSubhead: document.getElementById("chartSubhead"),
   legend: document.getElementById("legend"),
   analysisText: document.getElementById("analysisText"),
   resistance: document.getElementById("resistance"),
   support: document.getElementById("support"),
-  observationList: document.getElementById("observationList")
+  observationList: document.getElementById("observationList"),
+  indicatorGrid: document.getElementById("indicatorGrid"),
+  scoreFill: document.getElementById("scoreFill"),
+  signalList: document.getElementById("signalList"),
+  scenarioList: document.getElementById("scenarioList"),
+  riskTable: document.getElementById("riskTable")
 };
 
 const colors = {
@@ -91,34 +98,158 @@ function movingAverage(data, period) {
   });
 }
 
+function mean(values) {
+  if (!values.length) return 0;
+  return values.reduce((sum, item) => sum + item, 0) / values.length;
+}
+
+function stddev(values) {
+  if (!values.length) return 0;
+  const avg = mean(values);
+  return Math.sqrt(mean(values.map((item) => (item - avg) ** 2)));
+}
+
+function ema(values, period) {
+  const k = 2 / (period + 1);
+  const result = [];
+  values.forEach((value, index) => {
+    if (index === 0) result.push(value);
+    else result.push(value * k + result[index - 1] * (1 - k));
+  });
+  return result;
+}
+
+function rsi(data, period = 14) {
+  if (data.length <= period) return null;
+  const changes = data.slice(1).map((row, index) => row.close - data[index].close);
+  const seed = changes.slice(0, period);
+  let avgGain = mean(seed.map((value) => Math.max(value, 0)));
+  let avgLoss = mean(seed.map((value) => Math.max(-value, 0)));
+
+  for (let i = period; i < changes.length; i += 1) {
+    const gain = Math.max(changes[i], 0);
+    const loss = Math.max(-changes[i], 0);
+    avgGain = (avgGain * (period - 1) + gain) / period;
+    avgLoss = (avgLoss * (period - 1) + loss) / period;
+  }
+
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - 100 / (1 + rs);
+}
+
+function macd(data) {
+  const closes = data.map((row) => row.close);
+  const ema12 = ema(closes, 12);
+  const ema26 = ema(closes, 26);
+  const dif = closes.map((_, index) => ema12[index] - ema26[index]);
+  const dea = ema(dif, 9);
+  const hist = dif.map((value, index) => value - dea[index]);
+  return { dif: dif.at(-1), dea: dea.at(-1), hist: hist.at(-1), prevHist: hist.at(-2) || 0 };
+}
+
+function atr(data, period = 14) {
+  if (data.length < 2) return null;
+  const trs = data.slice(1).map((row, index) => {
+    const prevClose = data[index].close;
+    return Math.max(row.high - row.low, Math.abs(row.high - prevClose), Math.abs(row.low - prevClose));
+  });
+  return mean(trs.slice(-period));
+}
+
+function bollinger(data, period = 20, width = 2) {
+  const window = data.slice(-period).map((row) => row.close);
+  const mid = mean(window);
+  const sd = stddev(window);
+  return { upper: mid + width * sd, mid, lower: mid - width * sd, bandWidth: mid ? (width * 2 * sd) / mid : 0 };
+}
+
+function maxDrawdown(data, period = 60) {
+  let peak = -Infinity;
+  let drawdown = 0;
+  data.slice(-period).forEach((row) => {
+    peak = Math.max(peak, row.close);
+    drawdown = Math.min(drawdown, (row.close - peak) / peak);
+  });
+  return drawdown;
+}
+
+function closeStreak(data) {
+  let streak = 0;
+  for (let i = data.length - 1; i > 0; i -= 1) {
+    const diff = data[i].close - data[i - 1].close;
+    if (diff === 0) break;
+    if (streak === 0) streak = diff > 0 ? 1 : -1;
+    else if ((streak > 0 && diff > 0) || (streak < 0 && diff < 0)) streak += streak > 0 ? 1 : -1;
+    else break;
+  }
+  return streak;
+}
+
+function dateAgeDays(dateText) {
+  if (!dateText) return null;
+  const date = new Date(`${dateText}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((today - date) / 86400000);
+}
+
 function analyze(data) {
   const last = data[data.length - 1];
   const prev = data[data.length - 2] || last;
+  const closes = data.map((row) => row.close);
   const ma10 = movingAverage(data, 10).at(-1);
   const ma20 = movingAverage(data, 20).at(-1);
   const ma60 = movingAverage(data, Math.min(60, data.length)).at(-1);
+  const ma120 = movingAverage(data, Math.min(120, data.length)).at(-1);
   const changes = data.slice(1).map((row, index) => (row.close - data[index].close) / data[index].close);
   const recent20 = changes.slice(-20);
-  const mean = recent20.reduce((sum, item) => sum + item, 0) / Math.max(1, recent20.length);
-  const variance = recent20.reduce((sum, item) => sum + (item - mean) ** 2, 0) / Math.max(1, recent20.length);
+  const avgChange = mean(recent20);
+  const variance = mean(recent20.map((item) => (item - avgChange) ** 2));
   const vol = Math.sqrt(variance) * Math.sqrt(252);
   const upCount = changes.filter((item) => item > 0).length;
   const high20 = Math.max(...data.slice(-20).map((row) => row.high));
   const low20 = Math.min(...data.slice(-20).map((row) => row.low));
+  const high60 = Math.max(...data.slice(-60).map((row) => row.high));
+  const low60 = Math.min(...data.slice(-60).map((row) => row.low));
   const change = last.close - prev.close;
   const changePct = change / prev.close;
-
-  let score = 0;
-  if (last.close > ma20) score += 1;
-  if (ma10 > ma20) score += 1;
-  if (ma20 > ma60) score += 1;
-  if (changePct > 0) score += 1;
-  if (last.close < ma20) score -= 1;
-  if (ma10 < ma20) score -= 1;
-
-  const signal = score >= 3 ? "偏强" : score <= -1 ? "偏弱" : "震荡";
+  const rsi14 = rsi(data, 14);
+  const macdValue = macd(data);
+  const atr14 = atr(data, 14);
+  const boll = bollinger(data, 20, 2);
+  const volumeAvg20 = mean(data.slice(-20).map((row) => row.volume));
+  const volumeRatio = last.volume / Math.max(1, volumeAvg20);
+  const drawdown60 = maxDrawdown(data, 60);
+  const streak = closeStreak(data);
+  const dayRangePct = (last.high - last.low) / last.close;
+  const closePosition = (last.close - last.low) / Math.max(1, last.high - last.low);
+  const atrPct = atr14 ? atr14 / last.close : 0;
+  const trendSlope20 = data.length > 21 ? (ma20 - movingAverage(data.slice(0, -20), 20).at(-1)) / last.close : 0;
+  const support = Math.min(low20, boll.lower);
+  const resistance = Math.max(high20, boll.upper);
   const distanceToResistance = (high20 - last.close) / last.close;
   const distanceToSupport = (last.close - low20) / last.close;
+  const riskReward = distanceToSupport > 0 ? distanceToResistance / distanceToSupport : null;
+  const fib382 = high60 - (high60 - low60) * 0.382;
+  const fib618 = high60 - (high60 - low60) * 0.618;
+
+  const checks = [
+    { label: "收盘价站上 MA20", ok: last.close > ma20, weight: 1.1 },
+    { label: "MA10 高于 MA20", ok: ma10 > ma20, weight: 1 },
+    { label: "MA20 高于 MA60", ok: ma20 > ma60, weight: 1 },
+    { label: "MACD 柱体为正", ok: macdValue.hist > 0, weight: 0.9 },
+    { label: "RSI 位于强势区", ok: rsi14 >= 50 && rsi14 <= 72, weight: 0.8 },
+    { label: "放量但不过热", ok: volumeRatio >= 1 && volumeRatio <= 1.8, weight: 0.7 },
+    { label: "收盘靠近日内高位", ok: closePosition >= 0.55, weight: 0.6 },
+    { label: "价格未跌破布林中轨", ok: last.close >= boll.mid, weight: 0.8 }
+  ];
+  const positiveScore = checks.reduce((sum, item) => sum + (item.ok ? item.weight : 0), 0);
+  const totalScore = checks.reduce((sum, item) => sum + item.weight, 0);
+  const score = positiveScore / totalScore * 100;
+  const signal = score >= 68 ? "偏强" : score <= 42 ? "偏弱" : "震荡";
+  const staleDays = dateAgeDays(last.date);
 
   return {
     last,
@@ -130,14 +261,38 @@ function analyze(data) {
     winRate: upCount / Math.max(1, changes.length),
     high20,
     low20,
+    high60,
+    low60,
     ma10,
     ma20,
     ma60,
+    ma120,
+    rsi14,
+    macdValue,
+    atr14,
+    atrPct,
+    boll,
+    volumeAvg20,
+    volumeRatio,
+    drawdown60,
+    streak,
+    dayRangePct,
+    closePosition,
+    trendSlope20,
+    support,
+    resistance,
+    riskReward,
+    fib382,
+    fib618,
     signal,
     score,
+    checks,
+    staleDays,
     observations: [
       `收盘价位于 MA20 ${last.close >= ma20 ? "上方" : "下方"}，短线结构${last.close >= ma20 ? "较稳" : "承压"}。`,
-      `MA10 ${ma10 >= ma20 ? "上穿或高于" : "低于"} MA20，动量信号${ma10 >= ma20 ? "改善" : "偏谨慎"}。`,
+      `MA10 ${ma10 >= ma20 ? "高于" : "低于"} MA20，MACD 柱体${macdValue.hist >= 0 ? "为正" : "为负"}，动量${ma10 >= ma20 && macdValue.hist >= 0 ? "偏顺" : "仍需确认"}。`,
+      `RSI14 为 ${rsi14.toFixed(1)}，${rsi14 > 72 ? "进入偏热区，追高风险上升" : rsi14 < 35 ? "处于偏冷区，短线可能有修复需求" : "处在可观察区间"}。`,
+      `成交量为 20 日均量的 ${volumeRatio.toFixed(2)} 倍，${volumeRatio > 1.5 ? "量能明显放大" : volumeRatio < 0.8 ? "量能偏弱" : "量能中性"}。`,
       `距离 20 日压力约 ${(distanceToResistance * 100).toFixed(2)}%，距离 20 日支撑约 ${(distanceToSupport * 100).toFixed(2)}%。`
     ]
   };
@@ -314,24 +469,106 @@ function updateSummary(data, analysis) {
   els.lastChange.className = analysis.change >= 0 ? "up" : "down";
   els.signalText.textContent = analysis.signal;
   els.signalText.className = analysis.signal === "偏强" ? "up" : analysis.signal === "偏弱" ? "down" : "";
-  els.signalDetail.textContent = `趋势评分 ${analysis.score} / 4`;
+  els.signalDetail.textContent = `综合评分 ${analysis.score.toFixed(0)} / 100`;
   els.upDays.textContent = `${analysis.upCount} 天`;
   els.winRate.textContent = `样本上涨率 ${formatPct(analysis.winRate)}`;
   els.volatility.textContent = formatPct(analysis.vol);
-  els.resistance.textContent = analysis.high20.toFixed(0);
-  els.support.textContent = analysis.low20.toFixed(0);
+  updateDataStatus(analysis);
+  els.resistance.textContent = analysis.resistance.toFixed(0);
+  els.support.textContent = analysis.support.toFixed(0);
   els.analysisText.textContent = makeAnalysisText(analysis);
   els.observationList.innerHTML = analysis.observations.map((item) => `<li>${item}</li>`).join("");
+  els.indicatorGrid.innerHTML = makeIndicatorCards(analysis);
+  els.scoreFill.style.width = `${Math.max(3, Math.min(100, analysis.score))}%`;
+  els.signalList.innerHTML = analysis.checks.map((item) => {
+    const klass = item.ok ? "up" : "down";
+    return `<li><span class="${klass}">${item.ok ? "通过" : "未过"}</span> ${item.label}</li>`;
+  }).join("");
+  els.scenarioList.innerHTML = makeScenarios(analysis);
+  els.riskTable.innerHTML = makeRiskTable(analysis);
 }
 
 function makeAnalysisText(a) {
   if (a.signal === "偏强") {
-    return "价格站上关键均线且短期均线排列改善，短线多头占优。若放量突破压力位，趋势可能继续延伸；若回落跌破 MA20，需要降低追涨预期。";
+    return `综合评分 ${a.score.toFixed(0)}，结构偏强。价格位于关键均线之上，动量指标配合时更容易向压力区试探。若突破 ${a.resistance.toFixed(0)} 且成交量维持在 20 日均量上方，趋势延伸概率提高；若跌回 MA20 下方，需要把偏强判断降级。`;
   }
   if (a.signal === "偏弱") {
-    return "价格低于中短期均线，反弹持续性需要成交量确认。若跌破近 20 日支撑，弱势结构可能加深；重新站回 MA20 前宜以震荡偏弱看待。";
+    return `综合评分 ${a.score.toFixed(0)}，结构偏弱。价格或动量没有形成一致向上，反弹更需要量能和均线确认。若跌破 ${a.support.toFixed(0)}，弱势结构可能加深；重新站回 MA20 并修复 MACD 前，宜谨慎看待追多。`;
   }
-  return "当前信号偏震荡，价格与均线没有形成一致方向。更适合观察压力/支撑区间内的放量突破或缩量回踩，而不是提前押单边。";
+  return `综合评分 ${a.score.toFixed(0)}，当前偏震荡。价格与均线、动量、量能没有形成单边一致性。更适合观察 ${a.support.toFixed(0)}-${a.resistance.toFixed(0)} 区间内的放量突破或缩量回踩，而不是提前押单边。`;
+}
+
+function updateDataStatus(analysis) {
+  const sourceLabel = state.autoLoaded || state.dataMeta ? "真实CSV" : state.imported ? "手动CSV" : "示例";
+  const latest = state.dataMeta?.latest_date || analysis.last.date;
+  const updated = state.dataMeta?.updated_at_utc ? `更新 ${formatDateTime(state.dataMeta.updated_at_utc)}` : "本地生成";
+  const checked = `检查 ${new Date().toLocaleTimeString("zh-CN", { hour12: false })}`;
+  const stale = analysis.staleDays === null ? "" : analysis.staleDays > 3 ? `，距今 ${analysis.staleDays} 天，需核对` : `，距今 ${analysis.staleDays} 天`;
+  els.dataStatus.textContent = sourceLabel;
+  els.dataStatus.className = sourceLabel === "真实CSV" ? "up" : "";
+  els.dataFreshness.textContent = `${latest}${stale} | ${updated} | ${checked}`;
+}
+
+function makeIndicatorCards(a) {
+  const cards = [
+    ["MA 结构", a.ma10 > a.ma20 && a.ma20 > a.ma60 ? "多头排列" : a.ma10 < a.ma20 && a.ma20 < a.ma60 ? "空头排列" : "交错震荡", `MA10 ${a.ma10.toFixed(0)} / MA20 ${a.ma20.toFixed(0)} / MA60 ${a.ma60.toFixed(0)}`],
+    ["RSI14", a.rsi14.toFixed(1), a.rsi14 > 72 ? "偏热，防冲高回落" : a.rsi14 < 35 ? "偏冷，关注修复" : "中性区间"],
+    ["MACD", a.macdValue.hist.toFixed(1), `DIF ${a.macdValue.dif.toFixed(1)} / DEA ${a.macdValue.dea.toFixed(1)}，柱体${a.macdValue.hist >= a.macdValue.prevHist ? "扩张" : "收缩"}`],
+    ["布林带", `${a.boll.lower.toFixed(0)}-${a.boll.upper.toFixed(0)}`, `带宽 ${formatPct(a.boll.bandWidth)}，收盘${a.last.close > a.boll.upper ? "突破上轨" : a.last.close < a.boll.lower ? "跌破下轨" : "在轨道内"}`],
+    ["ATR14", a.atr14.toFixed(0), `约 ${formatPct(a.atrPct)}，日内波动 ${formatPct(a.dayRangePct)}`],
+    ["量能", `${a.volumeRatio.toFixed(2)}x`, `当前 ${formatCompact(a.last.volume)} / 20日均量 ${formatCompact(a.volumeAvg20)}`],
+    ["60日回撤", formatPct(a.drawdown60), `60日高 ${a.high60.toFixed(0)} / 低 ${a.low60.toFixed(0)}`],
+    ["连涨连跌", a.streak > 0 ? `${a.streak} 连涨` : a.streak < 0 ? `${Math.abs(a.streak)} 连跌` : "无连续", `收盘位置 ${formatPct(a.closePosition)}`]
+  ];
+
+  return cards.map(([label, value, detail]) => `
+    <div class="indicator">
+      <span>${label}</span>
+      <strong>${value}</strong>
+      <small>${detail}</small>
+    </div>
+  `).join("");
+}
+
+function makeScenarios(a) {
+  const upsideTarget = a.resistance + Math.max(1, a.atr14);
+  const downsideTarget = a.support - Math.max(1, a.atr14);
+  const pullbackZone = Math.min(a.ma20, a.boll.mid);
+  const scenarios = [
+    ["向上突破", `${a.resistance.toFixed(0)} 上方放量站稳`, `目标观察 ${upsideTarget.toFixed(0)}；若量能低于 20 日均量，突破可信度下降。`],
+    ["区间震荡", `${a.support.toFixed(0)}-${a.resistance.toFixed(0)}`, `价格没有离开区间前，以均值回归和等待确认更合理。`],
+    ["回踩修复", `回踩 ${pullbackZone.toFixed(0)} 附近`, `若缩量企稳且 RSI 不跌破 45，属于较健康回踩。`],
+    ["风险转弱", `${a.support.toFixed(0)} 下方收盘`, `下方风险位看 ${downsideTarget.toFixed(0)}；此时趋势评分通常会继续下调。`]
+  ];
+  return scenarios.map(([title, trigger, detail]) => `
+    <div class="scenario">
+      <span>${title}</span>
+      <strong>${trigger}</strong>
+      <small>${detail}</small>
+    </div>
+  `).join("");
+}
+
+function makeRiskTable(a) {
+  const rows = [
+    ["近20日支撑", a.low20, "跌破后短线结构转弱"],
+    ["综合支撑", a.support, "结合布林下轨和20日低点"],
+    ["MA20 防守", a.ma20, "趋势跟踪的核心分界"],
+    ["近20日压力", a.high20, "突破后观察是否放量"],
+    ["综合压力", a.resistance, "结合布林上轨和20日高点"],
+    ["60日38.2%", a.fib382, "60日区间回撤参考"],
+    ["60日61.8%", a.fib618, "60日区间深回撤参考"]
+  ];
+
+  return rows.map(([name, value, note]) => `
+    <div class="risk-row">
+      <div>
+        <span>${name}</span>
+        <small>${note}</small>
+      </div>
+      <strong>${value.toFixed(0)}</strong>
+    </div>
+  `).join("");
 }
 
 function formatSigned(value) {
@@ -342,6 +579,17 @@ function formatSigned(value) {
 function formatPct(value) {
   const sign = value > 0 ? "+" : "";
   return `${sign}${(value * 100).toFixed(2)}%`;
+}
+
+function formatCompact(value) {
+  if (Math.abs(value) >= 10000) return `${Math.round(value / 10000)}万`;
+  return Math.round(value).toString();
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("zh-CN", { hour12: false });
 }
 
 function parseCsv(text) {
@@ -374,6 +622,8 @@ els.modeButtons.forEach((button) => {
     state.mode = button.dataset.mode;
     state.data = makeDemoData(state.mode);
     state.imported = false;
+    state.autoLoaded = false;
+    state.dataMeta = null;
     draw();
   });
 });
@@ -447,9 +697,10 @@ async function autoLoadCsv() {
     return;
   }
   try {
+    const cacheBust = `t=${Date.now()}`;
     const [response, metaResponse] = await Promise.all([
-      fetch("data/palm_oil_p0_daily.csv", { cache: "no-store" }),
-      fetch("data/source_meta.json", { cache: "no-store" })
+      fetch(`data/palm_oil_p0_daily.csv?${cacheBust}`, { cache: "no-store" }),
+      fetch(`data/source_meta.json?${cacheBust}`, { cache: "no-store" })
     ]);
     if (!response.ok) return;
     const text = await response.text();

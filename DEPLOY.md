@@ -26,9 +26,9 @@ Expected project URL after Pages is enabled:
 https://franksun0616.github.io/palm_dalian/
 ```
 
-The workflow `.github/workflows/update-data.yml` is set to run every minute.
+The workflow `.github/workflows/update-data.yml` is set to run every 5 minutes, which is the shortest interval supported by GitHub Actions scheduled workflows.
 
-GitHub can throttle scheduled workflows, so this is the requested schedule, but exact one-minute execution is not guaranteed by GitHub.
+GitHub can throttle scheduled workflows, so exact execution time is not guaranteed.
 
 The same workflow updates the CSV and deploys the static site to GitHub Pages.
 

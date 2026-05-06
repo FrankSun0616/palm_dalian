@@ -16,8 +16,8 @@ The current validated data source is DCE palm oil continuous contract `P0` throu
 1. Create or use the GitHub repository named `palm_dalian`.
 2. Upload this folder's files to the repository root, or push this local git repository.
 3. In GitHub, open `Settings -> Pages`.
-4. Set source to `Deploy from a branch`.
-5. Choose the `main` branch and root folder `/`.
+4. Set source to `GitHub Actions`.
+5. Run the workflow `Update palm oil data`, or push a new commit.
 6. Open the generated GitHub Pages URL.
 
 Expected project URL after Pages is enabled:
@@ -29,6 +29,8 @@ https://franksun0616.github.io/palm_dalian/
 The workflow `.github/workflows/update-data.yml` is set to run every minute.
 
 GitHub can throttle scheduled workflows, so this is the requested schedule, but exact one-minute execution is not guaranteed by GitHub.
+
+The same workflow updates the CSV and deploys the static site to GitHub Pages.
 
 You can also run it manually from GitHub Actions with `Run workflow`.
 

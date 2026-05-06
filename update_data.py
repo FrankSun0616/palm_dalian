@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import akshare as ak
@@ -166,6 +166,40 @@ def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
     return parsed
 
 
+def get_live_bar(last_daily_date: str) -> dict | None:
+    """Fetch night session (21:00-23:59) minute data and return a preliminary next-day bar."""
+    try:
+        df = ak.futures_zh_minute_sina(symbol="P0", period="60")
+    except Exception:
+        return None
+    if df is None or df.empty:
+        return None
+
+    night_start = f"{last_daily_date} 21:00:00"
+    night_end = f"{last_daily_date} 23:59:59"
+    df["dt_str"] = df["datetime"].astype(str)
+    night = df[(df["dt_str"] >= night_start) & (df["dt_str"] <= night_end)]
+    if night.empty:
+        return None
+
+    last = datetime.strptime(last_daily_date, "%Y-%m-%d").date()
+    next_day = last + timedelta(days=1)
+    while next_day.weekday() >= 5:
+        next_day += timedelta(days=1)
+
+    as_of = str(night["datetime"].iloc[-1])[:16]
+    return {
+        "date": str(next_day),
+        "open": float(night["open"].iloc[0]),
+        "high": float(night["high"].max()),
+        "low": float(night["low"].min()),
+        "close": float(night["close"].iloc[-1]),
+        "volume": int(night["volume"].sum()),
+        "preliminary": True,
+        "session_note": f"夜盘进行中（截至 {as_of}）",
+    }
+
+
 def should_run_ai_analysis() -> bool:
     return os.getenv("RUN_AI_ANALYSIS", "").strip().lower() in {"1", "true", "yes", "on"}
 
@@ -189,6 +223,7 @@ def main() -> None:
         "latest_date": str(latest["date"]),
         "latest_close": float(latest["close"]),
         "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "live_bar": get_live_bar(str(latest["date"])),
     }
     (DATA_DIR / "source_meta.json").write_text(
         json.dumps(meta, ensure_ascii=False, indent=2),

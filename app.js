@@ -349,6 +349,7 @@ function drawPriceChart(data) {
   data.forEach((row, index) => {
     const cx = x(index);
     const rising = row.close >= row.open;
+    ctx.globalAlpha = row.preliminary ? 0.45 : 1;
     ctx.strokeStyle = rising ? colors.up : colors.down;
     ctx.fillStyle = rising ? colors.up : colors.down;
     ctx.lineWidth = 1.2;
@@ -365,6 +366,14 @@ function drawPriceChart(data) {
     } else {
       ctx.strokeRect(cx - candleW / 2, top, candleW, bodyH);
     }
+    if (row.preliminary) {
+      ctx.fillStyle = colors.text;
+      ctx.globalAlpha = 0.6;
+      ctx.font = "10px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("夜盘", cx, pad.top + 6);
+    }
+    ctx.globalAlpha = 1;
   });
 
   maPeriods.forEach((period, maIndex) => {
@@ -782,11 +791,11 @@ els.priceCanvas.addEventListener("mousemove", (event) => {
   els.chartTooltip.style.left = `${left}px`;
   els.chartTooltip.style.top = `${top}px`;
   els.chartTooltip.innerHTML = `
-    <strong>${row.date}</strong>
+    <strong>${row.date}${row.preliminary ? " 🌙夜盘" : ""}</strong>
     开 ${row.open.toFixed(0)} / 高 ${row.high.toFixed(0)}<br>
     低 ${row.low.toFixed(0)} / 收 ${row.close.toFixed(0)}<br>
     涨跌 ${formatSigned(change)} (${formatPct(change / previous.close)})<br>
-    量 ${Math.round(row.volume / 10000)} 万手
+    量 ${Math.round(row.volume / 10000)} 万手${row.preliminary ? "<br><small>夜盘进行中，数据未完整</small>" : ""}
   `;
   draw();
 });
@@ -817,6 +826,18 @@ async function autoLoadCsv() {
     if (rows.length < 20) throw new Error(`CSV有效数据少于20行: ${rows.length}`);
     state.dataMeta = metaResponse.ok ? await metaResponse.json() : null;
     state.data = rows;
+    if (state.dataMeta && state.dataMeta.live_bar) {
+      const lb = state.dataMeta.live_bar;
+      state.data.push({
+        date: lb.date,
+        open: lb.open,
+        high: lb.high,
+        low: lb.low,
+        close: lb.close,
+        volume: lb.volume,
+        preliminary: true
+      });
+    }
     state.imported = false;
     state.autoLoaded = true;
     draw();

@@ -49,6 +49,13 @@ let state = {
   chartGeometry: null
 };
 
+function setLoadStatus(status, detail = "") {
+  if (!els.dataStatus || !els.dataFreshness) return;
+  els.dataStatus.textContent = status;
+  els.dataStatus.className = status === "真实CSV" ? "up" : status === "加载失败" ? "down" : "";
+  els.dataFreshness.textContent = detail;
+}
+
 function makeDemoData(mode) {
   const rows = [];
   const end = new Date();
@@ -505,9 +512,7 @@ function updateDataStatus(analysis) {
   const updated = state.dataMeta?.updated_at_utc ? `更新 ${formatDateTime(state.dataMeta.updated_at_utc)}` : "本地生成";
   const checked = `检查 ${new Date().toLocaleTimeString("zh-CN", { hour12: false })}`;
   const stale = analysis.staleDays === null ? "" : analysis.staleDays > 3 ? `，距今 ${analysis.staleDays} 天，需核对` : `，距今 ${analysis.staleDays} 天`;
-  els.dataStatus.textContent = sourceLabel;
-  els.dataStatus.className = sourceLabel === "真实CSV" ? "up" : "";
-  els.dataFreshness.textContent = `${latest}${stale} | ${updated} | ${checked}`;
+  setLoadStatus(sourceLabel, `${latest}${stale} | ${updated} | ${checked}`);
 }
 
 function makeIndicatorCards(a) {
@@ -698,19 +703,22 @@ els.priceCanvas.addEventListener("mouseleave", () => {
 
 async function autoLoadCsv() {
   if (location.protocol === "file:") {
-    console.warn("CSV auto-load needs http:// or https://. Open through a local server or GitHub Pages.");
+    const message = "请通过 GitHub Pages 或本地 http server 打开，file:// 无法自动读取 CSV";
+    setLoadStatus("加载失败", message);
+    console.warn(message);
     return;
   }
+  setLoadStatus("加载中", "正在读取真实 P0 CSV...");
   try {
     const cacheBust = `t=${Date.now()}`;
     const [response, metaResponse] = await Promise.all([
       fetch(`data/palm_oil_p0_daily.csv?${cacheBust}`, { cache: "no-store" }),
       fetch(`data/source_meta.json?${cacheBust}`, { cache: "no-store" })
     ]);
-    if (!response.ok) return;
+    if (!response.ok) throw new Error(`CSV HTTP ${response.status}`);
     const text = await response.text();
     const rows = parseCsv(text);
-    if (rows.length < 20) return;
+    if (rows.length < 20) throw new Error(`CSV有效数据少于20行: ${rows.length}`);
     state.dataMeta = metaResponse.ok ? await metaResponse.json() : null;
     state.data = rows;
     state.mode = "continuous";
@@ -721,6 +729,7 @@ async function autoLoadCsv() {
     });
     draw();
   } catch (error) {
+    setLoadStatus("加载失败", error.message || "未知错误");
     console.warn("CSV auto-load skipped:", error);
   }
 }

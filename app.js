@@ -7,8 +7,8 @@ const els = {
   csvInput: document.getElementById("csvInput"),
   reloadBtn: document.getElementById("reloadBtn"),
   demoBtn: document.getElementById("demoBtn"),
-  triggerAiBtn: document.getElementById("triggerAiBtn"),
-  refreshAiBtn: document.getElementById("refreshAiBtn"),
+  generateAiBtn: document.getElementById("generateAiBtn"),
+  aiStatus: document.getElementById("aiStatus"),
   lastPrice: document.getElementById("lastPrice"),
   lastChange: document.getElementById("lastChange"),
   signalText: document.getElementById("signalText"),
@@ -642,13 +642,103 @@ els.demoBtn.addEventListener("click", () => {
   draw();
 });
 
-els.triggerAiBtn.addEventListener("click", () => {
-  window.open("https://github.com/FrankSun0616/palm_dalian/actions/workflows/update-data.yml", "_blank", "noopener,noreferrer");
-});
+const GH_OWNER = "FrankSun0616";
+const GH_REPO = "palm_dalian";
+const GH_WORKFLOW = "update-data.yml";
+const PAT_KEY = "gh_pat_palm_dalian";
 
-els.refreshAiBtn.addEventListener("click", () => {
-  autoLoadAiAnalysis();
-});
+function setAiStatus(text, type) {
+  els.aiStatus.textContent = text;
+  els.aiStatus.className = `ai-status${type ? ` ${type}` : ""}`;
+}
+
+async function generateAiAnalysis() {
+  let pat = localStorage.getItem(PAT_KEY) || "";
+
+  if (!pat) {
+    pat = (prompt(
+      "首次使用需要输入 GitHub Personal Access Token（填一次后会记住）\n\n" +
+      "获取方式：github.com → Settings → Developer settings\n" +
+      "→ Personal access tokens → Fine-grained tokens\n" +
+      "→ 新建，选择此仓库，勾选 Actions: Read and write"
+    ) || "").trim();
+    if (!pat) {
+      setAiStatus("已取消", "error");
+      return;
+    }
+    localStorage.setItem(PAT_KEY, pat);
+  }
+
+  els.generateAiBtn.disabled = true;
+  setAiStatus("正在触发 GitHub Actions...", "loading");
+
+  let prevGenTime = null;
+  try {
+    const snap = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
+    if (snap.ok) {
+      const ai = await snap.json();
+      prevGenTime = ai.generated_at_utc || null;
+    }
+  } catch (_) {}
+
+  try {
+    const resp = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${pat}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ref: "main", inputs: { run_ai_analysis: "true" } })
+      }
+    );
+    if (resp.status === 401 || resp.status === 403) {
+      localStorage.removeItem(PAT_KEY);
+      setAiStatus("Token 无效或权限不足，已清除，请重试", "error");
+      els.generateAiBtn.disabled = false;
+      return;
+    }
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      setAiStatus(`触发失败 (${resp.status})${body ? "：" + body.slice(0, 60) : ""}`, "error");
+      els.generateAiBtn.disabled = false;
+      return;
+    }
+  } catch (err) {
+    setAiStatus(`网络错误：${err.message}`, "error");
+    els.generateAiBtn.disabled = false;
+    return;
+  }
+
+  setAiStatus("分析运行中，约 3–5 分钟后自动刷新结果...", "loading");
+
+  const startTime = Date.now();
+  const maxWait = 10 * 60 * 1000;
+  const interval = setInterval(async () => {
+    if (Date.now() - startTime > maxWait) {
+      clearInterval(interval);
+      setAiStatus("超时，请手动刷新页面查看结果", "error");
+      els.generateAiBtn.disabled = false;
+      return;
+    }
+    try {
+      const r = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
+      if (!r.ok) return;
+      const ai = await r.json();
+      const newTime = ai.generated_at_utc || null;
+      if (newTime && newTime !== prevGenTime) {
+        clearInterval(interval);
+        updateAiPanel(ai);
+        setAiStatus(`✓ 分析完成，已自动更新（${formatDateTime(newTime)}）`, "success");
+        els.generateAiBtn.disabled = false;
+      }
+    } catch (_) {}
+  }, 25 * 1000);
+}
+
+els.generateAiBtn.addEventListener("click", generateAiAnalysis);
 
 els.csvInput.addEventListener("change", async (event) => {
   const file = event.target.files[0];

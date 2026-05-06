@@ -5,7 +5,8 @@ const els = {
   periodSelect: document.getElementById("periodSelect"),
   maSelect: document.getElementById("maSelect"),
   csvInput: document.getElementById("csvInput"),
-  resetBtn: document.getElementById("resetBtn"),
+  reloadBtn: document.getElementById("reloadBtn"),
+  demoBtn: document.getElementById("demoBtn"),
   modeButtons: Array.from(document.querySelectorAll(".market-switch button")),
   lastPrice: document.getElementById("lastPrice"),
   lastChange: document.getElementById("lastChange"),
@@ -630,7 +631,11 @@ els.modeButtons.forEach((button) => {
 
 els.periodSelect.addEventListener("change", draw);
 els.maSelect.addEventListener("change", draw);
-els.resetBtn.addEventListener("click", () => {
+els.reloadBtn.addEventListener("click", () => {
+  autoLoadCsv();
+});
+
+els.demoBtn.addEventListener("click", () => {
   state.data = makeDemoData(state.mode);
   state.imported = false;
   state.autoLoaded = false;

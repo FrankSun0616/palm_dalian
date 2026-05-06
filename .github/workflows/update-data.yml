@@ -1,9 +1,6 @@
 name: Update palm oil data
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       run_ai_analysis:
@@ -22,7 +19,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   update-data:
@@ -59,6 +56,13 @@ jobs:
         with:
           path: "."
 
+  deploy:
+    needs: update-data
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

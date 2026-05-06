@@ -744,10 +744,11 @@ function updateAiPanel(ai) {
   const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
   els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"} | 生成 ${generated}`;
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
-  const items = Array.isArray(ai.analysis) ? ai.analysis : [];
+  const items = Array.isArray(ai.analysis) ? ai.analysis : ai.analysis ? [ai.analysis] : [];
   els.aiList.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
-  els.aiSupport.textContent = Number(ai.watch_levels?.support || 0) ? Number(ai.watch_levels.support).toFixed(0) : "--";
-  els.aiResistance.textContent = Number(ai.watch_levels?.resistance || 0) ? Number(ai.watch_levels.resistance).toFixed(0) : "--";
+  const watchLevels = typeof ai.watch_levels === "object" && ai.watch_levels !== null ? ai.watch_levels : {};
+  els.aiSupport.textContent = Number(watchLevels.support || 0) ? Number(watchLevels.support).toFixed(0) : "--";
+  els.aiResistance.textContent = Number(watchLevels.resistance || 0) ? Number(watchLevels.resistance).toFixed(0) : "--";
   els.aiRisk.textContent = ai.risk_note || "本分析仅供行情研究，不构成投资建议。";
 }
 

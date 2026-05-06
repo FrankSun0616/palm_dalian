@@ -93,6 +93,31 @@ def fallback_ai_analysis(snapshot: dict[str, object], reason: str) -> dict[str, 
     }
 
 
+def normalize_ai_analysis(parsed: dict[str, object], snapshot: dict[str, object]) -> dict[str, object]:
+    analysis = parsed.get("analysis", [])
+    if isinstance(analysis, str):
+        analysis = [analysis]
+    if not isinstance(analysis, list):
+        analysis = []
+
+    watch_levels = parsed.get("watch_levels", {})
+    if not isinstance(watch_levels, dict):
+        watch_levels = {}
+    support = watch_levels.get("support", snapshot["low20"])
+    resistance = watch_levels.get("resistance", snapshot["high20"])
+
+    return {
+        "summary": str(parsed.get("summary", "暂无 AI 摘要。")),
+        "bias": str(parsed.get("bias", "未判断")),
+        "analysis": [str(item) for item in analysis],
+        "watch_levels": {
+            "support": float(support),
+            "resistance": float(resistance),
+        },
+        "risk_note": str(parsed.get("risk_note", "本分析仅供行情研究，不构成投资建议。")),
+    }
+
+
 def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
     api_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
     if not api_key:
@@ -104,7 +129,9 @@ def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
             "请基于下面的大连商品交易所棕榈油 P0 连续合约日线数据做中文行情分析。"
             "要求：1) 明确只分析日线，不要声称有逐笔盘口；2) 给出偏多/震荡/偏空判断；"
             "3) 解释趋势、均线、RSI、量能、支撑压力；4) 给出未来1-3个交易日的观察情景；"
-            "5) 强调不构成投资建议；6) 输出 JSON，字段为 summary,bias,analysis,watch_levels,risk_note。"
+            "5) 强调不构成投资建议；6) 只输出 JSON；"
+            "7) analysis 必须是字符串数组；8) watch_levels 必须是对象，包含数字 support 和 resistance；"
+            "字段为 summary,bias,analysis,watch_levels,risk_note。"
             f"\n\n数据:\n{json.dumps(snapshot, ensure_ascii=False)}"
         ),
     }
@@ -126,7 +153,7 @@ def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
     )
     response.raise_for_status()
     content = response.json()["choices"][0]["message"]["content"]
-    parsed = json.loads(content)
+    parsed = normalize_ai_analysis(json.loads(content), snapshot)
     parsed.update(
         {
             "source": "DeepSeek API",

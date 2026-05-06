@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      run_ai_analysis:
+        description: "Generate DeepSeek AI analysis"
+        required: true
+        default: true
+        type: boolean
   schedule:
     # GitHub Actions scheduled workflows support a shortest interval of 5 minutes.
     - cron: "*/5 * * * *"
@@ -37,6 +43,7 @@ jobs:
         run: python update_data.py
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          RUN_AI_ANALYSIS: ${{ github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis }}
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v5

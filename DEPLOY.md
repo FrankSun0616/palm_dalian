@@ -40,7 +40,13 @@ To enable AI analysis, add this GitHub Actions secret:
 DEEPSEEK_API_KEY
 ```
 
-The key must not be committed to the repository. When configured, `update_data.py` writes `data/ai_analysis.json`; the webpage refreshes that file every minute.
+The key must not be committed to the repository. AI analysis is generated only when you manually run the workflow:
+
+```text
+Actions -> Update palm oil data -> Run workflow -> Generate DeepSeek AI analysis = true
+```
+
+Scheduled and push-triggered runs update the daily CSV but skip DeepSeek, so they do not consume AI API quota. The webpage refreshes `data/ai_analysis.json` every minute and shows the latest manual AI analysis.
 
 You can also run it manually from GitHub Actions with `Run workflow`.
 

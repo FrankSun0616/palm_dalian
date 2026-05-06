@@ -27,6 +27,14 @@ DeepSeek AI 分析需要在 GitHub repo 的 `Settings -> Secrets and variables -
 DEEPSEEK_API_KEY
 ```
 
+AI 分析现在只会在 GitHub Actions 手动运行时生成：
+
+```text
+Actions -> Update palm oil data -> Run workflow -> Generate DeepSeek AI analysis = true
+```
+
+自动定时任务只更新日线 CSV，不自动调用 DeepSeek。
+
 GitHub Pages 目标地址：
 
 ```text

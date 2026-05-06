@@ -166,6 +166,10 @@ def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
     return parsed
 
 
+def should_run_ai_analysis() -> bool:
+    return os.getenv("RUN_AI_ANALYSIS", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def main() -> None:
     df = ak.futures_zh_daily_sina(symbol="P0")
     if df.empty:
@@ -190,20 +194,23 @@ def main() -> None:
         json.dumps(meta, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    snapshot = daily_snapshot(export)
-    try:
-        ai_analysis = generate_ai_analysis(snapshot)
-    except Exception as exc:  # noqa: BLE001 - write diagnostics for the public status file.
-        ai_analysis = fallback_ai_analysis(snapshot, f"{type(exc).__name__}: {exc}")
-    (DATA_DIR / "ai_analysis.json").write_text(
-        json.dumps(ai_analysis, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    if should_run_ai_analysis():
+        snapshot = daily_snapshot(export)
+        try:
+            ai_analysis = generate_ai_analysis(snapshot)
+        except Exception as exc:  # noqa: BLE001 - write diagnostics for the public status file.
+            ai_analysis = fallback_ai_analysis(snapshot, f"{type(exc).__name__}: {exc}")
+        (DATA_DIR / "ai_analysis.json").write_text(
+            json.dumps(ai_analysis, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        print(f"AI analysis: {ai_analysis['status']}")
+    else:
+        print("AI analysis: skipped; set RUN_AI_ANALYSIS=true to generate manually")
 
     print(f"Updated {output}")
     print(f"Rows: {len(export)}")
     print(f"Latest: {latest['date']} close={latest['close']}")
-    print(f"AI analysis: {ai_analysis['status']}")
 
 
 if __name__ == "__main__":

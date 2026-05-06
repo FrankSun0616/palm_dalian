@@ -1,3 +1,12 @@
+const nightBanner = document.getElementById("nightBanner");
+const nightEls = {
+  price:   document.getElementById("nightPrice"),
+  change:  document.getElementById("nightChange"),
+  range:   document.getElementById("nightRange"),
+  volume:  document.getElementById("nightVolume"),
+  asOf:    document.getElementById("nightAsOf")
+};
+
 const els = {
   priceCanvas: document.getElementById("priceCanvas"),
   volumeCanvas: document.getElementById("volumeCanvas"),
@@ -349,9 +358,10 @@ function drawPriceChart(data) {
   data.forEach((row, index) => {
     const cx = x(index);
     const rising = row.close >= row.open;
-    ctx.globalAlpha = row.preliminary ? 0.45 : 1;
-    ctx.strokeStyle = rising ? colors.up : colors.down;
-    ctx.fillStyle = rising ? colors.up : colors.down;
+    ctx.globalAlpha = row.preliminary ? 0.7 : 1;
+    const candleColor = row.preliminary ? "#4f8ef7" : (rising ? colors.up : colors.down);
+    ctx.strokeStyle = candleColor;
+    ctx.fillStyle = candleColor;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(cx, y(row.high));
@@ -661,6 +671,24 @@ localStorage.setItem(PAT_KEY, atob(
   "VHM2Z6eDRYVW5ocE9WVGhlVjRPRzdGVEVaVU8yc3phbUEx"
 ));
 
+function updateNightBanner() {
+  const lb = state.dataMeta && state.dataMeta.live_bar;
+  if (!lb) { nightBanner.hidden = true; return; }
+  const dayClose = state.data.length >= 2
+    ? state.data[state.data.length - 2].close
+    : lb.open;
+  const change = lb.close - dayClose;
+  const changePct = change / dayClose;
+  nightBanner.hidden = false;
+  nightEls.price.textContent  = lb.close.toFixed(0);
+  nightEls.price.className    = change >= 0 ? "up" : "down";
+  nightEls.change.textContent = `${formatSigned(change)} (${formatPct(changePct)})`;
+  nightEls.change.className   = change >= 0 ? "up" : "down";
+  nightEls.range.textContent  = `${lb.low.toFixed(0)} – ${lb.high.toFixed(0)}`;
+  nightEls.volume.textContent = `${formatCompact(lb.volume)} 手`;
+  nightEls.asOf.textContent   = lb.session_note || "";
+}
+
 function setAiStatus(text, type) {
   els.aiStatus.textContent = text;
   els.aiStatus.className = `ai-status${type ? ` ${type}` : ""}`;
@@ -840,6 +868,7 @@ async function autoLoadCsv() {
     }
     state.imported = false;
     state.autoLoaded = true;
+    updateNightBanner();
     draw();
   } catch (error) {
     setLoadStatus("加载失败", error.message || "未知错误");

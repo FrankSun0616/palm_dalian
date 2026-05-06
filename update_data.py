@@ -164,7 +164,10 @@ def main() -> None:
         encoding="utf-8",
     )
     snapshot = daily_snapshot(export)
-    ai_analysis = generate_ai_analysis(snapshot)
+    try:
+        ai_analysis = generate_ai_analysis(snapshot)
+    except Exception as exc:  # noqa: BLE001 - write diagnostics for the public status file.
+        ai_analysis = fallback_ai_analysis(snapshot, f"{type(exc).__name__}: {exc}")
     (DATA_DIR / "ai_analysis.json").write_text(
         json.dumps(ai_analysis, ensure_ascii=False, indent=2),
         encoding="utf-8",

@@ -7,6 +7,8 @@ const els = {
   csvInput: document.getElementById("csvInput"),
   reloadBtn: document.getElementById("reloadBtn"),
   demoBtn: document.getElementById("demoBtn"),
+  triggerAiBtn: document.getElementById("triggerAiBtn"),
+  refreshAiBtn: document.getElementById("refreshAiBtn"),
   lastPrice: document.getElementById("lastPrice"),
   lastChange: document.getElementById("lastChange"),
   signalText: document.getElementById("signalText"),
@@ -638,6 +640,14 @@ els.demoBtn.addEventListener("click", () => {
   state.dataMeta = null;
   els.csvInput.value = "";
   draw();
+});
+
+els.triggerAiBtn.addEventListener("click", () => {
+  window.open("https://github.com/FrankSun0616/palm_dalian/actions/workflows/update-data.yml", "_blank", "noopener,noreferrer");
+});
+
+els.refreshAiBtn.addEventListener("click", () => {
+  autoLoadAiAnalysis();
 });
 
 els.csvInput.addEventListener("change", async (event) => {

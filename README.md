@@ -35,6 +35,8 @@ Actions -> Update palm oil data -> Run workflow -> Generate DeepSeek AI analysis
 
 自动定时任务只更新日线 CSV，不自动调用 DeepSeek。
 
+网页里的 `触发 DeepSeek 分析` 按钮会打开 GitHub Actions 手动运行页面；为了保护 GitHub token 和 DeepSeek key，静态网页不会直接从浏览器调用 workflow。
+
 GitHub Pages 目标地址：
 
 ```text

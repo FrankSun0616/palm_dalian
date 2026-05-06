@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大连棕榈油连续行情 K 线分析</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <section>
+        <p class="eyebrow">DCE Palm Oil Continuous</p>
+        <h1>大连棕榈油连续行情 K 线分析</h1>
+      </section>
+      <div class="market-switch" role="group" aria-label="合约视图">
+        <button class="active" data-mode="weighted">加权</button>
+        <button data-mode="continuous">连续</button>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="行情控制">
+      <label>
+        周期
+        <select id="periodSelect">
+          <option value="120">近 120 日</option>
+          <option value="180" selected>近 180 日</option>
+          <option value="260">近 260 日</option>
+        </select>
+      </label>
+      <label>
+        均线
+        <select id="maSelect">
+          <option value="5,10,20">MA5 / MA10 / MA20</option>
+          <option value="10,20,60" selected>MA10 / MA20 / MA60</option>
+          <option value="20,60,120">MA20 / MA60 / MA120</option>
+        </select>
+      </label>
+      <label class="file-label">
+        导入 CSV
+        <input id="csvInput" type="file" accept=".csv,text/csv">
+      </label>
+      <button id="resetBtn" title="恢复示例数据">重置</button>
+    </section>
+
+    <section class="summary-grid" aria-label="关键指标">
+      <article class="metric">
+        <span>最新价</span>
+        <strong id="lastPrice">--</strong>
+        <small id="lastChange">--</small>
+      </article>
+      <article class="metric">
+        <span>趋势信号</span>
+        <strong id="signalText">--</strong>
+        <small id="signalDetail">--</small>
+      </article>
+      <article class="metric">
+        <span>上涨天数</span>
+        <strong id="upDays">--</strong>
+        <small id="winRate">--</small>
+      </article>
+      <article class="metric">
+        <span>波动率</span>
+        <strong id="volatility">--</strong>
+        <small>近 20 日年化估算</small>
+      </article>
+    </section>
+
+    <section class="workspace">
+      <section class="chart-panel" aria-label="K 线图">
+        <div class="chart-head">
+          <div>
+            <h2 id="chartTitle">P 加权日线</h2>
+            <p id="chartSubhead">示例数据，可通过 CSV 替换为真实行情</p>
+          </div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <canvas id="priceCanvas" width="1200" height="620" aria-label="价格 K 线图"></canvas>
+        <div class="tooltip" id="chartTooltip" hidden></div>
+        <canvas id="volumeCanvas" width="1200" height="180" aria-label="成交量图"></canvas>
+      </section>
+
+      <aside class="analysis-panel" aria-label="涨跌分析">
+        <section>
+          <h2>涨跌研判</h2>
+          <p id="analysisText">正在计算...</p>
+        </section>
+        <section class="levels">
+          <div>
+            <span>压力位</span>
+            <strong id="resistance">--</strong>
+          </div>
+          <div>
+            <span>支撑位</span>
+            <strong id="support">--</strong>
+          </div>
+        </section>
+        <section>
+          <h3>结构观察</h3>
+          <ul id="observationList"></ul>
+        </section>
+        <section class="csv-help">
+          <h3>CSV 格式</h3>
+          <p>支持字段：date, open, high, low, close, volume。日期可用 2026-05-06 或 2026/05/06。</p>
+        </section>
+      </aside>
+    </section>
+
+    <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -187,7 +187,7 @@ def get_live_bar(last_daily_date: str) -> dict | None:
     while next_day.weekday() >= 5:
         next_day += timedelta(days=1)
 
-    as_of = str(night["datetime"].iloc[-1])[:16]
+    as_of = str(night["datetime"].iloc[-1])[:16]  # AKShare returns Beijing time
     return {
         "date": str(next_day),
         "open": float(night["open"].iloc[0]),

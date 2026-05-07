@@ -536,7 +536,7 @@ function updateDataStatus(analysis) {
   const sourceLabel = state.autoLoaded || state.dataMeta ? "真实CSV" : state.imported ? "手动CSV" : "示例";
   const latest = state.dataMeta?.latest_date || analysis.last.date;
   const updated = state.dataMeta?.updated_at_utc ? `更新 ${formatDateTime(state.dataMeta.updated_at_utc)}` : "本地生成";
-  const checked = `检查 ${new Date().toLocaleTimeString("zh-CN", { hour12: false })}`;
+  const checked = `检查 ${bjNow()}`;
   const stale = analysis.staleDays === null ? "" : analysis.staleDays > 3 ? `，距今 ${analysis.staleDays} 天，需核对` : `，距今 ${analysis.staleDays} 天`;
   setLoadStatus(sourceLabel, `${latest}${stale} | ${updated} | ${checked}`);
 }
@@ -618,10 +618,16 @@ function formatCompact(value) {
   return Math.round(value).toString();
 }
 
+const TZ = "Asia/Shanghai";
+
 function formatDateTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString("zh-CN", { hour12: false });
+  return date.toLocaleString("zh-CN", { timeZone: TZ, hour12: false });
+}
+
+function bjNow(opts = {}) {
+  return new Date().toLocaleTimeString("zh-CN", { timeZone: TZ, hour12: false, ...opts });
 }
 
 function parseCsv(text) {
@@ -967,7 +973,7 @@ function applyRealtimeQuote(q) {
     nightEls.price.className    = nc >= 0 ? "up" : "down";
     nightEls.change.textContent = `${formatSigned(nc)} (${formatPct(nc / dayClose)})`;
     nightEls.change.className   = nc >= 0 ? "up" : "down";
-    nightEls.asOf.textContent   = `实时 ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}`;
+    nightEls.asOf.textContent   = `实时 ${bjNow({ hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
   }
 }
 

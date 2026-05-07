@@ -168,6 +168,10 @@ def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
 
 def get_live_bar(last_daily_date: str) -> dict | None:
     """Fetch night session (21:00-23:59) minute data and return a preliminary next-day bar."""
+    cst = timezone(timedelta(hours=8))
+    now_cst = datetime.now(cst)
+    if not (21 <= now_cst.hour <= 23):
+        return None
     try:
         df = ak.futures_zh_minute_sina(symbol="P0", period="60")
     except Exception:

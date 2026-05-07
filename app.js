@@ -680,7 +680,7 @@ localStorage.setItem(PAT_KEY, atob(
 
 function updateNightBanner() {
   const lb = state.dataMeta && state.dataMeta.live_bar;
-  if (!lb) { nightBanner.hidden = true; return; }
+  if (!lb || !isNightSession()) { nightBanner.hidden = true; return; }
   const dayClose = state.data.length >= 2
     ? state.data[state.data.length - 2].close
     : lb.open;
@@ -918,32 +918,35 @@ function updateAiPanel(ai) {
 
 let lastQuote = null;
 
+// Beijing time helpers (UTC+8, no DST)
+function bjHour() { return (new Date().getUTCHours() + 8) % 24; }
+function isNightSession() { const h = bjHour(); return h >= 21 && h <= 23; }
+function isDaySession()   { const h = bjHour(); return h >= 9  && h <= 15; }
+
+// Sina Market Center – CORS-enabled, returns P0 continuous contract directly
+const SINA_FUTURES_URL =
+  "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/" +
+  "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node=zly_qh&base=futures";
+
 async function fetchRealtimeQuote() {
   try {
-    const r = await fetch(
-      `https://push2.eastmoney.com/api/qt/stock/get?secid=113.P0&fields=f43,f44,f45,f46,f47,f60&_=${Date.now()}`,
-      { cache: "no-store" }
-    );
+    const r = await fetch(`${SINA_FUTURES_URL}&_=${Date.now()}`, { cache: "no-store" });
     if (!r.ok) return null;
-    const json = await r.json();
-    if (json.rc !== 0 || !json.data) return null;
-    const d = json.data;
-    const raw = +d.f43;
-    if (!raw || d.f43 === "-") return null;
-    // Palm oil trades at ~7000-12000. Eastmoney stocks use fen (×100); futures use yuan directly.
-    // Detect by checking if /100 lands in the expected range.
-    const scale = (raw / 100 >= 5000 && raw / 100 <= 15000) ? 100 : 1;
-    const price     = raw / scale;
-    const prevClose = +d.f60 / scale;
+    const data = await r.json();
+    const p0 = Array.isArray(data) && data.find(item => item.symbol === "P0");
+    if (!p0 || !+p0.trade) return null;
+    const price     = +p0.trade;
+    const prevClose = +p0.preclose;
     return {
       price,
-      high:      +d.f44 / scale,
-      low:       +d.f45 / scale,
-      open:      +d.f46 / scale,
+      high:      +p0.high,
+      low:       +p0.low,
+      open:      +p0.open,
       prevClose,
-      volume:    +d.f47,
+      volume:    +p0.volume,
       change:    price - prevClose,
-      changePct: prevClose > 0 ? (price - prevClose) / prevClose : 0
+      changePct: prevClose > 0 ? (price - prevClose) / prevClose : 0,
+      ticktime:  p0.ticktime || ""
     };
   } catch (_) {
     return null;

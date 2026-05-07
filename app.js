@@ -908,7 +908,8 @@ function updateAiPanel(ai) {
   els.aiBias.className = /多|强/.test(ai.bias || "") ? "up" : /空|弱/.test(ai.bias || "") ? "down" : "";
   const status = ai.status === "ok" ? "DeepSeek" : "规则备用";
   const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
-  els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"} | 生成 ${generated}`;
+  const realtimeTag = ai.realtime_price ? ` | 实时价 ${ai.realtime_price}` : "";
+  els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"}${realtimeTag} | 生成 ${generated}`;
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
   const items = Array.isArray(ai.analysis) ? ai.analysis : ai.analysis ? [ai.analysis] : [];
   els.aiList.innerHTML = items.map((item) => `<li>${item}</li>`).join("");

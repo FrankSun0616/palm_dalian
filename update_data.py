@@ -41,7 +41,40 @@ def rsi(values: list[float], period: int = 14) -> float | None:
     return 100 - 100 / (1 + rs)
 
 
-def daily_snapshot(export) -> dict[str, object]:
+SINA_FUTURES_URL = (
+    "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/"
+    "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node=zly_qh&base=futures"
+)
+
+
+def get_realtime_quote_sina() -> dict | None:
+    """Fetch live P0 quote from Sina Market Center (same API as the browser front-end)."""
+    try:
+        resp = requests.get(SINA_FUTURES_URL, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        p0 = next((item for item in data if item.get("symbol") == "P0"), None)
+        if not p0 or not float(p0.get("trade") or 0):
+            return None
+        price = float(p0["trade"])
+        prev_close = float(p0["preclose"])
+        change = (price - prev_close) / prev_close if prev_close else 0
+        return {
+            "price": price,
+            "open": float(p0["open"]),
+            "high": float(p0["high"]),
+            "low": float(p0["low"]),
+            "volume": int(p0["volume"]),
+            "prev_close": prev_close,
+            "change_pct": pct(change),
+            "tradedate": p0.get("tradedate", ""),
+            "ticktime": p0.get("ticktime", ""),
+        }
+    except Exception:
+        return None
+
+
+def daily_snapshot(export, realtime: dict | None = None) -> dict[str, object]:
     rows = export.tail(120).to_dict(orient="records")
     closes = [float(row["close"]) for row in rows]
     volumes = [float(row["volume"]) for row in rows]
@@ -51,7 +84,7 @@ def daily_snapshot(export) -> dict[str, object]:
     high20 = max(float(row["high"]) for row in rows[-20:])
     low20 = min(float(row["low"]) for row in rows[-20:])
     volume_avg20 = sum(volumes[-20:]) / 20
-    return {
+    snap: dict[str, object] = {
         "latest_date": str(latest["date"]),
         "open": float(latest["open"]),
         "high": float(latest["high"]),
@@ -68,6 +101,13 @@ def daily_snapshot(export) -> dict[str, object]:
         "low20": low20,
         "last_30_daily_bars": rows[-30:],
     }
+    if realtime:
+        snap["realtime"] = realtime
+        snap["realtime_note"] = (
+            f"实时行情截至 {realtime['tradedate']} {realtime['ticktime']}，"
+            f"当前价 {realtime['price']:.0f}，涨跌 {realtime['change_pct']}"
+        )
+    return snap
 
 
 def fallback_ai_analysis(snapshot: dict[str, object], reason: str) -> dict[str, object]:
@@ -81,7 +121,12 @@ def fallback_ai_analysis(snapshot: dict[str, object], reason: str) -> dict[str, 
         "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
         "bias": "等待AI",
         "analysis": [
-            f"最新日线收盘 {snapshot['close']:.0f}，日涨跌 {snapshot['change_pct']}。",
+            (
+                f"实时价 {snapshot['realtime']['price']:.0f}（{snapshot['realtime_note']}），"
+                f"最新日线收盘 {snapshot['close']:.0f}，日涨跌 {snapshot['change_pct']}。"
+                if snapshot.get("realtime") else
+                f"最新日线收盘 {snapshot['close']:.0f}，日涨跌 {snapshot['change_pct']}。"
+            ),
             f"MA10/MA20/MA60 分别为 {snapshot['ma10']:.0f}/{snapshot['ma20']:.0f}/{snapshot['ma60']:.0f}。",
             f"20日区间支撑压力为 {snapshot['low20']:.0f}-{snapshot['high20']:.0f}。",
         ],
@@ -123,11 +168,19 @@ def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
     if not api_key:
         return fallback_ai_analysis(snapshot, "DEEPSEEK_API_KEY is not configured")
 
+    has_realtime = bool(snapshot.get("realtime"))
+    realtime_instruction = (
+        "数据中包含字段 realtime（实时行情）和 realtime_note（实时摘要），"
+        "请在分析中明确引用当前实时价格，并结合实时价与均线、支撑压力的位置关系给出判断。"
+        if has_realtime else
+        "数据中无实时行情，请基于最新日线收盘价分析。"
+    )
     prompt = {
         "role": "user",
         "content": (
             "请基于下面的大连商品交易所棕榈油 P0 连续合约日线数据做中文行情分析。"
-            "要求：1) 明确只分析日线，不要声称有逐笔盘口；2) 给出偏多/震荡/偏空判断；"
+            f"{realtime_instruction}"
+            "要求：1) 明确只分析日线及实时价，不要声称有逐笔盘口；2) 给出偏多/震荡/偏空判断；"
             "3) 解释趋势、均线、RSI、量能、支撑压力；4) 给出未来1-3个交易日的观察情景；"
             "5) 强调不构成投资建议；6) 只输出 JSON；"
             "7) analysis 必须是字符串数组；8) watch_levels 必须是对象，包含数字 support 和 resistance；"
@@ -161,6 +214,8 @@ def generate_ai_analysis(snapshot: dict[str, object]) -> dict[str, object]:
             "status": "ok",
             "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "latest_date": snapshot["latest_date"],
+            "realtime_price": snapshot["realtime"]["price"] if snapshot.get("realtime") else None,
+            "realtime_note": snapshot.get("realtime_note"),
         }
     )
     return parsed
@@ -234,7 +289,12 @@ def main() -> None:
         encoding="utf-8",
     )
     if should_run_ai_analysis():
-        snapshot = daily_snapshot(export)
+        realtime = get_realtime_quote_sina()
+        if realtime:
+            print(f"Real-time quote: {realtime['price']} @ {realtime['tradedate']} {realtime['ticktime']}")
+        else:
+            print("Real-time quote: unavailable, using daily close only")
+        snapshot = daily_snapshot(export, realtime)
         try:
             ai_analysis = generate_ai_analysis(snapshot)
         except Exception as exc:  # noqa: BLE001 - write diagnostics for the public status file.

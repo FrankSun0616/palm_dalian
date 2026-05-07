@@ -918,12 +918,11 @@ function updateAiPanel(ai) {
 
 let lastQuote = null;
 
-// Beijing time helpers (UTC+8, no DST)
 function bjHour() { return (new Date().getUTCHours() + 8) % 24; }
 function isNightSession() { const h = bjHour(); return h >= 21 && h <= 23; }
 function isDaySession()   { const h = bjHour(); return h >= 9  && h <= 15; }
+function isTrading()      { return isDaySession() || isNightSession(); }
 
-// Sina Market Center – CORS-enabled, returns P0 continuous contract directly
 const SINA_FUTURES_URL =
   "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/" +
   "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node=zly_qh&base=futures";
@@ -946,29 +945,54 @@ async function fetchRealtimeQuote() {
       volume:    +p0.volume,
       change:    price - prevClose,
       changePct: prevClose > 0 ? (price - prevClose) / prevClose : 0,
-      ticktime:  p0.ticktime || ""
+      tradedate: p0.tradedate || "",
+      ticktime:  p0.ticktime  || ""
     };
   } catch (_) {
     return null;
   }
 }
 
+// Inject or update the in-progress bar in state.data from real-time quote
+function updateLiveBar(q) {
+  if (!isTrading()) {
+    // Outside trading hours — remove any stale preliminary bar
+    const idx = state.data.findIndex(r => r.preliminary);
+    if (idx >= 0) state.data.splice(idx, 1);
+    return;
+  }
+  if (!q || !q.tradedate) return;
+  // Skip if this date is already a completed bar in the CSV
+  const lastCompleted = [...state.data].reverse().find(r => !r.preliminary);
+  if (lastCompleted && q.tradedate <= lastCompleted.date) return;
+
+  const bar = {
+    date: q.tradedate,
+    open: q.open,
+    high: q.high,
+    low: q.low,
+    close: q.price,
+    volume: q.volume,
+    preliminary: true
+  };
+  const idx = state.data.findIndex(r => r.preliminary);
+  if (idx >= 0) state.data[idx] = bar;
+  else state.data.push(bar);
+}
+
+// Update metric card and night banner (no draw calls)
 function applyRealtimeQuote(q) {
   if (!q) return;
-  lastQuote = q;
 
-  // Update 最新价 metric card
   els.lastPrice.textContent = q.price.toFixed(0);
   els.lastChange.textContent = `${formatSigned(q.change)} (${formatPct(q.changePct)})`;
   els.lastChange.className = q.change >= 0 ? "up" : "down";
 
-  // Show live dot on the label
   const metricCard = els.lastPrice.closest(".metric");
   if (metricCard && !metricCard.querySelector(".live-dot")) {
     metricCard.querySelector("span").insertAdjacentHTML("beforeend", '<span class="live-dot"></span>');
   }
 
-  // Update night banner current price if visible (keep H/L from GitHub data — night-only range)
   if (!nightBanner.hidden) {
     const dayClose = state.data.length >= 2 ? state.data[state.data.length - 2].close : q.prevClose;
     const nc = q.price - dayClose;
@@ -984,7 +1008,9 @@ async function startRealtimeFeed() {
   if (location.protocol === "file:") return;
   const tick = async () => {
     const q = await fetchRealtimeQuote();
-    applyRealtimeQuote(q);
+    if (q) lastQuote = q;
+    updateLiveBar(lastQuote);
+    draw(); // redraws chart with updated live bar; applyRealtimeQuote called at end of draw
   };
   await tick();
   setInterval(tick, 5000);

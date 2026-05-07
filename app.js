@@ -330,6 +330,7 @@ function draw() {
   updateSummary(data, analysis);
   drawPriceChart(data);
   drawVolumeChart(data);
+  if (lastQuote) applyRealtimeQuote(lastQuote);
 }
 
 function drawPriceChart(data) {
@@ -907,9 +908,83 @@ function updateAiPanel(ai) {
   els.aiRisk.textContent = ai.risk_note || "本分析仅供行情研究，不构成投资建议。";
 }
 
+// ── Real-time quote ──────────────────────────────────────────────────────────
+
+let lastQuote = null;
+
+async function fetchRealtimeQuote() {
+  try {
+    const r = await fetch(
+      `https://push2.eastmoney.com/api/qt/stock/get?secid=113.P0&fields=f43,f44,f45,f46,f47,f60&_=${Date.now()}`,
+      { cache: "no-store" }
+    );
+    if (!r.ok) return null;
+    const json = await r.json();
+    if (json.rc !== 0 || !json.data) return null;
+    const d = json.data;
+    const raw = +d.f43;
+    if (!raw || d.f43 === "-") return null;
+    // Palm oil trades at ~7000-12000. Eastmoney stocks use fen (×100); futures use yuan directly.
+    // Detect by checking if /100 lands in the expected range.
+    const scale = (raw / 100 >= 5000 && raw / 100 <= 15000) ? 100 : 1;
+    const price     = raw / scale;
+    const prevClose = +d.f60 / scale;
+    return {
+      price,
+      high:      +d.f44 / scale,
+      low:       +d.f45 / scale,
+      open:      +d.f46 / scale,
+      prevClose,
+      volume:    +d.f47,
+      change:    price - prevClose,
+      changePct: prevClose > 0 ? (price - prevClose) / prevClose : 0
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+function applyRealtimeQuote(q) {
+  if (!q) return;
+  lastQuote = q;
+
+  // Update 最新价 metric card
+  els.lastPrice.textContent = q.price.toFixed(0);
+  els.lastChange.textContent = `${formatSigned(q.change)} (${formatPct(q.changePct)})`;
+  els.lastChange.className = q.change >= 0 ? "up" : "down";
+
+  // Show live dot on the label
+  const metricCard = els.lastPrice.closest(".metric");
+  if (metricCard && !metricCard.querySelector(".live-dot")) {
+    metricCard.querySelector("span").insertAdjacentHTML("beforeend", '<span class="live-dot"></span>');
+  }
+
+  // Update night banner current price if visible (keep H/L from GitHub data — night-only range)
+  if (!nightBanner.hidden) {
+    const dayClose = state.data.length >= 2 ? state.data[state.data.length - 2].close : q.prevClose;
+    const nc = q.price - dayClose;
+    nightEls.price.textContent  = q.price.toFixed(0);
+    nightEls.price.className    = nc >= 0 ? "up" : "down";
+    nightEls.change.textContent = `${formatSigned(nc)} (${formatPct(nc / dayClose)})`;
+    nightEls.change.className   = nc >= 0 ? "up" : "down";
+    nightEls.asOf.textContent   = `实时 ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}`;
+  }
+}
+
+async function startRealtimeFeed() {
+  if (location.protocol === "file:") return;
+  const tick = async () => {
+    const q = await fetchRealtimeQuote();
+    applyRealtimeQuote(q);
+  };
+  await tick();
+  setInterval(tick, 5000);
+}
+
 window.addEventListener("resize", draw);
 draw();
 autoLoadCsv();
 autoLoadAiAnalysis();
+startRealtimeFeed();
 setInterval(autoLoadCsv, 60 * 1000);
 setInterval(autoLoadAiAnalysis, 60 * 1000);

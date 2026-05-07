@@ -825,12 +825,14 @@ els.priceCanvas.addEventListener("mousemove", (event) => {
   els.chartTooltip.hidden = false;
   els.chartTooltip.style.left = `${left}px`;
   els.chartTooltip.style.top = `${top}px`;
+  const liveLabel = row.preliminary ? (isNightSession() ? " 🌙夜盘" : " ⚡实时") : "";
+  const liveNote  = row.preliminary ? `<br><small>${isNightSession() ? "夜盘进行中" : "实时行情"}，数据未完整</small>` : "";
   els.chartTooltip.innerHTML = `
-    <strong>${row.date}${row.preliminary ? " 🌙夜盘" : ""}</strong>
+    <strong>${row.date}${liveLabel}</strong>
     开 ${row.open.toFixed(0)} / 高 ${row.high.toFixed(0)}<br>
     低 ${row.low.toFixed(0)} / 收 ${row.close.toFixed(0)}<br>
     涨跌 ${formatSigned(change)} (${formatPct(change / previous.close)})<br>
-    量 ${Math.round(row.volume / 10000)} 万手${row.preliminary ? "<br><small>夜盘进行中，数据未完整</small>" : ""}
+    量 ${Math.round(row.volume / 10000)} 万手${liveNote}
   `;
   draw();
 });
@@ -861,7 +863,9 @@ async function autoLoadCsv() {
     if (rows.length < 20) throw new Error(`CSV有效数据少于20行: ${rows.length}`);
     state.dataMeta = metaResponse.ok ? await metaResponse.json() : null;
     state.data = rows;
-    if (state.dataMeta && state.dataMeta.live_bar) {
+    // Only pre-seed the live_bar from source_meta during night session —
+    // the real-time feed handles injecting today's bar during daytime.
+    if (state.dataMeta && state.dataMeta.live_bar && isNightSession()) {
       const lb = state.dataMeta.live_bar;
       state.data.push({
         date: lb.date,
@@ -1010,6 +1014,7 @@ async function startRealtimeFeed() {
     const q = await fetchRealtimeQuote();
     if (q) lastQuote = q;
     updateLiveBar(lastQuote);
+    updateNightBanner(); // ensure banner hides/shows correctly on every tick
     draw(); // redraws chart with updated live bar; applyRealtimeQuote called at end of draw
   };
   await tick();

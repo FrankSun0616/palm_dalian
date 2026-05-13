@@ -142,15 +142,18 @@ def web_search(query: str, max_results: int = 6) -> str:
 
 def fetch_news_summary(api_key: str, snapshot: dict) -> str:
     """
-    Let DeepSeek autonomously search for recent palm oil news using the
-    web_search tool and return a Chinese plain-text summary.
+    Let DeepSeek call web_search up to MAX_SEARCH_ROUNDS times, then
+    summarise recent palm oil news in plain Chinese text.
+    Returns "" on any failure so the caller can skip the news block gracefully.
     """
+    MAX_SEARCH_ROUNDS = 4  # keep total searches ≤ 4 to avoid rate-limiting
+
     tool_def = [
         {
             "type": "function",
             "function": {
                 "name": "web_search",
-                "description": "搜索互联网，获取最新新闻、价格资讯和市场分析",
+                "description": "搜索互联网获取最新新闻、价格资讯",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -167,27 +170,26 @@ def fetch_news_summary(api_key: str, snapshot: dict) -> str:
         {
             "role": "system",
             "content": (
-                "你是专业的商品期货市场信息员，擅长搜集和总结影响棕榈油期货价格的最新资讯。"
-                "请主动调用 web_search 查找信息，不要凭空编造新闻。"
+                "你是商品期货市场信息员。请调用 web_search 搜索棕榈油相关最新资讯，"
+                "最多搜索 3 次，然后给出 4–6 条中文舆情要点，"
+                "每条格式：'[利多/利空/中性] 事件内容'。如果搜索结果不足，"
+                "就基于已有结果总结，不要说搜索失败或超出轮次。"
             ),
         },
         {
             "role": "user",
             "content": (
-                f"当前分析日期：{latest_date}。\n"
-                "请搜索以下几个方向的最新信息，然后用中文给出 4–6 条舆情要点，"
-                "每条说明事件内容及其对大连棕榈油期货价格的影响方向（利多/利空/中性）：\n"
-                "1. 棕榈油期货 大连 最新\n"
-                "2. 马来西亚 印度尼西亚 棕榈油 产量 出口\n"
-                "3. 中国棕榈油 进口 需求\n"
-                "4. 植物油脂 豆油 菜油 价格\n"
-                "5. 棕榈油 政策 关税 补贴"
+                f"分析日期：{latest_date}。请搜索并总结影响棕榈油期货价格的近期因素，"
+                "涵盖：产量/出口（马来西亚、印尼）、中国进口需求、相关油脂价格、政策/关税。"
             ),
         },
     ]
 
-    for _round in range(8):  # model may search multiple times
+    search_count = 0
+    for _round in range(MAX_SEARCH_ROUNDS + 2):  # +2 for model's final reply turns
         try:
+            # Once search budget is used up, tell the model to stop searching
+            tool_choice = "none" if search_count >= MAX_SEARCH_ROUNDS else "auto"
             resp = requests.post(
                 "https://api.deepseek.com/chat/completions",
                 headers={
@@ -198,11 +200,11 @@ def fetch_news_summary(api_key: str, snapshot: dict) -> str:
                     "model": "deepseek-chat",
                     "messages": messages,
                     "tools": tool_def,
-                    "tool_choice": "auto",
+                    "tool_choice": tool_choice,
                     "temperature": 0.3,
-                    "max_tokens": 2000,
+                    "max_tokens": 1500,
                 },
-                timeout=90,
+                timeout=60,
             )
             resp.raise_for_status()
             data = resp.json()
@@ -214,7 +216,7 @@ def fetch_news_summary(api_key: str, snapshot: dict) -> str:
                 for tc in msg.get("tool_calls", []):
                     fn_args = json.loads(tc["function"]["arguments"])
                     query = fn_args.get("query", "棕榈油最新消息")
-                    print(f"  [web_search] {query}")
+                    print(f"  [web_search #{search_count + 1}] {query}")
                     search_text = web_search(query)
                     messages.append(
                         {
@@ -223,22 +225,42 @@ def fetch_news_summary(api_key: str, snapshot: dict) -> str:
                             "content": search_text,
                         }
                     )
+                    search_count += 1
             else:
-                return msg.get("content", "")
+                content = msg.get("content", "")
+                # Return empty string for obvious failure messages so analysis skips news block
+                if not content or "搜索失败" in content or "无法获取" in content:
+                    return ""
+                return content
 
         except Exception as exc:
-            return f"新闻搜索异常: {exc}"
+            print(f"  [news fetch error] {exc}")
+            return ""
 
-    return "新闻搜索超过最大轮次"
+    return ""  # budget exhausted — caller will skip news block
 
 
 # ── Step 2: Technical + fundamental analysis → JSON ───────────────────────────
 
 def normalize_ai_analysis(parsed: dict, snapshot: dict) -> dict:
-    def to_list(val):
+    def item_to_str(x) -> str:
+        """Convert a list item to a plain string, handling dict formats gracefully."""
+        if isinstance(x, str):
+            return x
+        if isinstance(x, dict):
+            # DeepSeek sometimes returns {"news": "...", "impact": "利多"} or
+            # {"content": "...", "direction": "..."} — flatten to a single string.
+            news = x.get("news") or x.get("content") or x.get("text") or x.get("item") or ""
+            impact = x.get("impact") or x.get("direction") or x.get("bias") or ""
+            return f"{news}（{impact}）" if impact else news or str(x)
+        return str(x)
+
+    def to_list(val) -> list[str]:
         if isinstance(val, str):
-            return [val] if val else []
-        return [str(x) for x in val] if isinstance(val, list) else []
+            return [val] if val.strip() else []
+        if isinstance(val, list):
+            return [item_to_str(x) for x in val if x]
+        return []
 
     watch_levels = parsed.get("watch_levels", {})
     if not isinstance(watch_levels, dict):
@@ -300,9 +322,16 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "") -> dict:
         "数据中无实时行情，请基于最新日线收盘价分析。"
     )
 
+    has_news = bool(news_summary and len(news_summary) > 30)
     news_block = (
         f"\n\n【近期市场舆情摘要（来自网络实时搜索）】\n{news_summary}\n"
-        if news_summary else ""
+        if has_news else ""
+    )
+    news_impact_instruction = (
+        "4) news_impact 数组：每条针对一个具体新闻/基本面要点，"
+        "格式为纯字符串，例如 '[利多] 马来西亚出口下滑，供给偏紧'；\n"
+        if has_news else
+        "4) news_impact 数组：留空列表 []，本次无网络舆情数据；\n"
     )
 
     prompt_content = (
@@ -313,10 +342,11 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "") -> dict:
         "1) 结合技术面和舆情/基本面给出综合判断；\n"
         "2) bias 字段给出偏多/震荡/偏空；\n"
         "3) analysis 数组：技术面要点（趋势、均线、RSI、量能、支撑压力）；\n"
-        "4) news_impact 数组：每条针对一个新闻/基本面要点，说明对价格的影响（利多/利空/中性）；\n"
+        f"{news_impact_instruction}"
         "5) watch_levels 包含数字 support 和 resistance；\n"
         "6) 强调不构成投资建议；\n"
-        "7) 只输出 JSON，字段：summary, bias, analysis, news_impact, watch_levels, risk_note。\n"
+        "7) 只输出 JSON，所有字段值必须是字符串或数字，不要嵌套对象；"
+        "字段：summary, bias, analysis, news_impact, watch_levels, risk_note。\n"
         f"\n数据:\n{json.dumps(snapshot, ensure_ascii=False)}"
     )
 

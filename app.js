@@ -1,12 +1,3 @@
-const nightBanner = document.getElementById("nightBanner");
-const nightEls = {
-  price:   document.getElementById("nightPrice"),
-  change:  document.getElementById("nightChange"),
-  range:   document.getElementById("nightRange"),
-  volume:  document.getElementById("nightVolume"),
-  asOf:    document.getElementById("nightAsOf")
-};
-
 const els = {
   priceCanvas: document.getElementById("priceCanvas"),
   volumeCanvas: document.getElementById("volumeCanvas"),
@@ -43,6 +34,8 @@ const els = {
   aiBias: document.getElementById("aiBias"),
   aiSummary: document.getElementById("aiSummary"),
   aiList: document.getElementById("aiList"),
+  aiNewsSection: document.getElementById("aiNewsSection"),
+  aiNewsList: document.getElementById("aiNewsList"),
   aiSupport: document.getElementById("aiSupport"),
   aiResistance: document.getElementById("aiResistance"),
   aiRisk: document.getElementById("aiRisk")
@@ -678,24 +671,6 @@ localStorage.setItem(PAT_KEY, atob(
   "VHM2Z6eDRYVW5ocE9WVGhlVjRPRzdGVEVaVU8yc3phbUEx"
 ));
 
-function updateNightBanner() {
-  const lb = state.dataMeta && state.dataMeta.live_bar;
-  if (!lb || !isNightSession()) { nightBanner.hidden = true; return; }
-  const dayClose = state.data.length >= 2
-    ? state.data[state.data.length - 2].close
-    : lb.open;
-  const change = lb.close - dayClose;
-  const changePct = change / dayClose;
-  nightBanner.hidden = false;
-  nightEls.price.textContent  = lb.close.toFixed(0);
-  nightEls.price.className    = change >= 0 ? "up" : "down";
-  nightEls.change.textContent = `${formatSigned(change)} (${formatPct(changePct)})`;
-  nightEls.change.className   = change >= 0 ? "up" : "down";
-  nightEls.range.textContent  = `${lb.low.toFixed(0)} – ${lb.high.toFixed(0)}`;
-  nightEls.volume.textContent = `${formatCompact(lb.volume)} 手`;
-  nightEls.asOf.textContent   = lb.session_note || "";
-}
-
 function setAiStatus(text, type) {
   els.aiStatus.textContent = text;
   els.aiStatus.className = `ai-status${type ? ` ${type}` : ""}`;
@@ -761,7 +736,7 @@ async function generateAiAnalysis() {
     return;
   }
 
-  setAiStatus("分析运行中，约 3–5 分钟后自动刷新结果...", "loading");
+  setAiStatus("正在搜索网络舆情 + 生成分析，约 5–8 分钟后自动刷新...", "loading");
 
   const startTime = Date.now();
   const maxWait = 10 * 60 * 1000;
@@ -879,7 +854,6 @@ async function autoLoadCsv() {
     }
     state.imported = false;
     state.autoLoaded = true;
-    updateNightBanner();
     draw();
   } catch (error) {
     setLoadStatus("加载失败", error.message || "未知错误");
@@ -911,8 +885,20 @@ function updateAiPanel(ai) {
   const realtimeTag = ai.realtime_price ? ` | 实时价 ${ai.realtime_price}` : "";
   els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"}${realtimeTag} | 生成 ${generated}`;
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
+
+  // Technical analysis bullets
   const items = Array.isArray(ai.analysis) ? ai.analysis : ai.analysis ? [ai.analysis] : [];
   els.aiList.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+
+  // News / sentiment bullets
+  const newsItems = Array.isArray(ai.news_impact) ? ai.news_impact : [];
+  if (newsItems.length > 0) {
+    els.aiNewsList.innerHTML = newsItems.map((item) => `<li>${item}</li>`).join("");
+    els.aiNewsSection.hidden = false;
+  } else {
+    els.aiNewsSection.hidden = true;
+  }
+
   const watchLevels = typeof ai.watch_levels === "object" && ai.watch_levels !== null ? ai.watch_levels : {};
   els.aiSupport.textContent = Number(watchLevels.support || 0) ? Number(watchLevels.support).toFixed(0) : "--";
   els.aiResistance.textContent = Number(watchLevels.resistance || 0) ? Number(watchLevels.resistance).toFixed(0) : "--";
@@ -985,7 +971,7 @@ function updateLiveBar(q) {
   else state.data.push(bar);
 }
 
-// Update metric card and night banner (no draw calls)
+// Update metric card with real-time price (no draw calls)
 function applyRealtimeQuote(q) {
   if (!q) return;
 
@@ -997,16 +983,6 @@ function applyRealtimeQuote(q) {
   if (metricCard && !metricCard.querySelector(".live-dot")) {
     metricCard.querySelector("span").insertAdjacentHTML("beforeend", '<span class="live-dot"></span>');
   }
-
-  if (!nightBanner.hidden) {
-    const dayClose = state.data.length >= 2 ? state.data[state.data.length - 2].close : q.prevClose;
-    const nc = q.price - dayClose;
-    nightEls.price.textContent  = q.price.toFixed(0);
-    nightEls.price.className    = nc >= 0 ? "up" : "down";
-    nightEls.change.textContent = `${formatSigned(nc)} (${formatPct(nc / dayClose)})`;
-    nightEls.change.className   = nc >= 0 ? "up" : "down";
-    nightEls.asOf.textContent   = `实时 ${bjNow({ hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
-  }
 }
 
 async function startRealtimeFeed() {
@@ -1015,7 +991,6 @@ async function startRealtimeFeed() {
     const q = await fetchRealtimeQuote();
     if (q) lastQuote = q;
     updateLiveBar(lastQuote);
-    updateNightBanner(); // ensure banner hides/shows correctly on every tick
     draw(); // redraws chart with updated live bar; applyRealtimeQuote called at end of draw
   };
   await tick();

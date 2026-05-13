@@ -36,6 +36,8 @@ const els = {
   aiList: document.getElementById("aiList"),
   aiNewsSection: document.getElementById("aiNewsSection"),
   aiNewsList: document.getElementById("aiNewsList"),
+  aiArticlesSection: document.getElementById("aiArticlesSection"),
+  aiArticlesList: document.getElementById("aiArticlesList"),
   aiSupport: document.getElementById("aiSupport"),
   aiResistance: document.getElementById("aiResistance"),
   aiRisk: document.getElementById("aiRisk")
@@ -890,11 +892,41 @@ function updateAiPanel(ai) {
   const items = Array.isArray(ai.analysis) ? ai.analysis : ai.analysis ? [ai.analysis] : [];
   els.aiList.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
 
-  // News / sentiment bullets
+  // News / sentiment detailed bullets
   const newsItems = Array.isArray(ai.news_impact) ? ai.news_impact : [];
-  if (newsItems.length > 0) {
-    els.aiNewsList.innerHTML = newsItems.map((item) => `<li>${item}</li>`).join("");
+  const articles  = Array.isArray(ai.news_articles) ? ai.news_articles : [];
+  const hasNews   = newsItems.length > 0 || articles.length > 0;
+
+  if (hasNews) {
     els.aiNewsSection.hidden = false;
+
+    // Detailed impact bullets
+    els.aiNewsList.innerHTML = newsItems.map((item) => `<li>${item}</li>`).join("");
+
+    // Source article cards
+    if (articles.length > 0) {
+      const impactClass = (imp) => {
+        if (/利多|看多|偏多/.test(imp)) return "up";
+        if (/利空|看空|偏空/.test(imp)) return "down";
+        return "neutral";
+      };
+      els.aiArticlesList.innerHTML = articles.map((a) => `
+        <div class="news-card">
+          <div class="news-card-head">
+            <span class="news-badge ${impactClass(a.impact)}">${a.impact || "中性"}</span>
+            ${a.url && a.url.startsWith("http")
+              ? `<a class="news-title" href="${a.url}" target="_blank" rel="noopener">${a.title || "查看原文"}</a>`
+              : `<span class="news-title">${a.title || ""}</span>`
+            }
+          </div>
+          ${a.source ? `<small class="news-source">📰 ${a.source}</small>` : ""}
+          ${a.detail ? `<p class="news-detail">${a.detail}</p>` : ""}
+        </div>
+      `).join("");
+      els.aiArticlesSection.hidden = false;
+    } else {
+      els.aiArticlesSection.hidden = true;
+    }
   } else {
     els.aiNewsSection.hidden = true;
   }

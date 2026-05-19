@@ -1,6 +1,6 @@
 # 大连棕榈油连续行情 K 线分析
 
-这是一个纯静态网页，用于查看大连棕榈油 `P0` 连续合约日线的 K 线、规则技术分析和 DeepSeek 日线分析。
+这是一个纯静态网页，用于查看大连棕榈油 `P0` 连续合约日线 K 线、1小时/2小时布林通道、规则技术分析、实时舆情快照和 DeepSeek 短线分析。
 
 ## 使用方法
 
@@ -27,15 +27,15 @@ DeepSeek AI 分析需要在 GitHub repo 的 `Settings -> Secrets and variables -
 DEEPSEEK_API_KEY
 ```
 
-AI 分析现在只会在 GitHub Actions 手动运行时生成：
+AI 分析现在只会在 GitHub Actions 手动运行时生成，并会把 1H/2H 布林通道、实时行情、日线背景和舆情快照一起发给 DeepSeek：
 
 ```text
 Actions -> Update palm oil data -> Run workflow -> Generate DeepSeek AI analysis = true
 ```
 
-自动定时任务只更新日线 CSV，不自动调用 DeepSeek。
+自动定时任务每 5 分钟更新日线 CSV、1H/2H 短线数据、布林通道摘要和舆情快照，不自动调用 DeepSeek。
 
-网页里的 `触发 DeepSeek 分析` 按钮会打开 GitHub Actions 手动运行页面；为了保护 GitHub token 和 DeepSeek key，静态网页不会直接从浏览器调用 workflow。
+网页里的 `触发 DeepSeek 短线分析` 按钮会打开 GitHub Actions 手动运行页面；为了保护 GitHub token 和 DeepSeek key，静态网页不会直接从浏览器调用 workflow。
 
 GitHub Pages 目标地址：
 

@@ -5,11 +5,15 @@ The current validated data source is DCE palm oil continuous contract `P0` throu
 ## What Can Auto-Update
 
 - The webpage is static HTML/CSS/JS.
-- The Python script `update_data.py` fetches the newest `P0` daily K-line and writes:
+- The Python script `update_data.py` fetches the newest `P0` daily K-line, 1H/2H intraday bars, Bollinger summaries, and a recent news snapshot. It writes:
   - `data/palm_oil_p0_daily.csv`
   - `data/source_meta.json`
-- The page auto-loads this CSV when served over HTTP.
-- The page also checks for a refreshed CSV every 1 minute.
+  - `data/intraday_1h.csv`
+  - `data/intraday_2h.csv`
+  - `data/intraday_meta.json`
+  - `data/news_snapshot.json`
+- The page auto-loads these files when served over HTTP.
+- The page checks for refreshed market data, intraday Bollinger summaries, sentiment snapshots, and AI analysis every 1 minute.
 
 ## GitHub Pages Setup
 
@@ -46,7 +50,7 @@ The key must not be committed to the repository. AI analysis is generated only w
 Actions -> Update palm oil data -> Run workflow -> Generate DeepSeek AI analysis = true
 ```
 
-Scheduled and push-triggered runs update the daily CSV but skip DeepSeek, so they do not consume AI API quota. The webpage refreshes `data/ai_analysis.json` every minute and shows the latest manual AI analysis.
+Scheduled and push-triggered runs update the daily/intraday data and sentiment snapshot but skip DeepSeek, so they do not consume AI API quota. The webpage refreshes `data/ai_analysis.json` every minute and shows the latest manual AI analysis.
 
 You can also run it manually from GitHub Actions with `Run workflow`.
 

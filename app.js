@@ -9,6 +9,14 @@ const els = {
   demoBtn: document.getElementById("demoBtn"),
   generateAiBtn: document.getElementById("generateAiBtn"),
   aiStatus: document.getElementById("aiStatus"),
+  boll1hStatus: document.getElementById("boll1hStatus"),
+  boll1hDetail: document.getElementById("boll1hDetail"),
+  boll2hStatus: document.getElementById("boll2hStatus"),
+  boll2hDetail: document.getElementById("boll2hDetail"),
+  intradayStrategyBias: document.getElementById("intradayStrategyBias"),
+  intradayStrategyText: document.getElementById("intradayStrategyText"),
+  newsRealtimeStatus: document.getElementById("newsRealtimeStatus"),
+  newsRealtimeText: document.getElementById("newsRealtimeText"),
   lastPrice: document.getElementById("lastPrice"),
   lastChange: document.getElementById("lastChange"),
   signalText: document.getElementById("signalText"),
@@ -33,6 +41,8 @@ const els = {
   aiMeta: document.getElementById("aiMeta"),
   aiBias: document.getElementById("aiBias"),
   aiSummary: document.getElementById("aiSummary"),
+  aiStrategy: document.getElementById("aiStrategy"),
+  aiStrategyGrid: document.getElementById("aiStrategyGrid"),
   aiList: document.getElementById("aiList"),
   aiNewsSection: document.getElementById("aiNewsSection"),
   aiNewsList: document.getElementById("aiNewsList"),
@@ -56,6 +66,8 @@ let state = {
   imported: false,
   autoLoaded: false,
   dataMeta: null,
+  intradayMeta: null,
+  newsSnapshot: null,
   hoverIndex: null,
   chartGeometry: null
 };
@@ -613,6 +625,15 @@ function formatCompact(value) {
   return Math.round(value).toString();
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 const TZ = "Asia/Shanghai";
 
 function formatDateTime(value) {
@@ -666,12 +687,6 @@ els.demoBtn.addEventListener("click", () => {
 const GH_OWNER = "FrankSun0616";
 const GH_REPO = "palm_dalian";
 const GH_WORKFLOW = "update-data.yml";
-const PAT_KEY = "gh_pat_palm_dalian";
-
-localStorage.setItem(PAT_KEY, atob(
-  "Z2l0aHViX3BhdF8xMUJIWlpDU1kwZDdKb050dVczVXU5X2dmMjd1c0V4aldwRHRMenU2ZXFNNHVKeF" +
-  "VHM2Z6eDRYVW5ocE9WVGhlVjRPRzdGVEVaVU8yc3phbUEx"
-));
 
 function setAiStatus(text, type) {
   els.aiStatus.textContent = text;
@@ -679,89 +694,12 @@ function setAiStatus(text, type) {
 }
 
 async function generateAiAnalysis() {
-  let pat = localStorage.getItem(PAT_KEY) || "";
-
-  if (!pat) {
-    pat = (prompt(
-      "首次使用需要输入 GitHub Personal Access Token（填一次后会记住）\n\n" +
-      "获取方式：github.com → Settings → Developer settings\n" +
-      "→ Personal access tokens → Fine-grained tokens\n" +
-      "→ 新建，选择此仓库，勾选 Actions: Read and write"
-    ) || "").trim();
-    if (!pat) {
-      setAiStatus("已取消", "error");
-      return;
-    }
-    localStorage.setItem(PAT_KEY, pat);
-  }
-
-  els.generateAiBtn.disabled = true;
-  setAiStatus("正在触发 GitHub Actions...", "loading");
-
-  let prevGenTime = null;
-  try {
-    const snap = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
-    if (snap.ok) {
-      const ai = await snap.json();
-      prevGenTime = ai.generated_at_utc || null;
-    }
-  } catch (_) {}
-
-  try {
-    const resp = await fetch(
-      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${pat}`,
-          Accept: "application/vnd.github+json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ ref: "main", inputs: { run_ai_analysis: "true" } })
-      }
-    );
-    if (resp.status === 401 || resp.status === 403) {
-      localStorage.removeItem(PAT_KEY);
-      setAiStatus("Token 无效或权限不足，已清除，请重试", "error");
-      els.generateAiBtn.disabled = false;
-      return;
-    }
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => "");
-      setAiStatus(`触发失败 (${resp.status})${body ? "：" + body.slice(0, 60) : ""}`, "error");
-      els.generateAiBtn.disabled = false;
-      return;
-    }
-  } catch (err) {
-    setAiStatus(`网络错误：${err.message}`, "error");
-    els.generateAiBtn.disabled = false;
-    return;
-  }
-
-  setAiStatus("正在搜索网络舆情 + 生成分析，约 5–8 分钟后自动刷新...", "loading");
-
-  const startTime = Date.now();
-  const maxWait = 10 * 60 * 1000;
-  const interval = setInterval(async () => {
-    if (Date.now() - startTime > maxWait) {
-      clearInterval(interval);
-      setAiStatus("超时，请手动刷新页面查看结果", "error");
-      els.generateAiBtn.disabled = false;
-      return;
-    }
-    try {
-      const r = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
-      if (!r.ok) return;
-      const ai = await r.json();
-      const newTime = ai.generated_at_utc || null;
-      if (newTime && newTime !== prevGenTime) {
-        clearInterval(interval);
-        updateAiPanel(ai);
-        setAiStatus(`✓ 分析完成，已自动更新（${formatDateTime(newTime)}）`, "success");
-        els.generateAiBtn.disabled = false;
-      }
-    } catch (_) {}
-  }, 25 * 1000);
+  window.open(
+    `https://github.com/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}`,
+    "_blank",
+    "noopener,noreferrer"
+  );
+  setAiStatus("已打开 GitHub Actions。运行 workflow 后回到页面，约1-3分钟点刷新或等待自动刷新。", "loading");
 }
 
 els.generateAiBtn.addEventListener("click", generateAiAnalysis);
@@ -879,6 +817,87 @@ async function autoLoadAiAnalysis() {
   }
 }
 
+async function autoLoadIntradayMeta() {
+  if (location.protocol === "file:") return;
+  try {
+    const response = await fetch(`data/intraday_meta.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Intraday HTTP ${response.status}`);
+    state.intradayMeta = await response.json();
+    updateIntradayPanel();
+  } catch (error) {
+    els.boll1hStatus.textContent = "加载失败";
+    els.boll1hDetail.textContent = error.message || "无法读取1小时数据";
+    els.boll2hStatus.textContent = "加载失败";
+    els.boll2hDetail.textContent = error.message || "无法读取2小时数据";
+  }
+}
+
+async function autoLoadNewsSnapshot() {
+  if (location.protocol === "file:") return;
+  try {
+    const response = await fetch(`data/news_snapshot.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`News HTTP ${response.status}`);
+    state.newsSnapshot = await response.json();
+    updateNewsPanel();
+  } catch (error) {
+    els.newsRealtimeStatus.textContent = "舆情读取失败";
+    els.newsRealtimeText.textContent = error.message || "无法读取舆情数据";
+  }
+}
+
+function bandStatus(summary, realtimePrice = null) {
+  if (!summary || !summary.bollinger) return { title: "--", detail: "暂无布林数据" };
+  const boll = summary.bollinger;
+  const price = realtimePrice || summary.close || boll.close;
+  const width = formatPct(Number(boll.band_width || 0));
+  const pos = price > boll.upper ? "突破上轨" : price < boll.lower ? "跌破下轨" : price >= boll.mid ? "中轨上方" : "中轨下方";
+  let read = "震荡";
+  if (price > boll.upper) read = "偏强但防追高";
+  else if (price < boll.lower) read = "偏弱但防急跌反抽";
+  else if (price >= boll.mid) read = "回到强势半区";
+  else read = "位于弱势半区";
+  return {
+    title: `${pos}`,
+    detail: `价 ${Number(price).toFixed(0)}｜上 ${Number(boll.upper).toFixed(0)} 中 ${Number(boll.mid).toFixed(0)} 下 ${Number(boll.lower).toFixed(0)}｜带宽 ${width}｜${read}｜${summary.latest_time || ""}`
+  };
+}
+
+function updateIntradayPanel() {
+  const meta = state.intradayMeta;
+  if (!meta) return;
+  const price = lastQuote?.price || null;
+  const one = bandStatus(meta.one_hour, price);
+  const two = bandStatus(meta.two_hour, price);
+  els.boll1hStatus.textContent = one.title;
+  els.boll1hStatus.className = /上轨|强势/.test(one.title) ? "up" : /下轨|弱势/.test(one.title) ? "down" : "";
+  els.boll1hDetail.textContent = one.detail;
+  els.boll2hStatus.textContent = two.title;
+  els.boll2hStatus.className = /上轨|强势/.test(two.title) ? "up" : /下轨|弱势/.test(two.title) ? "down" : "";
+  els.boll2hDetail.textContent = two.detail;
+
+  const onePos = meta.one_hour?.bollinger?.position || "";
+  const twoPos = meta.two_hour?.bollinger?.position || "";
+  const alignedUp = /上方|上轨/.test(onePos) && /上方|上轨/.test(twoPos);
+  const alignedDown = /下方|下轨/.test(onePos) && /下方|下轨/.test(twoPos);
+  els.intradayStrategyBias.textContent = alignedUp ? "短线偏多" : alignedDown ? "短线偏弱" : "区间震荡";
+  els.intradayStrategyBias.className = alignedUp ? "up" : alignedDown ? "down" : "";
+  els.intradayStrategyText.textContent = alignedUp
+    ? "1H/2H 同在布林中轨上方，适合等回踩中轨不破再看延续；跌回2H中轨下方则降级。"
+    : alignedDown
+      ? "1H/2H 同在中轨下方，反弹先看压力，未重新站回2H中轨前不追多。"
+      : "1H/2H 信号不一致，优先按布林上下轨做区间观察，等待放量突破再跟随。";
+}
+
+function updateNewsPanel() {
+  const snap = state.newsSnapshot;
+  const articles = Array.isArray(snap?.articles) ? snap.articles : [];
+  const updated = snap?.updated_at_utc ? formatDateTime(snap.updated_at_utc) : "--";
+  els.newsRealtimeStatus.textContent = articles.length ? `${articles.length} 条` : "暂无";
+  els.newsRealtimeText.textContent = articles.length
+    ? `最新 ${updated}。${articles.slice(0, 2).map((item) => item.title).filter(Boolean).join("；")}`
+    : `最新 ${updated}，没有抓到新舆情。`;
+}
+
 function updateAiPanel(ai) {
   els.aiBias.textContent = ai.bias || "--";
   els.aiBias.className = /多|强/.test(ai.bias || "") ? "up" : /空|弱/.test(ai.bias || "") ? "down" : "";
@@ -888,9 +907,30 @@ function updateAiPanel(ai) {
   els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"}${realtimeTag} | 生成 ${generated}`;
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
 
+  const strategy = ai.intraday_strategy && typeof ai.intraday_strategy === "object" ? ai.intraday_strategy : null;
+  if (strategy) {
+    els.aiStrategy.hidden = false;
+    const rows = [
+      ["短线方向", strategy.bias],
+      ["入场观察", strategy.entry],
+      ["止损/风控", strategy.stop],
+      ["止盈目标", strategy.take_profit],
+      ["失效条件", strategy.invalidation],
+      ["备注", strategy.notes],
+    ];
+    els.aiStrategyGrid.innerHTML = rows.map(([label, value]) => `
+      <div class="strategy-item">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value || "--")}</strong>
+      </div>
+    `).join("");
+  } else {
+    els.aiStrategy.hidden = true;
+  }
+
   // Technical analysis bullets
   const items = Array.isArray(ai.analysis) ? ai.analysis : ai.analysis ? [ai.analysis] : [];
-  els.aiList.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+  els.aiList.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 
   // News / sentiment detailed bullets
   const newsItems = Array.isArray(ai.news_impact) ? ai.news_impact : [];
@@ -901,7 +941,7 @@ function updateAiPanel(ai) {
     els.aiNewsSection.hidden = false;
 
     // Detailed impact bullets
-    els.aiNewsList.innerHTML = newsItems.map((item) => `<li>${item}</li>`).join("");
+    els.aiNewsList.innerHTML = newsItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 
     // Source article cards
     if (articles.length > 0) {
@@ -913,14 +953,14 @@ function updateAiPanel(ai) {
       els.aiArticlesList.innerHTML = articles.map((a) => `
         <div class="news-card">
           <div class="news-card-head">
-            <span class="news-badge ${impactClass(a.impact)}">${a.impact || "中性"}</span>
+            <span class="news-badge ${impactClass(a.impact)}">${escapeHtml(a.impact || "中性")}</span>
             ${a.url && a.url.startsWith("http")
-              ? `<a class="news-title" href="${a.url}" target="_blank" rel="noopener">${a.title || "查看原文"}</a>`
-              : `<span class="news-title">${a.title || ""}</span>`
+              ? `<a class="news-title" href="${escapeHtml(a.url)}" target="_blank" rel="noopener">${escapeHtml(a.title || "查看原文")}</a>`
+              : `<span class="news-title">${escapeHtml(a.title || "")}</span>`
             }
           </div>
-          ${a.source ? `<small class="news-source">📰 ${a.source}</small>` : ""}
-          ${a.detail ? `<p class="news-detail">${a.detail}</p>` : ""}
+          ${a.source ? `<small class="news-source">${escapeHtml(a.source)}</small>` : ""}
+          ${a.detail ? `<p class="news-detail">${escapeHtml(a.detail)}</p>` : ""}
         </div>
       `).join("");
       els.aiArticlesSection.hidden = false;
@@ -1023,6 +1063,7 @@ async function startRealtimeFeed() {
     const q = await fetchRealtimeQuote();
     if (q) lastQuote = q;
     updateLiveBar(lastQuote);
+    updateIntradayPanel();
     draw(); // redraws chart with updated live bar; applyRealtimeQuote called at end of draw
   };
   await tick();
@@ -1033,6 +1074,10 @@ window.addEventListener("resize", draw);
 draw();
 autoLoadCsv();
 autoLoadAiAnalysis();
+autoLoadIntradayMeta();
+autoLoadNewsSnapshot();
 startRealtimeFeed();
 setInterval(autoLoadCsv, 60 * 1000);
 setInterval(autoLoadAiAnalysis, 60 * 1000);
+setInterval(autoLoadIntradayMeta, 60 * 1000);
+setInterval(autoLoadNewsSnapshot, 60 * 1000);

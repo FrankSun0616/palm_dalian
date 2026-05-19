@@ -1,6 +1,8 @@
 name: Update palm oil data
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       run_ai_analysis:
@@ -46,7 +48,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update palm oil P0 data"
-          file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json data/ai_analysis.json
+          file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json data/ai_analysis.json data/intraday_1h.csv data/intraday_2h.csv data/intraday_meta.json data/news_snapshot.json
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

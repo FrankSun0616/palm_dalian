@@ -898,9 +898,15 @@ function updateNewsPanel() {
     : `最新 ${updated}，没有抓到新舆情。`;
 }
 
+function biasClass(text) {
+  if (/多|强/.test(text)) return "bullish";
+  if (/空|弱/.test(text)) return "bearish";
+  return "neutral";
+}
+
 function updateAiPanel(ai) {
   els.aiBias.textContent = ai.bias || "--";
-  els.aiBias.className = /多|强/.test(ai.bias || "") ? "up" : /空|弱/.test(ai.bias || "") ? "down" : "";
+  els.aiBias.className = `bias-pill ${biasClass(ai.bias || "")}`;
   const status = ai.status === "ok" ? "DeepSeek" : "规则备用";
   const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
   const realtimeTag = ai.realtime_price ? ` | 实时价 ${ai.realtime_price}` : "";

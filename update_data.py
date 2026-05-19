@@ -258,17 +258,25 @@ def clean_text(value: str | None) -> str:
 def is_relevant_news(item: dict[str, str]) -> bool:
     text = f"{item.get('title', '')} {item.get('snippet', '')}".lower()
     keywords = [
-        "棕榈",
-        "palm",
-        "malaysia",
-        "indonesia",
-        "马来",
-        "印尼",
-        "油脂",
-        "期货",
-        "futures",
-        "dce",
-        "大连",
+        # 棕榈油本体
+        "棕榈", "palm",
+        # 产地与主要参与国
+        "malaysia", "indonesia", "马来", "印尼", "india", "印度", "mpob",
+        # 替代/联动油脂
+        "油脂", "豆油", "soybean", "soyoil", "rapeseed", "菜油", "葵花籽油", "sunflower",
+        "椰子油", "coconut", "vegetable oil", "edible oil",
+        # 能源 / 生物柴油（影响棕榈油需求）
+        "原油", "crude", "brent", "wti", "diesel", "biofuel", "biodiesel", "生物柴油",
+        # 大宗商品 / 政策
+        "大宗", "commodity", "commodities", "出口", "export", "进口", "import",
+        "关税", "tariff", "tax", "补贴", "subsidy", "禁令", "ban", "配额",
+        # 天气（影响产量）
+        "厄尔尼诺", "拉尼娜", "el nino", "el niño", "la nina", "la niña",
+        "drought", "干旱", "雨季", "monsoon",
+        # 期货 / 交易所
+        "期货", "futures", "dce", "大连", "bursa", "fcpo", "cbot",
+        # 汇率（影响以美元计价的大宗商品）
+        "ringgit", "rupiah", "usd", "美元", "汇率",
     ]
     return any(keyword in text for keyword in keywords)
 
@@ -308,9 +316,28 @@ def fetch_google_news(query: str, max_results: int = 8) -> list[dict[str, str]]:
 
 def fetch_news_snapshot() -> dict[str, object]:
     queries = [
+        # 棕榈油核心
         "棕榈油 期货 今日 马来西亚 印尼 出口 库存",
         "大连 棕榈油 P0 期货 今日 走势",
         "palm oil futures Malaysia Indonesia export stock today",
+        "MPOB monthly palm oil production stock",
+        # 印尼大宗商品 / 政策
+        "印尼 大宗商品 出口 政策 关税 棕榈油",
+        "Indonesia commodity export policy palm oil tariff",
+        # 印度（最大买家）
+        "印度 棕榈油 进口 需求",
+        "India palm oil import demand vegetable oil",
+        # 能源 / 生物柴油（替代品需求）
+        "原油 价格 布伦特 WTI 走势",
+        "crude oil Brent WTI price biodiesel demand",
+        # 替代油脂
+        "豆油 菜油 葵花油 国际 价格 走势",
+        "soybean oil rapeseed sunflower oil price",
+        # 天气
+        "厄尔尼诺 拉尼娜 东南亚 棕榈 干旱",
+        "El Nino La Nina Southeast Asia palm oil weather",
+        # 汇率
+        "马来 林吉特 印尼 卢比 美元 走势",
     ]
     articles: list[dict[str, str]] = []
 
@@ -387,7 +414,7 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
     the analysis step can build proper article cards.
     Returns "" on failure so the caller can skip the news block gracefully.
     """
-    MAX_SEARCH_ROUNDS = 5
+    MAX_SEARCH_ROUNDS = 8
 
     tool_def = [
         {
@@ -411,15 +438,23 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
         {
             "role": "system",
             "content": (
-                "你是商品期货市场资讯员。请调用 web_search 多次搜索棕榈油相关最新资讯，"
-                "搜索方向包括：马来西亚/印尼产量出口、中国进口需求、植物油脂联动、政策关税、"
-                "大连期货盘面。最多搜索 4 次。\n"
-                "完成搜索后，请输出 6–10 条详细新闻条目，每条格式严格如下（保留原始URL）：\n"
+                "你是商品期货市场资讯员。请调用 web_search 多次搜索影响棕榈油价格的"
+                "所有相关资讯（最多 7 次搜索）。搜索方向必须广泛涵盖：\n"
+                "1) 棕榈油本体——马来西亚 MPOB 月度报告、印尼产量与库存、大连 P0 期货盘面；\n"
+                "2) 印尼大宗商品政策——出口关税、煤炭、镍、棕榈油禁令或配额；\n"
+                "3) 印度需求——印度是最大进口国，关税与采购变化影响巨大；\n"
+                "4) 原油与生物柴油——原油价格、生物柴油掺混政策（B35/B40）影响棕榈油需求；\n"
+                "5) 替代油脂——豆油、菜油、葵花油、椰子油价格联动；\n"
+                "6) 天气——厄尔尼诺/拉尼娜、东南亚干旱、雨季对产量影响；\n"
+                "7) 汇率——林吉特/卢比/美元走势对棕榈油价格的影响；\n"
+                "8) 宏观——中国进口数据、CBOT 大豆、海运费、地缘冲突。\n\n"
+                "完成搜索后，请输出 8–15 条详细新闻条目（覆盖以上至少 5 个方向），"
+                "每条格式严格如下（保留原始URL）：\n"
                 "【标题】新闻标题\n"
                 "【来源】网站/媒体名称\n"
                 "【URL】原文链接\n"
                 "【摘要】3–5句详细摘要，说明具体数据/事件及原因\n"
-                "【影响】利多/利空/中性，并解释逻辑\n"
+                "【影响】利多/利空/中性，并解释对棕榈油的传导逻辑\n"
                 "---\n"
                 "不要省略URL。如果搜索结果里有链接，必须原样保留。"
             ),
@@ -427,8 +462,10 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
         {
             "role": "user",
             "content": (
-                f"分析日期：{latest_date}。请搜索并详细整理近期影响大连棕榈油期货价格的重要新闻，"
-                "要求每条新闻都有具体数据（如产量数字、涨跌幅、政策名称等）和来源URL。"
+                f"分析日期：{latest_date}。请广泛搜索并详细整理近期影响大连棕榈油期货价格的"
+                "所有重要新闻，不要只看棕榈油本身——印尼大宗商品政策、原油价格、生物柴油、"
+                "印度采购、替代油脂、东南亚天气、相关汇率都要覆盖。"
+                "每条新闻必须有具体数据（产量、价格、政策名称、百分比等）和来源URL。"
             ),
         },
     ]
@@ -449,9 +486,9 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
                     "tools": tool_def,
                     "tool_choice": tool_choice,
                     "temperature": 0.2,
-                    "max_tokens": 3000,
+                    "max_tokens": 5000,
                 },
-                timeout=90,
+                timeout=120,
             )
             resp.raise_for_status()
             data = resp.json()

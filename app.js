@@ -17,6 +17,10 @@ const els = {
   intradayStrategyText: document.getElementById("intradayStrategyText"),
   newsRealtimeStatus: document.getElementById("newsRealtimeStatus"),
   newsRealtimeText: document.getElementById("newsRealtimeText"),
+  newsTickerToggle: document.getElementById("newsTickerToggle"),
+  newsTickerSection: document.getElementById("newsTickerSection"),
+  newsTickerList: document.getElementById("newsTickerList"),
+  newsTickerMeta: document.getElementById("newsTickerMeta"),
   lastPrice: document.getElementById("lastPrice"),
   lastChange: document.getElementById("lastChange"),
   signalText: document.getElementById("signalText"),
@@ -1011,10 +1015,50 @@ function updateNewsPanel() {
   const snap = state.newsSnapshot;
   const articles = Array.isArray(snap?.articles) ? snap.articles : [];
   const updated = snap?.updated_at_utc ? formatDateTime(snap.updated_at_utc) : "--";
+
+  // Small board card summary
   els.newsRealtimeStatus.textContent = articles.length ? `${articles.length} 条` : "暂无";
   els.newsRealtimeText.textContent = articles.length
     ? `最新 ${updated}。${articles.slice(0, 2).map((item) => item.title).filter(Boolean).join("；")}`
     : `最新 ${updated}，没有抓到新舆情。`;
+
+  // Full ticker list (clickable cards)
+  if (els.newsTickerList && articles.length > 0) {
+    els.newsTickerMeta.textContent = `${articles.length} 条 · 更新于 ${updated} · 每 60 秒自动刷新`;
+    els.newsTickerList.innerHTML = articles.map((a) => {
+      const title  = escapeHtml(a.title || "(无标题)");
+      const source = escapeHtml(a.source || "未知来源");
+      const pub    = a.published_at_utc
+        ? formatDateTime(a.published_at_utc).replace(/^\d{4}\//, "")
+        : "";
+      const url = a.url || "#";
+      const tag = a.url ? "a" : "div";
+      const linkAttrs = a.url ? `href="${escapeHtml(url)}" target="_blank" rel="noopener"` : "";
+      return `
+        <${tag} class="ticker-card" ${linkAttrs}>
+          <div class="ticker-card-title">${title}</div>
+          <div class="ticker-card-meta">
+            <span class="source">📰 ${source}</span>
+            ${pub ? `<span>${pub}</span>` : ""}
+          </div>
+        </${tag}>
+      `;
+    }).join("");
+  } else if (els.newsTickerList) {
+    els.newsTickerList.innerHTML = "";
+    els.newsTickerMeta.textContent = "暂无新闻数据";
+  }
+}
+
+// Click the small card to expand/collapse the full ticker section
+if (els.newsTickerToggle && els.newsTickerSection) {
+  els.newsTickerToggle.addEventListener("click", () => {
+    const willShow = els.newsTickerSection.hidden;
+    els.newsTickerSection.hidden = !willShow;
+    if (willShow) {
+      els.newsTickerSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  });
 }
 
 function biasClass(text) {

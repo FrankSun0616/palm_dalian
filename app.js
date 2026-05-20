@@ -1053,9 +1053,42 @@ function updateAiPanel(ai) {
     els.aiStrategy.hidden = true;
   }
 
-  // Technical analysis bullets
+  // Map any bias label to a CSS class. Handles 中性偏多/中性偏空 nuances.
+  const impactClass = (imp) => {
+    if (!imp) return "neutral";
+    if (/中性偏空|偏空|看空|利空|空头|弱/.test(imp)) return "down";
+    if (/中性偏多|偏多|看多|利多|多头|强/.test(imp)) return "up";
+    if (/中性/.test(imp)) return "neutral";
+    return "neutral";
+  };
+
+  // Highlight ONLY explicit bullish/bearish impact words. Avoid generic
+  // direction words like "增长/下降" which are context-dependent (e.g. supply
+  // increases are bearish for price).
+  const colorizeText = (text) => {
+    return escapeHtml(text)
+      .replace(/(利多|看多|偏多|多头排列|强势|放量上涨|底部支撑|利好)/g,
+               '<span class="up">$1</span>')
+      .replace(/(利空|看空|偏空|空头排列|弱势|放量下跌|破位|压制|担忧)/g,
+               '<span class="down">$1</span>');
+  };
+
+  // Convert "[利空] xxx" / "[中性偏多] xxx" → "<badge>利空</badge> xxx" with color.
+  // The badge gives the dominant signal; we don't keyword-color the body to
+  // avoid misleading users (e.g. "产量增长" reads bullish but is bearish for price).
+  const renderImpactItem = (raw) => {
+    const m = String(raw).match(/^\s*\[([^\]]+)\]\s*(.*)$/);
+    if (m) {
+      const label = m[1];
+      const body  = m[2];
+      return `<span class="news-badge ${impactClass(label)}">${escapeHtml(label)}</span> ${escapeHtml(body)}`;
+    }
+    return escapeHtml(raw);
+  };
+
+  // Technical analysis bullets — also inline-highlight bias words
   const items = Array.isArray(ai.analysis) ? ai.analysis : ai.analysis ? [ai.analysis] : [];
-  els.aiList.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  els.aiList.innerHTML = items.map((item) => `<li>${colorizeText(item)}</li>`).join("");
 
   // News / sentiment detailed bullets
   const newsItems = Array.isArray(ai.news_impact) ? ai.news_impact : [];
@@ -1065,16 +1098,11 @@ function updateAiPanel(ai) {
   if (hasNews) {
     els.aiNewsSection.hidden = false;
 
-    // Detailed impact bullets
-    els.aiNewsList.innerHTML = newsItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    // Detailed impact bullets — each gets a colored prefix badge
+    els.aiNewsList.innerHTML = newsItems.map((item) => `<li>${renderImpactItem(item)}</li>`).join("");
 
     // Source article cards
     if (articles.length > 0) {
-      const impactClass = (imp) => {
-        if (/利多|看多|偏多/.test(imp)) return "up";
-        if (/利空|看空|偏空/.test(imp)) return "down";
-        return "neutral";
-      };
       els.aiArticlesList.innerHTML = articles.map((a) => `
         <div class="news-card">
           <div class="news-card-head">
@@ -1085,7 +1113,7 @@ function updateAiPanel(ai) {
             }
           </div>
           ${a.source ? `<small class="news-source">${escapeHtml(a.source)}</small>` : ""}
-          ${a.detail ? `<p class="news-detail">${escapeHtml(a.detail)}</p>` : ""}
+          ${a.detail ? `<p class="news-detail">${colorizeText(a.detail)}</p>` : ""}
         </div>
       `).join("");
       els.aiArticlesSection.hidden = false;

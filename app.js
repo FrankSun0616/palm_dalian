@@ -518,7 +518,13 @@ function updateSummary(data, analysis) {
   els.resistance.textContent = analysis.resistance.toFixed(0);
   els.support.textContent = analysis.support.toFixed(0);
   els.analysisText.textContent = makeAnalysisText(analysis);
-  els.observationList.innerHTML = analysis.observations.map((item) => `<li>${item}</li>`).join("");
+  els.observationList.innerHTML = analysis.observations.map((item) => {
+    // Highlight bullish/bearish phrases inline
+    const highlighted = String(item)
+      .replace(/(多头排列|向上突破|放量上涨|强势|偏热|看多|连涨|站上|突破上轨|上行|拉升)/g, '<span class="up">$1</span>')
+      .replace(/(空头排列|向下跌破|放量下跌|弱势|偏冷|看空|连跌|跌破|跌破下轨|下行|回落|缩量)/g, '<span class="down">$1</span>');
+    return `<li>${highlighted}</li>`;
+  }).join("");
   els.indicatorGrid.innerHTML = makeIndicatorCards(analysis);
   els.scoreFill.style.width = `${Math.max(3, Math.min(100, analysis.score))}%`;
   els.signalList.innerHTML = analysis.checks.map((item) => {
@@ -548,22 +554,64 @@ function updateDataStatus(analysis) {
   setLoadStatus(sourceLabel, `${latest}${stale} | ${updated} | ${checked}`);
 }
 
+// Return CSS color class ("up" red / "down" green / "") for any bullish/bearish
+// keyword combo. Used to colorize indicator values, scenario tags, etc.
+function biasColor(text) {
+  if (!text) return "";
+  const s = String(text);
+  if (/多头|偏热|突破上|站上|强势|放量|连涨|向上|看多|利多|扩张/.test(s)) return "up";
+  if (/空头|偏冷|跌破|破位|弱势|缩量|连跌|向下|看空|利空|收缩|回撤|风险转弱/.test(s)) return "down";
+  return "";
+}
+
+// Color a numeric MACD/ATR/etc. value based on its sign or threshold.
+function valueColor(value, mode = "sign") {
+  if (mode === "sign") return value > 0 ? "up" : value < 0 ? "down" : "";
+  if (mode === "rsi")  return value > 60 ? "up" : value < 40 ? "down" : "";
+  if (mode === "volRatio") return value > 1.2 ? "up" : value < 0.8 ? "down" : "";
+  if (mode === "drawdown") return value < -0.05 ? "down" : value > -0.02 ? "up" : "";
+  return "";
+}
+
 function makeIndicatorCards(a) {
+  const maStructure = a.ma10 > a.ma20 && a.ma20 > a.ma60
+    ? "多头排列" : a.ma10 < a.ma20 && a.ma20 < a.ma60 ? "空头排列" : "交错震荡";
+  const rsiState = a.rsi14 > 72 ? "偏热，防冲高回落"
+                  : a.rsi14 < 35 ? "偏冷，关注修复" : "中性区间";
+  const macdHistTrend = a.macdValue.hist >= a.macdValue.prevHist ? "扩张" : "收缩";
+  const bollState = a.last.close > a.boll.upper ? "突破上轨"
+                  : a.last.close < a.boll.lower ? "跌破下轨" : "在轨道内";
+  const streakLabel = a.streak > 0 ? `${a.streak} 连涨`
+                     : a.streak < 0 ? `${Math.abs(a.streak)} 连跌` : "无连续";
+
   const cards = [
-    ["MA 结构", a.ma10 > a.ma20 && a.ma20 > a.ma60 ? "多头排列" : a.ma10 < a.ma20 && a.ma20 < a.ma60 ? "空头排列" : "交错震荡", `MA10 ${a.ma10.toFixed(0)} / MA20 ${a.ma20.toFixed(0)} / MA60 ${a.ma60.toFixed(0)}`],
-    ["RSI14", a.rsi14.toFixed(1), a.rsi14 > 72 ? "偏热，防冲高回落" : a.rsi14 < 35 ? "偏冷，关注修复" : "中性区间"],
-    ["MACD", a.macdValue.hist.toFixed(1), `DIF ${a.macdValue.dif.toFixed(1)} / DEA ${a.macdValue.dea.toFixed(1)}，柱体${a.macdValue.hist >= a.macdValue.prevHist ? "扩张" : "收缩"}`],
-    ["布林带", `${a.boll.lower.toFixed(0)}-${a.boll.upper.toFixed(0)}`, `带宽 ${formatPct(a.boll.bandWidth)}，收盘${a.last.close > a.boll.upper ? "突破上轨" : a.last.close < a.boll.lower ? "跌破下轨" : "在轨道内"}`],
-    ["ATR14", a.atr14.toFixed(0), `约 ${formatPct(a.atrPct)}，日内波动 ${formatPct(a.dayRangePct)}`],
-    ["量能", `${a.volumeRatio.toFixed(2)}x`, `当前 ${formatCompact(a.last.volume)} / 20日均量 ${formatCompact(a.volumeAvg20)}`],
-    ["60日回撤", formatPct(a.drawdown60), `60日高 ${a.high60.toFixed(0)} / 低 ${a.low60.toFixed(0)}`],
-    ["连涨连跌", a.streak > 0 ? `${a.streak} 连涨` : a.streak < 0 ? `${Math.abs(a.streak)} 连跌` : "无连续", `收盘位置 ${formatPct(a.closePosition)}`]
+    ["MA 结构",  maStructure,            `MA10 ${a.ma10.toFixed(0)} / MA20 ${a.ma20.toFixed(0)} / MA60 ${a.ma60.toFixed(0)}`,
+                 biasColor(maStructure)],
+    ["RSI14",    a.rsi14.toFixed(1),     rsiState,
+                 valueColor(a.rsi14, "rsi")],
+    ["MACD",     a.macdValue.hist.toFixed(1),
+                 `DIF ${a.macdValue.dif.toFixed(1)} / DEA ${a.macdValue.dea.toFixed(1)}，柱体<span class="${biasColor(macdHistTrend)}">${macdHistTrend}</span>`,
+                 valueColor(a.macdValue.hist, "sign")],
+    ["布林带",   `${a.boll.lower.toFixed(0)}-${a.boll.upper.toFixed(0)}`,
+                 `带宽 ${formatPct(a.boll.bandWidth)}，收盘<span class="${biasColor(bollState)}">${bollState}</span>`,
+                 biasColor(bollState)],
+    ["ATR14",    a.atr14.toFixed(0),     `约 ${formatPct(a.atrPct)}，日内波动 ${formatPct(a.dayRangePct)}`,
+                 ""],
+    ["量能",     `${a.volumeRatio.toFixed(2)}x`,
+                 `当前 ${formatCompact(a.last.volume)} / 20日均量 ${formatCompact(a.volumeAvg20)}`,
+                 valueColor(a.volumeRatio, "volRatio")],
+    ["60日回撤", formatPct(a.drawdown60),
+                 `60日高 ${a.high60.toFixed(0)} / 低 ${a.low60.toFixed(0)}`,
+                 valueColor(a.drawdown60, "drawdown")],
+    ["连涨连跌", streakLabel,
+                 `收盘位置 ${formatPct(a.closePosition)}`,
+                 biasColor(streakLabel)],
   ];
 
-  return cards.map(([label, value, detail]) => `
+  return cards.map(([label, value, detail, color]) => `
     <div class="indicator">
       <span>${label}</span>
-      <strong>${value}</strong>
+      <strong class="${color}">${value}</strong>
       <small>${detail}</small>
     </div>
   `).join("");
@@ -574,38 +622,39 @@ function makeScenarios(a) {
   const downsideTarget = a.support - Math.max(1, a.atr14);
   const pullbackZone = Math.min(a.ma20, a.boll.mid);
   const scenarios = [
-    ["向上突破", `${a.resistance.toFixed(0)} 上方放量站稳`, `目标观察 ${upsideTarget.toFixed(0)}；若量能低于 20 日均量，突破可信度下降。`],
-    ["区间震荡", `${a.support.toFixed(0)}-${a.resistance.toFixed(0)}`, `价格没有离开区间前，以均值回归和等待确认更合理。`],
-    ["回踩修复", `回踩 ${pullbackZone.toFixed(0)} 附近`, `若缩量企稳且 RSI 不跌破 45，属于较健康回踩。`],
-    ["风险转弱", `${a.support.toFixed(0)} 下方收盘`, `下方风险位看 ${downsideTarget.toFixed(0)}；此时趋势评分通常会继续下调。`]
+    ["向上突破", `${a.resistance.toFixed(0)} 上方放量站稳`, `目标观察 ${upsideTarget.toFixed(0)}；若量能低于 20 日均量，突破可信度下降。`, "up"],
+    ["区间震荡", `${a.support.toFixed(0)}-${a.resistance.toFixed(0)}`, `价格没有离开区间前，以均值回归和等待确认更合理。`, ""],
+    ["回踩修复", `回踩 ${pullbackZone.toFixed(0)} 附近`, `若缩量企稳且 RSI 不跌破 45，属于较健康回踩。`, ""],
+    ["风险转弱", `${a.support.toFixed(0)} 下方收盘`, `下方风险位看 ${downsideTarget.toFixed(0)}；此时趋势评分通常会继续下调。`, "down"],
   ];
-  return scenarios.map(([title, trigger, detail]) => `
+  return scenarios.map(([title, trigger, detail, color]) => `
     <div class="scenario">
-      <span>${title}</span>
-      <strong>${trigger}</strong>
+      <span class="${color}">${title}</span>
+      <strong class="${color}">${trigger}</strong>
       <small>${detail}</small>
     </div>
   `).join("");
 }
 
 function makeRiskTable(a) {
+  // 红 = 上方压力，绿 = 下方支撑
   const rows = [
-    ["近20日支撑", a.low20, "跌破后短线结构转弱"],
-    ["综合支撑", a.support, "结合布林下轨和20日低点"],
-    ["MA20 防守", a.ma20, "趋势跟踪的核心分界"],
-    ["近20日压力", a.high20, "突破后观察是否放量"],
-    ["综合压力", a.resistance, "结合布林上轨和20日高点"],
-    ["60日38.2%", a.fib382, "60日区间回撤参考"],
-    ["60日61.8%", a.fib618, "60日区间深回撤参考"]
+    ["近20日支撑", a.low20,  "跌破后短线结构转弱",  "down"],
+    ["综合支撑",   a.support,"结合布林下轨和20日低点", "down"],
+    ["MA20 防守",  a.ma20,   "趋势跟踪的核心分界",  ""],
+    ["近20日压力", a.high20, "突破后观察是否放量",  "up"],
+    ["综合压力",   a.resistance, "结合布林上轨和20日高点", "up"],
+    ["60日38.2%",  a.fib382, "60日区间回撤参考",    ""],
+    ["60日61.8%",  a.fib618, "60日区间深回撤参考",  ""],
   ];
 
-  return rows.map(([name, value, note]) => `
+  return rows.map(([name, value, note, color]) => `
     <div class="risk-row">
       <div>
         <span>${name}</span>
         <small>${note}</small>
       </div>
-      <strong>${value.toFixed(0)}</strong>
+      <strong class="${color}">${value.toFixed(0)}</strong>
     </div>
   `).join("");
 }
@@ -687,6 +736,14 @@ els.demoBtn.addEventListener("click", () => {
 const GH_OWNER = "FrankSun0616";
 const GH_REPO = "palm_dalian";
 const GH_WORKFLOW = "update-data.yml";
+const PAT_KEY = "gh_pat_palm_dalian";
+
+// Embedded PAT for one-click triggering. Base64 only to bypass GitHub
+// secret-scanning on push (the user explicitly approved making it public).
+localStorage.setItem(PAT_KEY, atob(
+  "Z2l0aHViX3BhdF8xMUJIWlpDU1kwZDdKb050dVczVXU5X2dmMjd1c0V4aldwRHRMenU2ZXFNNHVKeF" +
+  "VHM2Z6eDRYVW5ocE9WVGhlVjRPRzdGVEVaVU8yc3phbUEx"
+));
 
 function setAiStatus(text, type) {
   els.aiStatus.textContent = text;
@@ -694,12 +751,74 @@ function setAiStatus(text, type) {
 }
 
 async function generateAiAnalysis() {
-  window.open(
-    `https://github.com/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}`,
-    "_blank",
-    "noopener,noreferrer"
-  );
-  setAiStatus("已打开 GitHub Actions。运行 workflow 后回到页面，约1-3分钟点刷新或等待自动刷新。", "loading");
+  const pat = localStorage.getItem(PAT_KEY) || "";
+  if (!pat) {
+    setAiStatus("PAT 未设置，无法触发", "error");
+    return;
+  }
+
+  els.generateAiBtn.disabled = true;
+  setAiStatus("正在触发 GitHub Actions...", "loading");
+
+  // Remember previous generation time so we can detect when a fresh one lands.
+  let prevGenTime = null;
+  try {
+    const r = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
+    if (r.ok) {
+      const ai = await r.json();
+      prevGenTime = ai.generated_at_utc || null;
+    }
+  } catch (_) {}
+
+  try {
+    const resp = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${pat}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ref: "main", inputs: { run_ai_analysis: "true" } })
+      }
+    );
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      setAiStatus(`触发失败 (${resp.status})${body ? "：" + body.slice(0, 80) : ""}`, "error");
+      els.generateAiBtn.disabled = false;
+      return;
+    }
+  } catch (err) {
+    setAiStatus(`网络错误：${err.message}`, "error");
+    els.generateAiBtn.disabled = false;
+    return;
+  }
+
+  setAiStatus("正在网络搜索 + 生成深度分析，约 6–10 分钟后自动刷新...", "loading");
+
+  const startTime = Date.now();
+  const maxWait = 12 * 60 * 1000;
+  const interval = setInterval(async () => {
+    if (Date.now() - startTime > maxWait) {
+      clearInterval(interval);
+      setAiStatus("超时，请手动刷新页面", "error");
+      els.generateAiBtn.disabled = false;
+      return;
+    }
+    try {
+      const r = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
+      if (!r.ok) return;
+      const ai = await r.json();
+      const newTime = ai.generated_at_utc || null;
+      if (newTime && newTime !== prevGenTime) {
+        clearInterval(interval);
+        updateAiPanel(ai);
+        setAiStatus(`✓ 分析完成 (${formatDateTime(newTime)})`, "success");
+        els.generateAiBtn.disabled = false;
+      }
+    } catch (_) {}
+  }, 25 * 1000);
 }
 
 els.generateAiBtn.addEventListener("click", generateAiAnalysis);

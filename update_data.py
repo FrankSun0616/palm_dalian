@@ -267,9 +267,12 @@ def is_relevant_news(item: dict[str, str]) -> bool:
         "椰子油", "coconut", "vegetable oil", "edible oil",
         # 能源 / 生物柴油（影响棕榈油需求）
         "原油", "crude", "brent", "wti", "diesel", "biofuel", "biodiesel", "生物柴油",
-        # 大宗商品 / 政策
+        # 大宗商品 / 政策（state-backed agencies, raw materials, etc.）
         "大宗", "commodity", "commodities", "出口", "export", "进口", "import",
         "关税", "tariff", "tax", "补贴", "subsidy", "禁令", "ban", "配额",
+        "原材料", "raw material", "raw materials", "state-backed", "state-owned",
+        "国营", "国有", "管理机构", "agency", "danantara", "bumn",
+        "矿产", "mineral", "镍", "nickel", "锡", "tin", "煤炭", "coal", "铜", "copper",
         # 天气（影响产量）
         "厄尔尼诺", "拉尼娜", "el nino", "el niño", "la nina", "la niña",
         "drought", "干旱", "雨季", "monsoon",
@@ -324,6 +327,10 @@ def fetch_news_snapshot() -> dict[str, object]:
         # 印尼大宗商品 / 政策
         "印尼 大宗商品 出口 政策 关税 棕榈油",
         "Indonesia commodity export policy palm oil tariff",
+        "Indonesia state-backed agency raw material export",
+        "Indonesia Danantara raw materials commodity",
+        "印尼 国营 大宗商品 原材料 出口 机构",
+        "Indonesia nickel coal mineral export ban quota",
         # 印度（最大买家）
         "印度 棕榈油 进口 需求",
         "India palm oil import demand vegetable oil",
@@ -441,7 +448,9 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
                 "你是商品期货市场资讯员。请调用 web_search 多次搜索影响棕榈油价格的"
                 "所有相关资讯（最多 7 次搜索）。搜索方向必须广泛涵盖：\n"
                 "1) 棕榈油本体——马来西亚 MPOB 月度报告、印尼产量与库存、大连 P0 期货盘面；\n"
-                "2) 印尼大宗商品政策——出口关税、煤炭、镍、棕榈油禁令或配额；\n"
+                "2) 印尼大宗商品政策——出口关税、煤炭、镍、棕榈油禁令或配额；"
+                "特别注意印尼新设立的国营/state-backed 大宗商品/原材料出口管理机构"
+                "（如 Danantara、BUMN），这类机构会直接影响棕榈油等大宗商品的出口节奏；\n"
                 "3) 印度需求——印度是最大进口国，关税与采购变化影响巨大；\n"
                 "4) 原油与生物柴油——原油价格、生物柴油掺混政策（B35/B40）影响棕榈油需求；\n"
                 "5) 替代油脂——豆油、菜油、葵花油、椰子油价格联动；\n"

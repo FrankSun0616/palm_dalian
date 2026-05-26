@@ -947,6 +947,11 @@ async function autoLoadIntradayMeta() {
     if (!response.ok) throw new Error(`Intraday HTTP ${response.status}`);
     state.intradayMeta = await response.json();
     updateIntradayPanel();
+    // If AI is loaded but missing intraday_strategy, refresh AI panel so
+    // the rule-based fallback uses the latest 1H/2H bollinger numbers.
+    if (state.lastAi && !state.lastAi.intraday_strategy) {
+      updateAiPanel(state.lastAi);
+    }
   } catch (error) {
     els.boll1hStatus.textContent = "加载失败";
     els.boll1hDetail.textContent = error.message || "无法读取1小时数据";
@@ -1067,6 +1072,59 @@ function biasClass(text) {
   return "neutral";
 }
 
+// Rule-based intraday strategy from live 1H/2H bollinger data — used when
+// DeepSeek's ai.intraday_strategy is missing or stale.
+function computeIntradayStrategyFromMeta(meta) {
+  if (!meta || !meta.one_hour || !meta.two_hour) return null;
+  const h1 = meta.one_hour;
+  const h2 = meta.two_hour;
+  const b1 = h1.bollinger || {};
+  const b2 = h2.bollinger || {};
+  if (!b1.mid || !b1.upper || !b1.lower || !b2.mid || !b2.upper || !b2.lower) return null;
+
+  const pos = (close, b) =>
+    close > b.upper ? "上轨上方" :
+    close > b.mid   ? "中轨上方" :
+    close > b.lower ? "中轨下方" : "下轨下方";
+
+  const pos1 = pos(h1.close, b1);
+  const pos2 = pos(h2.close, b2);
+  const above1 = h1.close > b1.mid;
+  const above2 = h2.close > b2.mid;
+
+  let bias, entry, stop, takeProfit, invalidation;
+  if (above1 && above2) {
+    bias = "短线偏多";
+    entry = `回踩 1H 中轨 ${b1.mid.toFixed(0)} 附近且量能不放大，分批轻仓多`;
+    stop = `跌破 2H 中轨 ${b2.mid.toFixed(0)} 即止损`;
+    takeProfit = `1H 上轨 ${b1.upper.toFixed(0)} 减仓，2H 上轨 ${b2.upper.toFixed(0)} 清仓`;
+    invalidation = `2H 收盘跌破中轨 ${b2.mid.toFixed(0)} 视为方向失效`;
+  } else if (!above1 && !above2) {
+    bias = "短线偏空";
+    entry = `反弹至 1H 中轨 ${b1.mid.toFixed(0)} 受阻、量能萎缩后分批轻仓空`;
+    stop = `突破 2H 中轨 ${b2.mid.toFixed(0)} 即止损`;
+    takeProfit = `1H 下轨 ${b1.lower.toFixed(0)} 减仓，2H 下轨 ${b2.lower.toFixed(0)} 清仓`;
+    invalidation = `2H 收盘站上中轨 ${b2.mid.toFixed(0)} 视为方向失效`;
+  } else {
+    bias = "区间震荡";
+    entry = `1H 通道 ${b1.lower.toFixed(0)}–${b1.upper.toFixed(0)} 内高抛低吸，不追单边`;
+    stop = `单笔风险控制在通道宽度 30% 以内`;
+    takeProfit = `回到 1H 中轨 ${b1.mid.toFixed(0)} 减仓`;
+    invalidation = `2H 站稳上轨 ${b2.upper.toFixed(0)} 或跌破下轨 ${b2.lower.toFixed(0)} 视为方向选择`;
+  }
+
+  const rsiNote = `1H RSI ${(h1.rsi14 ?? 0).toFixed(1)} / 2H RSI ${(h2.rsi14 ?? 0).toFixed(1)}`;
+  return {
+    bias,
+    entry,
+    stop,
+    take_profit: takeProfit,
+    invalidation,
+    notes: `本地规则推导（实时 · 1H ${pos1} / 2H ${pos2} · ${rsiNote}）。DeepSeek 重跑后会替换为更精细策略。`,
+    _fallback: true,
+  };
+}
+
 function updateAiPanel(ai) {
   els.aiBias.textContent = ai.bias || "--";
   els.aiBias.className = `bias-pill ${biasClass(ai.bias || "")}`;
@@ -1076,9 +1134,24 @@ function updateAiPanel(ai) {
   els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"}${realtimeTag} | 生成 ${generated}`;
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
 
-  const strategy = ai.intraday_strategy && typeof ai.intraday_strategy === "object" ? ai.intraday_strategy : null;
+  // Remember the latest AI payload so we can re-render the strategy panel
+  // whenever the live 1H/2H meta refreshes.
+  state.lastAi = ai;
+
+  let strategy = ai.intraday_strategy && typeof ai.intraday_strategy === "object" ? ai.intraday_strategy : null;
+  const hasAiStrategy = strategy && (strategy.entry || strategy.stop || strategy.take_profit);
+  if (!hasAiStrategy) {
+    strategy = computeIntradayStrategyFromMeta(state.intradayMeta);
+  }
+
   if (strategy) {
     els.aiStrategy.hidden = false;
+    const title = strategy._fallback
+      ? `1H / 2H 日内策略 <small style="color:var(--gold);font-weight:700">· 规则备用（实时计算）</small>`
+      : `1H / 2H 日内策略`;
+    const heading = els.aiStrategy.querySelector("h3");
+    if (heading) heading.innerHTML = title;
+
     const rows = [
       ["短线方向", strategy.bias],
       ["入场观察", strategy.entry],
@@ -1087,12 +1160,15 @@ function updateAiPanel(ai) {
       ["失效条件", strategy.invalidation],
       ["备注", strategy.notes],
     ];
-    els.aiStrategyGrid.innerHTML = rows.map(([label, value]) => `
-      <div class="strategy-item">
-        <span>${escapeHtml(label)}</span>
-        <strong>${escapeHtml(value || "--")}</strong>
-      </div>
-    `).join("");
+    els.aiStrategyGrid.innerHTML = rows.map(([label, value]) => {
+      const cls = biasClass(label === "短线方向" ? (value || "") : "");
+      return `
+        <div class="strategy-item">
+          <span>${escapeHtml(label)}</span>
+          <strong class="${cls === "neutral" ? "" : (cls === "bullish" ? "up" : "down")}">${escapeHtml(value || "--")}</strong>
+        </div>
+      `;
+    }).join("");
   } else {
     els.aiStrategy.hidden = true;
   }

@@ -15,6 +15,7 @@ const els = {
   boll2hDetail: document.getElementById("boll2hDetail"),
   boll2dStatus: document.getElementById("boll2dStatus"),
   boll2dDetail: document.getElementById("boll2dDetail"),
+  multiStrategyCards: document.getElementById("multiStrategyCards"),
   intradayStrategyBias: document.getElementById("intradayStrategyBias"),
   intradayStrategyText: document.getElementById("intradayStrategyText"),
   newsRealtimeStatus: document.getElementById("newsRealtimeStatus"),
@@ -251,6 +252,118 @@ function compute2DayMeta(daily) {
   };
 }
 
+// Compute a bollinger-based meta for the daily timeframe straight from
+// state.data so the multi-strategy panel has all 4 timeframes.
+function computeDailyMeta(daily) {
+  const bars = daily.filter((r) => !r.preliminary);
+  if (bars.length < 20) return null;
+  const closes = bars.map((b) => b.close);
+  const period = 20;
+  const window = closes.slice(-period);
+  const mid = mean(window);
+  const sd  = stddev(window);
+  const last = bars[bars.length - 1];
+  const prev = bars[bars.length - 2] || last;
+  const change = (last.close - prev.close) / prev.close;
+  return {
+    label: "日线",
+    latest_time: last.date,
+    open: last.open, high: last.high, low: last.low, close: last.close,
+    change_pct: `${change > 0 ? "+" : ""}${(change * 100).toFixed(2)}%`,
+    volume: last.volume,
+    rsi14: rsi(bars, 14),
+    bollinger: { period, upper: mid + 2 * sd, mid, lower: mid - 2 * sd, bandWidth: mid ? (4 * sd) / mid : 0 },
+  };
+}
+
+// Build a bias/entry/stop/take_profit/invalidation block for any timeframe
+// that has a bollinger {upper, mid, lower} + a close price.
+function strategyForTimeframe(meta, label) {
+  if (!meta || !meta.bollinger) return null;
+  const b = meta.bollinger;
+  const close = meta.close;
+  if (!Number.isFinite(b.upper) || !Number.isFinite(b.lower) || !Number.isFinite(b.mid)) return null;
+
+  let bias, biasKind, entry, stop, takeProfit, invalidation;
+
+  if (close > b.upper) {
+    bias = "突破上轨"; biasKind = "up";
+    entry  = `回踩中轨 ${b.mid.toFixed(0)} 不破再加多`;
+    stop   = `跌破 ${b.mid.toFixed(0)}`;
+    takeProfit = `观察上轨外延伸，目标 +1.5×带宽`;
+    invalidation = `收盘回到中轨 ${b.mid.toFixed(0)} 下方`;
+  } else if (close > b.mid) {
+    bias = "中轨上方"; biasKind = "up";
+    entry  = `回踩中轨 ${b.mid.toFixed(0)} 不破入场`;
+    stop   = `跌破下轨 ${b.lower.toFixed(0)}`;
+    takeProfit = `上轨 ${b.upper.toFixed(0)}`;
+    invalidation = `跌破中轨 ${b.mid.toFixed(0)} 视为失败`;
+  } else if (close > b.lower) {
+    bias = "中轨下方"; biasKind = "down";
+    entry  = `反弹至中轨 ${b.mid.toFixed(0)} 受阻空`;
+    stop   = `突破上轨 ${b.upper.toFixed(0)}`;
+    takeProfit = `下轨 ${b.lower.toFixed(0)}`;
+    invalidation = `站稳中轨 ${b.mid.toFixed(0)} 视为失败`;
+  } else {
+    bias = "跌破下轨"; biasKind = "down";
+    entry  = `反弹至 ${b.mid.toFixed(0)} 受阻空`;
+    stop   = `突破 ${b.mid.toFixed(0)}`;
+    takeProfit = `下轨外延伸，目标 -1.5×带宽`;
+    invalidation = `收盘回到中轨 ${b.mid.toFixed(0)} 上方`;
+  }
+
+  // RSI overlay — soften bias if RSI contradicts
+  const r = meta.rsi14;
+  let rsiNote = "";
+  if (Number.isFinite(r)) {
+    if (biasKind === "up" && r > 72) rsiNote = ` · RSI ${r.toFixed(0)} 偏热`;
+    else if (biasKind === "down" && r < 28) rsiNote = ` · RSI ${r.toFixed(0)} 偏冷`;
+    else rsiNote = ` · RSI ${r.toFixed(0)}`;
+  }
+
+  return {
+    label, bias, biasKind, entry, stop, take_profit: takeProfit, invalidation,
+    rsiNote,
+    price: close,
+    changePct: meta.change_pct || "",
+  };
+}
+
+function renderMultiStrategyPanel() {
+  if (!els.multiStrategyCards) return;
+  const intraday = state.intradayMeta;
+  const daily = computeDailyMeta(state.data || []);
+  const tf2d = compute2DayMeta(state.data || []);
+
+  const strategies = [
+    intraday?.one_hour ? strategyForTimeframe(intraday.one_hour, "1 小时") : null,
+    intraday?.two_hour ? strategyForTimeframe(intraday.two_hour, "2 小时") : null,
+    tf2d  ? strategyForTimeframe(tf2d,  "2 日") : null,
+    daily ? strategyForTimeframe(daily, "日线") : null,
+  ].filter(Boolean);
+
+  if (strategies.length === 0) {
+    els.multiStrategyCards.innerHTML = `<div class="tf-card"><div class="tf-label">等待数据...</div></div>`;
+    return;
+  }
+
+  els.multiStrategyCards.innerHTML = strategies.map((s) => `
+    <div class="tf-card">
+      <div class="tf-card-head">
+        <span class="tf-label">${escapeHtml(s.label)}</span>
+        <span class="tf-bias ${s.biasKind}">${escapeHtml(s.bias)}</span>
+      </div>
+      <div class="tf-price">${s.price.toFixed(0)} <span class="${/^\+/.test(s.changePct)?'up':/^-/.test(s.changePct)?'down':''}">${escapeHtml(s.changePct)}</span>${escapeHtml(s.rsiNote)}</div>
+      <div class="tf-rows">
+        <div class="row"><span>入场</span><span>${escapeHtml(s.entry)}</span></div>
+        <div class="row"><span>止损</span><span class="down">${escapeHtml(s.stop)}</span></div>
+        <div class="row"><span>止盈</span><span class="up">${escapeHtml(s.take_profit)}</span></div>
+        <div class="row"><span>失效</span><span>${escapeHtml(s.invalidation)}</span></div>
+      </div>
+    </div>
+  `).join("");
+}
+
 function maxDrawdown(data, period = 60) {
   let peak = -Infinity;
   let drawdown = 0;
@@ -400,6 +513,7 @@ function draw() {
   // up the new 2D position.
   update2DayCard();
   if (state.intradayMeta) updateIntradayPanel();
+  renderMultiStrategyPanel();
 }
 
 function drawPriceChart(data) {
@@ -1005,6 +1119,7 @@ async function autoLoadIntradayMeta() {
     if (!response.ok) throw new Error(`Intraday HTTP ${response.status}`);
     state.intradayMeta = await response.json();
     updateIntradayPanel();
+    renderMultiStrategyPanel();
     // If AI is loaded but missing intraday_strategy, refresh AI panel so
     // the rule-based fallback uses the latest 1H/2H bollinger numbers.
     if (state.lastAi && !state.lastAi.intraday_strategy) {

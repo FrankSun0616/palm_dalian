@@ -13,6 +13,8 @@ const els = {
   boll1hDetail: document.getElementById("boll1hDetail"),
   boll2hStatus: document.getElementById("boll2hStatus"),
   boll2hDetail: document.getElementById("boll2hDetail"),
+  boll2dStatus: document.getElementById("boll2dStatus"),
+  boll2dDetail: document.getElementById("boll2dDetail"),
   intradayStrategyBias: document.getElementById("intradayStrategyBias"),
   intradayStrategyText: document.getElementById("intradayStrategyText"),
   newsRealtimeStatus: document.getElementById("newsRealtimeStatus"),
@@ -199,6 +201,56 @@ function bollinger(data, period = 20, width = 2) {
   return { upper: mid + width * sd, mid, lower: mid - width * sd, bandWidth: mid ? (width * 2 * sd) / mid : 0 };
 }
 
+// Aggregate daily bars into 2-day bars. Skip any in-progress preliminary bar.
+function aggregateTo2Day(daily) {
+  const completed = daily.filter((r) => !r.preliminary);
+  const result = [];
+  // Walk from latest backwards so the most recent 2-day bar always ends at
+  // the latest complete day (the leftover odd bar gets dropped at the start).
+  for (let i = completed.length - 1; i > 0; i -= 2) {
+    const second = completed[i];
+    const first  = completed[i - 1];
+    result.unshift({
+      date: second.date,
+      open: first.open,
+      close: second.close,
+      high: Math.max(first.high, second.high),
+      low:  Math.min(first.low,  second.low),
+      volume: (first.volume || 0) + (second.volume || 0),
+    });
+  }
+  return result;
+}
+
+// Build a 2-day meta object with the same shape as one_hour/two_hour
+// in intraday_meta.json so it can drive the same panels & fallback logic.
+function compute2DayMeta(daily) {
+  const bars = aggregateTo2Day(daily);
+  if (bars.length < 20) return null;
+  const closes = bars.map((b) => b.close);
+  const last = bars[bars.length - 1];
+  const period = 20;
+  const window = closes.slice(-period);
+  const mid = mean(window);
+  const sd  = stddev(window);
+  const upper = mid + 2 * sd;
+  const lower = mid - 2 * sd;
+  const prevClose = bars.length >= 2 ? bars[bars.length - 2].close : last.open;
+  const change = (last.close - prevClose) / prevClose;
+  return {
+    label: "2日",
+    latest_time: last.date,
+    open: last.open,
+    high: last.high,
+    low: last.low,
+    close: last.close,
+    change_pct: `${change > 0 ? "+" : ""}${(change * 100).toFixed(2)}%`,
+    volume: last.volume,
+    rsi14: rsi(bars, 14),
+    bollinger: { period, upper, mid, lower, bandWidth: mid ? (4 * sd) / mid : 0 },
+  };
+}
+
 function maxDrawdown(data, period = 60) {
   let peak = -Infinity;
   let drawdown = 0;
@@ -342,6 +394,12 @@ function draw() {
   drawPriceChart(data);
   drawVolumeChart(data);
   if (lastQuote) applyRealtimeQuote(lastQuote);
+
+  // Refresh the 2-day aggregated bollinger card (uses ALL of state.data,
+  // not just the visible window) and let the intraday-strategy card pick
+  // up the new 2D position.
+  update2DayCard();
+  if (state.intradayMeta) updateIntradayPanel();
 }
 
 function drawPriceChart(data) {
@@ -990,6 +1048,25 @@ function bandStatus(summary, realtimePrice = null) {
   };
 }
 
+function update2DayCard() {
+  if (!els.boll2dStatus) return;
+  const twoDay = state.twoDay = compute2DayMeta(state.data || []);
+  if (!twoDay) {
+    els.boll2dStatus.textContent = "数据不足";
+    els.boll2dStatus.className = "";
+    els.boll2dDetail.textContent = "需要至少 40 个日线 bar";
+    return;
+  }
+  const b = twoDay.bollinger;
+  const status = twoDay.close > b.upper ? "突破上轨"
+                : twoDay.close < b.lower ? "跌破下轨"
+                : twoDay.close > b.mid   ? "中轨上方" : "中轨下方";
+  els.boll2dStatus.textContent = status;
+  els.boll2dStatus.className = /上轨|上方/.test(status) ? "up" : /下轨|下方/.test(status) ? "down" : "";
+  els.boll2dDetail.textContent =
+    `${twoDay.close.toFixed(0)} ${twoDay.change_pct} | 上 ${b.upper.toFixed(0)} / 中 ${b.mid.toFixed(0)} / 下 ${b.lower.toFixed(0)} | RSI ${(twoDay.rsi14 || 0).toFixed(1)}`;
+}
+
 function updateIntradayPanel() {
   const meta = state.intradayMeta;
   if (!meta) return;
@@ -1005,15 +1082,35 @@ function updateIntradayPanel() {
 
   const onePos = meta.one_hour?.bollinger?.position || "";
   const twoPos = meta.two_hour?.bollinger?.position || "";
-  const alignedUp = /上方|上轨/.test(onePos) && /上方|上轨/.test(twoPos);
+  // Read 2-day position too so the strategy card considers all three timeframes
+  const twoDayClose = state.twoDay?.close;
+  const twoDayBoll  = state.twoDay?.bollinger;
+  const twoDayAbove = twoDayClose && twoDayBoll && twoDayClose > twoDayBoll.mid;
+  const twoDayBelow = twoDayClose && twoDayBoll && twoDayClose < twoDayBoll.mid;
+
+  const alignedUp   = /上方|上轨/.test(onePos) && /上方|上轨/.test(twoPos);
   const alignedDown = /下方|下轨/.test(onePos) && /下方|下轨/.test(twoPos);
-  els.intradayStrategyBias.textContent = alignedUp ? "短线偏多" : alignedDown ? "短线偏弱" : "区间震荡";
-  els.intradayStrategyBias.className = alignedUp ? "up" : alignedDown ? "down" : "";
-  els.intradayStrategyText.textContent = alignedUp
-    ? "1H/2H 同在布林中轨上方，适合等回踩中轨不破再看延续；跌回2H中轨下方则降级。"
-    : alignedDown
-      ? "1H/2H 同在中轨下方，反弹先看压力，未重新站回2H中轨前不追多。"
-      : "1H/2H 信号不一致，优先按布林上下轨做区间观察，等待放量突破再跟随。";
+
+  let biasLabel, biasText, biasClass;
+  if (alignedUp && twoDayAbove) {
+    biasLabel = "三周期共振偏多"; biasClass = "up";
+    biasText = "1H/2H/2D 同在中轨上方，趋势共振；回踩 2H 中轨不破可顺势加多。";
+  } else if (alignedDown && twoDayBelow) {
+    biasLabel = "三周期共振偏空"; biasClass = "down";
+    biasText = "1H/2H/2D 同在中轨下方，下行共振；反弹 2H 中轨受阻继续看空。";
+  } else if (alignedUp) {
+    biasLabel = "短线偏多"; biasClass = "up";
+    biasText = "1H/2H 偏多但 2D 未跟进，警惕短线冲高回落。";
+  } else if (alignedDown) {
+    biasLabel = "短线偏弱"; biasClass = "down";
+    biasText = "1H/2H 偏弱但 2D 未跌破，关注是否抢反弹。";
+  } else {
+    biasLabel = "区间震荡"; biasClass = "";
+    biasText = "1H/2H/2D 信号不一致，优先按布林上下轨做区间观察。";
+  }
+  els.intradayStrategyBias.textContent = biasLabel;
+  els.intradayStrategyBias.className = biasClass;
+  els.intradayStrategyText.textContent = biasText;
 }
 
 function updateNewsPanel() {
@@ -1113,6 +1210,21 @@ function computeIntradayStrategyFromMeta(meta) {
     invalidation = `2H 站稳上轨 ${b2.upper.toFixed(0)} 或跌破下轨 ${b2.lower.toFixed(0)} 视为方向选择`;
   }
 
+  // Pull 2-day context if available (computed from daily data)
+  const twoDay = state.twoDay;
+  let twoDayNote = "";
+  if (twoDay && twoDay.bollinger) {
+    const bd = twoDay.bollinger;
+    const posD = twoDay.close > bd.upper ? "上轨上方"
+               : twoDay.close > bd.mid   ? "中轨上方"
+               : twoDay.close > bd.lower ? "中轨下方" : "下轨下方";
+    twoDayNote = ` / 2D ${posD} (中 ${bd.mid.toFixed(0)})`;
+    const dayAbove = twoDay.close > bd.mid;
+    // Upgrade bias when all 3 timeframes agree
+    if (above1 && above2 && dayAbove) bias = "三周期共振偏多";
+    if (!above1 && !above2 && !dayAbove) bias = "三周期共振偏空";
+  }
+
   const rsiNote = `1H RSI ${(h1.rsi14 ?? 0).toFixed(1)} / 2H RSI ${(h2.rsi14 ?? 0).toFixed(1)}`;
   return {
     bias,
@@ -1120,7 +1232,7 @@ function computeIntradayStrategyFromMeta(meta) {
     stop,
     take_profit: takeProfit,
     invalidation,
-    notes: `本地规则推导（实时 · 1H ${pos1} / 2H ${pos2} · ${rsiNote}）。DeepSeek 重跑后会替换为更精细策略。`,
+    notes: `本地规则推导（实时 · 1H ${pos1} / 2H ${pos2}${twoDayNote} · ${rsiNote}）。DeepSeek 重跑后会替换为更精细策略。`,
     _fallback: true,
   };
 }

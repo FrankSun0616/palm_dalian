@@ -777,16 +777,50 @@ def should_run_ai_analysis() -> bool:
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+def fetch_daily_with_retry(symbol: str = "P0", attempts: int = 4, backoff: int = 20):
+    """Sina's futures API blocks GitHub Actions IPs intermittently. Retry with
+    linear backoff so a single transient timeout doesn't fail the workflow."""
+    import time
+    last_exc: Exception | None = None
+    for i in range(1, attempts + 1):
+        try:
+            df = ak.futures_zh_daily_sina(symbol=symbol)
+            if df is not None and not df.empty:
+                if i > 1:
+                    print(f"Daily fetch succeeded on attempt {i}/{attempts}")
+                return df
+            last_exc = RuntimeError("empty dataframe")
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            print(f"Daily fetch attempt {i}/{attempts} failed: {type(exc).__name__}: {exc}")
+        if i < attempts:
+            wait = backoff * i  # 20s, 40s, 60s
+            print(f"  retrying in {wait}s...")
+            time.sleep(wait)
+    raise RuntimeError(f"AKShare futures_zh_daily_sina failed after {attempts} attempts: {last_exc}")
+
+
 def main() -> None:
-    df = ak.futures_zh_daily_sina(symbol="P0")
+    df = fetch_daily_with_retry(symbol="P0")
     if df.empty:
         raise RuntimeError("AKShare returned empty P0 daily data")
 
     export = df[["date", "open", "high", "low", "close", "volume"]].copy()
     output = DATA_DIR / "palm_oil_p0_daily.csv"
     export.to_csv(output, index=False)
-    intraday = fetch_intraday_bundle()
-    news_snapshot = fetch_news_snapshot()
+
+    # Intraday + news are best-effort — a transient Sina/DDG hiccup here
+    # shouldn't fail the whole workflow when the daily CSV already updated.
+    try:
+        intraday = fetch_intraday_bundle()
+    except Exception as exc:  # noqa: BLE001
+        print(f"Intraday fetch failed (soft-skip): {type(exc).__name__}: {exc}")
+        intraday = {"updated_at_utc": None, "one_hour": None, "two_hour": None}
+    try:
+        news_snapshot = fetch_news_snapshot()
+    except Exception as exc:  # noqa: BLE001
+        print(f"News snapshot fetch failed (soft-skip): {type(exc).__name__}: {exc}")
+        news_snapshot = {"updated_at_utc": None, "articles": []}
 
     latest = export.tail(1).iloc[0]
     meta = {

@@ -48,6 +48,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update palm oil P0 data"
+          skip_dirty_check: true
           file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json data/ai_analysis.json data/intraday_1h.csv data/intraday_2h.csv data/intraday_meta.json data/news_snapshot.json
 
       - name: Configure Pages
@@ -65,6 +66,38 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - name: Deploy to GitHub Pages (attempt 1)
+        id: deploy_attempt_1
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Deploy to GitHub Pages (attempt 2)
+        if: steps.deploy_attempt_1.outcome == 'failure'
+        id: deploy_attempt_2
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Deploy to GitHub Pages (attempt 3)
+        if: steps.deploy_attempt_2.outcome == 'failure'
+        id: deploy_attempt_3
+        uses: actions/deploy-pages@v4
+
+      - name: Ensure deployment success
+        if: steps.deploy_attempt_1.outcome == 'failure' && steps.deploy_attempt_2.outcome == 'failure' && steps.deploy_attempt_3.outcome == 'failure'
+        run: |
+          echo "All 3 deploy attempts failed."
+          exit 1
+
+      - name: Select deployment result
+        id: deployment
+        if: always()
+        run: |
+          if [ "${{ steps.deploy_attempt_3.outcome }}" = "success" ]; then
+            echo "page_url=${{ steps.deploy_attempt_3.outputs.page_url }}" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.deploy_attempt_2.outcome }}" = "success" ]; then
+            echo "page_url=${{ steps.deploy_attempt_2.outputs.page_url }}" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.deploy_attempt_1.outcome }}" = "success" ]; then
+            echo "page_url=${{ steps.deploy_attempt_1.outputs.page_url }}" >> $GITHUB_OUTPUT
+          else
+            echo "page_url=https://franksun0616.github.io/palm_dalian/" >> $GITHUB_OUTPUT
+          fi

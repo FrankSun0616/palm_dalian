@@ -77,6 +77,10 @@ jobs:
         uses: actions/deploy-pages@v4
         continue-on-error: true
 
+      - name: Wait before deploy retry
+        if: steps.deploy_attempt_2.outcome == 'failure'
+        run: sleep 15
+
       - name: Deploy to GitHub Pages (attempt 3)
         if: steps.deploy_attempt_2.outcome == 'failure'
         id: deploy_attempt_3

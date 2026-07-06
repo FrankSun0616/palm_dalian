@@ -348,14 +348,22 @@ def fetch_news_snapshot() -> dict[str, object]:
     ]
     articles: list[dict[str, str]] = []
 
-    for query in queries:
-        try:
-            for item in fetch_google_news(query):
-                if any(existing["url"] == item["url"] for existing in articles):
-                    continue
-                articles.append(item)
-        except Exception as exc:
-            print(f"Google News snapshot failed for {query}: {exc}")
+    # Fan out all Google News queries in parallel — each is an independent
+    # HTTP GET, so 8 workers cuts ~30s serial down to ~4s wall clock.
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    seen_urls: set[str] = set()
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = {pool.submit(fetch_google_news, q): q for q in queries}
+        for fut in as_completed(futures):
+            q = futures[fut]
+            try:
+                for item in fut.result():
+                    if item["url"] in seen_urls:
+                        continue
+                    seen_urls.add(item["url"])
+                    articles.append(item)
+            except Exception as exc:
+                print(f"Google News snapshot failed for {q}: {exc}")
 
     if len(articles) < 4:
         try:
@@ -421,7 +429,10 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
     the analysis step can build proper article cards.
     Returns "" on failure so the caller can skip the news block gracefully.
     """
-    MAX_SEARCH_ROUNDS = 8
+    # This tool-calling loop is only a fallback; the fast path is
+    # news_snapshot_to_text() which uses pre-fetched articles. Keeping it
+    # short here trims worst-case runtime when the snapshot is empty.
+    MAX_SEARCH_ROUNDS = 4
 
     tool_def = [
         {
@@ -809,18 +820,28 @@ def main() -> None:
     output = DATA_DIR / "palm_oil_p0_daily.csv"
     export.to_csv(output, index=False)
 
-    # Intraday + news are best-effort — a transient Sina/DDG hiccup here
-    # shouldn't fail the whole workflow when the daily CSV already updated.
-    try:
-        intraday = fetch_intraday_bundle()
-    except Exception as exc:  # noqa: BLE001
-        print(f"Intraday fetch failed (soft-skip): {type(exc).__name__}: {exc}")
-        intraday = {"updated_at_utc": None, "one_hour": None, "two_hour": None}
-    try:
-        news_snapshot = fetch_news_snapshot()
-    except Exception as exc:  # noqa: BLE001
-        print(f"News snapshot fetch failed (soft-skip): {type(exc).__name__}: {exc}")
-        news_snapshot = {"updated_at_utc": None, "articles": []}
+    # Intraday + news are best-effort AND independent of each other and the
+    # daily fetch — run them in parallel with the real-time quote fetch below.
+    # A transient Sina/DDG hiccup shouldn't fail the whole workflow.
+    from concurrent.futures import ThreadPoolExecutor
+    def _safe(fn, fallback, label):
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001
+            print(f"{label} failed (soft-skip): {type(exc).__name__}: {exc}")
+            return fallback
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        f_intraday = pool.submit(_safe, fetch_intraday_bundle,
+                                 {"updated_at_utc": None, "one_hour": None, "two_hour": None},
+                                 "Intraday fetch")
+        f_news     = pool.submit(_safe, fetch_news_snapshot,
+                                 {"updated_at_utc": None, "articles": []},
+                                 "News snapshot fetch")
+        f_realtime = pool.submit(_safe, get_realtime_quote_sina, None, "Realtime quote fetch")
+        intraday = f_intraday.result()
+        news_snapshot = f_news.result()
+        realtime = f_realtime.result()
 
     latest = export.tail(1).iloc[0]
     meta = {
@@ -844,8 +865,7 @@ def main() -> None:
     if should_run_ai_analysis():
         api_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
 
-        # Real-time quote
-        realtime = get_realtime_quote_sina()
+        # Real-time quote was already fetched in parallel above
         if realtime:
             print(f"Real-time quote: {realtime['price']} @ {realtime['tradedate']} {realtime['ticktime']}")
         else:

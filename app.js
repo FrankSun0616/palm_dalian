@@ -1135,7 +1135,7 @@ async function generateAiAnalysis() {
     return;
   }
 
-  setAiStatus("正在网络搜索 + 生成深度分析，约 2–3 分钟后自动刷新...", "loading");
+  setAiStatus("正在并行分析 P0 + Y0（搜索 + 深度分析），约 2–3 分钟后自动刷新...", "loading");
 
   const startTime = Date.now();
   const maxWait = 6 * 60 * 1000;

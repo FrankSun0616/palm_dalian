@@ -1009,18 +1009,28 @@ def run_profile(symbol: str) -> None:
 
 if __name__ == "__main__":
     import sys
+    from concurrent.futures import ThreadPoolExecutor, as_completed
     symbols_env = os.getenv("SYMBOLS", "P0,Y0")
+    symbols = [s.strip() for s in symbols_env.split(",") if s.strip() and s.strip() in PROFILES]
+    if not symbols:
+        print("No valid symbols to run")
+        sys.exit(1)
+
+    # Run both profiles in parallel — with DeepSeek included, sequential runs
+    # take ~4 min but the two profiles' Sina + AKShare + DeepSeek calls are
+    # fully independent. Parallel wall time ≈ max(P0, Y0) ≈ half.
     failed: list[str] = []
-    for sym in [s.strip() for s in symbols_env.split(",") if s.strip()]:
-        if sym not in PROFILES:
-            print(f"Unknown symbol: {sym}")
-            continue
-        print(f"\n{'=' * 60}\nRunning profile: {sym}\n{'=' * 60}")
-        try:
-            run_profile(sym)
-        except Exception as exc:  # noqa: BLE001
-            print(f"[{sym}] pipeline failed: {type(exc).__name__}: {exc}")
-            failed.append(sym)
+    with ThreadPoolExecutor(max_workers=len(symbols)) as pool:
+        futures = {pool.submit(run_profile, sym): sym for sym in symbols}
+        for fut in as_completed(futures):
+            sym = futures[fut]
+            try:
+                fut.result()
+                print(f"[{sym}] pipeline done")
+            except Exception as exc:  # noqa: BLE001
+                print(f"[{sym}] pipeline failed: {type(exc).__name__}: {exc}")
+                failed.append(sym)
+
     if failed:
         print(f"\n=== FAILED: {failed} ===")
         sys.exit(1)

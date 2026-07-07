@@ -60,11 +60,11 @@ jobs:
           SYMBOLS: "P0,Y0"
           RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && contains(fromJSON('["30 0 * * *","30 3 * * *","30 7 * * *"]'), github.event.schedule)) }}
 
-      - name: Commit updated data (with rebase-and-retry)
-        # Retries push up to 4 times, rebasing on top of remote each retry.
-        # This handles the race when two triggers (push + workflow_dispatch)
-        # arrive close together and both finish their pipelines around the
-        # same time — one wins, the other rebases + retries instead of failing.
+      - name: Commit updated data (save-and-replay on push conflict)
+        # When two runs (or update-data + notify) push data at the same time,
+        # rebase conflicts because both wrote different JSON. Instead of
+        # trying to merge, save our data → hard-reset to remote → re-apply
+        # our data on top. Our data always wins because we're the latest run.
         run: |
           set -e
           git config user.name "github-actions[bot]"
@@ -78,10 +78,20 @@ jobs:
             if git push origin HEAD:main; then
               echo "Push succeeded on attempt $attempt"; exit 0
             fi
-            echo "Push failed (attempt $attempt), rebasing on remote main..."
+            echo "Push failed (attempt $attempt), replaying data on top of remote..."
+            BACKUP=$(mktemp -d)
+            cp -a data/p0 data/y0 "$BACKUP/"
             git fetch origin main
-            git rebase origin/main || { echo "Rebase conflict — abort"; git rebase --abort || true; exit 1; }
-            sleep $((attempt * 5))
+            git reset --hard origin/main
+            rm -rf data/p0 data/y0
+            cp -a "$BACKUP/p0" "$BACKUP/y0" data/
+            rm -rf "$BACKUP"
+            git add data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json 2>/dev/null || true
+            if git diff --cached --quiet; then
+              echo "Remote already has our data — nothing to push"; exit 0
+            fi
+            git commit -m "Update palm oil + soybean oil data (retry $attempt)"
+            sleep $((attempt * 3))
           done
           echo "All push retries failed"; exit 1
 

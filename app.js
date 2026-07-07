@@ -26,6 +26,13 @@ const els = {
   newsTickerMeta: document.getElementById("newsTickerMeta"),
   lastPrice: document.getElementById("lastPrice"),
   lastChange: document.getElementById("lastChange"),
+  lastDistance: document.getElementById("lastDistance"),
+  themeToggleBtn: document.getElementById("themeToggleBtn"),
+  marketBanner: document.getElementById("marketBanner"),
+  correlationTable: document.getElementById("correlationTable"),
+  correlationMeta: document.getElementById("correlationMeta"),
+  aiNewsEmpty: document.getElementById("aiNewsEmpty"),
+  aiStrategyEmpty: document.getElementById("aiStrategyEmpty"),
   signalText: document.getElementById("signalText"),
   signalDetail: document.getElementById("signalDetail"),
   upDays: document.getElementById("upDays"),
@@ -60,13 +67,16 @@ const els = {
   aiRisk: document.getElementById("aiRisk")
 };
 
-const colors = {
-  up: "#cf3f35",
-  down: "#168f6a",
-  grid: "#e3e8df",
-  text: "#66716a",
-  ma: ["#c18c2d", "#326fb7", "#7657a8"]
-};
+function readColors() {
+  const s = getComputedStyle(document.documentElement);
+  return {
+    up:   (s.getPropertyValue("--up").trim())   || "#cf3f35",
+    down: (s.getPropertyValue("--down").trim()) || "#168f6a",
+    grid: (s.getPropertyValue("--line").trim()) || "#e3e8df",
+    text: (s.getPropertyValue("--muted").trim())|| "#66716a",
+    ma: ["#c18c2d", "#326fb7", "#7657a8"]
+  };
+}
 
 let state = {
   data: makeDemoData(),
@@ -76,8 +86,99 @@ let state = {
   intradayMeta: null,
   newsSnapshot: null,
   hoverIndex: null,
-  chartGeometry: null
+  chartGeometry: null,
+  visibleStart: null,
+  visibleCount: null,
+  correlation: null,
+  isDragging: false,
+  dragStartX: null,
+  dragStartVisibleStart: null
 };
+
+// ── Theme (dark/light) ─────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  if (els.themeToggleBtn) {
+    els.themeToggleBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+  }
+}
+
+function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem("theme"); } catch (_) {}
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = saved || (prefersDark ? "dark" : "light");
+  applyTheme(theme);
+}
+
+function toggleTheme() {
+  const cur = document.documentElement.dataset.theme || "light";
+  const next = cur === "dark" ? "light" : "dark";
+  applyTheme(next);
+  try { localStorage.setItem("theme", next); } catch (_) {}
+  draw();
+}
+
+// ── Market status ──────────────────────────────────────────
+function bjWeekday() {
+  const now = new Date();
+  const bjMs = now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 3600000;
+  return new Date(bjMs).getUTCDay(); // 0=Sun, 6=Sat
+}
+
+function bjMinutesOfDay() {
+  const now = new Date();
+  const bjMs = now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 3600000;
+  const bj = new Date(bjMs);
+  return bj.getUTCHours() * 60 + bj.getUTCMinutes();
+}
+
+// Returns one of: 'day-open', 'day-break', 'night-open', 'weekend', 'closed'
+function marketStatus() {
+  const wd = bjWeekday();
+  if (wd === 0 || wd === 6) return "weekend";
+  const m = bjMinutesOfDay();
+  const in09_1130 = m >= 9 * 60 && m < 11 * 60 + 30;
+  const in1330_15 = m >= 13 * 60 + 30 && m < 15 * 60;
+  const in21_2330 = m >= 21 * 60 && m < 23 * 60 + 30;
+  const inLunch   = m >= 11 * 60 + 30 && m < 13 * 60 + 30;
+  if (in09_1130 || in1330_15) return "day-open";
+  if (in21_2330) return "night-open";
+  if (inLunch) return "day-break";
+  return "closed";
+}
+
+function updateMarketStatus() {
+  const status = marketStatus();
+  // Update the pulse indicator
+  const liveInd = document.querySelector(".live-indicator");
+  if (liveInd) {
+    liveInd.classList.remove("market-closed", "market-weekend");
+    const textNode = Array.from(liveInd.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+    let label = "实时";
+    if (status === "weekend") { liveInd.classList.add("market-weekend"); label = "休市"; }
+    else if (status === "closed" || status === "day-break") { liveInd.classList.add("market-closed"); label = "非交易时段"; }
+    if (textNode) textNode.textContent = ` ${label}`;
+  }
+
+  if (!els.marketBanner) return;
+  if (status === "day-open" || status === "night-open") {
+    els.marketBanner.hidden = true;
+    els.marketBanner.classList.remove("weekend");
+    return;
+  }
+  els.marketBanner.hidden = false;
+  if (status === "weekend") {
+    els.marketBanner.classList.add("weekend");
+    els.marketBanner.textContent = "⏸ 本周末休市，数据截至周五 15:00 收盘";
+  } else if (status === "day-break") {
+    els.marketBanner.classList.remove("weekend");
+    els.marketBanner.textContent = "⏸ 午间休市（11:30-13:30），日盘 13:30 继续 · 夜盘 21:00-23:30";
+  } else {
+    els.marketBanner.classList.remove("weekend");
+    els.marketBanner.textContent = "⏸ 非交易时段，日盘 09:00-11:30 / 13:30-15:00 · 夜盘 21:00-23:30";
+  }
+}
 
 function setLoadStatus(status, detail = "") {
   if (!els.dataStatus || !els.dataFreshness) return;
@@ -124,6 +225,11 @@ function round(value) {
 }
 
 function visibleData() {
+  if (state.visibleStart !== null && state.visibleCount !== null) {
+    const start = Math.max(0, Math.min(state.data.length - 1, state.visibleStart));
+    const end = Math.min(state.data.length, start + state.visibleCount);
+    return state.data.slice(start, end);
+  }
   const count = Number(els.periodSelect.value);
   return state.data.slice(-count);
 }
@@ -517,6 +623,7 @@ function draw() {
 }
 
 function drawPriceChart(data) {
+  const colors = readColors();
   const canvas = els.priceCanvas;
   const ctx = setupCanvas(canvas);
   const width = canvas.clientWidth;
@@ -607,6 +714,7 @@ function drawHover(ctx, data, x, y, pad, height) {
 }
 
 function drawGrid(ctx, width, height, pad, minPrice, maxPrice) {
+  const colors = readColors();
   ctx.strokeStyle = colors.grid;
   ctx.fillStyle = colors.text;
   ctx.lineWidth = 1;
@@ -626,6 +734,7 @@ function drawGrid(ctx, width, height, pad, minPrice, maxPrice) {
 }
 
 function drawVolumeChart(data) {
+  const colors = readColors();
   const canvas = els.volumeCanvas;
   const ctx = setupCanvas(canvas);
   const width = canvas.clientWidth;
@@ -667,6 +776,7 @@ function setupCanvas(canvas) {
 }
 
 function updateLegend(maPeriods) {
+  const colors = readColors();
   els.legend.innerHTML = [
     `<span><i style="background:${colors.up}"></i>上涨</span>`,
     `<span><i style="background:${colors.down}"></i>下跌</span>`,
@@ -894,7 +1004,12 @@ function parseCsv(text) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-els.periodSelect.addEventListener("change", draw);
+els.periodSelect.addEventListener("change", () => {
+  // Reset zoom/pan state so periodSelect controls the visible window again.
+  state.visibleStart = null;
+  state.visibleCount = null;
+  draw();
+});
 els.maSelect.addEventListener("change", draw);
 els.reloadBtn.addEventListener("click", () => {
   autoLoadCsv();
@@ -1037,10 +1152,49 @@ els.csvInput.addEventListener("change", async (event) => {
   }
 });
 
-els.priceCanvas.addEventListener("mousemove", (event) => {
-  const data = visibleData();
+els.priceCanvas.addEventListener("mousedown", (event) => {
   const geometry = state.chartGeometry;
   if (!geometry) return;
+  state.isDragging = true;
+  state.dragMoved = false;
+  state.dragStartX = event.clientX;
+  // Snapshot the current visible window so we can pan relative to it.
+  const data = visibleData();
+  const totalStart = state.data.length - data.length;
+  state.dragStartVisibleStart = state.visibleStart !== null ? state.visibleStart : totalStart;
+  state.dragStartVisibleCount = state.visibleCount !== null ? state.visibleCount : data.length;
+  els.priceCanvas.style.cursor = "grabbing";
+});
+
+window.addEventListener("mouseup", () => {
+  if (state.isDragging) {
+    state.isDragging = false;
+    els.priceCanvas.style.cursor = "";
+  }
+});
+
+els.priceCanvas.addEventListener("mousemove", (event) => {
+  const geometry = state.chartGeometry;
+  if (!geometry) return;
+
+  // Drag-to-pan takes priority over tooltip rendering
+  if (state.isDragging && state.dragStartX !== null) {
+    const deltaX = event.clientX - state.dragStartX;
+    if (Math.abs(deltaX) > 2) state.dragMoved = true;
+    const count = state.dragStartVisibleCount;
+    const pxPerBar = geometry.innerW / Math.max(1, count - 1);
+    const deltaBars = Math.round(-deltaX / pxPerBar);
+    const maxStart = Math.max(0, state.data.length - count);
+    const newStart = Math.max(0, Math.min(maxStart, state.dragStartVisibleStart + deltaBars));
+    state.visibleStart = newStart;
+    state.visibleCount = count;
+    els.chartTooltip.hidden = true;
+    state.hoverIndex = null;
+    draw();
+    return;
+  }
+
+  const data = visibleData();
   const rect = els.priceCanvas.getBoundingClientRect();
   const mouseX = event.clientX - rect.left;
   const raw = (mouseX - geometry.pad.left) / geometry.innerW * (data.length - 1);
@@ -1058,12 +1212,22 @@ els.priceCanvas.addEventListener("mousemove", (event) => {
   els.chartTooltip.style.top = `${top}px`;
   const liveLabel = row.preliminary ? (isNightSession() ? " 🌙夜盘" : " ⚡实时") : "";
   const liveNote  = row.preliminary ? `<br><small>${isNightSession() ? "夜盘进行中" : "实时行情"}，数据未完整</small>` : "";
+
+  // MA at hover index — computed from same visible window so it matches lines on chart
+  const maCfg = els.maSelect.value.split(",").map(Number);
+  const maSeries = maCfg.map((p) => movingAverage(data, p));
+  const maParts = maCfg.map((p, i) => {
+    const v = maSeries[i][index];
+    return v == null ? null : `MA${p} ${Math.round(v)}`;
+  }).filter(Boolean);
+  const maLine = maParts.length ? `<br>${maParts.join(" / ")}` : "";
+
   els.chartTooltip.innerHTML = `
     <strong>${row.date}${liveLabel}</strong>
     开 ${row.open.toFixed(0)} / 高 ${row.high.toFixed(0)}<br>
     低 ${row.low.toFixed(0)} / 收 ${row.close.toFixed(0)}<br>
     涨跌 ${formatSigned(change)} (${formatPct(change / previous.close)})<br>
-    量 ${Math.round(row.volume / 10000)} 万手${liveNote}
+    量 ${Math.round(row.volume / 10000)} 万手${maLine}${liveNote}
   `;
   draw();
 });
@@ -1073,6 +1237,42 @@ els.priceCanvas.addEventListener("mouseleave", () => {
   els.chartTooltip.hidden = true;
   draw();
 });
+
+// Wheel zoom — preserves the bar under the mouse as anchor
+els.priceCanvas.addEventListener("wheel", (event) => {
+  const geometry = state.chartGeometry;
+  if (!geometry) return;
+  event.preventDefault();
+
+  const data = visibleData();
+  const totalStart = state.data.length - data.length;
+  const currentStart = state.visibleStart !== null ? state.visibleStart : totalStart;
+  const currentCount = state.visibleCount !== null ? state.visibleCount : data.length;
+
+  const rect = els.priceCanvas.getBoundingClientRect();
+  const mouseX = event.clientX - rect.left;
+  const anchorFrac = Math.max(0, Math.min(1,
+    (mouseX - geometry.pad.left) / Math.max(1, geometry.innerW)
+  ));
+  const anchorIdx = currentStart + Math.round(anchorFrac * (currentCount - 1));
+
+  // Wheel down → zoom out (more bars), wheel up → zoom in (fewer bars)
+  const zoomFactor = event.deltaY > 0 ? 1.15 : 1 / 1.15;
+  let newCount = Math.round(currentCount * zoomFactor);
+  newCount = Math.max(30, Math.min(500, newCount));
+  newCount = Math.min(newCount, state.data.length);
+  if (newCount === currentCount) return;
+
+  // Keep the anchor bar under the mouse
+  const newAnchorOffset = Math.round(anchorFrac * (newCount - 1));
+  let newStart = anchorIdx - newAnchorOffset;
+  const maxStart = Math.max(0, state.data.length - newCount);
+  newStart = Math.max(0, Math.min(maxStart, newStart));
+
+  state.visibleStart = newStart;
+  state.visibleCount = newCount;
+  draw();
+}, { passive: false });
 
 async function autoLoadCsv() {
   if (location.protocol === "file:") {
@@ -1496,6 +1696,122 @@ function updateAiPanel(ai) {
   els.aiSupport.textContent = Number(watchLevels.support || 0) ? Number(watchLevels.support).toFixed(0) : "--";
   els.aiResistance.textContent = Number(watchLevels.resistance || 0) ? Number(watchLevels.resistance).toFixed(0) : "--";
   els.aiRisk.textContent = ai.risk_note || "本分析仅供行情研究，不构成投资建议。";
+
+  // News tab empty-state flip
+  if (els.aiNewsEmpty) els.aiNewsEmpty.hidden = hasNews;
+  // Strategy tab empty-state flip
+  if (els.aiStrategyEmpty) els.aiStrategyEmpty.hidden = Boolean(strategy);
+
+  updateDistanceLine();
+}
+
+// ── Distance to AI support/resistance ──────────────────────
+function updateDistanceLine() {
+  if (!els.lastDistance) return;
+  const ai = state.lastAi;
+  const watchLevels = ai && typeof ai.watch_levels === "object" && ai.watch_levels !== null
+    ? ai.watch_levels : null;
+  if (!watchLevels) {
+    els.lastDistance.textContent = "--";
+    els.lastDistance.className = "";
+    return;
+  }
+  const resistance = Number(watchLevels.resistance || 0);
+  const support    = Number(watchLevels.support    || 0);
+
+  // Prefer live quote; fall back to analysis last close from full data
+  let price = null;
+  if (lastQuote && Number.isFinite(lastQuote.price)) price = lastQuote.price;
+  else {
+    const last = state.data && state.data.length ? state.data[state.data.length - 1] : null;
+    if (last) price = last.close;
+  }
+  if (!Number.isFinite(price)) {
+    els.lastDistance.textContent = "--";
+    els.lastDistance.className = "";
+    return;
+  }
+
+  const parts = [];
+  if (resistance > 0) {
+    if (price < resistance) parts.push(`<span>离 AI 压力 ${Math.round(resistance - price)}</span>`);
+    else parts.push(`<span class="up">破压力 +${Math.round(price - resistance)}</span>`);
+  }
+  if (support > 0) {
+    if (price > support) parts.push(`<span>离 AI 支撑 ${Math.round(price - support)}</span>`);
+    else parts.push(`<span class="down">破支撑 -${Math.round(support - price)}</span>`);
+  }
+  if (parts.length === 0) {
+    els.lastDistance.textContent = "--";
+  } else {
+    els.lastDistance.innerHTML = parts.join(" | ");
+  }
+}
+
+// ── AI panel tab switching ─────────────────────────────────
+document.querySelectorAll(".ai-tab").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.tab;
+    document.querySelectorAll(".ai-tab").forEach((b) => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".ai-tab-content").forEach((c) => {
+      c.hidden = c.dataset.tab !== target;
+    });
+  });
+});
+
+// ── Correlation panel ──────────────────────────────────────
+async function autoLoadCorrelation() {
+  if (location.protocol === "file:") return;
+  try {
+    const response = await fetch(`data/correlation_snapshot.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Correlation HTTP ${response.status}`);
+    state.correlation = await response.json();
+    renderCorrelation();
+  } catch (error) {
+    if (els.correlationMeta) els.correlationMeta.textContent = `读取失败：${error.message || "未知错误"}`;
+  }
+}
+
+function renderCorrelation() {
+  if (!els.correlationTable) return;
+  const snap = state.correlation;
+  if (!snap || !snap.symbols) {
+    els.correlationTable.innerHTML = `<div class="correlation-row">暂无数据</div>`;
+    return;
+  }
+  const symbols = snap.symbols;
+  const order = ["P0", "Y0", "OI0", "SC0"];
+  const updated = snap.updated_at_utc ? formatDateTime(snap.updated_at_utc) : "--";
+  if (els.correlationMeta) els.correlationMeta.textContent = `更新 ${updated} · 每 60 秒刷新`;
+
+  const rows = [
+    `<div class="correlation-row header"><span>品种</span><span>当前价</span><span>涨跌</span><span>涨跌幅</span></div>`
+  ];
+  order.forEach((sym) => {
+    const s = symbols[sym];
+    if (!s) {
+      rows.push(`<div class="correlation-row"><span class="name">${sym}</span><span>--</span><span>--</span><span>--</span></div>`);
+      return;
+    }
+    const changeAbs = Number(s.change_abs);
+    const isUp = Number.isFinite(changeAbs) ? changeAbs > 0 : /^\+/.test(String(s.change_pct));
+    const isDown = Number.isFinite(changeAbs) ? changeAbs < 0 : /^-/.test(String(s.change_pct));
+    const cls = isUp ? "up" : isDown ? "down" : "";
+    const priceText = Number.isFinite(Number(s.price)) ? Number(s.price).toFixed(0) : "--";
+    const changeText = Number.isFinite(changeAbs)
+      ? (changeAbs > 0 ? `+${changeAbs.toFixed(0)}` : changeAbs.toFixed(0))
+      : "--";
+    const pctText = s.change_pct || "--";
+    rows.push(`
+      <div class="correlation-row">
+        <span class="name">${escapeHtml(sym)}<small>${escapeHtml(s.name || "")}</small></span>
+        <span>${priceText}</span>
+        <span class="${cls}">${escapeHtml(changeText)}</span>
+        <span class="${cls}">${escapeHtml(pctText)}</span>
+      </div>
+    `);
+  });
+  els.correlationTable.innerHTML = rows.join("");
 }
 
 // ── Real-time quote ──────────────────────────────────────────────────────────
@@ -1576,6 +1892,8 @@ function applyRealtimeQuote(q) {
   if (metricCard && !metricCard.querySelector(".live-dot")) {
     metricCard.querySelector("span").insertAdjacentHTML("beforeend", '<span class="live-dot"></span>');
   }
+
+  updateDistanceLine();
 }
 
 async function startRealtimeFeed() {
@@ -1592,13 +1910,24 @@ async function startRealtimeFeed() {
 }
 
 window.addEventListener("resize", draw);
+
+// Theme
+initTheme();
+if (els.themeToggleBtn) els.themeToggleBtn.addEventListener("click", toggleTheme);
+
+// Market status
+updateMarketStatus();
+setInterval(updateMarketStatus, 30 * 1000);
+
 draw();
 autoLoadCsv();
 autoLoadAiAnalysis();
 autoLoadIntradayMeta();
 autoLoadNewsSnapshot();
+autoLoadCorrelation();
 startRealtimeFeed();
 setInterval(autoLoadCsv, 60 * 1000);
 setInterval(autoLoadAiAnalysis, 60 * 1000);
 setInterval(autoLoadIntradayMeta, 60 * 1000);
 setInterval(autoLoadNewsSnapshot, 60 * 1000);
+setInterval(autoLoadCorrelation, 60 * 1000);

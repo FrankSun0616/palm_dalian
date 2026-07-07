@@ -6,7 +6,7 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260707-2">
+  <link rel="stylesheet" href="styles.css?v=20260707-3">
 </head>
 <body>
   <main class="app-shell">
@@ -46,13 +46,17 @@
       </label>
       <button id="reloadBtn" title="从 data/palm_oil_p0_daily.csv 重新加载真实数据">重新加载真实数据</button>
       <button id="demoBtn" title="切换到内置示例数据">显示示例</button>
+      <button id="themeToggleBtn" title="切换暗色/亮色">🌙</button>
     </section>
+
+    <section id="marketBanner" class="market-banner" hidden></section>
 
     <section class="summary-grid" aria-label="关键指标">
       <article class="metric">
         <span>最新价</span>
         <strong id="lastPrice">--</strong>
         <small id="lastChange">--</small>
+        <small id="lastDistance">--</small>
       </article>
       <article class="metric">
         <span>趋势信号</span>
@@ -143,46 +147,66 @@
             </div>
             <strong id="aiBias" class="bias-pill neutral">--</strong>
           </div>
-          <p id="aiSummary">正在读取 AI 分析...</p>
           <div class="ai-actions">
             <button id="generateAiBtn" type="button">触发 DeepSeek 短线分析</button>
             <p id="aiStatus" class="ai-status"></p>
           </div>
-          <div class="ai-strategy" id="aiStrategy" hidden>
-            <h3>1H/2H 日内策略</h3>
-            <div class="strategy-grid" id="aiStrategyGrid"></div>
+
+          <div class="ai-tabs">
+            <button class="ai-tab active" data-tab="tech" type="button">技术面</button>
+            <button class="ai-tab" data-tab="news" type="button">舆情</button>
+            <button class="ai-tab" data-tab="strategy" type="button">策略</button>
           </div>
-          <ul id="aiList"></ul>
-          <div class="levels">
-            <div>
-              <span>AI 支撑</span>
-              <strong id="aiSupport" class="up">--</strong>
+
+          <div class="ai-tab-content" data-tab="tech">
+            <p id="aiSummary">正在读取 AI 分析...</p>
+            <ul id="aiList"></ul>
+            <div class="levels">
+              <div>
+                <span>AI 支撑</span>
+                <strong id="aiSupport" class="up">--</strong>
+              </div>
+              <div>
+                <span>AI 压力</span>
+                <strong id="aiResistance" class="down">--</strong>
+              </div>
             </div>
-            <div>
-              <span>AI 压力</span>
-              <strong id="aiResistance" class="down">--</strong>
-            </div>
+            <small id="aiRisk">AI 分析仅供行情研究。</small>
           </div>
-          <small id="aiRisk">AI 分析仅供行情研究。</small>
+
+          <div class="ai-tab-content" data-tab="news" hidden>
+            <section id="aiNewsSection" class="ai-news-inner" hidden>
+              <div class="news-layout">
+                <div>
+                  <h3>影响要点</h3>
+                  <ul id="aiNewsList"></ul>
+                </div>
+                <div id="aiArticlesSection" hidden>
+                  <h3>🔗 新闻来源</h3>
+                  <div id="aiArticlesList"></div>
+                </div>
+              </div>
+            </section>
+            <p id="aiNewsEmpty" class="ai-tab-empty">暂无舆情数据。</p>
+          </div>
+
+          <div class="ai-tab-content" data-tab="strategy" hidden>
+            <div class="ai-strategy" id="aiStrategy" hidden>
+              <h3>1H/2H 日内策略</h3>
+              <div class="strategy-grid" id="aiStrategyGrid"></div>
+            </div>
+            <p id="aiStrategyEmpty" class="ai-tab-empty">等待策略数据...</p>
+          </div>
         </section>
       </aside>
     </section>
 
-    <section id="aiNewsSection" class="news-block" hidden>
+    <section class="correlation-panel">
       <div class="section-head">
-        <h2>📰 市场舆情分析</h2>
-        <small>DeepSeek 联网检索 · 实时</small>
+        <h2>🔗 品种联动</h2>
+        <small id="correlationMeta">每 60 秒刷新</small>
       </div>
-      <div class="news-layout">
-        <div>
-          <h3>影响要点</h3>
-          <ul id="aiNewsList"></ul>
-        </div>
-        <div id="aiArticlesSection" hidden>
-          <h3>🔗 新闻来源</h3>
-          <div id="aiArticlesList"></div>
-        </div>
-      </div>
+      <div class="correlation-table" id="correlationTable"></div>
     </section>
 
     <section class="analysis-grid">
@@ -226,6 +250,6 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260707-2"></script>
+  <script src="app.js?v=20260707-3"></script>
 </body>
 </html>

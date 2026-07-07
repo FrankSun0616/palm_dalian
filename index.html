@@ -6,7 +6,7 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260707-7">
+  <link rel="stylesheet" href="styles.css?v=20260707-8">
 </head>
 <body>
   <main class="app-shell">
@@ -136,6 +136,14 @@
       </article>
     </section>
 
+    <section class="overseas-panel">
+      <div class="section-head">
+        <h2>🌍 隔夜市场</h2>
+        <small id="overseasMeta">每 60 秒刷新 · 关键领先指标</small>
+      </div>
+      <div class="overseas-grid" id="overseasGrid"></div>
+    </section>
+
     <section class="multi-strategy">
       <div class="section-head">
         <h2>📐 多周期策略</h2>
@@ -169,11 +177,19 @@
       <aside class="analysis-panel" aria-label="DeepSeek 分析">
         <section class="ai-panel">
           <div class="ai-head">
-            <div>
+            <div class="ai-head-main">
               <h2>DeepSeek 短线分析</h2>
               <p id="aiMeta">等待加载...</p>
+              <p id="aiAccuracy" class="ai-accuracy" hidden></p>
             </div>
-            <strong id="aiBias" class="bias-pill neutral">--</strong>
+            <div class="ai-head-right">
+              <strong id="aiBias" class="bias-pill neutral">--</strong>
+              <div class="alignment-score">
+                <span>共振评分</span>
+                <strong id="alignScore">--</strong>
+                <small id="alignScoreLabel">--</small>
+              </div>
+            </div>
           </div>
           <div class="ai-actions">
             <button id="generateAiBtn" type="button">触发 DeepSeek 分析（P0 + Y0 一起）</button>
@@ -184,6 +200,7 @@
             <button class="ai-tab active" data-tab="tech" type="button">技术面</button>
             <button class="ai-tab" data-tab="news" type="button">舆情</button>
             <button class="ai-tab" data-tab="strategy" type="button">策略</button>
+            <button class="ai-tab" data-tab="ask" type="button">问答</button>
           </div>
 
           <div class="ai-tab-content" data-tab="tech">
@@ -224,6 +241,36 @@
               <div class="strategy-grid" id="aiStrategyGrid"></div>
             </div>
             <p id="aiStrategyEmpty" class="ai-tab-empty">等待策略数据...</p>
+
+            <details class="pos-calc" open>
+              <summary>💰 仓位计算器</summary>
+              <div class="pos-calc-grid">
+                <label>账户资金 <input id="posCapital"  type="number" value="500000" step="10000"></label>
+                <label>单笔风险 % <input id="posRisk"    type="number" value="1"      step="0.5" min="0.1" max="10"></label>
+                <label>入场价       <input id="posEntry"   type="number" value=""></label>
+                <label>止损价       <input id="posStop"    type="number" value=""></label>
+                <label>合约乘数     <input id="posMult"    type="number" value="10"     step="1"><small>P0/Y0 = 10 吨/手</small></label>
+                <label>保证金比例 % <input id="posMargin"  type="number" value="12"     step="1"></label>
+              </div>
+              <div class="pos-calc-out">
+                <div><span>每手风险</span><strong id="posPerLotRisk">--</strong><small>元</small></div>
+                <div><span>推荐手数</span><strong id="posLotsRec">--</strong><small>手</small></div>
+                <div><span>保证金占用</span><strong id="posMarginUse">--</strong><small>元</small></div>
+                <div><span>距止损空间</span><strong id="posGap">--</strong><small>点 / %</small></div>
+              </div>
+            </details>
+          </div>
+
+          <div class="ai-tab-content" data-tab="ask" hidden>
+            <div class="ask-box">
+              <textarea id="askInput" placeholder="问点什么？例如：为什么今天下跌？什么时候可能反弹？现在能追多吗？" rows="3"></textarea>
+              <button id="askBtn" type="button">🤖 问 DeepSeek</button>
+              <p id="askStatus" class="ai-status"></p>
+              <div id="askResponse" class="ask-response" hidden>
+                <small id="askResponseMeta"></small>
+                <p id="askResponseText"></p>
+              </div>
+            </div>
           </div>
         </section>
       </aside>
@@ -270,6 +317,6 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260707-7"></script>
+  <script src="app.js?v=20260707-8"></script>
 </body>
 </html>

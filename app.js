@@ -84,7 +84,28 @@ const els = {
   aiArticlesList: document.getElementById("aiArticlesList"),
   aiSupport: document.getElementById("aiSupport"),
   aiResistance: document.getElementById("aiResistance"),
-  aiRisk: document.getElementById("aiRisk")
+  aiRisk: document.getElementById("aiRisk"),
+  aiAccuracy: document.getElementById("aiAccuracy"),
+  alignScore: document.getElementById("alignScore"),
+  alignScoreLabel: document.getElementById("alignScoreLabel"),
+  overseasGrid: document.getElementById("overseasGrid"),
+  overseasMeta: document.getElementById("overseasMeta"),
+  askInput: document.getElementById("askInput"),
+  askBtn: document.getElementById("askBtn"),
+  askStatus: document.getElementById("askStatus"),
+  askResponse: document.getElementById("askResponse"),
+  askResponseMeta: document.getElementById("askResponseMeta"),
+  askResponseText: document.getElementById("askResponseText"),
+  posCapital: document.getElementById("posCapital"),
+  posRisk: document.getElementById("posRisk"),
+  posEntry: document.getElementById("posEntry"),
+  posStop: document.getElementById("posStop"),
+  posMult: document.getElementById("posMult"),
+  posMargin: document.getElementById("posMargin"),
+  posPerLotRisk: document.getElementById("posPerLotRisk"),
+  posLotsRec: document.getElementById("posLotsRec"),
+  posMarginUse: document.getElementById("posMarginUse"),
+  posGap: document.getElementById("posGap")
 };
 
 function readColors() {
@@ -495,6 +516,75 @@ function renderMultiStrategyPanel() {
       </div>
     </div>
   `).join("");
+  renderAlignmentScore();
+}
+
+// ── Multi-timeframe alignment score (0-100) ────────────────
+// Reads price position vs bollinger for daily / 2D / 2H / 1H,
+// weights by timeframe importance, and normalizes to 0-100.
+function computeAlignmentScore() {
+  const daily = computeDailyMeta(state.data || []);
+  const twoD  = compute2DayMeta(state.data || []);
+  const twoH  = state.intradayMeta ? state.intradayMeta.two_hour : null;
+  const oneH  = state.intradayMeta ? state.intradayMeta.one_hour : null;
+
+  // Given a meta with bollinger + close + rsi14, return the raw [-2, +2]
+  // position score adjusted for RSI extremes.
+  const rawFor = (m) => {
+    if (!m || !m.bollinger) return null;
+    const b = m.bollinger;
+    const close = m.close;
+    if (!Number.isFinite(close) || !Number.isFinite(b.upper) || !Number.isFinite(b.mid) || !Number.isFinite(b.lower)) {
+      return null;
+    }
+    let raw;
+    if (close > b.upper)      raw = 2;
+    else if (close > b.mid)   raw = 1;
+    else if (close < b.lower) raw = -2;
+    else                       raw = -1;
+    const r = m.rsi14;
+    if (Number.isFinite(r)) {
+      if (r > 70 && raw > 0) raw -= 0.5;
+      if (r < 30 && raw < 0) raw += 0.5;
+    }
+    return raw;
+  };
+
+  const entries = [
+    { m: daily, weight: 3 },
+    { m: twoD,  weight: 2 },
+    { m: twoH,  weight: 1.5 },
+    { m: oneH,  weight: 1 },
+  ].map((e) => ({ raw: rawFor(e.m), weight: e.weight }))
+    .filter((e) => Number.isFinite(e.raw));
+
+  if (entries.length === 0) return null;
+
+  const wsum = entries.reduce((s, e) => s + e.weight, 0);
+  const combined = entries.reduce((s, e) => s + e.raw * e.weight, 0) / wsum;
+  const score = 50 + combined * 25;
+  return Math.max(0, Math.min(100, score));
+}
+
+function renderAlignmentScore() {
+  if (!els.alignScore || !els.alignScoreLabel) return;
+  const score = computeAlignmentScore();
+  if (score === null) {
+    els.alignScore.textContent = "--";
+    els.alignScore.className = "";
+    els.alignScoreLabel.textContent = "--";
+    return;
+  }
+  els.alignScore.textContent = Math.round(score);
+  let label, cls;
+  if (score > 75)      { label = "强烈偏多"; cls = "up"; }
+  else if (score > 60) { label = "偏多";     cls = "up"; }
+  else if (score >= 40) { label = "中性";     cls = ""; }
+  else if (score >= 25) { label = "偏空";     cls = "down"; }
+  else                  { label = "强烈偏空"; cls = "down"; }
+  els.alignScore.className = cls;
+  els.alignScoreLabel.textContent = label;
+  els.alignScoreLabel.className = cls;
 }
 
 function maxDrawdown(data, period = 60) {
@@ -647,6 +737,8 @@ function draw() {
   update2DayCard();
   if (state.intradayMeta) updateIntradayPanel();
   renderMultiStrategyPanel();
+  renderAlignmentScore();
+  populatePosCalcDefaults();
 }
 
 function drawPriceChart(data) {
@@ -1031,6 +1123,309 @@ function parseCsv(text) {
   }).filter((row) => row.date && [row.open, row.high, row.low, row.close, row.volume].every(Number.isFinite))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
+
+// ── Position size calculator ──────────────────────────────
+// Tracks per-field "user_edited" flags so auto-populated defaults don't
+// wipe values the user has typed. Cleared on symbol switch.
+const POS_CALC_INPUT_IDS = ["posCapital", "posRisk", "posEntry", "posStop", "posMult", "posMargin"];
+let posCalcUserEdited = new Set();
+
+function bindPosCalcInputs() {
+  POS_CALC_INPUT_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      posCalcUserEdited.add(id);
+      updatePosCalc();
+    });
+  });
+}
+
+function resetPosCalcUserEdited() {
+  posCalcUserEdited = new Set();
+}
+
+// Fill entry from live price and stop from AI watch_levels — but only for
+// fields the user has NOT touched.
+function populatePosCalcDefaults() {
+  if (!els.posEntry || !els.posStop) return;
+
+  // Entry default: live price → last close
+  if (!posCalcUserEdited.has("posEntry")) {
+    let price = null;
+    if (lastQuote && Number.isFinite(lastQuote.price)) price = lastQuote.price;
+    else if (state.data && state.data.length) {
+      const last = state.data[state.data.length - 1];
+      if (last) price = last.close;
+    }
+    if (Number.isFinite(price)) {
+      els.posEntry.value = Math.round(price);
+    }
+  }
+
+  // Stop default: derived from AI bias + watch_levels
+  if (!posCalcUserEdited.has("posStop")) {
+    const ai = state.lastAi;
+    const wl = ai && typeof ai.watch_levels === "object" && ai.watch_levels !== null ? ai.watch_levels : null;
+    const support    = wl ? Number(wl.support    || 0) : 0;
+    const resistance = wl ? Number(wl.resistance || 0) : 0;
+    const bias = ai ? String(ai.bias || "") : "";
+    const isBullish = /多|强/.test(bias);
+    const isBearish = /空|弱/.test(bias);
+    let stop = null;
+    if (isBullish && support > 0) stop = support;
+    else if (isBearish && resistance > 0) stop = resistance;
+    else if (support > 0) stop = support;   // sensible default when no bias
+    if (Number.isFinite(stop) && stop > 0) {
+      els.posStop.value = Math.round(stop);
+    }
+  }
+
+  updatePosCalc();
+}
+
+function updatePosCalc() {
+  if (!els.posPerLotRisk) return;
+  const capital   = Number(els.posCapital?.value || 0);
+  const riskPct   = Number(els.posRisk?.value    || 0);
+  const entry     = Number(els.posEntry?.value   || 0);
+  const stop      = Number(els.posStop?.value    || 0);
+  const mult      = Number(els.posMult?.value    || 0);
+  const marginPct = Number(els.posMargin?.value  || 0);
+
+  if (!(entry > 0 && stop > 0 && mult > 0)) {
+    els.posPerLotRisk.textContent = "--";
+    els.posLotsRec.textContent    = "--";
+    els.posMarginUse.textContent  = "--";
+    els.posGap.textContent        = "--";
+    return;
+  }
+
+  const perLotRisk = Math.abs(entry - stop) * mult;
+  const lotsRec    = perLotRisk > 0 ? Math.floor((capital * riskPct / 100) / perLotRisk) : 0;
+  const lotsSafe   = Math.max(0, lotsRec);
+  const marginUse  = entry * mult * lotsSafe * marginPct / 100;
+  const gap        = Math.abs(entry - stop);
+  const gapPct     = entry > 0 ? gap / entry * 100 : 0;
+
+  els.posPerLotRisk.textContent = Math.round(perLotRisk).toLocaleString();
+  els.posLotsRec.textContent    = String(lotsSafe);
+  els.posMarginUse.textContent  = Math.round(marginUse).toLocaleString();
+  els.posGap.textContent        = `${gap.toFixed(0)} / ${gapPct.toFixed(2)}%`;
+}
+
+// ── Overseas markets ──────────────────────────────────────
+// Loads a shared (non-symbol-scoped) data/overseas.json file. Cards show
+// FCPO, CBOT soy oil, Brent (whatever the backend chose to publish).
+async function autoLoadOverseas() {
+  if (location.protocol === "file:") return;
+  if (!els.overseasGrid) return;
+  try {
+    const r = await fetch(`data/overseas.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!r.ok) {
+      els.overseasGrid.innerHTML = `<div class="overseas-card"><span>暂无海外行情数据</span></div>`;
+      if (els.overseasMeta) els.overseasMeta.textContent = `等待 data/overseas.json`;
+      return;
+    }
+    const data = await r.json();
+    const items = Array.isArray(data.markets) ? data.markets : [];
+    if (els.overseasMeta) {
+      const upd = data.updated_at_utc ? `更新 ${formatDateTime(data.updated_at_utc)}` : "";
+      els.overseasMeta.textContent = items.length
+        ? `每 60 秒刷新 · ${items.length} 个市场${upd ? " · " + upd : ""}`
+        : `每 60 秒刷新 · 暂无数据${upd ? " · " + upd : ""}`;
+    }
+    if (!items.length) {
+      els.overseasGrid.innerHTML = `<div class="overseas-card"><span>暂无海外行情数据</span></div>`;
+      return;
+    }
+    els.overseasGrid.innerHTML = items.map((m) => {
+      const priceRaw = Number(m.price);
+      const price = Number.isFinite(priceRaw) ? priceRaw.toFixed(2) : "--";
+      const pctRaw = Number(m.change_pct);
+      const hasPct = Number.isFinite(pctRaw);
+      const pctStr = hasPct ? `${pctRaw > 0 ? "+" : ""}${pctRaw.toFixed(2)}%` : "--";
+      const cls    = !hasPct ? "" : (pctRaw >= 0 ? "up" : "down");
+      const name   = escapeHtml(m.name || m.symbol || "--");
+      const symTxt = m.symbol && m.symbol !== m.name ? m.symbol : "";
+      return `
+        <div class="overseas-card">
+          <div class="overseas-head">
+            <strong>${name}</strong>
+            ${symTxt ? `<small class="overseas-sym">${escapeHtml(symTxt)}</small>` : ""}
+          </div>
+          <div class="overseas-body">
+            <span class="overseas-price">${price}</span>
+            <span class="pct ${cls}">${pctStr}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch (err) {
+    els.overseasGrid.innerHTML = `<div class="overseas-card"><span>加载失败：${escapeHtml(err.message || "unknown")}</span></div>`;
+  }
+}
+
+// ── AI accuracy line (below aiMeta, above aiSummary) ──────
+async function autoLoadAccuracy() {
+  if (location.protocol === "file:") return;
+  if (!els.aiAccuracy) return;
+  const _fetchSym = state.activeSymbol;
+  try {
+    const r = await fetch(`${dataPath("ai_accuracy.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (_fetchSym !== state.activeSymbol) return;
+    if (!r.ok) {
+      els.aiAccuracy.hidden = true;
+      return;
+    }
+    const d = await r.json();
+    const rateRaw = Number(d.hit_rate_20);
+    const total   = Number(d.total_evaluated || 0);
+    if (!Number.isFinite(rateRaw)) {
+      els.aiAccuracy.hidden = true;
+      return;
+    }
+    // Backend may store hit_rate_20 as fraction 0..1 or as percent 0..100.
+    const pct  = rateRaw <= 1 ? rateRaw * 100 : rateRaw;
+    const warn = Boolean(d.warning_low_accuracy);
+    const prefix = warn ? "⚠️ " : "";
+    els.aiAccuracy.textContent = `${prefix}近 20 次命中率: ${pct.toFixed(0)}% (总评估 ${total})`;
+    els.aiAccuracy.hidden = false;
+    els.aiAccuracy.classList.toggle("warn", warn);
+  } catch (_) {
+    els.aiAccuracy.hidden = true;
+  }
+}
+
+// ── AI Q&A (ask.yml workflow + ask_response.json polling) ──
+let askPollInterval = null;
+
+function setAskStatus(text, type) {
+  if (!els.askStatus) return;
+  els.askStatus.textContent = text;
+  els.askStatus.className = `ai-status${type ? ` ${type}` : ""}`;
+}
+
+function renderAskResponse(data, fresh) {
+  if (!els.askResponse || !data) return;
+  const q = data.question || "";
+  const a = data.answer || "(无回复)";
+  const time = data.asked_at_utc ? formatDateTime(data.asked_at_utc) : "";
+  if (els.askResponseMeta) {
+    els.askResponseMeta.textContent = fresh
+      ? `问 ${time}：${q}`
+      : `上次问题 ${time}（历史）：${q}`;
+  }
+  if (els.askResponseText) {
+    els.askResponseText.textContent = a;
+  }
+  els.askResponse.hidden = false;
+  els.askResponse.classList.toggle("stale", !fresh);
+}
+
+async function autoLoadAskResponse() {
+  if (location.protocol === "file:") return;
+  if (!els.askResponse) return;
+  const _fetchSym = state.activeSymbol;
+  try {
+    const r = await fetch(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (_fetchSym !== state.activeSymbol) return;
+    if (!r.ok) {
+      state.lastAskResponse = null;
+      els.askResponse.hidden = true;
+      return;
+    }
+    const d = await r.json();
+    state.lastAskResponse = d;
+    renderAskResponse(d, /*fresh=*/false);
+  } catch (_) {
+    els.askResponse.hidden = true;
+  }
+}
+
+async function submitAskQuestion() {
+  const pat = localStorage.getItem(PAT_KEY) || "";
+  const question = (els.askInput?.value || "").trim();
+  if (!question) {
+    setAskStatus("请输入问题", "error");
+    return;
+  }
+  if (!pat) {
+    setAskStatus("PAT 未设置，无法触发", "error");
+    return;
+  }
+  if (els.askBtn) els.askBtn.disabled = true;
+  setAskStatus("正在触发 GitHub Actions...", "loading");
+
+  // Snapshot previous asked_at_utc so we detect the new answer landing.
+  let prevTime = null;
+  try {
+    const r = await fetch(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (r.ok) {
+      const d = await r.json();
+      prevTime = d.asked_at_utc || null;
+    }
+  } catch (_) {}
+
+  try {
+    const resp = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/ask.yml/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${pat}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ref: "main", inputs: { symbol: state.activeSymbol, question } })
+      }
+    );
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      const hint = resp.status === 401 || resp.status === 403
+        ? " (PAT 可能已失效)"
+        : "";
+      setAskStatus(`触发失败 (${resp.status})${hint}${body ? "：" + body.slice(0, 80) : ""}`, "error");
+      if (els.askBtn) els.askBtn.disabled = false;
+      return;
+    }
+  } catch (err) {
+    setAskStatus(`网络错误：${err.message}`, "error");
+    if (els.askBtn) els.askBtn.disabled = false;
+    return;
+  }
+
+  setAskStatus("正在思考...", "loading");
+  const startTime = Date.now();
+  const maxWait   = 90 * 1000;
+  if (askPollInterval) clearInterval(askPollInterval);
+  askPollInterval = setInterval(async () => {
+    if (Date.now() - startTime > maxWait) {
+      clearInterval(askPollInterval);
+      askPollInterval = null;
+      setAskStatus("超时（90 秒未收到回复），请稍后再试", "error");
+      if (els.askBtn) els.askBtn.disabled = false;
+      return;
+    }
+    try {
+      const r = await fetch(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" });
+      if (!r.ok) return;
+      const d = await r.json();
+      const newTime = d.asked_at_utc || null;
+      if (newTime && newTime !== prevTime) {
+        clearInterval(askPollInterval);
+        askPollInterval = null;
+        state.lastAskResponse = d;
+        renderAskResponse(d, /*fresh=*/true);
+        setAskStatus(`✓ 已回复 (${formatDateTime(newTime)})`, "success");
+        if (els.askBtn) els.askBtn.disabled = false;
+      }
+    } catch (_) {}
+  }, 10 * 1000);
+}
+
+if (els.askBtn) els.askBtn.addEventListener("click", submitAskQuestion);
+bindPosCalcInputs();
 
 els.periodSelect.addEventListener("change", () => {
   // Reset zoom/pan state so periodSelect controls the visible window again.
@@ -1776,6 +2171,10 @@ function updateAiPanel(ai) {
   if (els.aiStrategyEmpty) els.aiStrategyEmpty.hidden = Boolean(strategy);
 
   updateDistanceLine();
+  // AI bias just landed → refresh position-calc stop default (if user
+  // hasn't edited it) and re-score alignment (label depends on AI too).
+  populatePosCalcDefaults();
+  renderAlignmentScore();
 }
 
 // ── Distance to AI support/resistance ──────────────────────
@@ -2049,11 +2448,20 @@ function reloadAll() {
   state.intradayMeta = null;
   state.newsSnapshot = null;
   state.lastAi = null;
+  state.lastAskResponse = null;
   state.visibleStart = null;
   state.visibleCount = null;
   state.hoverIndex = null;
   state.twoDay = null;
   lastQuote = null;
+  // Pos-calc: symbol-scoped defaults should re-populate on switch
+  resetPosCalcUserEdited();
+  // Hide previous symbol's ask history and clear input
+  if (els.askResponse) els.askResponse.hidden = true;
+  if (els.askInput) els.askInput.value = "";
+  setAskStatus("", "");
+  // Hide accuracy line while it reloads
+  if (els.aiAccuracy) els.aiAccuracy.hidden = true;
   applyActiveSymbolLabels();
   draw();
   autoLoadCsv();
@@ -2061,6 +2469,10 @@ function reloadAll() {
   autoLoadIntradayMeta();
   autoLoadNewsSnapshot();
   autoLoadSibling();
+  autoLoadAccuracy();
+  autoLoadAskResponse();
+  // Overseas is shared (not symbol-scoped) — still safe to refresh on switch
+  autoLoadOverseas();
 }
 
 function setActiveSymbol(sym) {
@@ -2098,9 +2510,14 @@ autoLoadAiAnalysis();
 autoLoadIntradayMeta();
 autoLoadNewsSnapshot();
 autoLoadSibling();
+autoLoadAccuracy();
+autoLoadAskResponse();
+autoLoadOverseas();
 startRealtimeFeed();
 setInterval(autoLoadCsv, 60 * 1000);
 setInterval(autoLoadAiAnalysis, 60 * 1000);
 setInterval(autoLoadIntradayMeta, 60 * 1000);
 setInterval(autoLoadNewsSnapshot, 60 * 1000);
 setInterval(autoLoadSibling, 60 * 1000);
+setInterval(autoLoadAccuracy, 60 * 1000);
+setInterval(autoLoadOverseas, 60 * 1000);

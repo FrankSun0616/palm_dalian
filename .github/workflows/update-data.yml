@@ -28,7 +28,9 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  # Distinct group prevents two update-data runs from racing on git push.
+  # `pages` group is reserved for the deploy step below via job-level scope.
+  group: update-data
   cancel-in-progress: false
 
 jobs:
@@ -56,12 +58,30 @@ jobs:
           SYMBOLS: "P0,Y0"
           RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && contains(fromJSON('["30 0 * * *","30 3 * * *","30 7 * * *"]'), github.event.schedule)) }}
 
-      - name: Commit updated data
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update palm oil + soybean oil data"
-          skip_dirty_check: true
-          file_pattern: data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json
+      - name: Commit updated data (with rebase-and-retry)
+        # Retries push up to 4 times, rebasing on top of remote each retry.
+        # This handles the race when two triggers (push + workflow_dispatch)
+        # arrive close together and both finish their pipelines around the
+        # same time — one wins, the other rebases + retries instead of failing.
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No data changes to commit"; exit 0
+          fi
+          git commit -m "Update palm oil + soybean oil data"
+          for attempt in 1 2 3 4; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"; exit 0
+            fi
+            echo "Push failed (attempt $attempt), rebasing on remote main..."
+            git fetch origin main
+            git rebase origin/main || { echo "Rebase conflict — abort"; git rebase --abort || true; exit 1; }
+            sleep $((attempt * 5))
+          done
+          echo "All push retries failed"; exit 1
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -74,6 +94,11 @@ jobs:
   deploy:
     needs: update-data
     runs-on: ubuntu-latest
+    # Serialize with deploy-pages.yml so both workflows don't try to deploy
+    # the same artifact at once — Pages can only accept one at a time.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

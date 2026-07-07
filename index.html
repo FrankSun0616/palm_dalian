@@ -6,22 +6,42 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260707-4">
+  <link rel="stylesheet" href="styles.css?v=20260707-5">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <section>
         <p class="eyebrow">
-          DCE Palm Oil Continuous
+          <span id="eyebrowText">DCE Palm Oil Continuous</span>
           <span class="live-indicator" title="所有行情、舆情每 5–60 秒自动刷新">
             <span class="live-pulse"></span> <span class="live-label">实时</span>
           </span>
         </p>
-        <h1>大连棕榈油 P0 连续短线分析</h1>
+        <h1 id="topbarTitle">大连棕榈油 P0 连续短线分析</h1>
       </section>
-      <div class="contract-pill">DCE P0 1H / 2H / 日线</div>
+      <div class="contract-pill" id="contractPill">DCE P0 1H / 2H / 日线</div>
     </header>
+
+    <section class="symbol-switcher" aria-label="切换品种">
+      <button class="sym-btn active" data-sym="P0">🌴 P0 棕榈油</button>
+      <button class="sym-btn" data-sym="Y0">🌱 Y0 豆油</button>
+    </section>
+
+    <section class="sibling-widget" aria-label="联动品种">
+      <a class="sibling-link" id="siblingLink" href="#">
+        <span class="sibling-emoji" id="siblingEmoji">🌱</span>
+        <div class="sibling-body">
+          <div class="sibling-head">
+            <strong id="siblingName">豆油 Y0</strong>
+            <span id="siblingPrice">--</span>
+            <span id="siblingChange" class="pct">--</span>
+          </div>
+          <small id="siblingBias">--</small>
+        </div>
+        <span class="sibling-cta">切换 →</span>
+      </a>
+    </section>
 
     <section class="toolbar" aria-label="行情控制">
       <label>
@@ -44,7 +64,7 @@
         导入 CSV
         <input id="csvInput" type="file" accept=".csv,text/csv">
       </label>
-      <button id="reloadBtn" title="从 data/palm_oil_p0_daily.csv 重新加载真实数据">重新加载真实数据</button>
+      <button id="reloadBtn" title="从数据目录重新加载真实数据">重新加载真实数据</button>
       <button id="demoBtn" title="切换到内置示例数据">显示示例</button>
       <button id="themeToggleBtn" title="切换暗色/亮色">🌙</button>
     </section>
@@ -201,14 +221,6 @@
       </aside>
     </section>
 
-    <section class="correlation-panel">
-      <div class="section-head">
-        <h2>🔗 品种联动</h2>
-        <small id="correlationMeta">每 60 秒刷新</small>
-      </div>
-      <div class="correlation-table" id="correlationTable"></div>
-    </section>
-
     <section class="analysis-grid">
       <article class="analysis-card">
         <h3>📊 涨跌研判</h3>
@@ -250,6 +262,6 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260707-4"></script>
+  <script src="app.js?v=20260707-5"></script>
 </body>
 </html>

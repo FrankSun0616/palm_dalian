@@ -141,38 +141,74 @@
 .ai-tab-empty { color: var(--muted); font-size: 12px; margin: 0; }
 .ai-news-inner .news-layout { grid-template-columns: 1fr; }
 
-/* ── Correlation panel ────────────────────────────────────── */
-.correlation-panel {
+/* ── Symbol switcher ──────────────────────────────────────── */
+.symbol-switcher {
+  display: flex;
+  gap: 8px;
   margin-bottom: 14px;
-  padding: 16px 18px;
+}
+.sym-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.sym-btn:hover { border-color: var(--gold); color: var(--ink); }
+.sym-btn.active {
+  border-color: var(--ink);
+  color: #fff;
+  background: var(--ink);
+}
+:root[data-theme="dark"] .sym-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #0f1419;
+}
+
+/* ── Sibling widget ───────────────────────────────────────── */
+.sibling-widget {
+  margin-bottom: 14px;
+}
+.sibling-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--panel);
   box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.correlation-table { display: grid; gap: 6px; }
-.correlation-row {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: #f8faf6;
-  font-size: 13px;
-  align-items: center;
+.sibling-link:hover {
+  border-color: var(--gold);
+  box-shadow: 0 4px 12px rgba(193, 140, 45, 0.2);
 }
-.correlation-row.header {
-  font-weight: 800;
-  color: var(--muted);
-  background: transparent;
-  padding-top: 0;
-  padding-bottom: 4px;
-  font-size: 11px;
-  letter-spacing: 0.02em;
+.sibling-emoji { font-size: 28px; }
+.sibling-body { flex: 1; display: grid; gap: 4px; }
+.sibling-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-.correlation-row .name { font-weight: 700; color: var(--ink); }
-.correlation-row .name small { display: block; color: var(--muted); font-size: 10px; font-weight: 700; margin-top: 1px; }
-:root[data-theme="dark"] .correlation-row { background: #232a35; }
-:root[data-theme="dark"] .correlation-row.header { background: transparent; }
+.sibling-head strong { font-size: 15px; font-weight: 800; }
+.sibling-head #siblingPrice { font-size: 22px; font-weight: 800; }
+.sibling-head .pct { font-size: 14px; font-weight: 800; }
+.sibling-body small { color: var(--muted); font-size: 12px; }
+.sibling-cta { color: var(--gold); font-size: 13px; font-weight: 800; white-space: nowrap; }
+@media (max-width: 480px) {
+  .sibling-cta { display: none; }
+  .sibling-emoji { font-size: 22px; }
+}
 
 * { box-sizing: border-box; }
 
@@ -1059,7 +1095,7 @@ a.news-title:hover { text-decoration: underline; color: var(--blue); }
   /* Section heads — dense */
   .section-head h2 { font-size: 16px; }
   .section-head { margin-bottom: 8px; padding-bottom: 6px; }
-  .multi-strategy, .news-ticker, .news-block, .correlation-panel { padding: 12px; }
+  .multi-strategy, .news-ticker, .news-block { padding: 12px; }
 
   /* Legend — smaller chips so canvas isn't pushed down */
   .legend { gap: 5px; max-width: 100%; }

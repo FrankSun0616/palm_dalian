@@ -1,3 +1,15 @@
+// ── Dual-symbol config ─────────────────────────────────────
+const SYMBOL_LABELS = {
+  P0: { code: "P0", name: "棕榈油", emoji: "🌴", exchange: "DCE" },
+  Y0: { code: "Y0", name: "豆油",   emoji: "🌱", exchange: "DCE" },
+};
+function activeLabel() { return SYMBOL_LABELS[state.activeSymbol] || SYMBOL_LABELS.P0; }
+function siblingSymbol() { return state.activeSymbol === "P0" ? "Y0" : "P0"; }
+function siblingLabel() { return SYMBOL_LABELS[siblingSymbol()]; }
+function dataPath(filename) {
+  return `data/${state.activeSymbol.toLowerCase()}/${filename}`;
+}
+
 const els = {
   priceCanvas: document.getElementById("priceCanvas"),
   volumeCanvas: document.getElementById("volumeCanvas"),
@@ -9,6 +21,16 @@ const els = {
   demoBtn: document.getElementById("demoBtn"),
   generateAiBtn: document.getElementById("generateAiBtn"),
   aiStatus: document.getElementById("aiStatus"),
+  topbarTitle: document.getElementById("topbarTitle"),
+  eyebrowText: document.getElementById("eyebrowText"),
+  contractPill: document.getElementById("contractPill"),
+  symBtns: document.querySelectorAll(".sym-btn"),
+  siblingLink: document.getElementById("siblingLink"),
+  siblingEmoji: document.getElementById("siblingEmoji"),
+  siblingName: document.getElementById("siblingName"),
+  siblingPrice: document.getElementById("siblingPrice"),
+  siblingChange: document.getElementById("siblingChange"),
+  siblingBias: document.getElementById("siblingBias"),
   boll1hStatus: document.getElementById("boll1hStatus"),
   boll1hDetail: document.getElementById("boll1hDetail"),
   boll2hStatus: document.getElementById("boll2hStatus"),
@@ -29,8 +51,6 @@ const els = {
   lastDistance: document.getElementById("lastDistance"),
   themeToggleBtn: document.getElementById("themeToggleBtn"),
   marketBanner: document.getElementById("marketBanner"),
-  correlationTable: document.getElementById("correlationTable"),
-  correlationMeta: document.getElementById("correlationMeta"),
   aiNewsEmpty: document.getElementById("aiNewsEmpty"),
   aiStrategyEmpty: document.getElementById("aiStrategyEmpty"),
   signalText: document.getElementById("signalText"),
@@ -78,7 +98,14 @@ function readColors() {
   };
 }
 
+function initialActiveSymbol() {
+  let saved = null;
+  try { saved = localStorage.getItem("activeSymbol"); } catch (_) {}
+  return (saved === "Y0" || saved === "P0") ? saved : "P0";
+}
+
 let state = {
+  activeSymbol: initialActiveSymbol(),
   data: makeDemoData(),
   imported: false,
   autoLoaded: false,
@@ -89,7 +116,7 @@ let state = {
   chartGeometry: null,
   visibleStart: null,
   visibleCount: null,
-  correlation: null,
+  sibling: null,
   isDragging: false,
   dragStartX: null,
   dragStartVisibleStart: null
@@ -785,11 +812,12 @@ function updateLegend(maPeriods) {
 }
 
 function updateSummary(data, analysis) {
-  els.chartTitle.textContent = "P0 棕榈油连续日线";
+  const lbl = activeLabel();
+  els.chartTitle.textContent = `${lbl.code} ${lbl.name}连续日线`;
   if (state.dataMeta) {
-    els.chartSubhead.textContent = `${state.dataMeta.instrument_name || "棕榈油连续"} | 最新 ${state.dataMeta.latest_date} | 来源 ${state.dataMeta.source}`;
+    els.chartSubhead.textContent = `${state.dataMeta.instrument_name || `${lbl.name}连续`} | 最新 ${state.dataMeta.latest_date} | 来源 ${state.dataMeta.source}`;
   } else {
-    els.chartSubhead.textContent = state.imported || state.autoLoaded ? "已载入 P0 连续合约 CSV 数据" : "示例数据：未自动载入 CSV 时显示，日期不会超过今天";
+    els.chartSubhead.textContent = state.imported || state.autoLoaded ? `已载入 ${lbl.code} 连续合约 CSV 数据` : "示例数据：未自动载入 CSV 时显示，日期不会超过今天";
   }
   els.lastPrice.textContent = analysis.last.close.toFixed(0);
   els.lastChange.textContent = `${formatSigned(analysis.change)} (${formatPct(analysis.changePct)})`;
@@ -1054,7 +1082,7 @@ async function generateAiAnalysis() {
   // Remember previous generation time so we can detect when a fresh one lands.
   let prevGenTime = null;
   try {
-    const r = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
+    const r = await fetch(`${dataPath("ai_analysis.json")}?t=${Date.now()}`, { cache: "no-store" });
     if (r.ok) {
       const ai = await r.json();
       prevGenTime = ai.generated_at_utc || null;
@@ -1119,7 +1147,7 @@ async function generateAiAnalysis() {
       return;
     }
     try {
-      const r = await fetch(`data/ai_analysis.json?t=${Date.now()}`, { cache: "no-store" });
+      const r = await fetch(`${dataPath("ai_analysis.json")}?t=${Date.now()}`, { cache: "no-store" });
       if (!r.ok) return;
       const ai = await r.json();
       const newTime = ai.generated_at_utc || null;
@@ -1281,13 +1309,23 @@ async function autoLoadCsv() {
     console.warn(message);
     return;
   }
-  setLoadStatus("加载中", "正在读取真实 P0 CSV...");
+  const lbl = activeLabel();
+  setLoadStatus("加载中", `正在读取真实 ${lbl.code} CSV...`);
   try {
     const cacheBust = `t=${Date.now()}`;
     const [response, metaResponse] = await Promise.all([
-      fetch(`data/palm_oil_p0_daily.csv?${cacheBust}`, { cache: "no-store" }),
-      fetch(`data/source_meta.json?${cacheBust}`, { cache: "no-store" })
+      fetch(`${dataPath("daily.csv")}?${cacheBust}`, { cache: "no-store" }),
+      fetch(`${dataPath("source_meta.json")}?${cacheBust}`, { cache: "no-store" })
     ]);
+    if (response.status === 404) {
+      // Files not generated yet (e.g. fresh Y0 before first workflow run).
+      // Keep demo data and show a helpful message rather than crashing.
+      setLoadStatus("待生成", `${lbl.code} 数据尚未生成，等待后台生成`);
+      state.autoLoaded = false;
+      state.dataMeta = null;
+      draw();
+      return;
+    }
     if (!response.ok) throw new Error(`CSV HTTP ${response.status}`);
     const text = await response.text();
     const rows = parseCsv(text);
@@ -1321,7 +1359,17 @@ async function autoLoadAiAnalysis() {
   if (location.protocol === "file:") return;
   try {
     const cacheBust = `t=${Date.now()}`;
-    const response = await fetch(`data/ai_analysis.json?${cacheBust}`, { cache: "no-store" });
+    const response = await fetch(`${dataPath("ai_analysis.json")}?${cacheBust}`, { cache: "no-store" });
+    if (response.status === 404) {
+      // Fresh symbol without an AI run yet — show placeholder, don't crash.
+      els.aiMeta.textContent = `${activeLabel().code} AI 分析尚未生成`;
+      els.aiSummary.textContent = "等待后台生成 DeepSeek 短线分析。";
+      els.aiBias.textContent = "--";
+      els.aiBias.className = "bias-pill neutral";
+      els.aiList.innerHTML = "";
+      state.lastAi = null;
+      return;
+    }
     if (!response.ok) throw new Error(`AI HTTP ${response.status}`);
     const ai = await response.json();
     updateAiPanel(ai);
@@ -1336,7 +1384,16 @@ async function autoLoadAiAnalysis() {
 async function autoLoadIntradayMeta() {
   if (location.protocol === "file:") return;
   try {
-    const response = await fetch(`data/intraday_meta.json?t=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`${dataPath("intraday_meta.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (response.status === 404) {
+      state.intradayMeta = null;
+      els.boll1hStatus.textContent = "待生成";
+      els.boll1hDetail.textContent = `${activeLabel().code} 1小时数据尚未生成`;
+      els.boll2hStatus.textContent = "待生成";
+      els.boll2hDetail.textContent = `${activeLabel().code} 2小时数据尚未生成`;
+      renderMultiStrategyPanel();
+      return;
+    }
     if (!response.ok) throw new Error(`Intraday HTTP ${response.status}`);
     state.intradayMeta = await response.json();
     updateIntradayPanel();
@@ -1357,7 +1414,15 @@ async function autoLoadIntradayMeta() {
 async function autoLoadNewsSnapshot() {
   if (location.protocol === "file:") return;
   try {
-    const response = await fetch(`data/news_snapshot.json?t=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`${dataPath("news_snapshot.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (response.status === 404) {
+      state.newsSnapshot = null;
+      els.newsRealtimeStatus.textContent = "待生成";
+      els.newsRealtimeText.textContent = `${activeLabel().code} 舆情数据尚未生成`;
+      if (els.newsTickerList) els.newsTickerList.innerHTML = "";
+      if (els.newsTickerMeta) els.newsTickerMeta.textContent = "暂无新闻数据";
+      return;
+    }
     if (!response.ok) throw new Error(`News HTTP ${response.status}`);
     state.newsSnapshot = await response.json();
     updateNewsPanel();
@@ -1759,59 +1824,82 @@ document.querySelectorAll(".ai-tab").forEach((btn) => {
   });
 });
 
-// ── Correlation panel ──────────────────────────────────────
-async function autoLoadCorrelation() {
+// ── Sibling widget ─────────────────────────────────────────
+async function autoLoadSibling() {
   if (location.protocol === "file:") return;
+  const sib = siblingSymbol();
+  const sibLbl = siblingLabel();
+  const dir = sib.toLowerCase();
+  const cacheBust = `t=${Date.now()}`;
+
+  // Reset displayed sibling identity (so a stale prior symbol doesn't linger)
+  if (els.siblingEmoji) els.siblingEmoji.textContent = sibLbl.emoji;
+  if (els.siblingName)  els.siblingName.textContent  = `${sibLbl.name} ${sibLbl.code}`;
+
+  let sourceMeta = null;
+  let ai = null;
   try {
-    const response = await fetch(`data/correlation_snapshot.json?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Correlation HTTP ${response.status}`);
-    state.correlation = await response.json();
-    renderCorrelation();
-  } catch (error) {
-    if (els.correlationMeta) els.correlationMeta.textContent = `读取失败：${error.message || "未知错误"}`;
-  }
-}
+    const [smResp, aiResp] = await Promise.all([
+      fetch(`data/${dir}/source_meta.json?${cacheBust}`, { cache: "no-store" }),
+      fetch(`data/${dir}/ai_analysis.json?${cacheBust}`, { cache: "no-store" }),
+    ]);
+    if (smResp.ok) sourceMeta = await smResp.json();
+    if (aiResp.ok) ai = await aiResp.json();
+  } catch (_) {}
 
-function renderCorrelation() {
-  if (!els.correlationTable) return;
-  const snap = state.correlation;
-  if (!snap || !snap.symbols) {
-    els.correlationTable.innerHTML = `<div class="correlation-row">暂无数据</div>`;
-    return;
+  // Pick a price: prefer AI realtime_price, then source_meta.live_bar.close, then latest_close.
+  let price = null;
+  if (ai && Number.isFinite(Number(ai.realtime_price))) price = Number(ai.realtime_price);
+  else if (sourceMeta && sourceMeta.live_bar && Number.isFinite(Number(sourceMeta.live_bar.close))) {
+    price = Number(sourceMeta.live_bar.close);
+  } else if (sourceMeta && Number.isFinite(Number(sourceMeta.latest_close))) {
+    price = Number(sourceMeta.latest_close);
   }
-  const symbols = snap.symbols;
-  const order = ["P0", "Y0", "OI0", "SC0"];
-  const updated = snap.updated_at_utc ? formatDateTime(snap.updated_at_utc) : "--";
-  if (els.correlationMeta) els.correlationMeta.textContent = `更新 ${updated} · 每 60 秒刷新`;
 
-  const rows = [
-    `<div class="correlation-row header"><span>品种</span><span>当前价</span><span>涨跌</span><span>涨跌幅</span></div>`
-  ];
-  order.forEach((sym) => {
-    const s = symbols[sym];
-    if (!s) {
-      rows.push(`<div class="correlation-row"><span class="name">${sym}</span><span>--</span><span>--</span><span>--</span></div>`);
-      return;
+  // Compute change_pct: prefer live_bar deltas, then AI-provided, else derive from open/close.
+  let changePct = null;
+  let changeAbs = null;
+  if (sourceMeta && sourceMeta.live_bar) {
+    const lb = sourceMeta.live_bar;
+    const ref = Number(lb.prev_close ?? lb.open);
+    if (Number.isFinite(ref) && ref > 0 && Number.isFinite(price)) {
+      changeAbs = price - ref;
+      changePct = changeAbs / ref;
     }
-    const changeAbs = Number(s.change_abs);
-    const isUp = Number.isFinite(changeAbs) ? changeAbs > 0 : /^\+/.test(String(s.change_pct));
-    const isDown = Number.isFinite(changeAbs) ? changeAbs < 0 : /^-/.test(String(s.change_pct));
-    const cls = isUp ? "up" : isDown ? "down" : "";
-    const priceText = Number.isFinite(Number(s.price)) ? Number(s.price).toFixed(0) : "--";
-    const changeText = Number.isFinite(changeAbs)
-      ? (changeAbs > 0 ? `+${changeAbs.toFixed(0)}` : changeAbs.toFixed(0))
-      : "--";
-    const pctText = s.change_pct || "--";
-    rows.push(`
-      <div class="correlation-row">
-        <span class="name">${escapeHtml(sym)}<small>${escapeHtml(s.name || "")}</small></span>
-        <span>${priceText}</span>
-        <span class="${cls}">${escapeHtml(changeText)}</span>
-        <span class="${cls}">${escapeHtml(pctText)}</span>
-      </div>
-    `);
-  });
-  els.correlationTable.innerHTML = rows.join("");
+  }
+  if (changePct === null && ai && ai.change_pct) {
+    // Accept string "+1.23%" or number 0.0123
+    const m = String(ai.change_pct).match(/^\s*([+-]?\d+(?:\.\d+)?)/);
+    if (m) changePct = Number(m[1]) / (String(ai.change_pct).includes("%") ? 100 : 1);
+  }
+
+  state.sibling = { symbol: sib, sourceMeta, ai, price, changePct, changeAbs };
+
+  // Populate DOM
+  if (els.siblingPrice) {
+    els.siblingPrice.textContent = Number.isFinite(price) ? price.toFixed(0) : "--";
+  }
+  if (els.siblingChange) {
+    if (Number.isFinite(changePct)) {
+      els.siblingChange.textContent = formatPct(changePct);
+      els.siblingChange.className = `pct ${changePct >= 0 ? "up" : "down"}`;
+    } else {
+      els.siblingChange.textContent = "--";
+      els.siblingChange.className = "pct";
+    }
+  }
+  if (els.siblingBias) {
+    const bias = ai && ai.bias ? String(ai.bias) : "";
+    const summary = ai && ai.summary ? String(ai.summary) : "";
+    if (bias) {
+      const short = summary ? ` · ${summary.slice(0, 40)}${summary.length > 40 ? "…" : ""}` : "";
+      els.siblingBias.textContent = `AI 观点：${bias}${short}`;
+    } else if (sourceMeta && sourceMeta.latest_date) {
+      els.siblingBias.textContent = `${sibLbl.code} 数据已就绪 · ${sourceMeta.latest_date}，AI 分析尚未生成`;
+    } else {
+      els.siblingBias.textContent = `${sibLbl.code} 数据尚未生成`;
+    }
+  }
 }
 
 // ── Real-time quote ──────────────────────────────────────────────────────────
@@ -1832,21 +1920,22 @@ async function fetchRealtimeQuote() {
     const r = await fetch(`${SINA_FUTURES_URL}&_=${Date.now()}`, { cache: "no-store" });
     if (!r.ok) return null;
     const data = await r.json();
-    const p0 = Array.isArray(data) && data.find(item => item.symbol === "P0");
-    if (!p0 || !+p0.trade) return null;
-    const price     = +p0.trade;
-    const prevClose = +p0.preclose;
+    const sym = state.activeSymbol;
+    const hit = Array.isArray(data) && data.find(item => item.symbol === sym);
+    if (!hit || !+hit.trade) return null;
+    const price     = +hit.trade;
+    const prevClose = +hit.preclose;
     return {
       price,
-      high:      +p0.high,
-      low:       +p0.low,
-      open:      +p0.open,
+      high:      +hit.high,
+      low:       +hit.low,
+      open:      +hit.open,
       prevClose,
-      volume:    +p0.volume,
+      volume:    +hit.volume,
       change:    price - prevClose,
       changePct: prevClose > 0 ? (price - prevClose) / prevClose : 0,
-      tradedate: p0.tradedate || "",
-      ticktime:  p0.ticktime  || ""
+      tradedate: hit.tradedate || "",
+      ticktime:  hit.ticktime  || ""
     };
   } catch (_) {
     return null;
@@ -1911,6 +2000,79 @@ async function startRealtimeFeed() {
 
 window.addEventListener("resize", draw);
 
+// ── Active-symbol labels + switcher ────────────────────────
+function applyActiveSymbolLabels() {
+  const lbl = activeLabel();
+  const title = `大连${lbl.name} ${lbl.code} 连续短线分析`;
+  document.title = title;
+  if (els.topbarTitle) els.topbarTitle.textContent = title;
+  if (els.eyebrowText) {
+    els.eyebrowText.textContent = lbl.code === "P0" ? "DCE Palm Oil Continuous" : "DCE Soybean Oil Continuous";
+  }
+  if (els.contractPill) {
+    els.contractPill.textContent = `${lbl.exchange} ${lbl.code} 1H / 2H / 日线`;
+  }
+  // Toggle button active class
+  if (els.symBtns) {
+    els.symBtns.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.sym === state.activeSymbol);
+    });
+  }
+  // Sibling widget baseline (fill immediately; autoLoadSibling refreshes data)
+  const sibLbl = siblingLabel();
+  if (els.siblingEmoji) els.siblingEmoji.textContent = sibLbl.emoji;
+  if (els.siblingName)  els.siblingName.textContent  = `${sibLbl.name} ${sibLbl.code}`;
+  if (els.siblingPrice) els.siblingPrice.textContent = "--";
+  if (els.siblingChange) {
+    els.siblingChange.textContent = "--";
+    els.siblingChange.className = "pct";
+  }
+  if (els.siblingBias) els.siblingBias.textContent = "加载中...";
+}
+
+function reloadAll() {
+  // Reset symbol-specific state so the previous symbol's data does not linger
+  state.data = makeDemoData();
+  state.imported = false;
+  state.autoLoaded = false;
+  state.dataMeta = null;
+  state.intradayMeta = null;
+  state.newsSnapshot = null;
+  state.lastAi = null;
+  state.visibleStart = null;
+  state.visibleCount = null;
+  state.hoverIndex = null;
+  state.twoDay = null;
+  lastQuote = null;
+  applyActiveSymbolLabels();
+  draw();
+  autoLoadCsv();
+  autoLoadAiAnalysis();
+  autoLoadIntradayMeta();
+  autoLoadNewsSnapshot();
+  autoLoadSibling();
+}
+
+function setActiveSymbol(sym) {
+  if (sym !== "P0" && sym !== "Y0") return;
+  if (state.activeSymbol === sym) return;
+  state.activeSymbol = sym;
+  try { localStorage.setItem("activeSymbol", sym); } catch (_) {}
+  reloadAll();
+}
+
+if (els.symBtns) {
+  els.symBtns.forEach((btn) => {
+    btn.addEventListener("click", () => setActiveSymbol(btn.dataset.sym));
+  });
+}
+if (els.siblingLink) {
+  els.siblingLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    setActiveSymbol(siblingSymbol());
+  });
+}
+
 // Theme
 initTheme();
 if (els.themeToggleBtn) els.themeToggleBtn.addEventListener("click", toggleTheme);
@@ -1919,15 +2081,16 @@ if (els.themeToggleBtn) els.themeToggleBtn.addEventListener("click", toggleTheme
 updateMarketStatus();
 setInterval(updateMarketStatus, 30 * 1000);
 
+applyActiveSymbolLabels();
 draw();
 autoLoadCsv();
 autoLoadAiAnalysis();
 autoLoadIntradayMeta();
 autoLoadNewsSnapshot();
-autoLoadCorrelation();
+autoLoadSibling();
 startRealtimeFeed();
 setInterval(autoLoadCsv, 60 * 1000);
 setInterval(autoLoadAiAnalysis, 60 * 1000);
 setInterval(autoLoadIntradayMeta, 60 * 1000);
 setInterval(autoLoadNewsSnapshot, 60 * 1000);
-setInterval(autoLoadCorrelation, 60 * 1000);
+setInterval(autoLoadSibling, 60 * 1000);

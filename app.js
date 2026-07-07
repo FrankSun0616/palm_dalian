@@ -946,8 +946,10 @@ async function generateAiAnalysis() {
     }
   } catch (_) {}
 
-  try {
-    const resp = await fetch(
+  // Retry once on Failed-to-fetch — many browsers surface a transient DNS
+  // or TCP hiccup that way, and a second attempt usually goes through.
+  async function tryDispatch() {
+    return fetch(
       `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`,
       {
         method: "POST",
@@ -959,14 +961,33 @@ async function generateAiAnalysis() {
         body: JSON.stringify({ ref: "main", inputs: { run_ai_analysis: "true" } })
       }
     );
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => "");
-      setAiStatus(`触发失败 (${resp.status})${body ? "：" + body.slice(0, 80) : ""}`, "error");
+  }
+
+  let resp;
+  try {
+    resp = await tryDispatch();
+  } catch (err1) {
+    // Retry once after 1.5s in case it was a transient network hiccup.
+    setAiStatus(`网络错误 (${err1.message})，正在重试...`, "loading");
+    await new Promise(r => setTimeout(r, 1500));
+    try {
+      resp = await tryDispatch();
+    } catch (err2) {
+      setAiStatus(
+        `网络错误：${err2.message}。可能是：①浏览器扩展拦截了 api.github.com；`
+        + `②公司网络屏蔽；③PAT 失效。打开 F12 → Console 看具体报错。`,
+        "error"
+      );
       els.generateAiBtn.disabled = false;
       return;
     }
-  } catch (err) {
-    setAiStatus(`网络错误：${err.message}`, "error");
+  }
+  if (!resp.ok) {
+    const body = await resp.text().catch(() => "");
+    const hint = resp.status === 401 || resp.status === 403
+      ? " (PAT 可能已失效，请检查 token 权限)"
+      : "";
+    setAiStatus(`触发失败 (${resp.status})${hint}${body ? "：" + body.slice(0, 80) : ""}`, "error");
     els.generateAiBtn.disabled = false;
     return;
   }

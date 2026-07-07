@@ -1,12 +1,16 @@
 """WeChat push notifier via Server 酱 (sctapi.ftqq.com).
 
 Runs after the "Update palm oil data" workflow completes successfully.
-Detects notify-worthy events by diffing the current AI/meta files against
-the last recorded state:
+Iterates every symbol in PROFILES (P0 palm oil + Y0 soybean oil) and, per
+symbol, detects notify-worthy events by diffing the current AI/meta files
+against the last recorded state:
 
   1. New AI analysis (ai.generated_at_utc changed)
   2. Bias flip (previous vs current bias sign flipped)
   3. Level break (last price crossed above resistance or below support)
+
+State for all symbols lives in ONE top-level file (data/notify_state.json)
+keyed by symbol so we don't need to duplicate file writes per profile.
 
 For each event a POST goes to https://sctapi.ftqq.com/{SENDKEY}.send. If
 WECHAT_SENDKEY is empty we log "skip" and STILL update the state file so
@@ -27,11 +31,22 @@ import requests
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 
-AI_FILE = DATA_DIR / "ai_analysis.json"
-META_FILE = DATA_DIR / "source_meta.json"
+# Shared state for BOTH symbols, keyed by symbol code.
 STATE_FILE = DATA_DIR / "notify_state.json"
 
 SERVER_CHAN_URL = "https://sctapi.ftqq.com/{key}.send"
+
+
+# ── Notify profiles ──────────────────────────────────────────────────────────
+#
+# Mirrors update_data.PROFILES but keeps notify.py self-contained (no import
+# of update_data — that module pulls in akshare/requests-heavy deps we don't
+# need for pushing WeChat notifications).
+
+NOTIFY_PROFILES: dict[str, dict] = {
+    "P0": {"name": "棕榈油", "dir": "p0", "emoji": "🌴"},
+    "Y0": {"name": "豆油",   "dir": "y0", "emoji": "🌱"},
+}
 
 
 # ── Data loading (gracefully handle missing files) ───────────────────────────
@@ -122,8 +137,17 @@ def current_price(ai: dict, meta: dict) -> float | None:
     return _to_float(meta.get("latest_close"))
 
 
-def build_events(prev_state: dict, ai: dict, meta: dict) -> list[dict]:
+def build_events(
+    prev_state: dict,
+    ai: dict,
+    meta: dict,
+    symbol: str,
+    profile: dict,
+) -> list[dict]:
     events: list[dict] = []
+    emoji = profile.get("emoji", "")
+    name = profile.get("name", symbol)
+    tag = f"{emoji} [{name}]".strip()
 
     # 1) New AI analysis
     prev_gen = prev_state.get("ai_generated_at_utc")
@@ -131,8 +155,9 @@ def build_events(prev_state: dict, ai: dict, meta: dict) -> list[dict]:
     if curr_gen and curr_gen != prev_gen:
         events.append({
             "kind": "new_ai",
-            "title": f"[棕榈油] 新AI分析 · 偏向 {ai.get('bias', '?')}",
+            "title": f"{tag} 新AI分析 · 偏向 {ai.get('bias', '?')}",
             "desp": (
+                f"**品种**: {name}（{symbol}）\n\n"
                 f"**分析生成时间**: {curr_gen}\n\n"
                 f"**偏向**: {ai.get('bias', '?')}\n\n"
                 f"**摘要**: {ai.get('summary', '')}\n\n"
@@ -147,9 +172,10 @@ def build_events(prev_state: dict, ai: dict, meta: dict) -> list[dict]:
         events.append({
             "kind": "bias_flip",
             "title": (
-                f"[棕榈油] 方向反转: {prev_state.get('bias')} → {ai.get('bias')}"
+                f"{tag} 方向反转: {prev_state.get('bias')} → {ai.get('bias')}"
             ),
             "desp": (
+                f"**品种**: {name}（{symbol}）\n\n"
                 f"**上次偏向**: {prev_state.get('bias')}\n\n"
                 f"**当前偏向**: {ai.get('bias')}\n\n"
                 f"**摘要**: {ai.get('summary', '')}"
@@ -166,8 +192,9 @@ def build_events(prev_state: dict, ai: dict, meta: dict) -> list[dict]:
     if break_desc:
         events.append({
             "kind": "level_break",
-            "title": f"[棕榈油] 关键位破位 · {break_desc}",
+            "title": f"{tag} 关键位破位 · {break_desc}",
             "desp": (
+                f"**品种**: {name}（{symbol}）\n\n"
                 f"**破位**: {break_desc}\n\n"
                 f"**当前偏向**: {ai.get('bias', '?')}\n\n"
                 f"**支撑/压力**: {support} / {resistance}"
@@ -200,7 +227,7 @@ def send_wechat(sendkey: str, title: str, desp: str) -> bool:
 
 # ── State write ──────────────────────────────────────────────────────────────
 
-def build_next_state(ai: dict, meta: dict) -> dict:
+def build_next_symbol_state(ai: dict, meta: dict) -> dict:
     watch = ai.get("watch_levels") or {}
     return {
         "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -212,29 +239,62 @@ def build_next_state(ai: dict, meta: dict) -> dict:
     }
 
 
+def load_prev_state() -> dict:
+    """Load the combined state file. Falls back to an empty dict per symbol.
+
+    Also tolerates the legacy flat schema (pre dual-symbol) — those keys are
+    mapped onto the P0 slot so the first dual-symbol run doesn't re-fire
+    every P0 event."""
+    raw = load_json(STATE_FILE)
+    # Legacy flat schema had 'ai_generated_at_utc' at the top level.
+    if raw and "ai_generated_at_utc" in raw and "P0" not in raw and "Y0" not in raw:
+        return {"P0": raw}
+    return raw
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main() -> int:
-    ai = load_json(AI_FILE)
-    meta = load_json(META_FILE)
-    prev_state = load_json(STATE_FILE)
-
-    events = build_events(prev_state, ai, meta)
+    prev_state = load_prev_state()
     sendkey = os.getenv("WECHAT_SENDKEY", "").strip()
 
-    if not events:
-        print("[notify] no events to send")
-    elif not sendkey:
-        print(f"[notify] skip: WECHAT_SENDKEY not set ({len(events)} event(s) would have fired)")
+    next_state: dict = {}
+    total_events = 0
+    total_sent = 0
+
+    for symbol, profile in NOTIFY_PROFILES.items():
+        profile_dir = DATA_DIR / profile["dir"]
+        ai = load_json(profile_dir / "ai_analysis.json")
+        meta = load_json(profile_dir / "source_meta.json")
+
+        prev_symbol_state = prev_state.get(symbol, {}) if isinstance(prev_state, dict) else {}
+        events = build_events(prev_symbol_state, ai, meta, symbol, profile)
+        total_events += len(events)
+
+        if not events:
+            print(f"[notify] {symbol}: no events to send")
+        elif not sendkey:
+            print(
+                f"[notify] {symbol}: skip: WECHAT_SENDKEY not set "
+                f"({len(events)} event(s) would have fired)"
+            )
+        else:
+            for evt in events:
+                ok = send_wechat(sendkey, evt["title"], evt["desp"])
+                if ok:
+                    total_sent += 1
+                print(f"[notify] {symbol} {evt['kind']}: {'sent' if ok else 'failed'}")
+
+        next_state[symbol] = build_next_symbol_state(ai, meta)
+
+    if total_events == 0:
+        print("[notify] no events across all symbols")
     else:
-        for evt in events:
-            ok = send_wechat(sendkey, evt["title"], evt["desp"])
-            print(f"[notify] {evt['kind']}: {'sent' if ok else 'failed'}")
+        print(f"[notify] fired {total_sent}/{total_events} event(s) across all symbols")
 
     # Always write the next state, even when we skipped or had no events —
     # otherwise a missing SENDKEY would cause the next run to re-detect the
     # same events forever.
-    next_state = build_next_state(ai, meta)
     try:
         DATA_DIR.mkdir(exist_ok=True)
         STATE_FILE.write_text(

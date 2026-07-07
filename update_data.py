@@ -19,6 +19,71 @@ DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 
+# ── Profiles: per-symbol pipeline config ─────────────────────────────────────
+#
+# Each profile drives one full pipeline run (daily CSV, intraday bundle, news
+# snapshot, realtime quote, AI analysis). All output files land under
+# DATA_DIR / profile["dir"] so P0 and Y0 don't stomp on each other.
+
+PROFILES: dict[str, dict] = {
+    "P0": {
+        "name": "棕榈油",
+        "market_node": "zly_qh",  # Sina Market_Center node for realtime quote
+        "dir": "p0",
+        "news_queries": [
+            # 棕榈油核心
+            "棕榈油 期货 今日 马来西亚 印尼 出口 库存",
+            "大连 棕榈油 P0 期货 今日 走势",
+            "palm oil futures Malaysia Indonesia export stock today",
+            "MPOB monthly palm oil production stock",
+            # 印尼大宗商品 / 政策
+            "印尼 大宗商品 出口 政策 关税 棕榈油",
+            "Indonesia commodity export policy palm oil tariff",
+            "Indonesia state-backed agency raw material export",
+            "Indonesia Danantara raw materials commodity",
+            "印尼 国营 大宗商品 原材料 出口 机构",
+            "Indonesia nickel coal mineral export ban quota",
+            # 印度（最大买家）
+            "印度 棕榈油 进口 需求",
+            "India palm oil import demand vegetable oil",
+            # 能源 / 生物柴油（替代品需求）
+            "原油 价格 布伦特 WTI 走势",
+            "crude oil Brent WTI price biodiesel demand",
+            # 替代油脂
+            "豆油 菜油 葵花油 国际 价格 走势",
+            "soybean oil rapeseed sunflower oil price",
+            # 天气
+            "厄尔尼诺 拉尼娜 东南亚 棕榈 干旱",
+            "El Nino La Nina Southeast Asia palm oil weather",
+            # 汇率
+            "马来 林吉特 印尼 卢比 美元 走势",
+        ],
+    },
+    "Y0": {
+        "name": "豆油",
+        "market_node": "dy_qh",
+        "dir": "y0",
+        "news_queries": [
+            "豆油 期货 大连 走势 今日",
+            "大商所 豆油 Y2609 主力 走势",
+            "soybean oil futures DCE price",
+            "CBOT 大豆 期货 走势",
+            "USDA 大豆 报告 出口 库存",
+            "阿根廷 巴西 大豆 产量 天气",
+            "中国 大豆 进口 需求",
+            "China soybean import demand",
+            "中美 贸易 关税 大豆",
+            "US-China trade soybean tariff",
+            "印度 豆油 进口 需求",
+            "India soybean oil demand",
+            "植物油脂 联动 豆油 棕榈油",
+            "原油 布伦特 WTI 走势",
+            "El Nino La Nina 天气 大豆 影响",
+        ],
+    },
+}
+
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 def pct(value: float) -> str:
@@ -95,11 +160,11 @@ def normalize_intraday_df(df, limit: int = 220):
     return out[keep]
 
 
-def fetch_intraday(period: str):
+def fetch_intraday(period: str, symbol: str = "P0"):
     try:
-        return normalize_intraday_df(ak.futures_zh_minute_sina(symbol="P0", period=period))
+        return normalize_intraday_df(ak.futures_zh_minute_sina(symbol=symbol, period=period))
     except Exception as exc:
-        print(f"Intraday {period}m fetch failed: {exc}")
+        print(f"Intraday {symbol} {period}m fetch failed: {exc}")
         return None
 
 
@@ -130,21 +195,21 @@ def intraday_summary(df, label: str) -> dict[str, object] | None:
     }
 
 
-def fetch_intraday_bundle() -> dict[str, object]:
-    h1 = fetch_intraday("60")
-    h2 = fetch_intraday("120")
+def fetch_intraday_bundle(symbol: str = "P0", out_dir: Path = DATA_DIR) -> dict[str, object]:
+    h1 = fetch_intraday("60", symbol=symbol)
+    h2 = fetch_intraday("120", symbol=symbol)
     if h1 is not None and not h1.empty:
-        h1.to_csv(DATA_DIR / "intraday_1h.csv", index=False)
+        h1.to_csv(out_dir / "intraday_1h.csv", index=False)
     if h2 is not None and not h2.empty:
-        h2.to_csv(DATA_DIR / "intraday_2h.csv", index=False)
+        h2.to_csv(out_dir / "intraday_2h.csv", index=False)
     bundle = {
         "source": "AKShare futures_zh_minute_sina",
-        "symbol": "P0",
+        "symbol": symbol,
         "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "one_hour": intraday_summary(h1, "1小时"),
         "two_hour": intraday_summary(h2, "2小时"),
     }
-    (DATA_DIR / "intraday_meta.json").write_text(
+    (out_dir / "intraday_meta.json").write_text(
         json.dumps(bundle, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
@@ -157,101 +222,39 @@ SINA_MARKET_URL_TMPL = (
     "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/"
     "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node={node}&base=futures"
 )
-SINA_FUTURES_URL = SINA_MARKET_URL_TMPL.format(node="zly_qh")
 
 
-def get_realtime_quote_sina() -> dict | None:
-    """Fetch live P0 quote from Sina Market Center (same API as the browser front-end)."""
+def get_realtime_quote_sina(symbol: str = "P0") -> dict | None:
+    """Fetch live quote for `symbol` from Sina Market Center (same API as the
+    browser front-end). The Sina 'node' name is looked up from PROFILES so
+    each symbol hits its own commodity node (P0=zly_qh, Y0=dy_qh, ...)."""
+    profile = PROFILES.get(symbol)
+    if not profile:
+        return None
+    url = SINA_MARKET_URL_TMPL.format(node=profile["market_node"])
     try:
-        resp = requests.get(SINA_FUTURES_URL, timeout=10)
+        resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         data = resp.json()
-        p0 = next((item for item in data if item.get("symbol") == "P0"), None)
-        if not p0 or not float(p0.get("trade") or 0):
+        item = next((it for it in data if it.get("symbol") == symbol), None)
+        if not item or not float(item.get("trade") or 0):
             return None
-        price = float(p0["trade"])
-        prev_close = float(p0["preclose"])
+        price = float(item["trade"])
+        prev_close = float(item["preclose"])
         change = (price - prev_close) / prev_close if prev_close else 0
         return {
             "price": price,
-            "open": float(p0["open"]),
-            "high": float(p0["high"]),
-            "low": float(p0["low"]),
-            "volume": int(p0["volume"]),
+            "open": float(item["open"]),
+            "high": float(item["high"]),
+            "low": float(item["low"]),
+            "volume": int(item["volume"]),
             "prev_close": prev_close,
             "change_pct": pct(change),
-            "tradedate": p0.get("tradedate", ""),
-            "ticktime": p0.get("ticktime", ""),
+            "tradedate": item.get("tradedate", ""),
+            "ticktime": item.get("ticktime", ""),
         }
     except Exception:
         return None
-
-
-# ── Correlation snapshot (related commodity real-time quotes) ────────────────
-
-# Symbols to snapshot for the correlation panel. SC0 (INE crude) is not on the
-# same Sina node as the oils, so we probe multiple nodes and take whichever
-# node has the symbol.
-CORRELATION_TARGETS = [
-    ("P0",  "棕榈油"),
-    ("Y0",  "豆油"),
-    ("OI0", "菜油"),
-    ("SC0", "原油"),
-]
-
-
-def _fetch_daily_last_two(symbol: str) -> tuple[float, float] | None:
-    """Return (latest_close, prev_close) for a continuous symbol via AKShare's
-    Sina daily API. Retries once on transient failure. Returns None on error."""
-    for attempt in (1, 2):
-        try:
-            df = ak.futures_zh_daily_sina(symbol=symbol)
-            if df is None or len(df) < 2:
-                return None
-            last = float(df.iloc[-1]["close"])
-            prev = float(df.iloc[-2]["close"])
-            return (last, prev) if last and prev else None
-        except Exception as exc:  # noqa: BLE001
-            if attempt == 2:
-                print(f"Correlation {symbol}: daily fetch failed: {type(exc).__name__}: {exc}")
-                return None
-
-
-def fetch_correlation_snapshot() -> dict:
-    """Fetch latest daily close + prev close for P0 plus related futures (Y0, OI0, SC0)
-    via AKShare's Sina daily API. Sina's Market_Center endpoint splits every variety
-    into its own opaque 'node' name (棕榈=zly_qh, 豆油=dy_qh, ...) and the mapping is
-    undocumented — Y0/OI0/SC0 nodes proved unfindable — so we use futures_zh_daily_sina
-    for consistency across all symbols. Trade-off: correlation values are the last-
-    completed daily close, not intraday realtime, which is fine for a trend-comparison
-    panel."""
-    symbols: dict[str, dict] = {}
-    for sym, name in CORRELATION_TARGETS:
-        pair = _fetch_daily_last_two(sym)
-        if not pair:
-            print(f"Correlation: {sym} unavailable")
-            continue
-        price, prev_close = pair
-        change_abs = price - prev_close
-        change_pct_val = change_abs / prev_close if prev_close else 0
-        symbols[sym] = {
-            "name": name,
-            "price": price,
-            "prev_close": prev_close,
-            "change_abs": round(change_abs, 2),
-            "change_pct": pct(change_pct_val),
-        }
-
-    snap = {
-        "source": "AKShare futures_zh_daily_sina (last close)",
-        "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "symbols": symbols,
-    }
-    (DATA_DIR / "correlation_snapshot.json").write_text(
-        json.dumps(snap, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    return snap
 
 
 # ── Daily snapshot ────────────────────────────────────────────────────────────
@@ -330,9 +333,11 @@ def is_relevant_news(item: dict[str, str]) -> bool:
         "棕榈", "palm",
         # 产地与主要参与国
         "malaysia", "indonesia", "马来", "印尼", "india", "印度", "mpob",
-        # 替代/联动油脂
-        "油脂", "豆油", "soybean", "soyoil", "rapeseed", "菜油", "葵花籽油", "sunflower",
+        # 替代/联动油脂 + 大豆本体（Y0 关注）
+        "油脂", "豆油", "大豆", "soybean", "soyoil", "rapeseed", "菜油", "葵花籽油", "sunflower",
         "椰子油", "coconut", "vegetable oil", "edible oil",
+        # 大豆产地 / 报告（Y0 关注）
+        "usda", "cbot", "argentina", "brazil", "阿根廷", "巴西",
         # 能源 / 生物柴油（影响棕榈油需求）
         "原油", "crude", "brent", "wti", "diesel", "biofuel", "biodiesel", "生物柴油",
         # 大宗商品 / 政策（state-backed agencies, raw materials, etc.）
@@ -345,7 +350,7 @@ def is_relevant_news(item: dict[str, str]) -> bool:
         "厄尔尼诺", "拉尼娜", "el nino", "el niño", "la nina", "la niña",
         "drought", "干旱", "雨季", "monsoon",
         # 期货 / 交易所
-        "期货", "futures", "dce", "大连", "bursa", "fcpo", "cbot",
+        "期货", "futures", "dce", "大连", "bursa", "fcpo",
         # 汇率（影响以美元计价的大宗商品）
         "ringgit", "rupiah", "usd", "美元", "汇率",
     ]
@@ -385,35 +390,7 @@ def fetch_google_news(query: str, max_results: int = 8) -> list[dict[str, str]]:
     return results
 
 
-def fetch_news_snapshot() -> dict[str, object]:
-    queries = [
-        # 棕榈油核心
-        "棕榈油 期货 今日 马来西亚 印尼 出口 库存",
-        "大连 棕榈油 P0 期货 今日 走势",
-        "palm oil futures Malaysia Indonesia export stock today",
-        "MPOB monthly palm oil production stock",
-        # 印尼大宗商品 / 政策
-        "印尼 大宗商品 出口 政策 关税 棕榈油",
-        "Indonesia commodity export policy palm oil tariff",
-        "Indonesia state-backed agency raw material export",
-        "Indonesia Danantara raw materials commodity",
-        "印尼 国营 大宗商品 原材料 出口 机构",
-        "Indonesia nickel coal mineral export ban quota",
-        # 印度（最大买家）
-        "印度 棕榈油 进口 需求",
-        "India palm oil import demand vegetable oil",
-        # 能源 / 生物柴油（替代品需求）
-        "原油 价格 布伦特 WTI 走势",
-        "crude oil Brent WTI price biodiesel demand",
-        # 替代油脂
-        "豆油 菜油 葵花油 国际 价格 走势",
-        "soybean oil rapeseed sunflower oil price",
-        # 天气
-        "厄尔尼诺 拉尼娜 东南亚 棕榈 干旱",
-        "El Nino La Nina Southeast Asia palm oil weather",
-        # 汇率
-        "马来 林吉特 印尼 卢比 美元 走势",
-    ]
+def fetch_news_snapshot(queries: list[str], out_dir: Path = DATA_DIR) -> dict[str, object]:
     articles: list[dict[str, str]] = []
 
     # Fan out all Google News queries in parallel — each is an independent
@@ -463,7 +440,7 @@ def fetch_news_snapshot() -> dict[str, object]:
         "articles": articles[:12],
         "status": "ok" if articles else "empty",
     }
-    (DATA_DIR / "news_snapshot.json").write_text(
+    (out_dir / "news_snapshot.json").write_text(
         json.dumps(snapshot, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
@@ -490,11 +467,11 @@ def news_snapshot_to_text(snapshot: dict[str, object]) -> str:
 
 # ── Step 1: Fetch news with DeepSeek function-calling ─────────────────────────
 
-def fetch_news_raw(api_key: str, snapshot: dict) -> str:
+def fetch_news_raw(api_key: str, snapshot: dict, profile_name: str = "棕榈油") -> str:
     """
     DeepSeek searches the web (up to MAX_SEARCH_ROUNDS times) and returns a
-    detailed plain-text digest of recent palm oil news WITH source URLs so
-    the analysis step can build proper article cards.
+    detailed plain-text digest of recent {profile_name} news WITH source URLs
+    so the analysis step can build proper article cards.
     Returns "" on failure so the caller can skip the news block gracefully.
     """
     # This tool-calling loop is only a fallback; the fast path is
@@ -524,25 +501,23 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
         {
             "role": "system",
             "content": (
-                "你是商品期货市场资讯员。请调用 web_search 多次搜索影响棕榈油价格的"
-                "所有相关资讯（最多 7 次搜索）。搜索方向必须广泛涵盖：\n"
-                "1) 棕榈油本体——马来西亚 MPOB 月度报告、印尼产量与库存、大连 P0 期货盘面；\n"
-                "2) 印尼大宗商品政策——出口关税、煤炭、镍、棕榈油禁令或配额；"
-                "特别注意印尼新设立的国营/state-backed 大宗商品/原材料出口管理机构"
-                "（如 Danantara、BUMN），这类机构会直接影响棕榈油等大宗商品的出口节奏；\n"
-                "3) 印度需求——印度是最大进口国，关税与采购变化影响巨大；\n"
-                "4) 原油与生物柴油——原油价格、生物柴油掺混政策（B35/B40）影响棕榈油需求；\n"
-                "5) 替代油脂——豆油、菜油、葵花油、椰子油价格联动；\n"
-                "6) 天气——厄尔尼诺/拉尼娜、东南亚干旱、雨季对产量影响；\n"
-                "7) 汇率——林吉特/卢比/美元走势对棕榈油价格的影响；\n"
-                "8) 宏观——中国进口数据、CBOT 大豆、海运费、地缘冲突。\n\n"
+                f"你是商品期货市场资讯员。请调用 web_search 多次搜索影响{profile_name}价格的"
+                "所有相关资讯（最多 7 次搜索）。搜索方向要广泛覆盖：\n"
+                f"1) {profile_name}本体——主产地产量与库存、大连主力合约盘面；\n"
+                "2) 主产国政策——出口关税、禁令、配额、补贴；\n"
+                "3) 主要买家需求——大宗采购、进口关税、库存变化；\n"
+                "4) 原油与生物柴油——能源价格与生柴掺混政策的传导；\n"
+                "5) 替代油脂——棕榈油、豆油、菜油、葵花油、椰子油的价格联动；\n"
+                "6) 天气——厄尔尼诺/拉尼娜、干旱、雨季对产量的影响；\n"
+                "7) 汇率——相关产油国货币与美元走势；\n"
+                "8) 宏观——中国进口数据、CBOT 大豆、USDA 报告、海运费、地缘冲突。\n\n"
                 "完成搜索后，请输出 8–15 条详细新闻条目（覆盖以上至少 5 个方向），"
                 "每条格式严格如下（保留原始URL）：\n"
                 "【标题】新闻标题\n"
                 "【来源】网站/媒体名称\n"
                 "【URL】原文链接\n"
                 "【摘要】3–5句详细摘要，说明具体数据/事件及原因\n"
-                "【影响】利多/利空/中性，并解释对棕榈油的传导逻辑\n"
+                f"【影响】利多/利空/中性，并解释对{profile_name}的传导逻辑\n"
                 "---\n"
                 "不要省略URL。如果搜索结果里有链接，必须原样保留。"
             ),
@@ -550,9 +525,9 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
         {
             "role": "user",
             "content": (
-                f"分析日期：{latest_date}。请广泛搜索并详细整理近期影响大连棕榈油期货价格的"
-                "所有重要新闻，不要只看棕榈油本身——印尼大宗商品政策、原油价格、生物柴油、"
-                "印度采购、替代油脂、东南亚天气、相关汇率都要覆盖。"
+                f"分析日期：{latest_date}。请广泛搜索并详细整理近期影响大连{profile_name}期货价格的"
+                "所有重要新闻，不要只看本身——大宗商品政策、原油价格、生物柴油、"
+                "主要买家采购、替代油脂、产区天气、相关汇率都要覆盖。"
                 "每条新闻必须有具体数据（产量、价格、政策名称、百分比等）和来源URL。"
             ),
         },
@@ -587,7 +562,7 @@ def fetch_news_raw(api_key: str, snapshot: dict) -> str:
             if choice["finish_reason"] == "tool_calls":
                 for tc in msg.get("tool_calls", []):
                     fn_args = json.loads(tc["function"]["arguments"])
-                    query = fn_args.get("query", "棕榈油最新消息")
+                    query = fn_args.get("query", f"{profile_name}最新消息")
                     print(f"  [web_search #{search_count + 1}] {query}")
                     search_text = web_search(query, max_results=8)
                     messages.append(
@@ -713,7 +688,7 @@ def fallback_ai_analysis(snapshot: dict, reason: str) -> dict:
     }
 
 
-def generate_ai_analysis(snapshot: dict, news_summary: str = "") -> dict:
+def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: str = "棕榈油", symbol: str = "P0") -> dict:
     api_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
     if not api_key:
         return fallback_ai_analysis(snapshot, "DEEPSEEK_API_KEY is not configured")
@@ -742,7 +717,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "") -> dict:
     if has_news:
         news_instructions = (
             "4) news_impact 数组：4–8 条字符串，每条 2–4 句详细分析，"
-            "说明具体数据/事件、逻辑链条及对棕榈油价格的影响方向（以[利多]/[利空]/[中性]开头）；\n"
+            f"说明具体数据/事件、逻辑链条及对{profile_name}价格的影响方向（以[利多]/[利空]/[中性]开头）；\n"
             "5) news_articles 数组：从上方舆情原始结果中提取 6–10 条新闻，"
             "每条是包含以下字段的 JSON 对象：\n"
             '   {"title":"新闻标题","source":"来源媒体名","url":"原文链接（必须是http开头的完整URL）",'
@@ -756,7 +731,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "") -> dict:
         )
 
     prompt_content = (
-        "请基于以下大连商品交易所棕榈油 P0 连续合约实时行情、1小时/2小时K线、日线数据及市场舆情做综合中文分析。"
+        f"请基于以下大连商品交易所{profile_name} {symbol} 连续合约实时行情、1小时/2小时K线、日线数据及市场舆情做综合中文分析。"
         f"{realtime_instruction}{intraday_instruction}"
         f"{news_block}"
         "要求：\n"
@@ -805,6 +780,8 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "") -> dict:
             "realtime_price": snapshot["realtime"]["price"] if has_realtime else None,
             "realtime_note": snapshot.get("realtime_note"),
             "news_summary": news_summary,
+            "symbol": symbol,
+            "instrument_name": profile_name,
         }
     )
     return parsed
@@ -812,14 +789,14 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "") -> dict:
 
 # ── Night session live bar (only during 21:00–23:59 Beijing) ─────────────────
 
-def get_live_bar(last_daily_date: str) -> dict | None:
+def get_live_bar(last_daily_date: str, symbol: str = "P0") -> dict | None:
     """Fetch night session minute data and return a preliminary next-day bar."""
     cst = timezone(timedelta(hours=8))
     now_cst = datetime.now(cst)
     if not (21 <= now_cst.hour <= 23):
         return None
     try:
-        df = ak.futures_zh_minute_sina(symbol="P0", period="60")
+        df = ak.futures_zh_minute_sina(symbol=symbol, period="60")
     except Exception:
         return None
     if df is None or df.empty:
@@ -854,7 +831,7 @@ def should_run_ai_analysis() -> bool:
     return os.getenv("RUN_AI_ANALYSIS", "").strip().lower() in {"1", "true", "yes", "on"}
 
 
-# ── Main ─────────────────────────────────────────────────────────────────────
+# ── Daily fetch with retry ───────────────────────────────────────────────────
 
 def fetch_daily_with_retry(symbol: str = "P0", attempts: int = 4, backoff: int = 20):
     """Sina's futures API blocks GitHub Actions IPs intermittently. Retry with
@@ -893,10 +870,19 @@ def detect_oi_column(df) -> str | None:
     return None
 
 
-def main() -> None:
-    df = fetch_daily_with_retry(symbol="P0")
+# ── Per-symbol pipeline ──────────────────────────────────────────────────────
+
+def run_profile(symbol: str) -> None:
+    """Run the full data + AI pipeline for one symbol, writing all outputs to
+    DATA_DIR / PROFILES[symbol]["dir"]."""
+    profile = PROFILES[symbol]
+    name = profile["name"]
+    out_dir = DATA_DIR / profile["dir"]
+    out_dir.mkdir(exist_ok=True, parents=True)
+
+    df = fetch_daily_with_retry(symbol=symbol)
     if df.empty:
-        raise RuntimeError("AKShare returned empty P0 daily data")
+        raise RuntimeError(f"AKShare returned empty {symbol} daily data")
 
     # F2: include open interest (持仓量) after volume when the daily feed has it.
     oi_col = detect_oi_column(df)
@@ -906,51 +892,57 @@ def main() -> None:
     else:
         print(f"OI column not found in daily df; columns={list(df.columns)}")
         export = df[["date", "open", "high", "low", "close", "volume"]].copy()
-    output = DATA_DIR / "palm_oil_p0_daily.csv"
+    output = out_dir / "daily.csv"
     export.to_csv(output, index=False)
 
-    # Intraday + news + correlation are best-effort AND independent of each
-    # other and the daily fetch — run them in parallel with the real-time
-    # quote fetch below. A transient Sina/DDG hiccup shouldn't fail the whole
-    # workflow.
+    # Intraday + news + realtime are best-effort AND independent of each other
+    # and the daily fetch — run them in parallel. A transient Sina/DDG hiccup
+    # shouldn't fail the whole workflow.
     from concurrent.futures import ThreadPoolExecutor
+
     def _safe(fn, fallback, label):
         try:
             return fn()
         except Exception as exc:  # noqa: BLE001
-            print(f"{label} failed (soft-skip): {type(exc).__name__}: {exc}")
+            print(f"[{symbol}] {label} failed (soft-skip): {type(exc).__name__}: {exc}")
             return fallback
 
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        f_intraday = pool.submit(_safe, fetch_intraday_bundle,
-                                 {"updated_at_utc": None, "one_hour": None, "two_hour": None},
-                                 "Intraday fetch")
-        f_news     = pool.submit(_safe, fetch_news_snapshot,
-                                 {"updated_at_utc": None, "articles": []},
-                                 "News snapshot fetch")
-        f_realtime = pool.submit(_safe, get_realtime_quote_sina, None, "Realtime quote fetch")
-        f_correl   = pool.submit(_safe, fetch_correlation_snapshot,
-                                 {"updated_at_utc": None, "symbols": {}},
-                                 "Correlation snapshot fetch")
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        f_intraday = pool.submit(
+            _safe,
+            lambda: fetch_intraday_bundle(symbol=symbol, out_dir=out_dir),
+            {"updated_at_utc": None, "one_hour": None, "two_hour": None},
+            "Intraday fetch",
+        )
+        f_news = pool.submit(
+            _safe,
+            lambda: fetch_news_snapshot(profile["news_queries"], out_dir=out_dir),
+            {"updated_at_utc": None, "articles": []},
+            "News snapshot fetch",
+        )
+        f_realtime = pool.submit(
+            _safe,
+            lambda: get_realtime_quote_sina(symbol=symbol),
+            None,
+            "Realtime quote fetch",
+        )
         intraday = f_intraday.result()
         news_snapshot = f_news.result()
         realtime = f_realtime.result()
-        correlation = f_correl.result()
 
     latest = export.tail(1).iloc[0]
     meta = {
         "source": "AKShare futures_zh_daily_sina",
-        "symbol": "P0",
-        "market": "DCE palm oil continuous contract",
-        "instrument_name": "棕榈油连续",
+        "symbol": symbol,
+        "market": f"DCE {name} continuous contract",
+        "instrument_name": f"{name}连续",
         "rows": int(len(export)),
         "latest_date": str(latest["date"]),
         "latest_close": float(latest["close"]),
         "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "live_bar": get_live_bar(str(latest["date"])),
+        "live_bar": get_live_bar(str(latest["date"]), symbol=symbol),
         "intraday_updated_at_utc": intraday.get("updated_at_utc"),
         "news_updated_at_utc": news_snapshot.get("updated_at_utc"),
-        "correlation_updated_at_utc": correlation.get("updated_at_utc"),
     }
 
     # F2: attach open-interest fields when available.
@@ -965,8 +957,8 @@ def main() -> None:
             meta["oi_change"] = oi_change
             meta["oi_change_pct"] = pct(oi_change_pct)
         except (KeyError, ValueError, TypeError) as exc:
-            print(f"OI meta compute failed: {type(exc).__name__}: {exc}")
-    (DATA_DIR / "source_meta.json").write_text(
+            print(f"[{symbol}] OI meta compute failed: {type(exc).__name__}: {exc}")
+    (out_dir / "source_meta.json").write_text(
         json.dumps(meta, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
@@ -974,45 +966,52 @@ def main() -> None:
     if should_run_ai_analysis():
         api_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
 
-        # Real-time quote was already fetched in parallel above
+        # Real-time quote was already fetched in parallel above.
         if realtime:
-            print(f"Real-time quote: {realtime['price']} @ {realtime['tradedate']} {realtime['ticktime']}")
+            print(f"[{symbol}] Real-time quote: {realtime['price']} @ {realtime['tradedate']} {realtime['ticktime']}")
         else:
-            print("Real-time quote: unavailable, using daily close only")
+            print(f"[{symbol}] Real-time quote: unavailable, using daily close only")
 
         snapshot = daily_snapshot(export, realtime, intraday)
 
-        # Step 1 – detailed news via web search
+        # Step 1 – detailed news via web search (fallback path only)
         news_summary = news_snapshot_to_text(news_snapshot)
         if api_key and not news_summary:
-            print("Fetching market news via DeepSeek web search...")
-            news_summary = fetch_news_raw(api_key, snapshot)
+            print(f"[{symbol}] Fetching market news via DeepSeek web search...")
+            news_summary = fetch_news_raw(api_key, snapshot, profile_name=name)
             preview = news_summary[:150].replace("\n", " ")
-            print(f"News raw preview: {preview}...")
+            print(f"[{symbol}] News raw preview: {preview}...")
         else:
-            print(f"News snapshot articles: {len(news_snapshot.get('articles') or [])}")
+            print(f"[{symbol}] News snapshot articles: {len(news_snapshot.get('articles') or [])}")
 
         # Step 2 – full analysis
         try:
-            ai_analysis = generate_ai_analysis(snapshot, news_summary)
+            ai_analysis = generate_ai_analysis(
+                snapshot, news_summary, profile_name=name, symbol=symbol
+            )
         except Exception as exc:  # noqa: BLE001
             ai_analysis = fallback_ai_analysis(snapshot, f"{type(exc).__name__}: {exc}")
 
-        (DATA_DIR / "ai_analysis.json").write_text(
+        (out_dir / "ai_analysis.json").write_text(
             json.dumps(ai_analysis, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
-        print(f"AI analysis: {ai_analysis['status']}")
+        print(f"[{symbol}] AI analysis: {ai_analysis['status']}")
     else:
-        print("AI analysis: skipped; set RUN_AI_ANALYSIS=true to generate")
+        print(f"[{symbol}] AI analysis: skipped; set RUN_AI_ANALYSIS=true to generate")
 
-    print(f"Updated {output}")
-    print(f"Rows: {len(export)}")
-    print(f"Latest: {latest['date']} close={latest['close']}")
-    print(f"Intraday 1H: {bool(intraday.get('one_hour'))}, 2H: {bool(intraday.get('two_hour'))}")
-    print(f"News articles: {len(news_snapshot.get('articles') or [])}")
-    print(f"Correlation symbols: {list((correlation.get('symbols') or {}).keys())}")
+    print(f"[{symbol}] Updated {output}")
+    print(f"[{symbol}] Rows: {len(export)}")
+    print(f"[{symbol}] Latest: {latest['date']} close={latest['close']}")
+    print(f"[{symbol}] Intraday 1H: {bool(intraday.get('one_hour'))}, 2H: {bool(intraday.get('two_hour'))}")
+    print(f"[{symbol}] News articles: {len(news_snapshot.get('articles') or [])}")
 
 
 if __name__ == "__main__":
-    main()
+    symbols_env = os.getenv("SYMBOLS", "P0,Y0")
+    for sym in [s.strip() for s in symbols_env.split(",") if s.strip()]:
+        if sym not in PROFILES:
+            print(f"Unknown symbol: {sym}")
+            continue
+        print(f"\n{'=' * 60}\nRunning profile: {sym}\n{'=' * 60}")
+        run_profile(sym)

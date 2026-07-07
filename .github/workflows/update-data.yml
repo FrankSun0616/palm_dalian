@@ -50,14 +50,18 @@ jobs:
         run: python update_data.py
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          # Comma-separated list of profiles to run (must match keys in
+          # update_data.PROFILES). Default runs both P0 (palm oil) and Y0
+          # (soybean oil) — expect ~2x AI wall time on scheduled AI runs.
+          SYMBOLS: "P0,Y0"
           RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && contains(fromJSON('["30 0 * * *","30 3 * * *","30 7 * * *"]'), github.event.schedule)) }}
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update palm oil P0 data"
+          commit_message: "Update palm oil + soybean oil data"
           skip_dirty_check: true
-          file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json data/ai_analysis.json data/intraday_1h.csv data/intraday_2h.csv data/intraday_meta.json data/news_snapshot.json data/correlation_snapshot.json
+          file_pattern: data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

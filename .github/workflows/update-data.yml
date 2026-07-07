@@ -69,7 +69,7 @@ jobs:
           set -e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json 2>/dev/null || true
+          git add data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json data/overseas.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No data changes to commit"; exit 0
           fi
@@ -81,12 +81,14 @@ jobs:
             echo "Push failed (attempt $attempt), replaying data on top of remote..."
             BACKUP=$(mktemp -d)
             cp -a data/p0 data/y0 "$BACKUP/"
+            [ -f data/overseas.json ] && cp data/overseas.json "$BACKUP/overseas.json"
             git fetch origin main
             git reset --hard origin/main
             rm -rf data/p0 data/y0
             cp -a "$BACKUP/p0" "$BACKUP/y0" data/
+            [ -f "$BACKUP/overseas.json" ] && cp "$BACKUP/overseas.json" data/overseas.json
             rm -rf "$BACKUP"
-            git add data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json 2>/dev/null || true
+            git add data/p0/*.csv data/p0/*.json data/y0/*.csv data/y0/*.json data/overseas.json 2>/dev/null || true
             if git diff --cached --quiet; then
               echo "Remote already has our data — nothing to push"; exit 0
             fi

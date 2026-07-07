@@ -1014,3 +1014,66 @@ a.news-title:hover { text-decoration: underline; color: var(--blue); }
   .legend { justify-content: flex-start; }
   .section-head { flex-direction: column; gap: 4px; align-items: flex-start; }
 }
+
+/* ── Mobile ≤480px: tap targets, canvas aspect ratio, dense layout ── */
+@media (max-width: 480px) {
+  /* Canvas — restore aspect ratio so K-line doesn't distort into a tall column */
+  #priceCanvas  { aspect-ratio: 1200 / 620; height: auto; }
+  #volumeCanvas { aspect-ratio: 1200 / 180; height: auto; }
+  .chart-panel canvas { width: 100%; }
+  .chart-panel { padding: 12px; }
+
+  /* Toolbar — 44px tap targets */
+  .toolbar button { min-height: 44px; padding: 10px 12px; font-size: 14px; }
+  .toolbar select { min-height: 44px; padding: 10px 12px; width: 100%; font-size: 14px; }
+  .toolbar label { flex-direction: column; align-items: stretch; gap: 4px; }
+  .file-label input { max-width: 100%; width: 100%; min-height: 44px; padding: 8px; }
+  .file-label input::file-selector-button { min-height: 36px; padding: 8px 12px; }
+
+  /* Multi-strategy — single column so numbers don't wrap */
+  .strategy-cards { grid-template-columns: 1fr; }
+
+  /* Header — smaller so the long Chinese title doesn't eat the fold */
+  h1 { font-size: 20px; line-height: 1.2; }
+  .eyebrow { font-size: 11px; gap: 8px; }
+  .topbar { margin-bottom: 12px; }
+
+  /* AI panel head — stack title above the bias pill */
+  .ai-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .ai-head h2 { font-size: 17px; }
+  .bias-pill { align-self: flex-start; }
+
+  /* News ticker — single column, meta stacked */
+  #newsTickerList { grid-template-columns: 1fr; gap: 8px; }
+  .news-ticker { padding: 12px; }
+  .ticker-card-meta { flex-direction: column; gap: 2px; }
+
+  /* Levels — tighter but keep 2 cols for compare */
+  .levels div { padding: 10px; }
+  .levels strong { font-size: 18px; }
+
+  /* Metric — smaller so number fits */
+  .metric { min-height: 88px; padding: 12px; }
+  .metric strong { font-size: 22px; margin: 6px 0 2px; }
+
+  /* Section heads — dense */
+  .section-head h2 { font-size: 16px; }
+  .section-head { margin-bottom: 8px; padding-bottom: 6px; }
+  .multi-strategy, .news-ticker, .news-block, .correlation-panel { padding: 12px; }
+
+  /* Legend — smaller chips so canvas isn't pushed down */
+  .legend { gap: 5px; max-width: 100%; }
+  .legend span { font-size: 11px; gap: 3px; }
+  .legend i { width: 14px; height: 2px; }
+
+  /* Board cards — no forced tall min-height when stacked */
+  .board-card { min-height: 0; padding: 12px; }
+  .board-card strong { font-size: 13px; }
+  .intraday-board { gap: 10px; }
+
+  /* Analysis cards — 12px readability floor for elderly users */
+  .analysis-card { padding: 14px; }
+  .analysis-card ul { padding-left: 16px; }
+  .signal-list li, .indicator span, .risk-row span, .scenario span { font-size: 12px; }
+  .analysis-card p, .analysis-card li { font-size: 14px; }
+}

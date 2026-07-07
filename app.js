@@ -154,11 +154,11 @@ function updateMarketStatus() {
   const liveInd = document.querySelector(".live-indicator");
   if (liveInd) {
     liveInd.classList.remove("market-closed", "market-weekend");
-    const textNode = Array.from(liveInd.childNodes).find((n) => n.nodeType === Node.TEXT_NODE);
+    const labelEl = liveInd.querySelector(".live-label");
     let label = "实时";
     if (status === "weekend") { liveInd.classList.add("market-weekend"); label = "休市"; }
     else if (status === "closed" || status === "day-break") { liveInd.classList.add("market-closed"); label = "非交易时段"; }
-    if (textNode) textNode.textContent = ` ${label}`;
+    if (labelEl) labelEl.textContent = label;
   }
 
   if (!els.marketBanner) return;

@@ -1228,7 +1228,10 @@ async function autoLoadOverseas() {
       return;
     }
     const data = await r.json();
-    const items = Array.isArray(data.markets) ? data.markets : [];
+    // Backend writes { symbols: { FCPO:{...}, SOYBEAN_OIL:{...}, BRENT:{...} } }
+    // Each value has: {name, price, change, change_pct: "+x.xx%" (string), source}
+    const symbolsObj = (data && typeof data.symbols === "object") ? data.symbols : {};
+    const items = Object.entries(symbolsObj).map(([sym, v]) => ({ symbol: sym, ...v }));
     if (els.overseasMeta) {
       const upd = data.updated_at_utc ? `更新 ${formatDateTime(data.updated_at_utc)}` : "";
       els.overseasMeta.textContent = items.length
@@ -1242,9 +1245,11 @@ async function autoLoadOverseas() {
     els.overseasGrid.innerHTML = items.map((m) => {
       const priceRaw = Number(m.price);
       const price = Number.isFinite(priceRaw) ? priceRaw.toFixed(2) : "--";
-      const pctRaw = Number(m.change_pct);
+      // change_pct arrives as a string like "+1.23%" — strip the % to compute
+      // numeric direction, keep the string for display.
+      const pctStr = typeof m.change_pct === "string" ? m.change_pct : "--";
+      const pctRaw = Number(String(m.change_pct || "").replace("%", ""));
       const hasPct = Number.isFinite(pctRaw);
-      const pctStr = hasPct ? `${pctRaw > 0 ? "+" : ""}${pctRaw.toFixed(2)}%` : "--";
       const cls    = !hasPct ? "" : (pctRaw >= 0 ? "up" : "down");
       const name   = escapeHtml(m.name || m.symbol || "--");
       const symTxt = m.symbol && m.symbol !== m.name ? m.symbol : "";
@@ -1256,7 +1261,7 @@ async function autoLoadOverseas() {
           </div>
           <div class="overseas-body">
             <span class="overseas-price">${price}</span>
-            <span class="pct ${cls}">${pctStr}</span>
+            <span class="pct ${cls}">${escapeHtml(pctStr)}</span>
           </div>
         </div>
       `;
@@ -1279,13 +1284,16 @@ async function autoLoadAccuracy() {
       return;
     }
     const d = await r.json();
-    const rateRaw = Number(d.hit_rate_20);
+    // Backend writes `recent_hit_rate` as a fraction (0..1) or null when
+    // there aren't enough graded entries yet.
+    const rateRaw = Number(d.recent_hit_rate);
     const total   = Number(d.total_evaluated || 0);
     if (!Number.isFinite(rateRaw)) {
       els.aiAccuracy.hidden = true;
       return;
     }
-    // Backend may store hit_rate_20 as fraction 0..1 or as percent 0..100.
+    // Defensive: accept fraction (0..1) or percent (0..100) in case an older
+    // ai_accuracy.json format from an earlier run is still on disk.
     const pct  = rateRaw <= 1 ? rateRaw * 100 : rateRaw;
     const warn = Boolean(d.warning_low_accuracy);
     const prefix = warn ? "⚠️ " : "";
@@ -2456,6 +2464,13 @@ function reloadAll() {
   lastQuote = null;
   // Pos-calc: symbol-scoped defaults should re-populate on switch
   resetPosCalcUserEdited();
+  // Kill any in-flight ask polling so it doesn't leak into the new symbol's
+  // ask_response.json (dataPath uses the CURRENT activeSymbol on each tick).
+  if (askPollInterval) {
+    clearInterval(askPollInterval);
+    askPollInterval = null;
+    if (els.askBtn) els.askBtn.disabled = false;
+  }
   // Hide previous symbol's ask history and clear input
   if (els.askResponse) els.askResponse.hidden = true;
   if (els.askInput) els.askInput.value = "";

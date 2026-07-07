@@ -1299,11 +1299,16 @@ def run_profile(symbol: str) -> None:
 
         # F3: append this analysis to the per-symbol history
         # F3+F7: re-grade the history against current price
+        # Skip archiving fallback entries — they carry bias='等待AI' (bias_sign=0)
+        # and would pollute the accuracy score with fake neutral outcomes.
         try:
             price_for_history = (
                 float(realtime["price"]) if realtime else float(snapshot["close"])
             )
-            archive_ai_history(out_dir, ai_analysis, price_for_history)
+            if ai_analysis.get("status") == "ok":
+                archive_ai_history(out_dir, ai_analysis, price_for_history)
+            else:
+                print(f"[{symbol}] AI history skipped for status={ai_analysis.get('status')}")
             acc = compute_ai_accuracy(out_dir, price_for_history)
             print(
                 f"[{symbol}] AI accuracy: evaluated={acc['total_evaluated']} "

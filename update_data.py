@@ -198,59 +198,52 @@ CORRELATION_TARGETS = [
     ("OI0", "菜油"),
     ("SC0", "原油"),
 ]
-# Order matters — earliest node wins if a symbol appears in multiple nodes.
-CORRELATION_NODES = ["zly_qh", "nsc_qh", "hnsc_qh", "inecom_qh"]
 
 
-def _fetch_sina_node(node: str) -> list[dict]:
-    url = SINA_MARKET_URL_TMPL.format(node=node)
-    resp = requests.get(url, timeout=10)
-    resp.raise_for_status()
-    payload = resp.json()
-    return payload if isinstance(payload, list) else []
+def _fetch_daily_last_two(symbol: str) -> tuple[float, float] | None:
+    """Return (latest_close, prev_close) for a continuous symbol via AKShare's
+    Sina daily API. Retries once on transient failure. Returns None on error."""
+    for attempt in (1, 2):
+        try:
+            df = ak.futures_zh_daily_sina(symbol=symbol)
+            if df is None or len(df) < 2:
+                return None
+            last = float(df.iloc[-1]["close"])
+            prev = float(df.iloc[-2]["close"])
+            return (last, prev) if last and prev else None
+        except Exception as exc:  # noqa: BLE001
+            if attempt == 2:
+                print(f"Correlation {symbol}: daily fetch failed: {type(exc).__name__}: {exc}")
+                return None
 
 
 def fetch_correlation_snapshot() -> dict:
-    """Fetch real-time quotes for P0 plus related futures (Y0, OI0, SC0).
-    Writes data/correlation_snapshot.json. A symbol may be omitted if it is
-    unavailable on any probed Sina node."""
-    all_quotes: dict[str, dict] = {}
-    for node in CORRELATION_NODES:
-        try:
-            items = _fetch_sina_node(node)
-        except Exception as exc:  # noqa: BLE001
-            print(f"Correlation node {node} fetch failed: {type(exc).__name__}: {exc}")
-            continue
-        for item in items:
-            sym = item.get("symbol")
-            if sym and sym not in all_quotes:
-                all_quotes[sym] = item
-
+    """Fetch latest daily close + prev close for P0 plus related futures (Y0, OI0, SC0)
+    via AKShare's Sina daily API. Sina's Market_Center endpoint splits every variety
+    into its own opaque 'node' name (棕榈=zly_qh, 豆油=dy_qh, ...) and the mapping is
+    undocumented — Y0/OI0/SC0 nodes proved unfindable — so we use futures_zh_daily_sina
+    for consistency across all symbols. Trade-off: correlation values are the last-
+    completed daily close, not intraday realtime, which is fine for a trend-comparison
+    panel."""
     symbols: dict[str, dict] = {}
     for sym, name in CORRELATION_TARGETS:
-        item = all_quotes.get(sym)
-        if not item:
-            print(f"Correlation: {sym} not found on any Sina node")
+        pair = _fetch_daily_last_two(sym)
+        if not pair:
+            print(f"Correlation: {sym} unavailable")
             continue
-        try:
-            price = float(item.get("trade") or 0)
-            prev_close = float(item.get("preclose") or 0)
-            if not price or not prev_close:
-                continue
-            change_abs = price - prev_close
-            change_pct_val = change_abs / prev_close if prev_close else 0
-            symbols[sym] = {
-                "name": name,
-                "price": price,
-                "prev_close": prev_close,
-                "change_abs": round(change_abs, 2),
-                "change_pct": pct(change_pct_val),
-            }
-        except (TypeError, ValueError) as exc:
-            print(f"Correlation parse failed for {sym}: {exc}")
+        price, prev_close = pair
+        change_abs = price - prev_close
+        change_pct_val = change_abs / prev_close if prev_close else 0
+        symbols[sym] = {
+            "name": name,
+            "price": price,
+            "prev_close": prev_close,
+            "change_abs": round(change_abs, 2),
+            "change_pct": pct(change_pct_val),
+        }
 
     snap = {
-        "source": "Sina Market Center",
+        "source": "AKShare futures_zh_daily_sina (last close)",
         "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "symbols": symbols,
     }

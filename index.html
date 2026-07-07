@@ -6,7 +6,7 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260707-5">
+  <link rel="stylesheet" href="styles.css?v=20260707-6">
 </head>
 <body>
   <main class="app-shell">
@@ -24,8 +24,16 @@
     </header>
 
     <section class="symbol-switcher" aria-label="切换品种">
-      <button class="sym-btn active" data-sym="P0">🌴 P0 棕榈油</button>
+      <button class="sym-btn" data-sym="P0">🌴 P0 棕榈油</button>
       <button class="sym-btn" data-sym="Y0">🌱 Y0 豆油</button>
+      <script>
+        // Stamp .active before render so users with saved Y0 don't see a P0 flash
+        (function() {
+          var sym = localStorage.getItem("activeSymbol") || "P0";
+          var btn = document.querySelector('.sym-btn[data-sym="' + sym + '"]');
+          if (btn) btn.classList.add("active");
+        })();
+      </script>
     </section>
 
     <section class="sibling-widget" aria-label="联动品种">
@@ -262,6 +270,6 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260707-5"></script>
+  <script src="app.js?v=20260707-6"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // ── Dual-symbol config ─────────────────────────────────────
 const SYMBOL_LABELS = {
-  P0: { code: "P0", name: "棕榈油", emoji: "🌴", exchange: "DCE" },
-  Y0: { code: "Y0", name: "豆油",   emoji: "🌱", exchange: "DCE" },
+  P0: { code: "P0", name: "棕榈油", emoji: "🌴", exchange: "DCE", sinaNode: "zly_qh" },
+  Y0: { code: "Y0", name: "豆油",   emoji: "🌱", exchange: "DCE", sinaNode: "dy_qh" },
 };
 function activeLabel() { return SYMBOL_LABELS[state.activeSymbol] || SYMBOL_LABELS.P0; }
 function siblingSymbol() { return state.activeSymbol === "P0" ? "Y0" : "P0"; }
@@ -1310,6 +1310,7 @@ async function autoLoadCsv() {
     return;
   }
   const lbl = activeLabel();
+  const _fetchSym = state.activeSymbol;  // guard against symbol switch during fetch
   setLoadStatus("加载中", `正在读取真实 ${lbl.code} CSV...`);
   try {
     const cacheBust = `t=${Date.now()}`;
@@ -1317,6 +1318,7 @@ async function autoLoadCsv() {
       fetch(`${dataPath("daily.csv")}?${cacheBust}`, { cache: "no-store" }),
       fetch(`${dataPath("source_meta.json")}?${cacheBust}`, { cache: "no-store" })
     ]);
+    if (_fetchSym !== state.activeSymbol) return;  // user switched — drop stale response
     if (response.status === 404) {
       // Files not generated yet (e.g. fresh Y0 before first workflow run).
       // Keep demo data and show a helpful message rather than crashing.
@@ -1357,9 +1359,11 @@ async function autoLoadCsv() {
 
 async function autoLoadAiAnalysis() {
   if (location.protocol === "file:") return;
+  const _fetchSym = state.activeSymbol;
   try {
     const cacheBust = `t=${Date.now()}`;
     const response = await fetch(`${dataPath("ai_analysis.json")}?${cacheBust}`, { cache: "no-store" });
+    if (_fetchSym !== state.activeSymbol) return;
     if (response.status === 404) {
       // Fresh symbol without an AI run yet — show placeholder, don't crash.
       els.aiMeta.textContent = `${activeLabel().code} AI 分析尚未生成`;
@@ -1383,8 +1387,10 @@ async function autoLoadAiAnalysis() {
 
 async function autoLoadIntradayMeta() {
   if (location.protocol === "file:") return;
+  const _fetchSym = state.activeSymbol;
   try {
     const response = await fetch(`${dataPath("intraday_meta.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (_fetchSym !== state.activeSymbol) return;
     if (response.status === 404) {
       state.intradayMeta = null;
       els.boll1hStatus.textContent = "待生成";
@@ -1413,8 +1419,10 @@ async function autoLoadIntradayMeta() {
 
 async function autoLoadNewsSnapshot() {
   if (location.protocol === "file:") return;
+  const _fetchSym = state.activeSymbol;
   try {
     const response = await fetch(`${dataPath("news_snapshot.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (_fetchSym !== state.activeSymbol) return;
     if (response.status === 404) {
       state.newsSnapshot = null;
       els.newsRealtimeStatus.textContent = "待生成";
@@ -1911,13 +1919,15 @@ function isNightSession() { const h = bjHour(); return h >= 21 && h <= 23; }
 function isDaySession()   { const h = bjHour(); return h >= 9  && h <= 15; }
 function isTrading()      { return isDaySession() || isNightSession(); }
 
-const SINA_FUTURES_URL =
-  "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/" +
-  "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node=zly_qh&base=futures";
+function sinaFuturesUrl(node) {
+  return "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/" +
+    `Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node=${node}&base=futures`;
+}
 
 async function fetchRealtimeQuote() {
   try {
-    const r = await fetch(`${SINA_FUTURES_URL}&_=${Date.now()}`, { cache: "no-store" });
+    const node = activeLabel().sinaNode;
+    const r = await fetch(`${sinaFuturesUrl(node)}&_=${Date.now()}`, { cache: "no-store" });
     if (!r.ok) return null;
     const data = await r.json();
     const sym = state.activeSymbol;

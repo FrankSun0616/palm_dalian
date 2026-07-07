@@ -1008,10 +1008,19 @@ def run_profile(symbol: str) -> None:
 
 
 if __name__ == "__main__":
+    import sys
     symbols_env = os.getenv("SYMBOLS", "P0,Y0")
+    failed: list[str] = []
     for sym in [s.strip() for s in symbols_env.split(",") if s.strip()]:
         if sym not in PROFILES:
             print(f"Unknown symbol: {sym}")
             continue
         print(f"\n{'=' * 60}\nRunning profile: {sym}\n{'=' * 60}")
-        run_profile(sym)
+        try:
+            run_profile(sym)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[{sym}] pipeline failed: {type(exc).__name__}: {exc}")
+            failed.append(sym)
+    if failed:
+        print(f"\n=== FAILED: {failed} ===")
+        sys.exit(1)

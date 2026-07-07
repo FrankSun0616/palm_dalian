@@ -1,0 +1,40 @@
+name: Notify palm oil events
+
+on:
+  workflow_run:
+    workflows: ["Update palm oil data"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  notify:
+    # Only run when the upstream data-update actually succeeded.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install requests
+
+      - name: Run notifier
+        run: python notify.py
+        env:
+          WECHAT_SENDKEY: ${{ secrets.WECHAT_SENDKEY }}
+
+      - name: Commit updated state
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update palm oil notify state"
+          skip_dirty_check: true
+          file_pattern: data/notify_state.json

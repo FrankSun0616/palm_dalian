@@ -12,9 +12,15 @@ on:
         type: boolean
   schedule:
     # GitHub Actions scheduled workflows support a shortest interval of 5 minutes.
+    # Data-only refresh.
     - cron: "*/5 * * * *"
-    # Run AI analysis on a 3-hour cadence for scheduled updates.
-    - cron: "0 */3 * * *"
+    # AI-analysis triggers, three times per trading day (Beijing time):
+    #   08:30 CST (pre-market) = 00:30 UTC
+    #   11:30 CST (mid-session) = 03:30 UTC
+    #   15:30 CST (post-market) = 07:30 UTC
+    - cron: "30 0 * * *"
+    - cron: "30 3 * * *"
+    - cron: "30 7 * * *"
 
 permissions:
   contents: write
@@ -44,14 +50,14 @@ jobs:
         run: python update_data.py
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && github.event.schedule == '0 */3 * * *') }}
+          RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && contains(fromJSON('["30 0 * * *","30 3 * * *","30 7 * * *"]'), github.event.schedule)) }}
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update palm oil P0 data"
           skip_dirty_check: true
-          file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json data/ai_analysis.json data/intraday_1h.csv data/intraday_2h.csv data/intraday_meta.json data/news_snapshot.json
+          file_pattern: data/palm_oil_p0_daily.csv data/source_meta.json data/ai_analysis.json data/intraday_1h.csv data/intraday_2h.csv data/intraday_meta.json data/news_snapshot.json data/correlation_snapshot.json
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

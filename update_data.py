@@ -153,10 +153,11 @@ def fetch_intraday_bundle() -> dict[str, object]:
 
 # ── Real-time quote (Sina Market Center) ─────────────────────────────────────
 
-SINA_FUTURES_URL = (
+SINA_MARKET_URL_TMPL = (
     "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/"
-    "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node=zly_qh&base=futures"
+    "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node={node}&base=futures"
 )
+SINA_FUTURES_URL = SINA_MARKET_URL_TMPL.format(node="zly_qh")
 
 
 def get_realtime_quote_sina() -> dict | None:
@@ -184,6 +185,80 @@ def get_realtime_quote_sina() -> dict | None:
         }
     except Exception:
         return None
+
+
+# ── Correlation snapshot (related commodity real-time quotes) ────────────────
+
+# Symbols to snapshot for the correlation panel. SC0 (INE crude) is not on the
+# same Sina node as the oils, so we probe multiple nodes and take whichever
+# node has the symbol.
+CORRELATION_TARGETS = [
+    ("P0",  "棕榈油"),
+    ("Y0",  "豆油"),
+    ("OI0", "菜油"),
+    ("SC0", "原油"),
+]
+# Order matters — earliest node wins if a symbol appears in multiple nodes.
+CORRELATION_NODES = ["zly_qh", "nsc_qh", "hnsc_qh", "inecom_qh"]
+
+
+def _fetch_sina_node(node: str) -> list[dict]:
+    url = SINA_MARKET_URL_TMPL.format(node=node)
+    resp = requests.get(url, timeout=10)
+    resp.raise_for_status()
+    payload = resp.json()
+    return payload if isinstance(payload, list) else []
+
+
+def fetch_correlation_snapshot() -> dict:
+    """Fetch real-time quotes for P0 plus related futures (Y0, OI0, SC0).
+    Writes data/correlation_snapshot.json. A symbol may be omitted if it is
+    unavailable on any probed Sina node."""
+    all_quotes: dict[str, dict] = {}
+    for node in CORRELATION_NODES:
+        try:
+            items = _fetch_sina_node(node)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Correlation node {node} fetch failed: {type(exc).__name__}: {exc}")
+            continue
+        for item in items:
+            sym = item.get("symbol")
+            if sym and sym not in all_quotes:
+                all_quotes[sym] = item
+
+    symbols: dict[str, dict] = {}
+    for sym, name in CORRELATION_TARGETS:
+        item = all_quotes.get(sym)
+        if not item:
+            print(f"Correlation: {sym} not found on any Sina node")
+            continue
+        try:
+            price = float(item.get("trade") or 0)
+            prev_close = float(item.get("preclose") or 0)
+            if not price or not prev_close:
+                continue
+            change_abs = price - prev_close
+            change_pct_val = change_abs / prev_close if prev_close else 0
+            symbols[sym] = {
+                "name": name,
+                "price": price,
+                "prev_close": prev_close,
+                "change_abs": round(change_abs, 2),
+                "change_pct": pct(change_pct_val),
+            }
+        except (TypeError, ValueError) as exc:
+            print(f"Correlation parse failed for {sym}: {exc}")
+
+    snap = {
+        "source": "Sina Market Center",
+        "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "symbols": symbols,
+    }
+    (DATA_DIR / "correlation_snapshot.json").write_text(
+        json.dumps(snap, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return snap
 
 
 # ── Daily snapshot ────────────────────────────────────────────────────────────
@@ -811,18 +886,40 @@ def fetch_daily_with_retry(symbol: str = "P0", attempts: int = 4, backoff: int =
     raise RuntimeError(f"AKShare futures_zh_daily_sina failed after {attempts} attempts: {last_exc}")
 
 
+# Candidate OI column names in AKShare's Sina daily output — order matters,
+# first match wins. AKShare has used both English 'hold' (matching the minute
+# feed) and Chinese '持仓' / '持仓量' across versions.
+OI_COLUMN_CANDIDATES = ("hold", "open_interest", "持仓量", "持仓")
+
+
+def detect_oi_column(df) -> str | None:
+    """Return the name of the OI column in df, or None if not present."""
+    for candidate in OI_COLUMN_CANDIDATES:
+        if candidate in df.columns:
+            return candidate
+    return None
+
+
 def main() -> None:
     df = fetch_daily_with_retry(symbol="P0")
     if df.empty:
         raise RuntimeError("AKShare returned empty P0 daily data")
 
-    export = df[["date", "open", "high", "low", "close", "volume"]].copy()
+    # F2: include open interest (持仓量) after volume when the daily feed has it.
+    oi_col = detect_oi_column(df)
+    if oi_col is not None:
+        export = df[["date", "open", "high", "low", "close", "volume", oi_col]].copy()
+        export = export.rename(columns={oi_col: "open_interest"})
+    else:
+        print(f"OI column not found in daily df; columns={list(df.columns)}")
+        export = df[["date", "open", "high", "low", "close", "volume"]].copy()
     output = DATA_DIR / "palm_oil_p0_daily.csv"
     export.to_csv(output, index=False)
 
-    # Intraday + news are best-effort AND independent of each other and the
-    # daily fetch — run them in parallel with the real-time quote fetch below.
-    # A transient Sina/DDG hiccup shouldn't fail the whole workflow.
+    # Intraday + news + correlation are best-effort AND independent of each
+    # other and the daily fetch — run them in parallel with the real-time
+    # quote fetch below. A transient Sina/DDG hiccup shouldn't fail the whole
+    # workflow.
     from concurrent.futures import ThreadPoolExecutor
     def _safe(fn, fallback, label):
         try:
@@ -831,7 +928,7 @@ def main() -> None:
             print(f"{label} failed (soft-skip): {type(exc).__name__}: {exc}")
             return fallback
 
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    with ThreadPoolExecutor(max_workers=4) as pool:
         f_intraday = pool.submit(_safe, fetch_intraday_bundle,
                                  {"updated_at_utc": None, "one_hour": None, "two_hour": None},
                                  "Intraday fetch")
@@ -839,9 +936,13 @@ def main() -> None:
                                  {"updated_at_utc": None, "articles": []},
                                  "News snapshot fetch")
         f_realtime = pool.submit(_safe, get_realtime_quote_sina, None, "Realtime quote fetch")
+        f_correl   = pool.submit(_safe, fetch_correlation_snapshot,
+                                 {"updated_at_utc": None, "symbols": {}},
+                                 "Correlation snapshot fetch")
         intraday = f_intraday.result()
         news_snapshot = f_news.result()
         realtime = f_realtime.result()
+        correlation = f_correl.result()
 
     latest = export.tail(1).iloc[0]
     meta = {
@@ -856,7 +957,22 @@ def main() -> None:
         "live_bar": get_live_bar(str(latest["date"])),
         "intraday_updated_at_utc": intraday.get("updated_at_utc"),
         "news_updated_at_utc": news_snapshot.get("updated_at_utc"),
+        "correlation_updated_at_utc": correlation.get("updated_at_utc"),
     }
+
+    # F2: attach open-interest fields when available.
+    if oi_col is not None and len(export) >= 2:
+        try:
+            latest_oi = int(float(latest["open_interest"]))
+            prev_oi = int(float(export.tail(2).iloc[0]["open_interest"]))
+            oi_change = latest_oi - prev_oi
+            oi_change_pct = (oi_change / prev_oi) if prev_oi else 0
+            meta["latest_open_interest"] = latest_oi
+            meta["prev_open_interest"] = prev_oi
+            meta["oi_change"] = oi_change
+            meta["oi_change_pct"] = pct(oi_change_pct)
+        except (KeyError, ValueError, TypeError) as exc:
+            print(f"OI meta compute failed: {type(exc).__name__}: {exc}")
     (DATA_DIR / "source_meta.json").write_text(
         json.dumps(meta, ensure_ascii=False, indent=2),
         encoding="utf-8",
@@ -902,6 +1018,7 @@ def main() -> None:
     print(f"Latest: {latest['date']} close={latest['close']}")
     print(f"Intraday 1H: {bool(intraday.get('one_hour'))}, 2H: {bool(intraday.get('two_hour'))}")
     print(f"News articles: {len(news_snapshot.get('articles') or [])}")
+    print(f"Correlation symbols: {list((correlation.get('symbols') or {}).keys())}")
 
 
 if __name__ == "__main__":

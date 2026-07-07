@@ -762,13 +762,23 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
                 {"role": "user", "content": prompt_content},
             ],
             "temperature": 0.2,
-            "max_tokens": 4000,
+            "max_tokens": 8000,
             "response_format": {"type": "json_object"},
         },
-        timeout=90,
+        timeout=120,
     )
     resp.raise_for_status()
-    content = resp.json()["choices"][0]["message"]["content"]
+    resp_json = resp.json()
+    choice = resp_json["choices"][0]
+    content = choice["message"]["content"]
+    # Defensive: if DeepSeek truncated the response (finish_reason='length'),
+    # json.loads will throw a cryptic 'Unterminated string' error. Surface a
+    # cleaner error so we know to bump max_tokens rather than debug our parser.
+    if choice.get("finish_reason") == "length":
+        raise RuntimeError(
+            f"DeepSeek output truncated at max_tokens (finish_reason=length). "
+            f"Content length: {len(content)} chars. Bump max_tokens."
+        )
     parsed = normalize_ai_analysis(json.loads(content), snapshot)
     parsed.update(
         {

@@ -22,7 +22,7 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -126,6 +126,63 @@ def detect_level_break(
     return None
 
 
+# ── Data-freshness monitor (F6) ──────────────────────────────────────────────
+
+# Trading-hour thresholds are stricter than off-hours because the pipeline is
+# scheduled every 5 min during market open. Times are Beijing local (UTC+8).
+STALE_THRESHOLD_TRADING_SEC = 15 * 60
+STALE_THRESHOLD_OFFHOURS_SEC = 6 * 3600
+_BEIJING = timezone(timedelta(hours=8))
+
+
+def _parse_utc(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        s = str(value)
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def _is_trading_hours(now_utc: datetime) -> bool:
+    """True if now (Beijing) sits inside the day (09:00-15:00) or night
+    (21:00-23:30) DCE session windows."""
+    b = now_utc.astimezone(_BEIJING)
+    minutes = b.hour * 60 + b.minute
+    return (9 * 60 <= minutes <= 15 * 60) or (21 * 60 <= minutes <= 23 * 60 + 30)
+
+
+def check_data_freshness(meta: dict, now_utc: datetime | None = None) -> dict | None:
+    """Return a dict describing the staleness (elapsed_sec, threshold_sec) if
+    source_meta.updated_at_utc is beyond the current-hour threshold, else None.
+
+    Returning a dict (not a formatted string) lets the caller decide whether
+    to actually push based on prev_state.data_stale_alerted."""
+    if not meta:
+        return None
+    updated = _parse_utc(meta.get("updated_at_utc"))
+    if updated is None:
+        return None
+    now = now_utc or datetime.now(timezone.utc)
+    elapsed = (now - updated).total_seconds()
+    if elapsed < 0:
+        return None
+    threshold = STALE_THRESHOLD_TRADING_SEC if _is_trading_hours(now) else STALE_THRESHOLD_OFFHOURS_SEC
+    if elapsed <= threshold:
+        return None
+    return {
+        "elapsed_sec": int(elapsed),
+        "threshold_sec": int(threshold),
+        "updated_at_utc": meta.get("updated_at_utc"),
+    }
+
+
 # ── Event extraction ─────────────────────────────────────────────────────────
 
 def current_price(ai: dict, meta: dict) -> float | None:
@@ -143,6 +200,8 @@ def build_events(
     meta: dict,
     symbol: str,
     profile: dict,
+    accuracy: dict | None = None,
+    stale_info: dict | None = None,
 ) -> list[dict]:
     events: list[dict] = []
     emoji = profile.get("emoji", "")
@@ -201,6 +260,36 @@ def build_events(
             ),
         })
 
+    # 4) F6: data-source staleness — only fire on false→true transition
+    if stale_info and not bool(prev_state.get("data_stale_alerted")):
+        minutes = stale_info["elapsed_sec"] // 60
+        threshold_min = stale_info["threshold_sec"] // 60
+        events.append({
+            "kind": "data_stale",
+            "title": f"⚠️ {name} 数据源异常 ({minutes} 分钟未更新)",
+            "desp": (
+                f"**品种**: {name}（{symbol}）\n\n"
+                f"**最后更新**: {stale_info.get('updated_at_utc', '?')}\n\n"
+                f"**距今**: {minutes} 分钟（阈值 {threshold_min} 分钟）\n\n"
+                f"上游 AKShare/Sina 可能异常，前端数据将暂停更新。"
+            ),
+        })
+
+    # 5) F7: low AI accuracy warning — only fire on false→true transition
+    if accuracy and accuracy.get("warning_low_accuracy"):
+        if not bool(prev_state.get("accuracy_warned")):
+            hit_rate = accuracy.get("recent_hit_rate") or 0
+            total_evaluated = int(accuracy.get("total_evaluated") or 0)
+            hits = int(accuracy.get("hits") or 0)
+            events.append({
+                "kind": "accuracy_warning",
+                "title": f"📉 {name} AI 命中率偏低 ({hit_rate:.0%})",
+                "desp": (
+                    f"近 {total_evaluated} 次评估中 {hits} 次准确。"
+                    "谨慎参考 AI 判断。"
+                ),
+            })
+
     return events
 
 
@@ -227,8 +316,15 @@ def send_wechat(sendkey: str, title: str, desp: str) -> bool:
 
 # ── State write ──────────────────────────────────────────────────────────────
 
-def build_next_symbol_state(ai: dict, meta: dict) -> dict:
+def build_next_symbol_state(
+    ai: dict,
+    meta: dict,
+    accuracy: dict | None = None,
+    stale_info: dict | None = None,
+) -> dict:
     watch = ai.get("watch_levels") or {}
+    # Latch flags stay true while the condition persists; clear when it clears.
+    # That's what makes the notify path fire once per false→true edge.
     return {
         "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "ai_generated_at_utc": ai.get("generated_at_utc"),
@@ -236,6 +332,8 @@ def build_next_symbol_state(ai: dict, meta: dict) -> dict:
         "last_price": current_price(ai, meta),
         "resistance": _to_float(watch.get("resistance")),
         "support": _to_float(watch.get("support")),
+        "data_stale_alerted": bool(stale_info is not None),
+        "accuracy_warned": bool(accuracy and accuracy.get("warning_low_accuracy")),
     }
 
 
@@ -266,9 +364,14 @@ def main() -> int:
         profile_dir = DATA_DIR / profile["dir"]
         ai = load_json(profile_dir / "ai_analysis.json")
         meta = load_json(profile_dir / "source_meta.json")
+        accuracy = load_json(profile_dir / "ai_accuracy.json") or None
+        stale_info = check_data_freshness(meta)
 
         prev_symbol_state = prev_state.get(symbol, {}) if isinstance(prev_state, dict) else {}
-        events = build_events(prev_symbol_state, ai, meta, symbol, profile)
+        events = build_events(
+            prev_symbol_state, ai, meta, symbol, profile,
+            accuracy=accuracy, stale_info=stale_info,
+        )
         total_events += len(events)
 
         if not events:
@@ -285,7 +388,9 @@ def main() -> int:
                     total_sent += 1
                 print(f"[notify] {symbol} {evt['kind']}: {'sent' if ok else 'failed'}")
 
-        next_state[symbol] = build_next_symbol_state(ai, meta)
+        next_state[symbol] = build_next_symbol_state(
+            ai, meta, accuracy=accuracy, stale_info=stale_info,
+        )
 
     if total_events == 0:
         print("[notify] no events across all symbols")

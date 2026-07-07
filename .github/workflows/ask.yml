@@ -1,0 +1,87 @@
+name: Ask DeepSeek
+
+on:
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: "Symbol"
+        required: true
+        default: "P0"
+        type: choice
+        options:
+          - P0
+          - Y0
+      question:
+        description: "Question (Chinese)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  # Serialize asks so back-to-back submissions don't race on the git push.
+  group: ask-deepseek
+  cancel-in-progress: false
+
+jobs:
+  ask:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run DeepSeek Q&A
+        run: python ask_deepseek.py
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          SYMBOL: ${{ inputs.symbol }}
+          QUESTION: ${{ inputs.question }}
+
+      - name: Commit ask response (save-and-replay on push conflict)
+        # Same pattern as update-data.yml: if push races another workflow's
+        # commit, snapshot our one file, hard-reset to origin/main, drop the
+        # file back, and retry. Our ask always wins because it's the newest.
+        run: |
+          set -e
+          SYM_LOWER=$(echo "${{ inputs.symbol }}" | tr '[:upper:]' '[:lower:]')
+          TARGET="data/$SYM_LOWER/ask_response.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$TARGET" 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No ask response to commit"; exit 0
+          fi
+          git commit -m "Update $SYM_LOWER ask response"
+          for attempt in 1 2 3 4; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt $attempt"; exit 0
+            fi
+            echo "Push failed (attempt $attempt), replaying ask response on top of remote..."
+            BACKUP=$(mktemp -d)
+            cp "$TARGET" "$BACKUP/ask_response.json"
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "data/$SYM_LOWER"
+            cp "$BACKUP/ask_response.json" "$TARGET"
+            rm -rf "$BACKUP"
+            git add "$TARGET" 2>/dev/null || true
+            if git diff --cached --quiet; then
+              echo "Remote already has our answer — nothing to push"; exit 0
+            fi
+            git commit -m "Update $SYM_LOWER ask response (retry $attempt)"
+            sleep $((attempt * 3))
+          done
+          echo "All push retries failed"; exit 1

@@ -19,6 +19,295 @@ DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 
+# ── AI history / accuracy helpers ────────────────────────────────────────────
+
+# Kept in sync with notify.bias_sign — duplicated here to avoid importing
+# notify.py (which is a lightweight standalone script) from the data pipeline.
+_BIAS_LEXICON: list[tuple[str, int]] = [
+    ("偏多", +1), ("多头", +1), ("看多", +1), ("做多", +1), ("强", +1),
+    ("偏空", -1), ("空头", -1), ("看空", -1), ("做空", -1), ("弱", -1),
+]
+
+
+def _bias_sign(bias: str | None) -> int:
+    """+1 for long, -1 for short, 0 for neutral/unknown. Matches notify.bias_sign."""
+    if not bias:
+        return 0
+    text = str(bias)
+    for keyword, sign in _BIAS_LEXICON:
+        if keyword in text:
+            return sign
+    return 0
+
+
+AI_HISTORY_MAX = 100
+AI_HISTORY_MIN_FOR_SCORING = 5
+AI_ACCURACY_ELAPSED_DAYS = 3
+AI_ACCURACY_WINDOW = 20
+AI_ACCURACY_MOVE_THRESHOLD = 0.005  # 0.5%
+AI_ACCURACY_LOW_THRESHOLD = 0.40
+AI_ACCURACY_LOW_MIN_EVAL = 10
+
+
+def _load_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def archive_ai_history(profile_dir, ai_analysis: dict, current_price: float) -> None:
+    """Append a compact record of this AI analysis to
+    data/{profile_dir}/ai_history.json (list, trimmed to last 100)."""
+    profile_dir = Path(profile_dir)
+    profile_dir.mkdir(parents=True, exist_ok=True)
+    hist_path = profile_dir / "ai_history.json"
+
+    watch = ai_analysis.get("watch_levels") or {}
+    support = watch.get("support")
+    resistance = watch.get("resistance")
+
+    def _num(x):
+        try:
+            if x is None:
+                return None
+            return float(x)
+        except (TypeError, ValueError):
+            return None
+
+    bias = str(ai_analysis.get("bias") or "")
+    entry = {
+        "generated_at_utc": ai_analysis.get("generated_at_utc")
+            or datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "bias": bias,
+        "bias_sign": _bias_sign(bias),
+        "price_at": _num(current_price),
+        "resistance": _num(resistance),
+        "support": _num(support),
+    }
+
+    existing = _load_json(hist_path)
+    entries = existing.get("entries") if isinstance(existing, dict) else None
+    if not isinstance(entries, list):
+        entries = []
+    entries.append(entry)
+    if len(entries) > AI_HISTORY_MAX:
+        entries = entries[-AI_HISTORY_MAX:]
+
+    hist_path.write_text(
+        json.dumps({"entries": entries}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def _grade_entry(entry: dict, current_price: float) -> str | None:
+    """Return 'hit'|'miss'|'neutral' if this entry has enough elapsed time and
+    can be graded against current_price, else None."""
+    gen = entry.get("generated_at_utc")
+    price_at = entry.get("price_at")
+    if not gen or price_at in (None, 0):
+        return None
+    try:
+        gen_dt = datetime.fromisoformat(gen.replace("Z", "+00:00") if gen.endswith("Z") else gen)
+    except ValueError:
+        return None
+    if gen_dt.tzinfo is None:
+        gen_dt = gen_dt.replace(tzinfo=timezone.utc)
+    elapsed_days = (datetime.now(timezone.utc) - gen_dt).total_seconds() / 86400.0
+    if elapsed_days < AI_ACCURACY_ELAPSED_DAYS:
+        return None
+    try:
+        pa = float(price_at)
+        cp = float(current_price)
+    except (TypeError, ValueError):
+        return None
+    move = (cp - pa) / pa
+    sign = int(entry.get("bias_sign") or 0)
+    thr = AI_ACCURACY_MOVE_THRESHOLD
+    if sign > 0:
+        if move > thr:
+            return "hit"
+        if move < -thr:
+            return "miss"
+        return "neutral"
+    if sign < 0:
+        if move < -thr:
+            return "hit"
+        if move > thr:
+            return "miss"
+        return "neutral"
+    # neutral bias: hit if move stays inside ±thr, miss if big move
+    return "hit" if abs(move) <= thr else "miss"
+
+
+def compute_ai_accuracy(profile_dir, current_price: float) -> dict:
+    """Grade past AI entries in ai_history.json against current_price and
+    write data/{profile_dir}/ai_accuracy.json. Returns the written dict."""
+    profile_dir = Path(profile_dir)
+    profile_dir.mkdir(parents=True, exist_ok=True)
+    acc_path = profile_dir / "ai_accuracy.json"
+    hist = _load_json(profile_dir / "ai_history.json")
+    entries = hist.get("entries") if isinstance(hist, dict) else None
+    if not isinstance(entries, list):
+        entries = []
+
+    now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    if len(entries) < AI_HISTORY_MIN_FOR_SCORING:
+        result = {
+            "updated_at_utc": now_iso,
+            "recent_hit_rate": None,
+            "total_evaluated": 0,
+            "hits": 0,
+            "misses": 0,
+            "neutrals": 0,
+            "warning_low_accuracy": False,
+            "last_grade": None,
+        }
+        acc_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        return result
+
+    graded: list[dict] = []
+    for e in entries:
+        outcome = _grade_entry(e, current_price)
+        if outcome is None:
+            continue
+        graded.append({
+            "bias": e.get("bias"),
+            "generated_at_utc": e.get("generated_at_utc"),
+            "price_at": e.get("price_at"),
+            "current_price": float(current_price),
+            "outcome": outcome,
+        })
+
+    total_evaluated = len(graded)
+    hits = sum(1 for g in graded if g["outcome"] == "hit")
+    misses = sum(1 for g in graded if g["outcome"] == "miss")
+    neutrals = sum(1 for g in graded if g["outcome"] == "neutral")
+
+    recent = graded[-AI_ACCURACY_WINDOW:]
+    if len(recent) >= AI_HISTORY_MIN_FOR_SCORING:
+        recent_hit_rate = sum(1 for g in recent if g["outcome"] == "hit") / len(recent)
+    else:
+        recent_hit_rate = None
+
+    warning = bool(
+        recent_hit_rate is not None
+        and recent_hit_rate < AI_ACCURACY_LOW_THRESHOLD
+        and total_evaluated >= AI_ACCURACY_LOW_MIN_EVAL
+    )
+
+    result = {
+        "updated_at_utc": now_iso,
+        "recent_hit_rate": round(recent_hit_rate, 4) if recent_hit_rate is not None else None,
+        "total_evaluated": total_evaluated,
+        "hits": hits,
+        "misses": misses,
+        "neutrals": neutrals,
+        "warning_low_accuracy": warning,
+        "last_grade": graded[-1] if graded else None,
+    }
+    acc_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    return result
+
+
+# ── F4: Overseas overnight snapshot ─────────────────────────────────────────
+#
+# Writes a single shared data/overseas.json used by BOTH the P0 and Y0 front
+# pages. Best-effort — a per-symbol failure or a total-network failure just
+# omits that symbol, never fails the pipeline.
+
+# akshare returns rows keyed by 名称 (Chinese name); we map code → cn_name so
+# a single realtime call covers all three tickers. Keeping this hardcoded
+# avoids paying for ak.futures_hq_subscribe_exchange_symbol() at runtime.
+_OVERSEAS_SPEC = [
+    ("FCPO",        "FCPO", "马棕油",       "马来棕榈油"),
+    ("SOYBEAN_OIL", "BO",   "CBOT-黄豆油",  "CBOT 豆油"),
+    ("BRENT",       "OIL",  "布伦特原油",   "布伦特原油"),
+]
+
+
+def fetch_overseas_snapshot(out_dir: Path = DATA_DIR) -> dict:
+    result = {
+        "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "symbols": {},
+    }
+    codes = [row[1] for row in _OVERSEAS_SPEC]
+    df = None
+    try:
+        df = ak.futures_foreign_commodity_realtime(symbol=codes)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[overseas] akshare fetch failed (soft-skip): {type(exc).__name__}: {exc}")
+
+    if df is not None and not df.empty:
+        for key, _code, cn_name, display in _OVERSEAS_SPEC:
+            try:
+                match = df[df["名称"] == cn_name]
+                if match.empty:
+                    continue
+                row = match.iloc[0]
+                price = float(row["最新价"])
+                prev_close = float(row["昨日结算价"])
+                if not price:
+                    continue
+                change = price - prev_close
+                change_pct = (change / prev_close) if prev_close else 0
+                result["symbols"][key] = {
+                    "name": display,
+                    "price": round(price, 4),
+                    "change": round(change, 4),
+                    "change_pct": pct(change_pct),
+                    "source": "AKShare futures_foreign_commodity_realtime",
+                }
+            except Exception as exc:  # noqa: BLE001
+                print(f"[overseas] parse {key} failed (soft-skip): {type(exc).__name__}: {exc}")
+
+    # Fallback: try Yahoo Finance for BO=F and BZ=F if akshare gave us nothing
+    # for those keys. FCPO is not on Yahoo, so we accept a possible omission.
+    yahoo_map = {"SOYBEAN_OIL": ("BO=F", "CBOT 豆油"), "BRENT": ("BZ=F", "布伦特原油")}
+    for key, (ticker, display) in yahoo_map.items():
+        if key in result["symbols"]:
+            continue
+        try:
+            resp = requests.get(
+                f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range=1d&interval=1d",
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=15,
+            )
+            resp.raise_for_status()
+            payload = resp.json()
+            chart = (payload.get("chart") or {}).get("result") or []
+            if not chart:
+                continue
+            meta_y = chart[0].get("meta") or {}
+            price = float(meta_y.get("regularMarketPrice") or 0)
+            prev_close = float(
+                meta_y.get("chartPreviousClose")
+                or meta_y.get("previousClose")
+                or 0
+            )
+            if not price:
+                continue
+            change = price - prev_close
+            change_pct = (change / prev_close) if prev_close else 0
+            result["symbols"][key] = {
+                "name": display,
+                "price": round(price, 4),
+                "change": round(change, 4),
+                "change_pct": pct(change_pct),
+                "source": f"Yahoo Finance {ticker}",
+            }
+        except Exception as exc:  # noqa: BLE001
+            print(f"[overseas] yahoo {ticker} failed (soft-skip): {type(exc).__name__}: {exc}")
+
+    out_dir.mkdir(exist_ok=True, parents=True)
+    (out_dir / "overseas.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print(f"[overseas] wrote {len(result['symbols'])} symbol(s): {list(result['symbols'].keys())}")
+    return result
+
+
 # ── Profiles: per-symbol pipeline config ─────────────────────────────────────
 #
 # Each profile drives one full pipeline run (daily CSV, intraday bundle, news
@@ -1007,6 +1296,21 @@ def run_profile(symbol: str) -> None:
             encoding="utf-8",
         )
         print(f"[{symbol}] AI analysis: {ai_analysis['status']}")
+
+        # F3: append this analysis to the per-symbol history
+        # F3+F7: re-grade the history against current price
+        try:
+            price_for_history = (
+                float(realtime["price"]) if realtime else float(snapshot["close"])
+            )
+            archive_ai_history(out_dir, ai_analysis, price_for_history)
+            acc = compute_ai_accuracy(out_dir, price_for_history)
+            print(
+                f"[{symbol}] AI accuracy: evaluated={acc['total_evaluated']} "
+                f"hit_rate={acc['recent_hit_rate']} warn={acc['warning_low_accuracy']}"
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"[{symbol}] AI history/accuracy failed (soft-skip): {type(exc).__name__}: {exc}")
     else:
         print(f"[{symbol}] AI analysis: skipped; set RUN_AI_ANALYSIS=true to generate")
 
@@ -1025,6 +1329,14 @@ if __name__ == "__main__":
     if not symbols:
         print("No valid symbols to run")
         sys.exit(1)
+
+    # F4: shared overseas snapshot — one HTTP call to akshare covers all three
+    # tickers (FCPO, CBOT-BO, Brent), same file consumed by both P0/Y0 UIs.
+    # Best-effort: log & continue if akshare 429s or the runner is offline.
+    try:
+        fetch_overseas_snapshot(out_dir=DATA_DIR)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[overseas] top-level fetch failed (soft-skip): {type(exc).__name__}: {exc}")
 
     # Run both profiles in parallel — with DeepSeek included, sequential runs
     # take ~4 min but the two profiles' Sina + AKShare + DeepSeek calls are

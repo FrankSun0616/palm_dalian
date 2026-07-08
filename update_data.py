@@ -991,9 +991,15 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         "数据中无实时行情，请基于最新日线收盘价分析。"
     )
     intraday_instruction = (
-        "数据中包含 intraday.one_hour / two_hour / four_hour。请把 1小时/2小时/4小时K线作为核心，"
-        "重点分析布林通道上轨/中轨/下轨、当前价在通道中的位置、带宽变化、是否突破或回归中轨，"
-        "并给出适合日内操作的短线策略；结合日线级别背景。"
+        "数据中包含 intraday.one_hour / two_hour / four_hour。"
+        "请按 **1小时 / 4小时 / 日线** 三个核心尺度做多周期共振分析（2小时数据可作为过渡参考）。"
+        "对每个尺度都要说：布林通道上/中/下轨位置、当前价在通道中的位置、带宽变化、是否突破或回归中轨。"
+        "然后综合三个尺度给出适合下一个交易时段的策略。"
+        "\n\n中国大商所 P0/Y0 交易时段（北京时间，工作日）：\n"
+        "- 早盘 09:00–11:30\n"
+        "- 午盘 13:30–15:00\n"
+        "- 夜盘 21:00–23:00\n"
+        "策略推荐时请指明适用哪个时段（如「今晚夜盘 21:00 开盘后关注...」）。"
         if snapshot.get("intraday") else
         "数据中无 1小时/2小时/4小时 K线，请不要声称进行了小时线分析。"
     )
@@ -1021,14 +1027,14 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         )
 
     prompt_content = (
-        f"请基于以下大连商品交易所{profile_name} {symbol} 连续合约实时行情、1小时/2小时K线、日线数据及市场舆情做综合中文分析。"
+        f"请基于以下大连商品交易所{profile_name} {symbol} 连续合约实时行情、1小时/2小时/4小时K线、日线数据及市场舆情做综合中文分析。"
         f"{realtime_instruction}{intraday_instruction}"
         f"{news_block}"
         "要求：\n"
-        "1) 先给日内短线判断，再给日线背景，不能只做中长期分析；\n"
+        "1) 先给日内短线判断（结合 1H + 4H），再给日线级别背景，不能只做中长期分析；\n"
         "2) bias 字段给出偏多/震荡/偏空；\n"
-        "3) analysis 数组：6–8条技术面要点，必须包含1小时布林、2小时布林、实时价位置、趋势、量能、支撑压力，每条 2–3 句；\n"
-        "4) intraday_strategy 对象：必须包含 bias, entry, stop, take_profit, invalidation, notes 六个字段，给出日内1小时/2小时级别策略；\n"
+        "3) analysis 数组：6–8 条技术面要点，必须包含 **1小时布林、4小时布林、日线布林/均线、实时价位置、趋势、量能、支撑压力**，每条 2–3 句；\n"
+        "4) intraday_strategy 对象：必须包含 bias, entry, stop, take_profit, invalidation, notes 六个字段，给出以 1小时 + 4小时 尺度为主的日内策略，明确说明适用哪个交易时段（早盘 09:00-11:30 / 午盘 13:30-15:00 / 夜盘 21:00-23:00）；\n"
         f"{news_instructions}"
         "6) watch_levels 包含数字 support 和 resistance；\n"
         "7) 强调不构成投资建议；\n"

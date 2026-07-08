@@ -170,31 +170,48 @@ function toggleTheme() {
 }
 
 // ── Market status ──────────────────────────────────────────
-// getTime() is already UTC ms — DON'T subtract the local timezone offset
-// (was doing that AND adding +8h, so user at GMT+2 saw UTC+6h instead of
-// UTC+8h → night session 21:00 CST looked like 19:00 CST = "closed").
-function bjWeekday() {
-  const bjMs = Date.now() + 8 * 3600000;
-  return new Date(bjMs).getUTCDay(); // 0=Sun, 6=Sat
+// Explicit Beijing time via Intl. No more UTC-offset math — one source of
+// truth, correct regardless of the browser's local timezone (or DST changes
+// anywhere in the world). Returns {weekday: 0-6 with 0=Sun, minutes: 0-1439}.
+function bjParts() {
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Shanghai",
+    weekday: "short",   // Sun/Mon/Tue/Wed/Thu/Fri/Sat
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    fmt.formatToParts(new Date()).map(p => [p.type, p.value])
+  );
+  const wdMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const hour24 = parts.hour === "24" ? 0 : parseInt(parts.hour, 10);
+  return {
+    weekday: wdMap[parts.weekday] ?? 0,
+    hour: hour24,
+    minute: parseInt(parts.minute, 10),
+    minutes: hour24 * 60 + parseInt(parts.minute, 10),
+  };
 }
 
-function bjMinutesOfDay() {
-  const bjMs = Date.now() + 8 * 3600000;
-  const bj = new Date(bjMs);
-  return bj.getUTCHours() * 60 + bj.getUTCMinutes();
-}
+function bjWeekday()      { return bjParts().weekday; }
+function bjMinutesOfDay() { return bjParts().minutes; }
 
-// Returns one of: 'day-open', 'day-break', 'night-open', 'weekend', 'closed'
+// DCE palm oil (P0) + soybean oil (Y0) trading hours per user spec:
+//   工作日早盘   09:00 – 11:30
+//   工作日午盘   13:30 – 15:00
+//   工作日夜盘   21:00 – 23:00
+// Weekend = fully closed. Off-hours weekdays = 'closed'.
+// Returns one of: 'day-open' | 'day-break' | 'night-open' | 'weekend' | 'closed'
 function marketStatus() {
-  const wd = bjWeekday();
+  const { weekday: wd, minutes: m } = bjParts();
   if (wd === 0 || wd === 6) return "weekend";
-  const m = bjMinutesOfDay();
-  const in09_1130 = m >= 9 * 60 && m < 11 * 60 + 30;
-  const in1330_15 = m >= 13 * 60 + 30 && m < 15 * 60;
-  const in21_2330 = m >= 21 * 60 && m < 23 * 60 + 30;
-  const inLunch   = m >= 11 * 60 + 30 && m < 13 * 60 + 30;
-  if (in09_1130 || in1330_15) return "day-open";
-  if (in21_2330) return "night-open";
+  const inMorning   = m >= 9 * 60 && m < 11 * 60 + 30;
+  const inAfternoon = m >= 13 * 60 + 30 && m < 15 * 60;
+  const inNight     = m >= 21 * 60 && m < 23 * 60;
+  const inLunch     = m >= 11 * 60 + 30 && m < 13 * 60 + 30;
+  if (inMorning || inAfternoon) return "day-open";
+  if (inNight) return "night-open";
   if (inLunch) return "day-break";
   return "closed";
 }
@@ -224,10 +241,10 @@ function updateMarketStatus() {
     els.marketBanner.textContent = "⏸ 本周末休市，数据截至周五 15:00 收盘";
   } else if (status === "day-break") {
     els.marketBanner.classList.remove("weekend");
-    els.marketBanner.textContent = "⏸ 午间休市（11:30-13:30），日盘 13:30 继续 · 夜盘 21:00-23:30";
+    els.marketBanner.textContent = "⏸ 午间休市（11:30-13:30），日盘 13:30 继续 · 夜盘 21:00-23:00";
   } else {
     els.marketBanner.classList.remove("weekend");
-    els.marketBanner.textContent = "⏸ 非交易时段，日盘 09:00-11:30 / 13:30-15:00 · 夜盘 21:00-23:30";
+    els.marketBanner.textContent = "⏸ 非交易时段，日盘 09:00-11:30 / 13:30-15:00 · 夜盘 21:00-23:00";
   }
 }
 
@@ -2344,9 +2361,14 @@ async function autoLoadSibling() {
 
 let lastQuote = null;
 
-function bjHour() { return (new Date().getUTCHours() + 8) % 24; }
-function isNightSession() { const h = bjHour(); return h >= 21 && h <= 23; }
-function isDaySession()   { const h = bjHour(); return h >= 9  && h <= 15; }
+// Beijing-time predicates — reuse the single Intl-based bjParts() source of
+// truth from the top of the file. Night session is 21:00–23:00 (Y0/P0
+// contracts). Day is 09:00–15:00 including the 11:30–13:30 lunch window
+// (isDaySession returns true through the break so live-bar / preliminary
+// logic doesn't flap; use marketStatus() when the break matters).
+function bjHour()         { return bjParts().hour; }
+function isNightSession() { const h = bjHour(); return h >= 21 && h < 23; }
+function isDaySession()   { const h = bjHour(); return h >= 9  && h < 15; }
 function isTrading()      { return isDaySession() || isNightSession(); }
 
 function sinaFuturesUrl(node) {

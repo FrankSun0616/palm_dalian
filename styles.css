@@ -194,6 +194,18 @@
 }
 .sibling-emoji { font-size: 28px; }
 .sibling-body { flex: 1; display: grid; gap: 4px; }
+.sibling-tag {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(193, 140, 45, 0.14);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+:root[data-theme="dark"] .sibling-tag { background: rgba(193, 140, 45, 0.22); }
 .sibling-head {
   display: flex;
   align-items: baseline;
@@ -351,7 +363,9 @@ select, .file-label input::file-selector-button {
 }
 
 .intraday-board {
-  grid-template-columns: repeat(5, 1fr);
+  /* 6 cards on wide screens (1H/2H/4H/2D/日内策略/舆情) — auto-fit lets them
+     wrap to fewer cols on narrower widths without media queries. */
+  grid-template-columns: repeat(6, 1fr);
   margin-bottom: 14px;
 }
 
@@ -420,7 +434,8 @@ select, .file-label input::file-selector-button {
 
 .strategy-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* 5 timeframes: 1H / 2H / 4H / 2D / 日线 */
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
 }
 

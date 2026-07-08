@@ -485,18 +485,19 @@ def intraday_summary(df, label: str) -> dict[str, object] | None:
 
 
 def fetch_intraday_bundle(symbol: str = "P0", out_dir: Path = DATA_DIR) -> dict[str, object]:
-    h1 = fetch_intraday("60", symbol=symbol)
+    h1 = fetch_intraday("60",  symbol=symbol)
     h2 = fetch_intraday("120", symbol=symbol)
-    if h1 is not None and not h1.empty:
-        h1.to_csv(out_dir / "intraday_1h.csv", index=False)
-    if h2 is not None and not h2.empty:
-        h2.to_csv(out_dir / "intraday_2h.csv", index=False)
+    h4 = fetch_intraday("240", symbol=symbol)
+    if h1 is not None and not h1.empty: h1.to_csv(out_dir / "intraday_1h.csv", index=False)
+    if h2 is not None and not h2.empty: h2.to_csv(out_dir / "intraday_2h.csv", index=False)
+    if h4 is not None and not h4.empty: h4.to_csv(out_dir / "intraday_4h.csv", index=False)
     bundle = {
         "source": "AKShare futures_zh_minute_sina",
         "symbol": symbol,
         "updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "one_hour": intraday_summary(h1, "1小时"),
-        "two_hour": intraday_summary(h2, "2小时"),
+        "one_hour":  intraday_summary(h1, "1小时"),
+        "two_hour":  intraday_summary(h2, "2小时"),
+        "four_hour": intraday_summary(h4, "4小时"),
     }
     (out_dir / "intraday_meta.json").write_text(
         json.dumps(bundle, ensure_ascii=False, indent=2),
@@ -990,11 +991,11 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         "数据中无实时行情，请基于最新日线收盘价分析。"
     )
     intraday_instruction = (
-        "数据中包含 intraday.one_hour 和 intraday.two_hour。请把 1小时/2小时K线作为核心，"
+        "数据中包含 intraday.one_hour / two_hour / four_hour。请把 1小时/2小时/4小时K线作为核心，"
         "重点分析布林通道上轨/中轨/下轨、当前价在通道中的位置、带宽变化、是否突破或回归中轨，"
-        "并给出适合日内操作的短线策略。"
+        "并给出适合日内操作的短线策略；结合日线级别背景。"
         if snapshot.get("intraday") else
-        "数据中无1小时/2小时K线，请不要声称进行了小时线分析。"
+        "数据中无 1小时/2小时/4小时 K线，请不要声称进行了小时线分析。"
     )
 
     has_news = bool(news_summary and len(news_summary) > 60)
@@ -1210,7 +1211,7 @@ def run_profile(symbol: str) -> None:
         f_intraday = pool.submit(
             _safe,
             lambda: fetch_intraday_bundle(symbol=symbol, out_dir=out_dir),
-            {"updated_at_utc": None, "one_hour": None, "two_hour": None},
+            {"updated_at_utc": None, "one_hour": None, "two_hour": None, "four_hour": None},
             "Intraday fetch",
         )
         f_news = pool.submit(
@@ -1322,7 +1323,7 @@ def run_profile(symbol: str) -> None:
     print(f"[{symbol}] Updated {output}")
     print(f"[{symbol}] Rows: {len(export)}")
     print(f"[{symbol}] Latest: {latest['date']} close={latest['close']}")
-    print(f"[{symbol}] Intraday 1H: {bool(intraday.get('one_hour'))}, 2H: {bool(intraday.get('two_hour'))}")
+    print(f"[{symbol}] Intraday 1H: {bool(intraday.get('one_hour'))}, 2H: {bool(intraday.get('two_hour'))}, 4H: {bool(intraday.get('four_hour'))}")
     print(f"[{symbol}] News articles: {len(news_snapshot.get('articles') or [])}")
 
 

@@ -35,6 +35,8 @@ const els = {
   boll1hDetail: document.getElementById("boll1hDetail"),
   boll2hStatus: document.getElementById("boll2hStatus"),
   boll2hDetail: document.getElementById("boll2hDetail"),
+  boll4hStatus: document.getElementById("boll4hStatus"),
+  boll4hDetail: document.getElementById("boll4hDetail"),
   boll2dStatus: document.getElementById("boll2dStatus"),
   boll2dDetail: document.getElementById("boll2dDetail"),
   multiStrategyCards: document.getElementById("multiStrategyCards"),
@@ -491,9 +493,10 @@ function renderMultiStrategyPanel() {
   const tf2d = compute2DayMeta(state.data || []);
 
   const strategies = [
-    intraday?.one_hour ? strategyForTimeframe(intraday.one_hour, "1 小时") : null,
-    intraday?.two_hour ? strategyForTimeframe(intraday.two_hour, "2 小时") : null,
-    tf2d  ? strategyForTimeframe(tf2d,  "2 日") : null,
+    intraday?.one_hour  ? strategyForTimeframe(intraday.one_hour,  "1 小时") : null,
+    intraday?.two_hour  ? strategyForTimeframe(intraday.two_hour,  "2 小时") : null,
+    intraday?.four_hour ? strategyForTimeframe(intraday.four_hour, "4 小时") : null,
+    tf2d  ? strategyForTimeframe(tf2d,  "2 日")  : null,
     daily ? strategyForTimeframe(daily, "日线") : null,
   ].filter(Boolean);
 
@@ -524,10 +527,11 @@ function renderMultiStrategyPanel() {
 // Reads price position vs bollinger for daily / 2D / 2H / 1H,
 // weights by timeframe importance, and normalizes to 0-100.
 function computeAlignmentScore() {
-  const daily = computeDailyMeta(state.data || []);
-  const twoD  = compute2DayMeta(state.data || []);
-  const twoH  = state.intradayMeta ? state.intradayMeta.two_hour : null;
-  const oneH  = state.intradayMeta ? state.intradayMeta.one_hour : null;
+  const daily  = computeDailyMeta(state.data || []);
+  const twoD   = compute2DayMeta(state.data || []);
+  const fourH  = state.intradayMeta ? state.intradayMeta.four_hour : null;
+  const twoH   = state.intradayMeta ? state.intradayMeta.two_hour  : null;
+  const oneH   = state.intradayMeta ? state.intradayMeta.one_hour  : null;
 
   // Given a meta with bollinger + close + rsi14, return the raw [-2, +2]
   // position score adjusted for RSI extremes.
@@ -554,6 +558,7 @@ function computeAlignmentScore() {
   const entries = [
     { m: daily, weight: 3 },
     { m: twoD,  weight: 2 },
+    { m: fourH, weight: 1.75 },  // between 2D and 2H — swing horizon
     { m: twoH,  weight: 1.5 },
     { m: oneH,  weight: 1 },
   ].map((e) => ({ raw: rawFor(e.m), weight: e.weight }))
@@ -1801,6 +1806,11 @@ async function autoLoadIntradayMeta() {
       els.boll1hDetail.textContent = `${activeLabel().code} 1小时数据尚未生成`;
       els.boll2hStatus.textContent = "待生成";
       els.boll2hDetail.textContent = `${activeLabel().code} 2小时数据尚未生成`;
+      if (els.boll4hStatus) {
+        els.boll4hStatus.textContent = "待生成";
+        els.boll4hStatus.className = "";
+        els.boll4hDetail.textContent = `${activeLabel().code} 4小时数据尚未生成`;
+      }
       renderMultiStrategyPanel();
       return;
     }
@@ -1884,14 +1894,26 @@ function updateIntradayPanel() {
   const meta = state.intradayMeta;
   if (!meta) return;
   const price = lastQuote?.price || null;
-  const one = bandStatus(meta.one_hour, price);
-  const two = bandStatus(meta.two_hour, price);
+  const one  = bandStatus(meta.one_hour,  price);
+  const two  = bandStatus(meta.two_hour,  price);
+  const four = bandStatus(meta.four_hour, price);
   els.boll1hStatus.textContent = one.title;
   els.boll1hStatus.className = /上轨|强势/.test(one.title) ? "up" : /下轨|弱势/.test(one.title) ? "down" : "";
   els.boll1hDetail.textContent = one.detail;
   els.boll2hStatus.textContent = two.title;
   els.boll2hStatus.className = /上轨|强势/.test(two.title) ? "up" : /下轨|弱势/.test(two.title) ? "down" : "";
   els.boll2hDetail.textContent = two.detail;
+  if (els.boll4hStatus) {
+    if (meta.four_hour) {
+      els.boll4hStatus.textContent = four.title;
+      els.boll4hStatus.className = /上轨|强势/.test(four.title) ? "up" : /下轨|弱势/.test(four.title) ? "down" : "";
+      els.boll4hDetail.textContent = four.detail;
+    } else {
+      els.boll4hStatus.textContent = "待生成";
+      els.boll4hStatus.className = "";
+      els.boll4hDetail.textContent = "4小时数据尚未生成（首次运行后可见）";
+    }
+  }
 
   const onePos = meta.one_hour?.bollinger?.position || "";
   const twoPos = meta.two_hour?.bollinger?.position || "";

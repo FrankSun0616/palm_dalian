@@ -168,15 +168,16 @@ function toggleTheme() {
 }
 
 // ── Market status ──────────────────────────────────────────
+// getTime() is already UTC ms — DON'T subtract the local timezone offset
+// (was doing that AND adding +8h, so user at GMT+2 saw UTC+6h instead of
+// UTC+8h → night session 21:00 CST looked like 19:00 CST = "closed").
 function bjWeekday() {
-  const now = new Date();
-  const bjMs = now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 3600000;
+  const bjMs = Date.now() + 8 * 3600000;
   return new Date(bjMs).getUTCDay(); // 0=Sun, 6=Sat
 }
 
 function bjMinutesOfDay() {
-  const now = new Date();
-  const bjMs = now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 3600000;
+  const bjMs = Date.now() + 8 * 3600000;
   const bj = new Date(bjMs);
   return bj.getUTCHours() * 60 + bj.getUTCMinutes();
 }

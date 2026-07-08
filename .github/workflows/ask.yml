@@ -37,11 +37,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: requirements.txt
+        # No pip cache — we only install `requests`, and cache restore
+        # takes longer than the plain install.
 
-      - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+      - name: Install requests only
+        # ask_deepseek.py only imports `requests` (plus stdlib). Skip the full
+        # requirements.txt so we don't pay 12–15s for akshare/pandas/DDG.
+        run: python -m pip install --disable-pip-version-check requests
 
       - name: Run DeepSeek Q&A
         id: ask

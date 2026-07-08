@@ -1429,7 +1429,7 @@ async function submitAskQuestion() {
         if (els.askBtn) els.askBtn.disabled = false;
       }
     } catch (_) {}
-  }, 10 * 1000);
+  }, 3 * 1000);  // Tight poll — DeepSeek answers in ~5s, workflow overhead ~15s
 }
 
 if (els.askBtn) els.askBtn.addEventListener("click", submitAskQuestion);

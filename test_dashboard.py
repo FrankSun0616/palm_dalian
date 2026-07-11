@@ -156,6 +156,8 @@ def validate_frontend() -> None:
         "rollRisk",
         "modelStatus",
         "modelExpectancy",
+        "actionsPatDialog",
+        "actionsPatInput",
     }
     assert required_ids.issubset(collector.ids), f"missing UI ids: {sorted(required_ids - set(collector.ids))}"
 
@@ -169,12 +171,17 @@ def validate_frontend() -> None:
         "github_pat_",
         "ghp_",
         "PAT_KEY",
-        "Authorization: `Bearer",
         "localStorage.setItem(\"gh_pat",
         "atob(",
+        "DEEPSEEK_API_KEY",
     )
     hits = [token for token in forbidden if token in combined]
     assert not hits, f"credential-like frontend content found: {hits}"
+    assert "GH_WORKFLOW_DISPATCH_URL" in app, "direct workflow dispatch is missing"
+    assert "sessionStorage.setItem(GH_PAT_SESSION_KEY" in app, "session-only PAT handling is missing"
+    assert 'inputs: { run_ai_analysis: "true" }' in app, "AI workflow input is missing"
+    assert 'id="actionsPatInput" type="password"' in html, "PAT input must be masked"
+    assert "window.prompt" not in app, "native prompt is not supported in all target browsers"
 
 
 def validate_workflow() -> None:

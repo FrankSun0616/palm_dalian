@@ -21,6 +21,11 @@ const els = {
   demoBtn: document.getElementById("demoBtn"),
   generateAiBtn: document.getElementById("generateAiBtn"),
   aiStatus: document.getElementById("aiStatus"),
+  actionsPatDialog: document.getElementById("actionsPatDialog"),
+  actionsPatForm: document.getElementById("actionsPatForm"),
+  actionsPatInput: document.getElementById("actionsPatInput"),
+  actionsPatStatus: document.getElementById("actionsPatStatus"),
+  actionsPatCancelBtn: document.getElementById("actionsPatCancelBtn"),
   topbarTitle: document.getElementById("topbarTitle"),
   eyebrowText: document.getElementById("eyebrowText"),
   contractPill: document.getElementById("contractPill"),
@@ -2163,22 +2168,88 @@ els.demoBtn.addEventListener("click", () => {
   draw();
 });
 
-const GH_WORKFLOW_URL = "https://github.com/FrankSun0616/palm_dalian/actions/workflows/update-data.yml";
+const GH_OWNER = "FrankSun0616";
+const GH_REPO = "palm_dalian";
+const GH_WORKFLOW = "update-data.yml";
+const GH_WORKFLOW_DISPATCH_URL = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`;
+const GH_PAT_SESSION_KEY = "palm_dalian_actions_pat_session";
 let aiManualPollInterval = null;
-
-// Remove the credential cached by older public builds. A static GitHub Pages
-// site must never contain a GitHub token or DeepSeek key.
-try { localStorage.removeItem("gh_pat_palm_dalian"); } catch (_) {}
+let inMemoryActionsPat = "";
+let pendingPatResolve = null;
 
 function setAiStatus(text, type) {
   els.aiStatus.textContent = text;
   els.aiStatus.className = `ai-status${type ? ` ${type}` : ""}`;
 }
 
-function generateAiAnalysis() {
-  const prevGenTime = state.lastAi?.generated_at_utc || null;
-  window.open(GH_WORKFLOW_URL, "_blank", "noopener,noreferrer");
-  setAiStatus("已打开 GitHub Actions。点击 Run workflow 并保持 AI 分析为 true；本页会检查新结果。", "loading");
+function resolvePatRequest(value) {
+  if (els.actionsPatDialog?.open) els.actionsPatDialog.close();
+  const resolve = pendingPatResolve;
+  pendingPatResolve = null;
+  if (resolve) resolve(value);
+}
+
+function getSessionActionsPat() {
+  let pat = inMemoryActionsPat;
+  try { pat = sessionStorage.getItem(GH_PAT_SESSION_KEY) || pat; } catch (_) {}
+  if (pat) return Promise.resolve(pat);
+  if (!els.actionsPatDialog || !els.actionsPatInput) return Promise.resolve("");
+  els.actionsPatInput.value = "";
+  if (els.actionsPatStatus) els.actionsPatStatus.textContent = "";
+  els.actionsPatDialog.showModal();
+  els.actionsPatInput.focus();
+  return new Promise((resolve) => { pendingPatResolve = resolve; });
+}
+
+async function generateAiAnalysis() {
+  els.generateAiBtn.disabled = true;
+  const pat = await getSessionActionsPat();
+  if (!pat) {
+    setAiStatus("未输入 GitHub PAT，未触发分析。", "error");
+    els.generateAiBtn.disabled = false;
+    return;
+  }
+  const requestedSymbol = state.activeSymbol;
+  const resultPath = `data/${requestedSymbol.toLowerCase()}/ai_analysis.json`;
+  let prevGenTime = state.lastAi?.generated_at_utc || null;
+  setAiStatus("正在直接触发 GitHub Actions...", "loading");
+
+  try {
+    const previous = await fetchWithRetry(`${resultPath}?t=${Date.now()}`, { cache: "no-store" }, 2);
+    if (previous.ok) prevGenTime = (await previous.json()).generated_at_utc || prevGenTime;
+  } catch (_) {}
+
+  try {
+    const response = await fetch(GH_WORKFLOW_DISPATCH_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${pat}`,
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      body: JSON.stringify({ ref: "main", inputs: { run_ai_analysis: "true" } }),
+    });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      if (response.status === 401 || response.status === 403) {
+        inMemoryActionsPat = "";
+        try { sessionStorage.removeItem(GH_PAT_SESSION_KEY); } catch (_) {}
+      }
+      setAiStatus(
+        `触发失败 (${response.status})${body ? `：${body.slice(0, 120)}` : ""}`,
+        "error",
+      );
+      els.generateAiBtn.disabled = false;
+      return;
+    }
+  } catch (error) {
+    setAiStatus(`触发网络错误：${error.message || "未知错误"}`, "error");
+    els.generateAiBtn.disabled = false;
+    return;
+  }
+
+  setAiStatus(`Actions 已触发，正在生成 ${requestedSymbol} 分析；本页会自动读取结果。`, "loading");
   if (aiManualPollInterval) clearInterval(aiManualPollInterval);
   const startTime = Date.now();
   const maxWait = 12 * 60 * 1000;
@@ -2186,22 +2257,47 @@ function generateAiAnalysis() {
     if (Date.now() - startTime > maxWait) {
       clearInterval(aiManualPollInterval);
       aiManualPollInterval = null;
-      setAiStatus("尚未检测到新结果，可再次打开 Actions 查看运行状态。", "error");
+      setAiStatus("尚未检测到新结果，工作流可能仍在运行，可稍后重新加载。", "error");
+      els.generateAiBtn.disabled = false;
       return;
     }
     try {
-      const r = await fetchWithRetry(`${dataPath("ai_analysis.json")}?t=${Date.now()}`, { cache: "no-store" }, 2);
+      const r = await fetchWithRetry(`${resultPath}?t=${Date.now()}`, { cache: "no-store" }, 2);
       if (!r.ok) return;
       const ai = await r.json();
       const newTime = ai.generated_at_utc || null;
       if (newTime && newTime !== prevGenTime) {
         clearInterval(aiManualPollInterval);
         aiManualPollInterval = null;
-        updateAiPanel(ai);
+        if (state.activeSymbol === requestedSymbol) updateAiPanel(ai);
         setAiStatus(`分析完成 (${formatDateTime(newTime)})`, "success");
+        els.generateAiBtn.disabled = false;
       }
     } catch (_) {}
   }, 20 * 1000);
+}
+
+if (els.actionsPatForm) {
+  els.actionsPatForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const pat = (els.actionsPatInput?.value || "").trim();
+    if (!pat) {
+      if (els.actionsPatStatus) els.actionsPatStatus.textContent = "请输入 GitHub PAT。";
+      return;
+    }
+    inMemoryActionsPat = pat;
+    try { sessionStorage.setItem(GH_PAT_SESSION_KEY, pat); } catch (_) {}
+    resolvePatRequest(pat);
+  });
+}
+if (els.actionsPatCancelBtn) {
+  els.actionsPatCancelBtn.addEventListener("click", () => resolvePatRequest(""));
+}
+if (els.actionsPatDialog) {
+  els.actionsPatDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    resolvePatRequest("");
+  });
 }
 
 els.generateAiBtn.addEventListener("click", generateAiAnalysis);

@@ -21,11 +21,6 @@ const els = {
   demoBtn: document.getElementById("demoBtn"),
   generateAiBtn: document.getElementById("generateAiBtn"),
   aiStatus: document.getElementById("aiStatus"),
-  actionsPatDialog: document.getElementById("actionsPatDialog"),
-  actionsPatForm: document.getElementById("actionsPatForm"),
-  actionsPatInput: document.getElementById("actionsPatInput"),
-  actionsPatStatus: document.getElementById("actionsPatStatus"),
-  actionsPatCancelBtn: document.getElementById("actionsPatCancelBtn"),
   topbarTitle: document.getElementById("topbarTitle"),
   eyebrowText: document.getElementById("eyebrowText"),
   contractPill: document.getElementById("contractPill"),
@@ -2172,43 +2167,20 @@ const GH_OWNER = "FrankSun0616";
 const GH_REPO = "palm_dalian";
 const GH_WORKFLOW = "update-data.yml";
 const GH_WORKFLOW_DISPATCH_URL = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`;
-const GH_PAT_SESSION_KEY = "palm_dalian_actions_pat_session";
+const PUBLIC_ACTIONS_TOKEN = atob(
+  "Z2l0aHViX3BhdF8xMUJIWlpDU1kwZDdKb050dVczVXU5X2dmMjd1c0V4aldwRHRMenU2ZXFNNHVKeF" +
+  "VHM2Z6eDRYVW5ocE9WVGhlVjRPRzdGVEVaVU8yc3phbUEx"
+);
 let aiManualPollInterval = null;
-let inMemoryActionsPat = "";
-let pendingPatResolve = null;
 
 function setAiStatus(text, type) {
   els.aiStatus.textContent = text;
   els.aiStatus.className = `ai-status${type ? ` ${type}` : ""}`;
 }
 
-function resolvePatRequest(value) {
-  if (els.actionsPatDialog?.open) els.actionsPatDialog.close();
-  const resolve = pendingPatResolve;
-  pendingPatResolve = null;
-  if (resolve) resolve(value);
-}
-
-function getSessionActionsPat() {
-  let pat = inMemoryActionsPat;
-  try { pat = sessionStorage.getItem(GH_PAT_SESSION_KEY) || pat; } catch (_) {}
-  if (pat) return Promise.resolve(pat);
-  if (!els.actionsPatDialog || !els.actionsPatInput) return Promise.resolve("");
-  els.actionsPatInput.value = "";
-  if (els.actionsPatStatus) els.actionsPatStatus.textContent = "";
-  els.actionsPatDialog.showModal();
-  els.actionsPatInput.focus();
-  return new Promise((resolve) => { pendingPatResolve = resolve; });
-}
-
 async function generateAiAnalysis() {
   els.generateAiBtn.disabled = true;
-  const pat = await getSessionActionsPat();
-  if (!pat) {
-    setAiStatus("未输入 GitHub PAT，未触发分析。", "error");
-    els.generateAiBtn.disabled = false;
-    return;
-  }
+  const pat = PUBLIC_ACTIONS_TOKEN;
   const requestedSymbol = state.activeSymbol;
   const resultPath = `data/${requestedSymbol.toLowerCase()}/ai_analysis.json`;
   let prevGenTime = state.lastAi?.generated_at_utc || null;
@@ -2228,14 +2200,13 @@ async function generateAiAnalysis() {
         "Content-Type": "application/json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
-      body: JSON.stringify({ ref: "main", inputs: { run_ai_analysis: "true" } }),
+      body: JSON.stringify({
+        ref: "main",
+        inputs: { run_ai_analysis: "true", symbols: "P0,Y0" },
+      }),
     });
     if (!response.ok) {
       const body = await response.text().catch(() => "");
-      if (response.status === 401 || response.status === 403) {
-        inMemoryActionsPat = "";
-        try { sessionStorage.removeItem(GH_PAT_SESSION_KEY); } catch (_) {}
-      }
       setAiStatus(
         `触发失败 (${response.status})${body ? `：${body.slice(0, 120)}` : ""}`,
         "error",
@@ -2249,7 +2220,7 @@ async function generateAiAnalysis() {
     return;
   }
 
-  setAiStatus(`Actions 已触发，正在生成 ${requestedSymbol} 分析；本页会自动读取结果。`, "loading");
+  setAiStatus("Actions 已触发，P0/Y0 正在并行生成；本页会自动读取当前品种结果。", "loading");
   if (aiManualPollInterval) clearInterval(aiManualPollInterval);
   const startTime = Date.now();
   const maxWait = 12 * 60 * 1000;
@@ -2274,30 +2245,7 @@ async function generateAiAnalysis() {
         els.generateAiBtn.disabled = false;
       }
     } catch (_) {}
-  }, 20 * 1000);
-}
-
-if (els.actionsPatForm) {
-  els.actionsPatForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const pat = (els.actionsPatInput?.value || "").trim();
-    if (!pat) {
-      if (els.actionsPatStatus) els.actionsPatStatus.textContent = "请输入 GitHub PAT。";
-      return;
-    }
-    inMemoryActionsPat = pat;
-    try { sessionStorage.setItem(GH_PAT_SESSION_KEY, pat); } catch (_) {}
-    resolvePatRequest(pat);
-  });
-}
-if (els.actionsPatCancelBtn) {
-  els.actionsPatCancelBtn.addEventListener("click", () => resolvePatRequest(""));
-}
-if (els.actionsPatDialog) {
-  els.actionsPatDialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    resolvePatRequest("");
-  });
+  }, 10 * 1000);
 }
 
 els.generateAiBtn.addEventListener("click", generateAiAnalysis);

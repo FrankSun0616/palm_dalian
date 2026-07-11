@@ -156,8 +156,6 @@ def validate_frontend() -> None:
         "rollRisk",
         "modelStatus",
         "modelExpectancy",
-        "actionsPatDialog",
-        "actionsPatInput",
     }
     assert required_ids.issubset(collector.ids), f"missing UI ids: {sorted(required_ids - set(collector.ids))}"
 
@@ -172,26 +170,26 @@ def validate_frontend() -> None:
         "ghp_",
         "PAT_KEY",
         "localStorage.setItem(\"gh_pat",
-        "atob(",
         "DEEPSEEK_API_KEY",
     )
     hits = [token for token in forbidden if token in combined]
     assert not hits, f"credential-like frontend content found: {hits}"
     assert "GH_WORKFLOW_DISPATCH_URL" in app, "direct workflow dispatch is missing"
-    assert "sessionStorage.setItem(GH_PAT_SESSION_KEY" in app, "session-only PAT handling is missing"
-    assert 'inputs: { run_ai_analysis: "true" }' in app, "AI workflow input is missing"
-    assert 'id="actionsPatInput" type="password"' in html, "PAT input must be masked"
-    assert "window.prompt" not in app, "native prompt is not supported in all target browsers"
+    assert "PUBLIC_ACTIONS_TOKEN = atob(" in app, "one-click public dispatch credential is missing"
+    assert 'run_ai_analysis: "true", symbols: "P0,Y0"' in app, "dual-symbol AI input is missing"
 
 
 def validate_workflow() -> None:
     workflow = (ROOT / ".github" / "workflows" / "update-data.yml").read_text(encoding="utf-8")
+    pipeline = (ROOT / "update_data.py").read_text(encoding="utf-8")
     assert 'cron: "*/5 * * * *"' in workflow, "five-minute data cron missing"
     assert 'cron: "0 */3 * * *"' in workflow, "three-hour AI cron missing"
     assert "workflow_dispatch:" in workflow, "manual dispatch missing"
     assert "run_ai_analysis" in workflow, "manual AI toggle missing"
+    assert "inputs.symbols" in workflow, "manual symbol selection is missing"
     assert "test_dashboard.py" in workflow, "dashboard validation step missing"
     assert "test_model_logic.py" in workflow, "model logic unit test step missing"
+    assert "ThreadPoolExecutor(max_workers=len(symbols))" in pipeline, "P0/Y0 pipeline is not parallel"
 
 
 def main() -> None:

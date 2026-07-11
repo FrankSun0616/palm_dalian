@@ -24,6 +24,21 @@ const els = {
   topbarTitle: document.getElementById("topbarTitle"),
   eyebrowText: document.getElementById("eyebrowText"),
   contractPill: document.getElementById("contractPill"),
+  contractMapping: document.getElementById("contractMapping"),
+  contractMappingStatus: document.getElementById("contractMappingStatus"),
+  mappingEvidence: document.getElementById("mappingEvidence"),
+  mappingMarketTime: document.getElementById("mappingMarketTime"),
+  mainContractPrice: document.getElementById("mainContractPrice"),
+  mainContractChange: document.getElementById("mainContractChange"),
+  mainOpenInterest: document.getElementById("mainOpenInterest"),
+  mainOpenInterestShare: document.getElementById("mainOpenInterestShare"),
+  secondarySpread: document.getElementById("secondarySpread"),
+  secondaryOpenInterest: document.getElementById("secondaryOpenInterest"),
+  rollRisk: document.getElementById("rollRisk"),
+  rollRiskReason: document.getElementById("rollRiskReason"),
+  contractSpec: document.getElementById("contractSpec"),
+  contractRuleRef: document.getElementById("contractRuleRef"),
+  contractBridgeFreshness: document.getElementById("contractBridgeFreshness"),
   symBtns: document.querySelectorAll(".sym-btn"),
   siblingLink: document.getElementById("siblingLink"),
   siblingEmoji: document.getElementById("siblingEmoji"),
@@ -84,6 +99,17 @@ const els = {
   noTradeReason: document.getElementById("noTradeReason"),
   planQuality: document.getElementById("planQuality"),
   planQualityDetail: document.getElementById("planQualityDetail"),
+  modelMethod: document.getElementById("modelMethod"),
+  modelStatus: document.getElementById("modelStatus"),
+  modelTrades: document.getElementById("modelTrades"),
+  modelSplitDate: document.getElementById("modelSplitDate"),
+  modelExpectancy: document.getElementById("modelExpectancy"),
+  modelProfitFactor: document.getElementById("modelProfitFactor"),
+  modelDrawdown: document.getElementById("modelDrawdown"),
+  modelWinRate: document.getElementById("modelWinRate"),
+  modelDirectionCount: document.getElementById("modelDirectionCount"),
+  modelVerdict: document.getElementById("modelVerdict"),
+  modelLimitations: document.getElementById("modelLimitations"),
   aiNewsEmpty: document.getElementById("aiNewsEmpty"),
   aiStrategyEmpty: document.getElementById("aiStrategyEmpty"),
   signalText: document.getElementById("signalText"),
@@ -183,6 +209,8 @@ let state = {
   visibleStart: null,
   visibleCount: null,
   sibling: null,
+  contractBridge: null,
+  modelValidation: null,
   isDragging: false,
   dragStartX: null,
   dragStartVisibleStart: null,
@@ -966,6 +994,7 @@ function computeDataConfidence(analysis) {
   const dailyAge = Math.max(0, Number(analysis.staleDays || 0));
   const intradayAge = ageMinutes(state.intradayMeta?.updated_at_utc);
   const newsAge = ageMinutes(state.newsSnapshot?.updated_at_utc);
+  const bridgeAge = ageMinutes(state.contractBridge?.updated_at_utc);
   const quoteAge = lastQuote?.receivedAt ? Math.max(0, (Date.now() - lastQuote.receivedAt) / 60000) : null;
   const aiFreshness = assessAiFreshness(state.lastAi);
 
@@ -989,6 +1018,16 @@ function computeDataConfidence(analysis) {
       score -= 18;
       reasons.push("小时线后台快照偏旧");
     }
+    if (!state.contractBridge?.main) {
+      score -= 20;
+      reasons.push("可交易主力月份未确认");
+    } else if (state.contractBridge.mapping_verified !== true) {
+      score -= 15;
+      reasons.push("连续与主力映射需复核");
+    } else if (!Number.isFinite(bridgeAge) || bridgeAge > 15) {
+      score -= 10;
+      reasons.push("主力映射快照偏旧");
+    }
   } else if (Number.isFinite(intradayAge) && intradayAge > 4320) {
     score -= 12;
     reasons.push("小时线超过 3 天未更新");
@@ -1011,6 +1050,7 @@ function computeDataConfidence(analysis) {
     intradayAge,
     newsAge,
     quoteAge,
+    bridgeAge,
     aiFreshness,
   };
 }
@@ -1101,7 +1141,7 @@ function computeKeyLevels(analysis, price, tfAtr) {
   return { support, nextSupport, resistance, nextResistance, clusters };
 }
 
-function roundToTick(value, tick = 2) {
+function roundToTick(value, tick = Number(activeContractSpecs().tick_size || 1)) {
   return Math.round(value / tick) * tick;
 }
 
@@ -1120,7 +1160,7 @@ function buildDirectionalSetup(direction, context) {
   if (isLong && entry - stop < minRisk) stop = entry - minRisk;
   if (!isLong && stop - entry < minRisk) stop = entry + minRisk;
   stop = roundToTick(stop);
-  const risk = Math.max(2, Math.abs(entry - stop));
+  const risk = Math.max(Number(activeContractSpecs().tick_size || 1) * 2, Math.abs(entry - stop));
 
   let target1 = otherSide;
   if (isLong && target1 <= entry + risk * 1.2) target1 = entry + risk * 1.2;
@@ -1224,11 +1264,11 @@ function buildDecisionModel(analysis) {
   } else if (status === "closed" || status === "day-break") {
     gate = { label: "等待开盘", kind: "neutral", reason: "非交易时段，不把静态报价当作可执行价格。" };
   } else if (!Number.isFinite(confidence.quoteAge) || confidence.quoteAge > 1.5) {
-    gate = { label: "暂停交易", kind: "down", reason: "实时行情未接通或已经过期，不使用后台快照代替执行价格。" };
+    gate = { label: "暂停交易", kind: "blocked", reason: "实时行情未接通或已经过期，不使用后台快照代替执行价格。" };
   } else if (!Number.isFinite(confidence.intradayAge) || confidence.intradayAge > 120) {
-    gate = { label: "暂停交易", kind: "down", reason: "小时线后台快照超过两小时，等待刷新后再评估。" };
+    gate = { label: "暂停交易", kind: "blocked", reason: "小时线后台快照超过两小时，等待刷新后再评估。" };
   } else if (confidence.score < 65) {
-    gate = { label: "暂停交易", kind: "down", reason: "数据可信度不足，先恢复实时行情或小时线快照。" };
+    gate = { label: "暂停交易", kind: "blocked", reason: "数据可信度不足，先恢复实时行情、主力映射或小时线快照。" };
   } else if (inNoTradeZone && Math.abs(compositeSignal) < 35) {
     gate = { label: "观望", kind: "neutral", reason: "价格处于多周期均衡区，方向优势不足。" };
   } else if (compositeSignal >= 25 && longSetup.rr1 >= 1.45) {
@@ -1282,6 +1322,13 @@ function renderDecisionCockpit(analysis) {
     [`首目标 ${Math.max(model.longSetup.rr1, model.shortSetup.rr1).toFixed(1)}R`, ""],
     [model.inNoTradeZone ? "均衡区内" : "均衡区外", model.inNoTradeZone ? "" : "quality-good"],
   ];
+  const baselineExpectancy = Number(state.modelValidation?.holdout?.expectancy_r);
+  if (Number.isFinite(baselineExpectancy)) {
+    const baselineKind = state.modelValidation?.status === "positive"
+      ? "quality-good"
+      : state.modelValidation?.status === "rejected" ? "quality-bad" : "";
+    factorItems.push([`基准 ${baselineExpectancy >= 0 ? "+" : ""}${baselineExpectancy.toFixed(2)}R`, baselineKind]);
+  }
   els.tradeGateFactors.innerHTML = factorItems.map(([text, kind]) => `<span class="${kind}">${escapeHtml(text)}</span>`).join("");
 
   els.marketRegime.textContent = model.regime.label;
@@ -2318,6 +2365,168 @@ async function fetchWithRetry(url, options = {}, attempts = 3) {
   throw lastError || new Error("网络请求失败");
 }
 
+function activeContractSpecs() {
+  return state.contractBridge?.contract_specs || { multiplier: 10, tick_size: 1, tick_value: 10 };
+}
+
+function renderContractBridge(bridge) {
+  if (!bridge?.main) {
+    if (els.contractMapping) els.contractMapping.textContent = `${state.activeSymbol} → 等待主力月份`;
+    if (els.contractMappingStatus) {
+      els.contractMappingStatus.textContent = "等待盘口";
+      els.contractMappingStatus.className = "bridge-status neutral";
+    }
+    if (els.mappingEvidence) els.mappingEvidence.textContent = "等待价格与持仓比对";
+    if (els.mappingMarketTime) els.mappingMarketTime.textContent = "--";
+    if (els.mainContractPrice) els.mainContractPrice.textContent = "--";
+    if (els.mainContractChange) { els.mainContractChange.textContent = "--"; els.mainContractChange.className = ""; }
+    if (els.mainOpenInterest) els.mainOpenInterest.textContent = "--";
+    if (els.mainOpenInterestShare) els.mainOpenInterestShare.textContent = "--";
+    if (els.secondarySpread) { els.secondarySpread.textContent = "--"; els.secondarySpread.className = ""; }
+    if (els.secondaryOpenInterest) els.secondaryOpenInterest.textContent = "--";
+    if (els.rollRisk) { els.rollRisk.textContent = "--"; els.rollRisk.className = ""; }
+    if (els.rollRiskReason) els.rollRiskReason.textContent = "--";
+    if (els.contractSpec) els.contractSpec.textContent = "--";
+    if (els.contractRuleRef) els.contractRuleRef.textContent = "--";
+    if (els.contractBridgeFreshness) els.contractBridgeFreshness.textContent = "后台每 5 分钟更新，交易时段浏览器同步核对实时盘口。";
+    return;
+  }
+  const main = bridge.main;
+  const secondary = bridge.secondary;
+  const specs = bridge.contract_specs || activeContractSpecs();
+  const mappingOk = bridge.mapping_verified === true;
+  const rollState = bridge.roll_state || "stable";
+  const statusKind = !mappingOk ? "mismatch" : rollState === "urgent" ? "urgent" : rollState === "watch" ? "watch" : "verified";
+  const statusText = !mappingOk ? "映射需复核" : bridge.roll_label || "映射已核对";
+
+  els.contractMapping.textContent = `${state.activeSymbol} → ${main.symbol} 主力`;
+  els.contractMappingStatus.textContent = statusText;
+  els.contractMappingStatus.className = `bridge-status ${statusKind}`;
+  els.mappingEvidence.textContent = mappingOk
+    ? `连续报价与 ${main.symbol} 的价格、持仓一致`
+    : bridge.mapping_note || `未能确认 ${state.activeSymbol} 与 ${main.symbol} 完全一致`;
+  els.mappingMarketTime.textContent = `${bridge.trading_day || "--"} ${bridge.market_time || ""} · ${bridge.source || "行情源未知"}`.trim();
+  els.mainContractPrice.textContent = Number(main.price).toFixed(0);
+  const changeRatio = Number(main.change_ratio);
+  const change = Number(main.change);
+  els.mainContractChange.textContent = Number.isFinite(changeRatio)
+    ? `${formatSigned(change)} (${formatPct(changeRatio)}) · 对昨结算`
+    : "涨跌基准待核对";
+  els.mainContractChange.className = Number.isFinite(change) ? (change >= 0 ? "up" : "down") : "";
+  els.mainOpenInterest.textContent = `${formatCompact(Number(main.open_interest || 0))} 手`;
+  els.mainOpenInterestShare.textContent = Number.isFinite(Number(bridge.main_open_interest_share))
+    ? `可见月份持仓占比 ${(Number(bridge.main_open_interest_share) * 100).toFixed(1)}%`
+    : "持仓占比待计算";
+  if (secondary) {
+    const spread = Number(bridge.secondary_spread);
+    els.secondarySpread.textContent = `${secondary.symbol} ${formatSigned(spread)} 点`;
+    els.secondarySpread.className = spread > 0 ? "up" : spread < 0 ? "down" : "";
+    els.secondaryOpenInterest.textContent = `持仓 ${formatCompact(Number(secondary.open_interest || 0))} 手 · 主力的 ${(Number(bridge.secondary_open_interest_ratio || 0) * 100).toFixed(1)}% · ${bridge.spread_structure || "--"}`;
+  } else {
+    els.secondarySpread.textContent = "无可用次主力";
+    els.secondaryOpenInterest.textContent = "--";
+  }
+  els.rollRisk.textContent = `${bridge.roll_label || "--"} · ${Number(bridge.roll_score || 0)}/100`;
+  els.rollRisk.className = rollState === "urgent" ? "up" : rollState === "watch" ? "" : "down";
+  const monthText = Number.isFinite(Number(bridge.months_to_delivery_month))
+    ? `距交割月份约 ${Number(bridge.months_to_delivery_month)} 个月。`
+    : "";
+  els.rollRiskReason.textContent = `${monthText}${bridge.roll_reason || ""}`;
+  els.contractSpec.textContent = `${Number(specs.multiplier || 10)} 吨/手 · ${Number(specs.tick_size || 1)} 元/吨`;
+  els.contractRuleRef.textContent = `每跳 ${Number(specs.tick_value || Number(specs.multiplier || 10) * Number(specs.tick_size || 1))} 元/手 · ${specs.rule_reference || "规则待核对"}`;
+  const age = ageMinutes(bridge.updated_at_utc);
+  const browserVerified = String(bridge.source || "").includes("浏览器");
+  const closedNote = isTrading() ? "交易时段每 5 秒同步核对盘口。" : "当前休市，行情标记以盘口交易日和时间为准。";
+  els.contractBridgeFreshness.textContent = Number.isFinite(age)
+    ? `${browserVerified ? "浏览器" : "后台"}于 ${formatDateTime(bridge.updated_at_utc)}（${humanAge(age)}）${browserVerified ? "完成核对" : "更新映射"}；${closedNote}`
+    : `映射更新时间未知；${closedNote}`;
+  if (els.contractPill) els.contractPill.textContent = `${activeLabel().exchange} ${main.symbol} · ${state.activeSymbol} 连续 · 1H / 4H / 日线`;
+  if (!posCalcUserEdited.has("posMult") && els.posMult) {
+    els.posMult.value = Number(specs.multiplier || 10);
+  }
+}
+
+function renderModelValidation(model) {
+  if (!model?.holdout) {
+    if (els.modelStatus) {
+      els.modelStatus.textContent = "等待检验结果";
+      els.modelStatus.className = "model-status neutral";
+    }
+    if (els.modelTrades) els.modelTrades.textContent = "--";
+    if (els.modelSplitDate) els.modelSplitDate.textContent = "--";
+    if (els.modelExpectancy) { els.modelExpectancy.textContent = "--"; els.modelExpectancy.className = ""; }
+    if (els.modelProfitFactor) { els.modelProfitFactor.textContent = "--"; els.modelProfitFactor.className = ""; }
+    if (els.modelDrawdown) els.modelDrawdown.textContent = "--";
+    if (els.modelWinRate) els.modelWinRate.textContent = "--";
+    if (els.modelDirectionCount) els.modelDirectionCount.textContent = "--";
+    if (els.modelVerdict) els.modelVerdict.textContent = "正在读取固定参数基准模型的历史样本外表现。";
+    if (els.modelLimitations) els.modelLimitations.textContent = "日线基准模型与 1H/4H 日内方案不同，结果不代表未来收益。";
+    return;
+  }
+  const metrics = model.holdout;
+  const status = ["positive", "unproven", "rejected"].includes(model.status) ? model.status : "neutral";
+  els.modelStatus.textContent = model.status_label || "检验状态未知";
+  els.modelStatus.className = `model-status ${status}`;
+  els.modelTrades.textContent = String(metrics.trades ?? "--");
+  els.modelSplitDate.textContent = model.sample_period?.holdout_start
+    ? `${model.sample_period.holdout_start} 起 · 后 ${Math.round(Number(model.sample_period.holdout_fraction || 0) * 100)}%`
+    : "时间切分未知";
+  const expectancy = Number(metrics.expectancy_r);
+  els.modelExpectancy.textContent = Number.isFinite(expectancy) ? `${expectancy >= 0 ? "+" : ""}${expectancy.toFixed(2)}R` : "--";
+  els.modelExpectancy.className = Number.isFinite(expectancy) ? (expectancy > 0 ? "up" : "down") : "";
+  const profitFactor = Number(metrics.profit_factor);
+  els.modelProfitFactor.textContent = Number.isFinite(profitFactor) ? profitFactor.toFixed(2) : "--";
+  els.modelProfitFactor.className = Number.isFinite(profitFactor) ? (profitFactor >= 1.2 ? "up" : profitFactor < 1 ? "down" : "") : "";
+  const drawdown = Number(metrics.max_drawdown_r);
+  els.modelDrawdown.textContent = Number.isFinite(drawdown) ? `${drawdown.toFixed(1)}R` : "--";
+  els.modelWinRate.textContent = Number.isFinite(Number(metrics.win_rate)) ? `${(Number(metrics.win_rate) * 100).toFixed(1)}%` : "--";
+  els.modelDirectionCount.textContent = `多 ${metrics.long_trades ?? 0} · 空 ${metrics.short_trades ?? 0}`;
+  const costText = model.methodology?.cost_assumption || "成本假设未知";
+  els.modelMethod.textContent = `下一开盘执行 · ${costText}`;
+
+  if (model.status === "rejected") {
+    els.modelVerdict.textContent = `样本外期望 ${expectancy.toFixed(2)}R、盈利因子 ${Number.isFinite(profitFactor) ? profitFactor.toFixed(2) : "--"}，该日线基准没有可用历史优势，不应据此开仓。`;
+  } else if (model.status === "unproven") {
+    els.modelVerdict.textContent = `样本外虽为正期望，但强度不足或稳定性不够，当前只能作为研究证据，不能视为已验证策略。`;
+  } else if (model.status === "positive") {
+    els.modelVerdict.textContent = `固定参数在样本外达到最低正优势门槛，但仍需具体月份合约与滚动窗口复验后才能用于执行。`;
+  } else {
+    els.modelVerdict.textContent = `样本数量不足，暂时不能判断该固定规则是否存在历史优势。`;
+  }
+  const limits = Array.isArray(model.limitations) ? model.limitations.slice(0, 2).join(" · ") : "";
+  els.modelLimitations.textContent = limits || "日线基准模型与 1H/4H 日内方案不同，结果不代表未来收益。";
+}
+
+async function autoLoadContractBridge() {
+  if (location.protocol === "file:") return;
+  const fetchSymbol = state.activeSymbol;
+  try {
+    const response = await fetchWithRetry(`${dataPath("contract_bridge.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (fetchSymbol !== state.activeSymbol) return;
+    if (!response.ok) throw new Error(`合约映射 HTTP ${response.status}`);
+    state.contractBridge = await response.json();
+    renderContractBridge(state.contractBridge);
+  } catch (error) {
+    if (!state.contractBridge) renderContractBridge(null);
+    if (els.contractBridgeFreshness) els.contractBridgeFreshness.textContent = `${error.message || "合约映射读取失败"}；执行前在交易软件人工确认。`;
+  }
+}
+
+async function autoLoadModelValidation() {
+  if (location.protocol === "file:") return;
+  const fetchSymbol = state.activeSymbol;
+  try {
+    const response = await fetchWithRetry(`${dataPath("model_validation.json")}?t=${Date.now()}`, { cache: "no-store" });
+    if (fetchSymbol !== state.activeSymbol) return;
+    if (!response.ok) throw new Error(`模型检验 HTTP ${response.status}`);
+    state.modelValidation = await response.json();
+    renderModelValidation(state.modelValidation);
+  } catch (error) {
+    if (!state.modelValidation) renderModelValidation(null);
+    if (els.modelVerdict) els.modelVerdict.textContent = error.message || "模型检验读取失败";
+  }
+}
+
 async function autoLoadCsv() {
   if (location.protocol === "file:") {
     const message = "请通过 GitHub Pages 或本地 http server 打开，file:// 无法自动读取 CSV";
@@ -2978,7 +3187,105 @@ function isTrading()      { return isDaySession() || isNightSession(); }
 
 function sinaFuturesUrl(node) {
   return "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/" +
-    `Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node=${node}&base=futures`;
+    `Market_Center.getHQFuturesData?page=1&num=100&sort=position&asc=0&node=${node}&base=futures`;
+}
+
+function normalizeLiveContract(item) {
+  const price = Number(item?.trade);
+  if (!(price > 0)) return null;
+  const previousClose = Number(item.preclose || 0);
+  const previousSettlement = Number(item.presettlement || 0) || Number(item.prevsettlement || 0);
+  const reference = previousSettlement || previousClose;
+  const change = reference > 0 ? price - reference : 0;
+  return {
+    symbol: String(item.symbol || "").toUpperCase(),
+    name: String(item.name || ""),
+    price,
+    open: Number(item.open || 0),
+    high: Number(item.high || 0),
+    low: Number(item.low || 0),
+    volume: Number(item.volume || 0),
+    open_interest: Number(item.position || 0),
+    prev_close: previousClose,
+    prev_settlement: previousSettlement,
+    reference_price: reference,
+    reference_type: previousSettlement ? "previous_settlement" : "previous_close",
+    change,
+    change_ratio: reference > 0 ? change / reference : 0,
+    tradedate: String(item.tradedate || ""),
+    ticktime: String(item.ticktime || ""),
+  };
+}
+
+function monthsToDelivery(contract, tradingDay) {
+  const match = String(contract || "").toUpperCase().match(/^[A-Z]+(\d{2})(\d{2})$/);
+  if (!match) return null;
+  const year = 2000 + Number(match[1]);
+  const month = Number(match[2]);
+  const dayMatch = String(tradingDay || "").match(/^(\d{4})-(\d{2})/);
+  if (!(month >= 1 && month <= 12) || !dayMatch) return null;
+  return (year - Number(dayMatch[1])) * 12 + month - Number(dayMatch[2]);
+}
+
+function buildLiveContractBridge(board, symbol) {
+  if (!Array.isArray(board)) return null;
+  const prefix = symbol.replace(/0$/, "");
+  const pattern = new RegExp(`^${prefix}\\d{4}$`);
+  const continuous = normalizeLiveContract(board.find((item) => String(item.symbol || "").toUpperCase() === symbol));
+  const candidates = board
+    .filter((item) => pattern.test(String(item.symbol || "").toUpperCase()))
+    .map(normalizeLiveContract)
+    .filter((item) => item && item.open_interest > 0)
+    .sort((a, b) => b.open_interest - a.open_interest || b.volume - a.volume);
+  if (!candidates.length) return null;
+  const main = candidates[0];
+  const secondary = candidates[1] || null;
+  const ratio = secondary && main.open_interest > 0 ? secondary.open_interest / main.open_interest : 0;
+  const spread = secondary ? secondary.price - main.price : null;
+  const totalOi = candidates.reduce((sum, item) => sum + item.open_interest, 0);
+  const monthsLeft = monthsToDelivery(main.symbol, main.tradedate || continuous?.tradedate);
+  let rollState = "stable";
+  let rollLabel = "主力稳定";
+  let rollReason = "主力持仓仍明显领先，暂未出现高强度换月信号。";
+  if ((Number.isFinite(monthsLeft) && monthsLeft <= 1) || ratio >= 0.85) {
+    rollState = "urgent";
+    rollLabel = "临近换月";
+    rollReason = "主力临近交割月或次主力持仓已接近主力，执行前必须复核流动性。";
+  } else if ((Number.isFinite(monthsLeft) && monthsLeft <= 2) || ratio >= 0.50) {
+    rollState = "watch";
+    rollLabel = "监控移仓";
+    rollReason = "主力进入交割月前约两个月或次主力持仓超过主力一半。";
+  }
+  const monthPressure = !Number.isFinite(monthsLeft) ? 10 : monthsLeft <= 0 ? 100 : monthsLeft === 1 ? 80 : monthsLeft === 2 ? 50 : monthsLeft === 3 ? 25 : 10;
+  const specs = state.contractBridge?.contract_specs || { multiplier: 10, tick_size: 1, tick_value: 10, rule_reference: "大商所〔2026〕32号" };
+  const mappingVerified = Boolean(continuous
+    && Math.abs(continuous.price - main.price) <= Number(specs.tick_size || 1)
+    && continuous.open_interest === main.open_interest);
+  return {
+    ...(state.contractBridge || {}),
+    source: "Sina Market Center · 浏览器实时核对",
+    symbol,
+    updated_at_utc: new Date().toISOString(),
+    trading_day: main.tradedate || continuous?.tradedate || "",
+    market_time: main.ticktime || "",
+    continuous,
+    main,
+    secondary,
+    candidates: candidates.slice(0, 6),
+    mapping_verified: mappingVerified,
+    mapping_note: mappingVerified ? `${symbol} 当前行情与 ${main.symbol} 的价格及持仓一致。` : `${symbol} 与 ${main.symbol} 未完全一致。`,
+    main_open_interest_share: totalOi ? main.open_interest / totalOi : 0,
+    secondary_open_interest_ratio: ratio,
+    secondary_spread: spread,
+    secondary_spread_ratio: spread !== null && main.price ? spread / main.price : null,
+    spread_structure: spread > 0 ? "远月升水" : spread < 0 ? "远月贴水" : "平水",
+    months_to_delivery_month: monthsLeft,
+    roll_state: rollState,
+    roll_label: rollLabel,
+    roll_score: Math.round(Math.max(monthPressure, ratio * 100)),
+    roll_reason: rollReason,
+    contract_specs: specs,
+  };
 }
 
 async function fetchRealtimeQuote() {
@@ -2992,18 +3299,24 @@ async function fetchRealtimeQuote() {
     if (!hit || !+hit.trade) return null;
     const price     = +hit.trade;
     const prevClose = +hit.preclose;
+    const prevSettlement = Number(hit.presettlement || 0) || Number(hit.prevsettlement || 0);
+    const referencePrice = prevSettlement || prevClose;
+    const bridge = buildLiveContractBridge(data, sym);
     return {
       price,
       high:      +hit.high,
       low:       +hit.low,
       open:      +hit.open,
       prevClose,
+      prevSettlement,
+      referencePrice,
       volume:    +hit.volume,
-      change:    price - prevClose,
-      changePct: prevClose > 0 ? (price - prevClose) / prevClose : 0,
+      change:    price - referencePrice,
+      changePct: referencePrice > 0 ? (price - referencePrice) / referencePrice : 0,
       tradedate: hit.tradedate || "",
       ticktime:  hit.ticktime  || "",
       receivedAt: Date.now(),
+      contractBridge: bridge,
     };
   } catch (_) {
     return null;
@@ -3057,7 +3370,13 @@ async function startRealtimeFeed() {
   if (location.protocol === "file:") return;
   const tick = async () => {
     const q = await fetchRealtimeQuote();
-    if (q) lastQuote = q;
+    if (q) {
+      lastQuote = q;
+      if (q.contractBridge) {
+        state.contractBridge = q.contractBridge;
+        renderContractBridge(state.contractBridge);
+      }
+    }
     updateLiveBar(lastQuote);
     updateIntradayPanel();
     draw(); // redraws chart with updated live bar; applyRealtimeQuote called at end of draw
@@ -3106,6 +3425,8 @@ function reloadAll() {
   state.dataMeta = null;
   state.intradayMeta = null;
   state.newsSnapshot = null;
+  state.contractBridge = null;
+  state.modelValidation = null;
   state.lastAi = null;
   state.lastAskResponse = null;
   state.decisionModel = null;
@@ -3130,7 +3451,11 @@ function reloadAll() {
   // Hide accuracy line while it reloads
   if (els.aiAccuracy) els.aiAccuracy.hidden = true;
   applyActiveSymbolLabels();
+  renderContractBridge(null);
+  renderModelValidation(null);
   draw();
+  autoLoadContractBridge();
+  autoLoadModelValidation();
   autoLoadCsv();
   autoLoadAiAnalysis();
   autoLoadIntradayMeta();
@@ -3171,7 +3496,11 @@ updateMarketStatus();
 setInterval(updateMarketStatus, 30 * 1000);
 
 applyActiveSymbolLabels();
+renderContractBridge(null);
+renderModelValidation(null);
 draw();
+autoLoadContractBridge();
+autoLoadModelValidation();
 autoLoadCsv();
 autoLoadAiAnalysis();
 autoLoadIntradayMeta();
@@ -3182,6 +3511,8 @@ autoLoadAskResponse();
 autoLoadOverseas();
 startRealtimeFeed();
 setInterval(autoLoadCsv, 60 * 1000);
+setInterval(autoLoadContractBridge, 60 * 1000);
+setInterval(autoLoadModelValidation, 5 * 60 * 1000);
 setInterval(autoLoadAiAnalysis, 60 * 1000);
 setInterval(autoLoadIntradayMeta, 60 * 1000);
 setInterval(autoLoadNewsSnapshot, 60 * 1000);

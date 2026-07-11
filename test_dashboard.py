@@ -96,6 +96,43 @@ def validate_symbol(symbol: str) -> None:
     parse_utc(news.get("updated_at_utc"), f"{symbol} news updated_at_utc")
     assert isinstance(news.get("articles"), list), f"{symbol}: news articles must be a list"
 
+    bridge = read_json(directory / "contract_bridge.json")
+    assert bridge.get("symbol") == symbol, f"{symbol}: contract bridge symbol mismatch"
+    assert bridge.get("market") == "DCE", f"{symbol}: contract bridge is not DCE"
+    parse_utc(bridge.get("updated_at_utc"), f"{symbol} bridge updated_at_utc")
+    prefix = symbol.removesuffix("0")
+    main = bridge.get("main")
+    secondary = bridge.get("secondary")
+    assert isinstance(main, dict), f"{symbol}: main contract missing"
+    assert re.fullmatch(rf"{prefix}\d{{4}}", str(main.get("symbol", ""))), f"{symbol}: invalid main contract"
+    assert float(main.get("price", 0)) > 0, f"{symbol}: invalid main price"
+    assert int(main.get("open_interest", 0)) > 0, f"{symbol}: invalid main open interest"
+    assert main.get("reference_type") == "previous_settlement", f"{symbol}: live change must use previous settlement"
+    assert isinstance(secondary, dict), f"{symbol}: secondary contract missing"
+    assert 0 <= float(bridge.get("secondary_open_interest_ratio", -1)), f"{symbol}: invalid secondary OI ratio"
+    assert bridge.get("roll_state") in {"stable", "watch", "urgent"}, f"{symbol}: invalid roll state"
+    specs = bridge.get("contract_specs")
+    assert isinstance(specs, dict), f"{symbol}: contract specs missing"
+    assert float(specs.get("multiplier", 0)) == 10, f"{symbol}: contract multiplier mismatch"
+    assert float(specs.get("tick_size", 0)) == 1, f"{symbol}: post-2026 tick size mismatch"
+    assert source.get("main_contract") == main.get("symbol"), f"{symbol}: source/main mapping mismatch"
+
+    model = read_json(directory / "model_validation.json")
+    assert model.get("symbol") == symbol, f"{symbol}: model symbol mismatch"
+    assert model.get("status") in {"positive", "unproven", "rejected", "insufficient"}, f"{symbol}: invalid model status"
+    parse_utc(model.get("generated_at_utc"), f"{symbol} model generated_at_utc")
+    holdout = model.get("holdout")
+    assert isinstance(holdout, dict), f"{symbol}: holdout metrics missing"
+    assert int(holdout.get("trades", 0)) >= 30, f"{symbol}: holdout sample too small"
+    integrity = model.get("integrity")
+    assert isinstance(integrity, dict), f"{symbol}: model integrity missing"
+    for key in ("entry_after_signal", "no_overlapping_positions", "same_bar_conservative", "chronological_split"):
+        assert integrity.get(key) is True, f"{symbol}: model integrity failed: {key}"
+    recent_trades = model.get("recent_trades")
+    assert isinstance(recent_trades, list) and recent_trades, f"{symbol}: recent model trades missing"
+    for trade in recent_trades:
+        assert int(trade["entry_index"]) == int(trade["signal_index"]) + 1, f"{symbol}: lookahead entry detected"
+
 
 def validate_frontend() -> None:
     html = (ROOT / "index.html").read_text(encoding="utf-8")
@@ -114,6 +151,11 @@ def validate_frontend() -> None:
         "posRR",
         "aiFreshness",
         "priceCanvas",
+        "contractMapping",
+        "mainContractPrice",
+        "rollRisk",
+        "modelStatus",
+        "modelExpectancy",
     }
     assert required_ids.issubset(collector.ids), f"missing UI ids: {sorted(required_ids - set(collector.ids))}"
 
@@ -142,6 +184,7 @@ def validate_workflow() -> None:
     assert "workflow_dispatch:" in workflow, "manual dispatch missing"
     assert "run_ai_analysis" in workflow, "manual AI toggle missing"
     assert "test_dashboard.py" in workflow, "dashboard validation step missing"
+    assert "test_model_logic.py" in workflow, "model logic unit test step missing"
 
 
 def main() -> None:

@@ -6,7 +6,7 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260711-2">
+  <link rel="stylesheet" href="styles.css?v=20260712-1">
 </head>
 <body>
   <main class="app-shell">
@@ -29,6 +29,49 @@
     <p class="contract-disclaimer">
       P0/Y0 是连续合约分析口径。实际下单前必须核对可交易主力月份、换月价差、流动性与交易所保证金。
     </p>
+
+    <section class="contract-bridge" aria-label="连续合约与可交易合约映射">
+      <div class="bridge-head">
+        <div>
+          <span class="section-kicker">可交易合约桥接</span>
+          <h2 id="contractMapping">P0 → 正在核对主力月份</h2>
+        </div>
+        <strong id="contractMappingStatus" class="bridge-status neutral">等待盘口</strong>
+      </div>
+      <div class="contract-bridge-grid">
+        <div class="bridge-metric mapping-metric">
+          <span>映射证据</span>
+          <strong id="mappingEvidence">等待价格与持仓比对</strong>
+          <small id="mappingMarketTime">--</small>
+        </div>
+        <div class="bridge-metric">
+          <span>主力实时价</span>
+          <strong id="mainContractPrice">--</strong>
+          <small id="mainContractChange">--</small>
+        </div>
+        <div class="bridge-metric">
+          <span>主力持仓</span>
+          <strong id="mainOpenInterest">--</strong>
+          <small id="mainOpenInterestShare">--</small>
+        </div>
+        <div class="bridge-metric">
+          <span>次主力价差</span>
+          <strong id="secondarySpread">--</strong>
+          <small id="secondaryOpenInterest">--</small>
+        </div>
+        <div class="bridge-metric">
+          <span>换月风险</span>
+          <strong id="rollRisk">--</strong>
+          <small id="rollRiskReason">--</small>
+        </div>
+        <div class="bridge-metric">
+          <span>合约规则</span>
+          <strong id="contractSpec">--</strong>
+          <small id="contractRuleRef">--</small>
+        </div>
+      </div>
+      <p class="bridge-freshness" id="contractBridgeFreshness">后台每 5 分钟更新，交易时段浏览器同步核对实时盘口。</p>
+    </section>
 
     <section class="symbol-switcher" aria-label="切换品种">
       <button class="sym-btn" data-sym="P0">P0 棕榈油</button>
@@ -169,6 +212,27 @@
             <div><dt>盈亏比</dt><dd id="shortSetupRR">--</dd></div>
           </dl>
         </article>
+      </div>
+    </section>
+
+    <section class="model-validation" aria-label="固定规则样本外检验">
+      <div class="section-head validation-head">
+        <div>
+          <h2>固定规则样本外检验</h2>
+          <small id="modelMethod">信号收盘确认，下一交易日开盘执行</small>
+        </div>
+        <strong id="modelStatus" class="model-status neutral">等待检验结果</strong>
+      </div>
+      <div class="validation-grid">
+        <div><span>样本外交易</span><strong id="modelTrades">--</strong><small id="modelSplitDate">--</small></div>
+        <div><span>单笔期望</span><strong id="modelExpectancy">--</strong><small>扣除成本后 R</small></div>
+        <div><span>盈利因子</span><strong id="modelProfitFactor">--</strong><small>总盈利 / 总亏损</small></div>
+        <div><span>最大回撤</span><strong id="modelDrawdown">--</strong><small>按累计 R 计算</small></div>
+        <div><span>胜率</span><strong id="modelWinRate">--</strong><small id="modelDirectionCount">--</small></div>
+      </div>
+      <div class="validation-verdict">
+        <p id="modelVerdict">正在读取固定参数基准模型的历史样本外表现。</p>
+        <small id="modelLimitations">日线基准模型与 1H/4H 日内方案不同，结果不代表未来收益。</small>
       </div>
     </section>
 
@@ -423,6 +487,6 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260711-2"></script>
+  <script src="app.js?v=20260712-1"></script>
 </body>
 </html>

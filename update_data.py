@@ -319,6 +319,16 @@ PROFILES: dict[str, dict] = {
     "P0": {
         "name": "棕榈油",
         "market_node": "zly_qh",  # Sina Market_Center node for realtime quote
+        "contract_prefix": "P",
+        "contract_specs": {
+            "multiplier": 10,
+            "tick_size": 1,
+            "price_unit": "元/吨",
+            "tick_value": 10,
+            "rule_reference": "大商所〔2026〕32号",
+            "effective_from": "2026-04-10",
+            "source_url": "https://www.dce.com.cn/dce/content/2026/ywggytz/18628268.html",
+        },
         "dir": "p0",
         "news_queries": [
             # 棕榈油核心
@@ -352,6 +362,16 @@ PROFILES: dict[str, dict] = {
     "Y0": {
         "name": "豆油",
         "market_node": "dy_qh",
+        "contract_prefix": "Y",
+        "contract_specs": {
+            "multiplier": 10,
+            "tick_size": 1,
+            "price_unit": "元/吨",
+            "tick_value": 10,
+            "rule_reference": "大商所〔2026〕32号",
+            "effective_from": "2026-04-10",
+            "source_url": "https://www.dce.com.cn/dce/content/2026/ywggytz/18628268.html",
+        },
         "dir": "y0",
         "news_queries": [
             "豆油 期货 大连 走势 今日",
@@ -577,46 +597,235 @@ def fetch_intraday_bundle(symbol: str = "P0", out_dir: Path = DATA_DIR) -> dict[
 
 SINA_MARKET_URL_TMPL = (
     "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/"
-    "Market_Center.getHQFuturesData?page=1&sort=position&asc=0&node={node}&base=futures"
+    "Market_Center.getHQFuturesData?page=1&num=100&sort=position&asc=0&node={node}&base=futures"
 )
 
 
-def get_realtime_quote_sina(symbol: str = "P0") -> dict | None:
-    """Fetch live quote for `symbol` from Sina Market Center (same API as the
-    browser front-end). The Sina 'node' name is looked up from PROFILES so
-    each symbol hits its own commodity node (P0=zly_qh, Y0=dy_qh, ...)."""
+def _safe_float(value: object, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _safe_int(value: object, default: int = 0) -> int:
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return default
+
+
+def fetch_sina_market_board(symbol: str = "P0") -> list[dict]:
+    """Return the complete commodity board used by both the live quote and
+    continuous-to-tradable-contract mapping."""
+    profile = PROFILES.get(symbol)
+    if not profile:
+        return []
+    url = SINA_MARKET_URL_TMPL.format(node=profile["market_node"])
+    resp = requests.get(url, timeout=12, headers={"User-Agent": "Mozilla/5.0"})
+    resp.raise_for_status()
+    data = resp.json()
+    return data if isinstance(data, list) else []
+
+
+def normalize_sina_quote(item: dict | None) -> dict | None:
+    if not item:
+        return None
+    price = _safe_float(item.get("trade"))
+    if price <= 0:
+        return None
+    previous_close = _safe_float(item.get("preclose"))
+    previous_settlement = (
+        _safe_float(item.get("presettlement"))
+        or _safe_float(item.get("prevsettlement"))
+    )
+    reference = previous_settlement or previous_close
+    change = price - reference if reference else 0.0
+    change_ratio = change / reference if reference else 0.0
+    return {
+        "symbol": str(item.get("symbol") or ""),
+        "name": str(item.get("name") or ""),
+        "price": price,
+        "open": _safe_float(item.get("open")),
+        "high": _safe_float(item.get("high")),
+        "low": _safe_float(item.get("low")),
+        "volume": _safe_int(item.get("volume")),
+        "open_interest": _safe_int(item.get("position")),
+        "prev_close": previous_close,
+        "prev_settlement": previous_settlement,
+        "reference_price": reference,
+        "reference_type": "previous_settlement" if previous_settlement else "previous_close",
+        "change": round(change, 4),
+        "change_ratio": round(change_ratio, 8),
+        "change_pct": pct(change_ratio),
+        "bid_price": _safe_float(item.get("bidprice1")),
+        "ask_price": _safe_float(item.get("askprice1")),
+        "bid_volume": _safe_int(item.get("bidvol1")),
+        "ask_volume": _safe_int(item.get("askvol1")),
+        "tradedate": str(item.get("tradedate") or ""),
+        "ticktime": str(item.get("ticktime") or ""),
+    }
+
+
+def _delivery_month(contract: str) -> tuple[int, int] | None:
+    match = re.fullmatch(r"[A-Z]+(\d{2})(\d{2})", contract.upper())
+    if not match:
+        return None
+    year = 2000 + int(match.group(1))
+    month = int(match.group(2))
+    if not 1 <= month <= 12:
+        return None
+    return year, month
+
+
+def _months_to_delivery(contract: str, trading_day: str) -> int | None:
+    delivery = _delivery_month(contract)
+    if not delivery:
+        return None
+    try:
+        current = datetime.strptime(trading_day[:10], "%Y-%m-%d")
+    except (TypeError, ValueError):
+        current = datetime.now(timezone(timedelta(hours=8)))
+    year, month = delivery
+    return (year - current.year) * 12 + month - current.month
+
+
+def build_contract_bridge(
+    symbol: str,
+    board: list[dict],
+    updated_at_utc: str | None = None,
+) -> dict | None:
+    """Map a continuous symbol to the highest-open-interest tradable month.
+
+    The mapping is evidence-based: specific month contracts are ranked by
+    current open interest, then compared with the continuous quote. No expiry
+    date is guessed; only month distance and OI migration are used for alerts.
+    """
     profile = PROFILES.get(symbol)
     if not profile:
         return None
-    url = SINA_MARKET_URL_TMPL.format(node=profile["market_node"])
+    prefix = str(profile["contract_prefix"]).upper()
+    continuous = normalize_sina_quote(
+        next((item for item in board if str(item.get("symbol") or "").upper() == symbol), None)
+    )
+    contract_pattern = re.compile(rf"^{re.escape(prefix)}\d{{4}}$")
+    candidates = [
+        quote
+        for item in board
+        if contract_pattern.fullmatch(str(item.get("symbol") or "").upper())
+        for quote in [normalize_sina_quote(item)]
+        if quote and quote["open_interest"] > 0
+    ]
+    candidates.sort(key=lambda item: (item["open_interest"], item["volume"]), reverse=True)
+    if not candidates:
+        return None
+
+    main = candidates[0]
+    secondary = candidates[1] if len(candidates) > 1 else None
+    trading_day = str(main.get("tradedate") or (continuous or {}).get("tradedate") or "")
+    months_left = _months_to_delivery(main["symbol"], trading_day)
+    total_oi = sum(int(item["open_interest"]) for item in candidates)
+    main_share = main["open_interest"] / total_oi if total_oi else 0.0
+    secondary_ratio = (
+        secondary["open_interest"] / main["open_interest"]
+        if secondary and main["open_interest"] else 0.0
+    )
+    spread = secondary["price"] - main["price"] if secondary else None
+    spread_ratio = spread / main["price"] if spread is not None and main["price"] else None
+
+    if (months_left is not None and months_left <= 1) or secondary_ratio >= 0.85:
+        roll_state = "urgent"
+        roll_label = "临近换月"
+        roll_reason = "主力临近交割月或次主力持仓已接近主力，执行前必须复核流动性。"
+    elif (months_left is not None and months_left <= 2) or secondary_ratio >= 0.50:
+        roll_state = "watch"
+        roll_label = "监控移仓"
+        roll_reason = "主力进入交割月前约两个月或次主力持仓超过主力一半。"
+    else:
+        roll_state = "stable"
+        roll_label = "主力稳定"
+        roll_reason = "主力持仓仍明显领先，暂未出现高强度换月信号。"
+
+    month_pressure = 10
+    if months_left is not None:
+        month_pressure = 100 if months_left <= 0 else 80 if months_left == 1 else 50 if months_left == 2 else 25 if months_left == 3 else 10
+    roll_score = round(max(month_pressure, secondary_ratio * 100))
+    mapping_verified = bool(
+        continuous
+        and abs(continuous["price"] - main["price"]) <= float(profile["contract_specs"]["tick_size"])
+        and continuous["open_interest"] == main["open_interest"]
+    )
+
+    return {
+        "source": "Sina Market Center",
+        "source_url": SINA_MARKET_URL_TMPL.format(node=profile["market_node"]),
+        "symbol": symbol,
+        "market": "DCE",
+        "updated_at_utc": updated_at_utc or datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "trading_day": trading_day,
+        "market_time": str(main.get("ticktime") or ""),
+        "continuous": continuous,
+        "main": main,
+        "secondary": secondary,
+        "mapping_verified": mapping_verified,
+        "mapping_note": (
+            f"{symbol} 当前行情与 {main['symbol']} 的价格及持仓一致。"
+            if mapping_verified else
+            f"{symbol} 与最高持仓合约 {main['symbol']} 未完全一致，执行前需人工复核。"
+        ),
+        "main_open_interest_share": round(main_share, 4),
+        "secondary_open_interest_ratio": round(secondary_ratio, 4),
+        "secondary_spread": round(spread, 4) if spread is not None else None,
+        "secondary_spread_ratio": round(spread_ratio, 6) if spread_ratio is not None else None,
+        "spread_structure": (
+            "远月升水" if spread is not None and spread > 0 else
+            "远月贴水" if spread is not None and spread < 0 else
+            "平水"
+        ),
+        "months_to_delivery_month": months_left,
+        "roll_state": roll_state,
+        "roll_label": roll_label,
+        "roll_score": roll_score,
+        "roll_reason": roll_reason,
+        "contract_specs": dict(profile["contract_specs"]),
+        "candidates": candidates[:6],
+    }
+
+
+def fetch_contract_market_snapshot(symbol: str, out_dir: Path) -> tuple[dict | None, dict | None]:
+    board = fetch_sina_market_board(symbol)
+    realtime = normalize_sina_quote(
+        next((item for item in board if str(item.get("symbol") or "").upper() == symbol), None)
+    )
+    bridge = build_contract_bridge(symbol, board)
+    if bridge:
+        (out_dir / "contract_bridge.json").write_text(
+            json.dumps(bridge, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+    return realtime, bridge
+
+
+def get_realtime_quote_sina(symbol: str = "P0") -> dict | None:
+    """Compatibility wrapper for callers that only need the live quote."""
     try:
-        resp = requests.get(url, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
-        item = next((it for it in data if it.get("symbol") == symbol), None)
-        if not item or not float(item.get("trade") or 0):
-            return None
-        price = float(item["trade"])
-        prev_close = float(item["preclose"])
-        change = (price - prev_close) / prev_close if prev_close else 0
-        return {
-            "price": price,
-            "open": float(item["open"]),
-            "high": float(item["high"]),
-            "low": float(item["low"]),
-            "volume": int(item["volume"]),
-            "prev_close": prev_close,
-            "change_pct": pct(change),
-            "tradedate": item.get("tradedate", ""),
-            "ticktime": item.get("ticktime", ""),
-        }
+        board = fetch_sina_market_board(symbol)
+        return normalize_sina_quote(
+            next((item for item in board if str(item.get("symbol") or "").upper() == symbol), None)
+        )
     except Exception:
         return None
 
 
 # ── Daily snapshot ────────────────────────────────────────────────────────────
 
-def daily_snapshot(export, realtime: dict | None = None, intraday: dict | None = None) -> dict:
+def daily_snapshot(
+    export,
+    realtime: dict | None = None,
+    intraday: dict | None = None,
+    contract_bridge: dict | None = None,
+    model_validation: dict | None = None,
+) -> dict:
     rows = export.tail(120).to_dict(orient="records")
     closes = [float(row["close"]) for row in rows]
     volumes = [float(row["volume"]) for row in rows]
@@ -651,7 +860,327 @@ def daily_snapshot(export, realtime: dict | None = None, intraday: dict | None =
         )
     if intraday:
         snap["intraday"] = intraday
+    if contract_bridge:
+        snap["contract_bridge"] = contract_bridge
+    if model_validation:
+        snap["model_validation"] = {
+            "strategy_version": model_validation.get("strategy_version"),
+            "status": model_validation.get("status"),
+            "status_label": model_validation.get("status_label"),
+            "holdout": model_validation.get("holdout"),
+            "limitations": model_validation.get("limitations"),
+        }
     return snap
+
+
+# ── Fixed-rule model validation (strict next-open execution) ─────────────────
+
+MODEL_STRATEGY_VERSION = "daily-trend-breakout-pullback-v1"
+MODEL_HOLDOUT_FRACTION = 0.30
+MODEL_MAX_HOLDING_BARS = 12
+MODEL_STOP_ATR = 1.25
+MODEL_TARGET_R = 2.0
+MODEL_SLIPPAGE_POINTS_PER_SIDE = 2.0
+MODEL_FEE_YUAN_PER_SIDE = 3.0
+
+
+def _round_price(value: float, tick_size: float) -> float:
+    return round(value / tick_size) * tick_size
+
+
+def _resolve_trade_bar(
+    direction_sign: int,
+    bar_open: float,
+    bar_high: float,
+    bar_low: float,
+    stop_price: float,
+    target_price: float,
+) -> tuple[float, str, bool] | None:
+    """Resolve one OHLC bar without assuming an unknowable intrabar path."""
+    if direction_sign > 0:
+        if bar_open <= stop_price:
+            return bar_open, "gap_stop", False
+        if bar_open >= target_price:
+            return target_price, "gap_target", False
+        stop_hit = bar_low <= stop_price
+        target_hit = bar_high >= target_price
+    else:
+        if bar_open >= stop_price:
+            return bar_open, "gap_stop", False
+        if bar_open <= target_price:
+            return target_price, "gap_target", False
+        stop_hit = bar_high >= stop_price
+        target_hit = bar_low <= target_price
+    if stop_hit and target_hit:
+        return stop_price, "stop_same_bar", True
+    if stop_hit:
+        return stop_price, "stop", False
+    if target_hit:
+        return target_price, "target", False
+    return None
+
+
+def _trade_metrics(trades: list[dict]) -> dict:
+    if not trades:
+        return {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "win_rate": None,
+            "expectancy_r": None,
+            "profit_factor": None,
+            "max_drawdown_r": None,
+            "average_holding_bars": None,
+            "long_trades": 0,
+            "short_trades": 0,
+            "stop_rate": None,
+            "target_rate": None,
+        }
+
+    results = [float(item["net_r"]) for item in trades]
+    wins = sum(value > 0 for value in results)
+    losses = sum(value <= 0 for value in results)
+    gross_profit = sum(value for value in results if value > 0)
+    gross_loss = -sum(value for value in results if value < 0)
+    equity = 0.0
+    peak = 0.0
+    max_drawdown = 0.0
+    for value in results:
+        equity += value
+        peak = max(peak, equity)
+        max_drawdown = min(max_drawdown, equity - peak)
+    count = len(trades)
+    return {
+        "trades": count,
+        "wins": wins,
+        "losses": losses,
+        "win_rate": round(wins / count, 4),
+        "expectancy_r": round(sum(results) / count, 4),
+        "profit_factor": round(gross_profit / gross_loss, 4) if gross_loss else None,
+        "max_drawdown_r": round(max_drawdown, 4),
+        "average_holding_bars": round(sum(int(item["holding_bars"]) for item in trades) / count, 2),
+        "long_trades": sum(item["direction"] == "long" for item in trades),
+        "short_trades": sum(item["direction"] == "short" for item in trades),
+        "stop_rate": round(sum(item["exit_reason"] in {"stop", "gap_stop", "stop_same_bar"} for item in trades) / count, 4),
+        "target_rate": round(sum(item["exit_reason"] in {"target", "gap_target"} for item in trades) / count, 4),
+        "net_r_total": round(sum(results), 4),
+        "best_trade_r": round(max(results), 4),
+        "worst_trade_r": round(min(results), 4),
+    }
+
+
+def build_model_validation(export, symbol: str) -> dict:
+    """Run one fixed, non-optimized daily model with a chronological holdout.
+
+    A signal can only use the completed close at index t and is filled at the
+    next bar's open. Same-bar stop/target collisions are resolved as a stop,
+    and adverse opening gaps fill at the open. These rules deliberately bias
+    results toward caution instead of flattering the strategy.
+    """
+    profile = PROFILES[symbol]
+    specs = profile["contract_specs"]
+    tick_size = float(specs["tick_size"])
+    multiplier = float(specs["multiplier"])
+    frame = export.copy().reset_index(drop=True)
+    frame["date"] = frame["date"].astype(str)
+    for column in ("open", "high", "low", "close", "volume"):
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+
+    close = frame["close"]
+    frame["ema20"] = close.ewm(span=20, adjust=False).mean()
+    frame["ema60"] = close.ewm(span=60, adjust=False).mean()
+    delta = close.diff()
+    average_gain = delta.clip(lower=0).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+    average_loss = (-delta.clip(upper=0)).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+    relative_strength = average_gain / average_loss.replace(0, pd.NA)
+    frame["rsi14"] = 100 - 100 / (1 + relative_strength)
+    frame.loc[average_loss.eq(0), "rsi14"] = 100.0
+
+    previous_close = close.shift(1)
+    true_range = pd.concat(
+        [
+            frame["high"] - frame["low"],
+            (frame["high"] - previous_close).abs(),
+            (frame["low"] - previous_close).abs(),
+        ],
+        axis=1,
+    ).max(axis=1)
+    frame["atr14"] = true_range.rolling(14, min_periods=14).mean()
+    prior_high20 = frame["high"].rolling(20).max().shift(1)
+    prior_low20 = frame["low"].rolling(20).min().shift(1)
+    pullback_long = (close > frame["ema20"]) & (close.shift(1) <= frame["ema20"].shift(1))
+    pullback_short = (close < frame["ema20"]) & (close.shift(1) >= frame["ema20"].shift(1))
+    trend_long = (
+        (close > frame["ema60"])
+        & (frame["ema20"] > frame["ema60"])
+        & (frame["ema20"] > frame["ema20"].shift(5))
+    )
+    trend_short = (
+        (close < frame["ema60"])
+        & (frame["ema20"] < frame["ema60"])
+        & (frame["ema20"] < frame["ema20"].shift(5))
+    )
+    signal = pd.Series(0, index=frame.index, dtype="int64")
+    signal.loc[
+        trend_long
+        & ((close > prior_high20) | pullback_long)
+        & frame["rsi14"].between(45, 75)
+    ] = 1
+    signal.loc[
+        trend_short
+        & ((close < prior_low20) | pullback_short)
+        & frame["rsi14"].between(25, 55)
+    ] = -1
+    frame["signal"] = signal
+
+    split_index = max(61, min(len(frame) - 2, int(len(frame) * (1 - MODEL_HOLDOUT_FRACTION))))
+    split_date = str(frame.iloc[split_index]["date"])
+    round_trip_cost_points = (
+        MODEL_SLIPPAGE_POINTS_PER_SIDE * 2
+        + (MODEL_FEE_YUAN_PER_SIDE * 2 / multiplier)
+    )
+    trades: list[dict] = []
+    same_bar_collisions = 0
+    cursor = 60
+    while cursor < len(frame) - 1:
+        direction_sign = int(frame.iloc[cursor]["signal"])
+        signal_atr = _safe_float(frame.iloc[cursor]["atr14"])
+        if direction_sign == 0 or signal_atr <= 0:
+            cursor += 1
+            continue
+
+        entry_index = cursor + 1
+        entry_price = float(frame.iloc[entry_index]["open"])
+        risk_points = max(signal_atr * MODEL_STOP_ATR, tick_size * 8)
+        stop_price = _round_price(entry_price - direction_sign * risk_points, tick_size)
+        risk_points = abs(entry_price - stop_price)
+        if risk_points <= 0:
+            cursor += 1
+            continue
+        target_price = _round_price(
+            entry_price + direction_sign * MODEL_TARGET_R * risk_points,
+            tick_size,
+        )
+
+        last_exit_index = min(entry_index + MODEL_MAX_HOLDING_BARS - 1, len(frame) - 1)
+        exit_index = last_exit_index
+        exit_price = float(frame.iloc[exit_index]["close"])
+        exit_reason = "time_exit"
+        for bar_index in range(entry_index, last_exit_index + 1):
+            bar = frame.iloc[bar_index]
+            resolution = _resolve_trade_bar(
+                direction_sign,
+                float(bar["open"]),
+                float(bar["high"]),
+                float(bar["low"]),
+                stop_price,
+                target_price,
+            )
+            if resolution:
+                exit_price, exit_reason, same_bar_collision = resolution
+                exit_index = bar_index
+                if same_bar_collision:
+                    same_bar_collisions += 1
+                break
+
+        gross_points = direction_sign * (exit_price - entry_price)
+        gross_r = gross_points / risk_points
+        net_r = (gross_points - round_trip_cost_points) / risk_points
+        trades.append(
+            {
+                "signal_index": cursor,
+                "entry_index": entry_index,
+                "exit_index": exit_index,
+                "signal_date": str(frame.iloc[cursor]["date"]),
+                "entry_date": str(frame.iloc[entry_index]["date"]),
+                "exit_date": str(frame.iloc[exit_index]["date"]),
+                "direction": "long" if direction_sign > 0 else "short",
+                "entry_price": round(entry_price, 2),
+                "stop_price": round(stop_price, 2),
+                "target_price": round(target_price, 2),
+                "exit_price": round(exit_price, 2),
+                "exit_reason": exit_reason,
+                "holding_bars": exit_index - entry_index + 1,
+                "initial_risk_points": round(risk_points, 2),
+                "gross_r": round(gross_r, 4),
+                "net_r": round(net_r, 4),
+                "sample": "holdout" if cursor >= split_index else "reference",
+            }
+        )
+        cursor = max(exit_index, cursor + 1)
+
+    reference_trades = [item for item in trades if item["sample"] == "reference"]
+    holdout_trades = [item for item in trades if item["sample"] == "holdout"]
+    holdout = _trade_metrics(holdout_trades)
+    holdout_pf = holdout.get("profit_factor")
+    holdout_exp = holdout.get("expectancy_r")
+    if holdout["trades"] < 30:
+        status, status_label = "insufficient", "样本不足"
+    elif holdout_exp is None or holdout_exp <= 0 or holdout_pf is None or holdout_pf < 1:
+        status, status_label = "rejected", "样本外无优势"
+    elif holdout_pf < 1.20 or holdout_exp < 0.10:
+        status, status_label = "unproven", "优势尚未证实"
+    else:
+        status, status_label = "positive", "样本外正优势"
+
+    no_overlap = all(
+        trades[index]["entry_index"] > trades[index - 1]["exit_index"]
+        for index in range(1, len(trades))
+    )
+    entry_after_signal = all(
+        item["entry_index"] == item["signal_index"] + 1 for item in trades
+    )
+    return {
+        "source": "local deterministic backtest",
+        "symbol": symbol,
+        "market": f"DCE {profile['name']} continuous history",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "strategy_version": MODEL_STRATEGY_VERSION,
+        "status": status,
+        "status_label": status_label,
+        "sample_period": {
+            "start": str(frame.iloc[0]["date"]),
+            "end": str(frame.iloc[-1]["date"]),
+            "rows": int(len(frame)),
+            "holdout_start": split_date,
+            "holdout_fraction": MODEL_HOLDOUT_FRACTION,
+        },
+        "methodology": {
+            "signal_timing": "仅使用当日收盘后可知的EMA20/EMA60、RSI14、ATR14及前20日高低点",
+            "entry_timing": "信号后下一交易日开盘成交",
+            "entry_rule": "EMA20与EMA60同向时，20日突破或回踩EMA20重新收复/跌破",
+            "exit_rule": f"{MODEL_STOP_ATR:.2f} ATR止损、{MODEL_TARGET_R:.1f}R目标、最多持有{MODEL_MAX_HOLDING_BARS}根日线",
+            "collision_policy": "同一根K线同时触及止损和止盈时按止损成交",
+            "gap_policy": "不利跳空越过止损时按开盘价成交；有利跳空按原目标价成交",
+            "cost_assumption": (
+                f"单边滑点{MODEL_SLIPPAGE_POINTS_PER_SIDE:.0f}点 + "
+                f"单边手续费假设{MODEL_FEE_YUAN_PER_SIDE:.0f}元/手"
+            ),
+            "parameter_search": "无；参数固定，未按样本外结果优化",
+        },
+        "all": _trade_metrics(trades),
+        "reference": _trade_metrics(reference_trades),
+        "holdout": holdout,
+        "integrity": {
+            "entry_after_signal": entry_after_signal,
+            "no_overlapping_positions": no_overlap,
+            "same_bar_conservative": True,
+            "same_bar_collision_count": same_bar_collisions,
+            "chronological_split": True,
+        },
+        "latest_signal": (
+            "long" if int(frame.iloc[-1]["signal"]) > 0 else
+            "short" if int(frame.iloc[-1]["signal"]) < 0 else
+            "flat"
+        ),
+        "recent_trades": trades[-12:],
+        "limitations": [
+            "连续合约历史可能包含换月跳空，不能替代具体月份合约回测。",
+            "样本外仅为一次时间切分，不等于未来收益保证。",
+            "未模拟涨跌停、排队成交、盘口冲击、保证金变化和税费差异。",
+            "该日线基准模型不等同于网页中的1小时/4小时日内执行计划。",
+        ],
+    }
 
 
 # ── Web search (DuckDuckGo, no API key needed) ────────────────────────────────
@@ -1113,6 +1642,19 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         if snapshot.get("intraday") else
         "数据中无 1小时/2小时/4小时 K线，请不要声称进行了小时线分析。"
     )
+    contract_instruction = (
+        "数据中包含 contract_bridge。请明确写出当前连续合约映射到的实际主力月份、"
+        "次主力价差、持仓比和换月状态；如果 mapping_verified=false，必须把人工复核列为不交易条件。"
+        if snapshot.get("contract_bridge") else
+        "数据中无主力月份映射，必须提醒用户下单前自行核对具体月份合约。"
+    )
+    validation_instruction = (
+        "数据中包含 model_validation，这是固定日线基准模型的历史样本外结果。"
+        "它不等同于当前日内方案；如果状态不是 positive，必须明确说明历史优势未被证实，"
+        "不得把命中率、胜率或历史结果包装成未来概率。"
+        if snapshot.get("model_validation") else
+        "数据中无策略验证结果，不得声称策略已经回测或验证。"
+    )
 
     has_news = bool(news_summary and len(news_summary) > 60)
     news_block = (
@@ -1138,7 +1680,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
 
     prompt_content = (
         f"请基于以下大连商品交易所{profile_name} {symbol} 连续合约实时行情、1小时/2小时/4小时K线、日线数据及市场舆情做综合中文分析。"
-        f"{realtime_instruction}{intraday_instruction}"
+        f"{realtime_instruction}{intraday_instruction}{contract_instruction}{validation_instruction}"
         f"{news_block}"
         "要求：\n"
         "1) 先给日内短线判断（结合 1H + 4H），再给日线级别背景，不能只做中长期分析；\n"
@@ -1149,7 +1691,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         "6) watch_levels 包含数字 support 和 resistance；\n"
         "7) decision_frame 对象必须包含：confidence(0-100，表示证据强度而非胜率)、regime、edge、no_trade_condition、long_case、short_case、event_risks、data_limits。"
         "long_case 和 short_case 都必须包含 trigger, entry_zone, stop, targets, invalidation, risk_reward；如果首目标盈亏比低于1.5，必须明确写入 no_trade_condition，不得硬给方向；\n"
-        "8) P0/Y0 是连续合约分析口径，不是可直接下单的具体月份合约。必须提醒实际执行前核对主力月份、换月价差、流动性和保证金；\n"
+        "8) P0/Y0 是连续合约分析口径，不是可直接下单的具体月份合约。结合 contract_bridge 核对主力月份、换月价差与流动性，但仍提醒下单软件二次确认；\n"
         "9) 舆情只能引用给定搜索结果，区分事实、市场预期和你的推断；禁止编造数字、发布时间或来源；\n"
         "10) 强调不构成投资建议；\n"
         "11) 只输出 JSON；字段：summary, bias, analysis, intraday_strategy, decision_frame, news_impact, news_articles, watch_levels, risk_note。\n"
@@ -1322,6 +1864,12 @@ def run_profile(symbol: str) -> None:
     output = out_dir / "daily.csv"
     export.to_csv(output, index=False)
 
+    model_validation = build_model_validation(export, symbol)
+    (out_dir / "model_validation.json").write_text(
+        json.dumps(model_validation, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
     # Intraday + news + realtime are best-effort AND independent of each other
     # and the daily fetch — run them in parallel. A transient Sina/DDG hiccup
     # shouldn't fail the whole workflow.
@@ -1347,15 +1895,17 @@ def run_profile(symbol: str) -> None:
             {"updated_at_utc": None, "articles": []},
             "News snapshot fetch",
         )
-        f_realtime = pool.submit(
+        existing_bridge = _load_json(out_dir / "contract_bridge.json")
+        bridge_fallback = existing_bridge if existing_bridge.get("symbol") == symbol else None
+        f_market = pool.submit(
             _safe,
-            lambda: get_realtime_quote_sina(symbol=symbol),
-            None,
-            "Realtime quote fetch",
+            lambda: fetch_contract_market_snapshot(symbol=symbol, out_dir=out_dir),
+            (None, bridge_fallback),
+            "Realtime contract board fetch",
         )
         intraday = f_intraday.result()
         news_snapshot = f_news.result()
-        realtime = f_realtime.result()
+        realtime, contract_bridge = f_market.result()
 
     latest = export.tail(1).iloc[0]
     meta = {
@@ -1370,6 +1920,10 @@ def run_profile(symbol: str) -> None:
         "live_bar": get_live_bar(str(latest["date"]), symbol=symbol),
         "intraday_updated_at_utc": intraday.get("updated_at_utc"),
         "news_updated_at_utc": news_snapshot.get("updated_at_utc"),
+        "contract_bridge_updated_at_utc": (contract_bridge or {}).get("updated_at_utc"),
+        "main_contract": ((contract_bridge or {}).get("main") or {}).get("symbol"),
+        "model_validation_status": model_validation.get("status"),
+        "model_validation_generated_at_utc": model_validation.get("generated_at_utc"),
     }
 
     # F2: attach open-interest fields when available.
@@ -1399,7 +1953,13 @@ def run_profile(symbol: str) -> None:
         else:
             print(f"[{symbol}] Real-time quote: unavailable, using daily close only")
 
-        snapshot = daily_snapshot(export, realtime, intraday)
+        snapshot = daily_snapshot(
+            export,
+            realtime,
+            intraday,
+            contract_bridge=contract_bridge,
+            model_validation=model_validation,
+        )
 
         # Step 1 – detailed news via web search (fallback path only)
         news_summary = news_snapshot_to_text(news_snapshot)
@@ -1452,6 +2012,17 @@ def run_profile(symbol: str) -> None:
     print(f"[{symbol}] Latest: {latest['date']} close={latest['close']}")
     print(f"[{symbol}] Intraday 1H: {bool(intraday.get('one_hour'))}, 2H: {bool(intraday.get('two_hour'))}, 4H: {bool(intraday.get('four_hour'))}")
     print(f"[{symbol}] News articles: {len(news_snapshot.get('articles') or [])}")
+    if contract_bridge:
+        print(
+            f"[{symbol}] Contract mapping: {symbol} -> "
+            f"{contract_bridge['main']['symbol']} ({contract_bridge['roll_label']})"
+        )
+    holdout = model_validation["holdout"]
+    print(
+        f"[{symbol}] Model holdout: {model_validation['status_label']} "
+        f"trades={holdout['trades']} expectancy={holdout['expectancy_r']}R "
+        f"PF={holdout['profit_factor']}"
+    )
 
 
 if __name__ == "__main__":

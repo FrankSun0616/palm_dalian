@@ -1223,6 +1223,10 @@ function buildDecisionModel(analysis) {
     gate = { label: "休市", kind: "neutral", reason: "市场关闭，当前计划只用于下个交易时段预案。" };
   } else if (status === "closed" || status === "day-break") {
     gate = { label: "等待开盘", kind: "neutral", reason: "非交易时段，不把静态报价当作可执行价格。" };
+  } else if (!Number.isFinite(confidence.quoteAge) || confidence.quoteAge > 1.5) {
+    gate = { label: "暂停交易", kind: "down", reason: "实时行情未接通或已经过期，不使用后台快照代替执行价格。" };
+  } else if (!Number.isFinite(confidence.intradayAge) || confidence.intradayAge > 120) {
+    gate = { label: "暂停交易", kind: "down", reason: "小时线后台快照超过两小时，等待刷新后再评估。" };
   } else if (confidence.score < 65) {
     gate = { label: "暂停交易", kind: "down", reason: "数据可信度不足，先恢复实时行情或小时线快照。" };
   } else if (inNoTradeZone && Math.abs(compositeSignal) < 35) {
@@ -2868,7 +2872,7 @@ function updateDistanceLine() {
   if (parts.length === 0) {
     els.lastDistance.textContent = "--";
   } else {
-    els.lastDistance.innerHTML = parts.join(" | ");
+    els.lastDistance.innerHTML = parts.join(" · ");
   }
 }
 

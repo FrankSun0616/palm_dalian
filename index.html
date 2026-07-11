@@ -6,7 +6,7 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260708-4">
+  <link rel="stylesheet" href="styles.css?v=20260711-1">
 </head>
 <body>
   <main class="app-shell">
@@ -14,18 +14,25 @@
       <section>
         <p class="eyebrow">
           <span id="eyebrowText">DCE Palm Oil Continuous</span>
-          <span class="live-indicator" title="所有行情、舆情每 5–60 秒自动刷新">
+          <span class="live-indicator" title="交易时段内每 5 秒尝试读取实时报价；后台数据按 GitHub Actions 实际运行时间更新">
             <span class="live-pulse"></span> <span class="live-label">实时</span>
           </span>
         </p>
         <h1 id="topbarTitle">大连棕榈油 P0 连续短线分析</h1>
       </section>
-      <div class="contract-pill" id="contractPill">DCE P0 1H / 2H / 日线</div>
+      <div class="topbar-status">
+        <div class="session-clock" id="sessionClock">北京时间 --:--</div>
+        <div class="contract-pill" id="contractPill">DCE P0 1H / 4H / 日线</div>
+      </div>
     </header>
 
+    <p class="contract-disclaimer">
+      P0/Y0 是连续合约分析口径。实际下单前必须核对可交易主力月份、换月价差、流动性与交易所保证金。
+    </p>
+
     <section class="symbol-switcher" aria-label="切换品种">
-      <button class="sym-btn" data-sym="P0">🌴 P0 棕榈油</button>
-      <button class="sym-btn" data-sym="Y0">🌱 Y0 豆油</button>
+      <button class="sym-btn" data-sym="P0">P0 棕榈油</button>
+      <button class="sym-btn" data-sym="Y0">Y0 豆油</button>
       <script>
         // Stamp .active before render so users with saved Y0 don't see a P0 flash
         (function() {
@@ -52,33 +59,34 @@
       </a>
     </section>
 
-    <section class="toolbar" aria-label="行情控制">
-      <label>
-        周期
-        <select id="periodSelect">
-          <option value="120">近 120 日</option>
-          <option value="180" selected>近 180 日</option>
-          <option value="260">近 260 日</option>
-        </select>
-      </label>
-      <label>
-        均线
-        <select id="maSelect">
-          <option value="5,10,20">MA5 / MA10 / MA20</option>
-          <option value="10,20,60" selected>MA10 / MA20 / MA60</option>
-          <option value="20,60,120">MA20 / MA60 / MA120</option>
-        </select>
-      </label>
-      <label class="file-label">
-        导入 CSV
-        <input id="csvInput" type="file" accept=".csv,text/csv">
-      </label>
-      <button id="reloadBtn" title="从数据目录重新加载真实数据">重新加载真实数据</button>
-      <button id="demoBtn" title="切换到内置示例数据">显示示例</button>
-      <button id="themeToggleBtn" title="切换暗色/亮色">🌙</button>
-    </section>
-
     <section id="marketBanner" class="market-banner" hidden></section>
+
+    <section class="decision-cockpit" aria-label="交易决策总览">
+      <article class="cockpit-cell gate-cell">
+        <span class="cockpit-label">交易许可</span>
+        <strong id="tradeGate" class="gate-pill neutral">等待数据</strong>
+        <p id="tradeGateReason">正在检查周期共振、数据质量和盈亏比。</p>
+        <div class="factor-row" id="tradeGateFactors"></div>
+      </article>
+      <article class="cockpit-cell">
+        <span class="cockpit-label">市场状态</span>
+        <strong id="marketRegime">--</strong>
+        <p id="regimeDetail">等待波动率与趋势强度。</p>
+      </article>
+      <article class="cockpit-cell">
+        <span class="cockpit-label">最近关键位</span>
+        <div class="level-pair">
+          <div><small>支撑</small><strong id="nearestSupport">--</strong></div>
+          <div><small>压力</small><strong id="nearestResistance">--</strong></div>
+        </div>
+        <p id="levelContext">等待关键价位计算。</p>
+      </article>
+      <article class="cockpit-cell">
+        <span class="cockpit-label">数据可信度</span>
+        <strong id="dataConfidence">--</strong>
+        <p id="dataConfidenceDetail">正在核对行情、AI 与舆情时间。</p>
+      </article>
+    </section>
 
     <section class="summary-grid" aria-label="关键指标">
       <article class="metric">
@@ -93,7 +101,7 @@
         <small id="signalDetail">--</small>
       </article>
       <article class="metric">
-        <span>上涨天数</span>
+        <span>20日上涨率</span>
         <strong id="upDays">--</strong>
         <small id="winRate">--</small>
       </article>
@@ -107,6 +115,61 @@
         <strong id="dataStatus">--</strong>
         <small id="dataFreshness">--</small>
       </article>
+    </section>
+
+    <section class="execution-playbook" aria-label="双向执行计划">
+      <div class="section-head">
+        <div>
+          <h2>双向执行计划</h2>
+          <small id="planAsOf">等待最新行情</small>
+        </div>
+        <small>确定性规则实时计算，AI 只作为补充证据</small>
+      </div>
+      <div class="execution-grid">
+        <article class="setup-card long-setup">
+          <div class="setup-head">
+            <span>多头方案</span>
+            <strong id="longSetupStatus" class="setup-status neutral">等待</strong>
+          </div>
+          <div class="setup-price" id="longSetupEntry">--</div>
+          <dl class="setup-rows">
+            <div><dt>触发</dt><dd id="longSetupTrigger">--</dd></div>
+            <div><dt>止损</dt><dd id="longSetupStop">--</dd></div>
+            <div><dt>目标一</dt><dd id="longSetupTarget1">--</dd></div>
+            <div><dt>目标二</dt><dd id="longSetupTarget2">--</dd></div>
+            <div><dt>盈亏比</dt><dd id="longSetupRR">--</dd></div>
+          </dl>
+        </article>
+
+        <article class="setup-card no-trade-card">
+          <div class="setup-head">
+            <span>观望区与失效条件</span>
+            <strong id="noTradeStatus" class="setup-status neutral">纪律优先</strong>
+          </div>
+          <div class="no-trade-zone" id="noTradeZone">--</div>
+          <p id="noTradeReason">等待数据后判断何时不应交易。</p>
+          <div class="plan-quality">
+            <span>计划质量</span>
+            <strong id="planQuality">--</strong>
+            <small id="planQualityDetail">--</small>
+          </div>
+        </article>
+
+        <article class="setup-card short-setup">
+          <div class="setup-head">
+            <span>空头方案</span>
+            <strong id="shortSetupStatus" class="setup-status neutral">等待</strong>
+          </div>
+          <div class="setup-price" id="shortSetupEntry">--</div>
+          <dl class="setup-rows">
+            <div><dt>触发</dt><dd id="shortSetupTrigger">--</dd></div>
+            <div><dt>止损</dt><dd id="shortSetupStop">--</dd></div>
+            <div><dt>目标一</dt><dd id="shortSetupTarget1">--</dd></div>
+            <div><dt>目标二</dt><dd id="shortSetupTarget2">--</dd></div>
+            <div><dt>盈亏比</dt><dd id="shortSetupRR">--</dd></div>
+          </dl>
+        </article>
+      </div>
     </section>
 
     <section class="intraday-board" aria-label="短线布林与舆情">
@@ -133,7 +196,7 @@
       <article class="board-card">
         <span>日内策略提示</span>
         <strong id="intradayStrategyBias">--</strong>
-        <p id="intradayStrategyText">等待 1H/2H/4H/2D 数据...</p>
+        <p id="intradayStrategyText">等待 1H/4H/日线数据...</p>
       </article>
       <article class="board-card news-ticker-card" id="newsTickerToggle" title="点击展开/收起实时新闻列表">
         <span>实时舆情更新 <small class="ticker-hint">点击展开 ▾</small></span>
@@ -144,26 +207,52 @@
 
     <section class="overseas-panel">
       <div class="section-head">
-        <h2>🌍 隔夜市场</h2>
-        <small id="overseasMeta">每 60 秒刷新 · 关键领先指标</small>
+        <h2>隔夜市场</h2>
+        <small id="overseasMeta">页面每 60 秒检查 · 关键领先指标</small>
       </div>
       <div class="overseas-grid" id="overseasGrid"></div>
     </section>
 
     <section class="multi-strategy">
       <div class="section-head">
-        <h2>📐 多周期策略</h2>
-        <small>实时按各周期布林通道 + RSI 计算 · 每 60 秒刷新</small>
+        <h2>多周期状态</h2>
+        <small>用于确认结构，不替代上方执行计划</small>
       </div>
       <div class="strategy-cards" id="multiStrategyCards"></div>
     </section>
 
     <section id="newsTickerSection" class="news-ticker" hidden>
       <div class="section-head">
-        <h2>🔴 实时新闻流</h2>
-        <small id="newsTickerMeta">每 60 秒自动刷新</small>
+        <h2>实时新闻流</h2>
+        <small id="newsTickerMeta">页面每 60 秒检查最新快照</small>
       </div>
       <div id="newsTickerList"></div>
+    </section>
+
+    <section class="toolbar" aria-label="图表与数据控制">
+      <label>
+        周期
+        <select id="periodSelect">
+          <option value="120">近 120 日</option>
+          <option value="180" selected>近 180 日</option>
+          <option value="260">近 260 日</option>
+        </select>
+      </label>
+      <label>
+        均线
+        <select id="maSelect">
+          <option value="5,10,20">MA5 / MA10 / MA20</option>
+          <option value="10,20,60" selected>MA10 / MA20 / MA60</option>
+          <option value="20,60,120">MA20 / MA60 / MA120</option>
+        </select>
+      </label>
+      <label class="file-label">
+        导入 CSV
+        <input id="csvInput" type="file" accept=".csv,text/csv">
+      </label>
+      <button id="reloadBtn" title="从数据目录重新加载真实数据">重新加载真实数据</button>
+      <button id="demoBtn" title="切换到内置示例数据">显示示例</button>
+      <button id="themeToggleBtn" title="切换暗色/亮色">🌙</button>
     </section>
 
     <section class="workspace">
@@ -184,8 +273,9 @@
         <section class="ai-panel">
           <div class="ai-head">
             <div class="ai-head-main">
-              <h2>DeepSeek 短线分析</h2>
+              <h2>DeepSeek 决策参考</h2>
               <p id="aiMeta">等待加载...</p>
+              <p id="aiFreshness" class="ai-freshness">正在核对分析时效</p>
               <p id="aiAccuracy" class="ai-accuracy" hidden></p>
             </div>
             <div class="ai-head-right">
@@ -198,7 +288,7 @@
             </div>
           </div>
           <div class="ai-actions">
-            <button id="generateAiBtn" type="button">触发 DeepSeek 分析（P0 + Y0 一起）</button>
+            <button id="generateAiBtn" type="button">打开 DeepSeek 手动分析</button>
             <p id="aiStatus" class="ai-status"></p>
           </div>
 
@@ -233,7 +323,7 @@
                   <ul id="aiNewsList"></ul>
                 </div>
                 <div id="aiArticlesSection" hidden>
-                  <h3>🔗 新闻来源</h3>
+                  <h3>新闻来源</h3>
                   <div id="aiArticlesList"></div>
                 </div>
               </div>
@@ -243,34 +333,48 @@
 
           <div class="ai-tab-content" data-tab="strategy" hidden>
             <div class="ai-strategy" id="aiStrategy" hidden>
-              <h3>1H/2H 日内策略</h3>
+              <h3>1H/4H 日内策略</h3>
               <div class="strategy-grid" id="aiStrategyGrid"></div>
             </div>
             <p id="aiStrategyEmpty" class="ai-tab-empty">等待策略数据...</p>
 
             <details class="pos-calc" open>
-              <summary>💰 仓位计算器</summary>
+              <summary>仓位与盈亏比控制</summary>
               <div class="pos-calc-grid">
                 <label>账户资金 <input id="posCapital"  type="number" value="500000" step="10000"></label>
-                <label>单笔风险 % <input id="posRisk"    type="number" value="1"      step="0.5" min="0.1" max="10"></label>
+                <label>单笔风险 % <input id="posRisk"    type="number" value="0.75"   step="0.25" min="0.1" max="3"></label>
+                <label>最大保证金 % <input id="posMaxMargin" type="number" value="35" step="5" min="5" max="100"></label>
+                <label>方向
+                  <select id="posDirection">
+                    <option value="long">做多</option>
+                    <option value="short">做空</option>
+                  </select>
+                </label>
                 <label>入场价       <input id="posEntry"   type="number" value=""></label>
                 <label>止损价       <input id="posStop"    type="number" value=""></label>
+                <label>目标价       <input id="posTarget"  type="number" value=""></label>
+                <label>滑点预留     <input id="posSlippage" type="number" value="2" step="1" min="0"><small>单边点数</small></label>
                 <label>合约乘数     <input id="posMult"    type="number" value="10"     step="1"><small>P0/Y0 = 10 吨/手</small></label>
                 <label>保证金比例 % <input id="posMargin"  type="number" value="12"     step="1"></label>
               </div>
               <div class="pos-calc-out">
-                <div><span>每手风险</span><strong id="posPerLotRisk">--</strong><small>元</small></div>
-                <div><span>推荐手数</span><strong id="posLotsRec">--</strong><small>手</small></div>
-                <div><span>保证金占用</span><strong id="posMarginUse">--</strong><small>元</small></div>
-                <div><span>距止损空间</span><strong id="posGap">--</strong><small>点 / %</small></div>
+                <div><span>风险预算</span><strong id="posRiskBudget">--</strong><small>元</small></div>
+                <div><span>每手风险</span><strong id="posPerLotRisk">--</strong><small>含滑点</small></div>
+                <div><span>风险允许</span><strong id="posRiskLots">--</strong><small>手</small></div>
+                <div><span>保证金允许</span><strong id="posMarginLots">--</strong><small>手</small></div>
+                <div class="primary-out"><span>最终手数</span><strong id="posLotsRec">--</strong><small>取两项较小值</small></div>
+                <div><span>保证金占用</span><strong id="posMarginUse">--</strong><small id="posMarginUsePct">--</small></div>
+                <div><span>计划盈亏比</span><strong id="posRR">--</strong><small id="posGap">--</small></div>
+                <div><span>目标盈利</span><strong id="posTargetPnl">--</strong><small>元，未扣手续费</small></div>
               </div>
+              <p id="posWarning" class="pos-warning"></p>
             </details>
           </div>
 
           <div class="ai-tab-content" data-tab="ask" hidden>
             <div class="ask-box">
               <textarea id="askInput" placeholder="问点什么？例如：为什么今天下跌？什么时候可能反弹？现在能追多吗？" rows="3"></textarea>
-              <button id="askBtn" type="button">🤖 问 DeepSeek</button>
+              <button id="askBtn" type="button">问 DeepSeek</button>
               <p id="askStatus" class="ai-status"></p>
               <div id="askResponse" class="ask-response" hidden>
                 <small id="askResponseMeta"></small>
@@ -284,7 +388,7 @@
 
     <section class="analysis-grid">
       <article class="analysis-card">
-        <h3>📊 涨跌研判</h3>
+        <h3>涨跌研判</h3>
         <p id="analysisText">正在计算...</p>
         <div class="levels small">
           <div>
@@ -296,33 +400,29 @@
             <strong id="support" class="up">--</strong>
           </div>
         </div>
-        <h3 style="margin-top:14px;">🔍 结构观察</h3>
+        <h3 style="margin-top:14px;">结构观察</h3>
         <ul id="observationList"></ul>
       </article>
 
       <article class="analysis-card">
-        <h3>📐 技术指标</h3>
+        <h3>技术指标</h3>
         <div class="indicator-grid" id="indicatorGrid"></div>
-        <h3 style="margin-top:14px;">⚡ 信号评分</h3>
+        <h3 style="margin-top:14px;">信号评分</h3>
         <div class="scorebar"><span id="scoreFill"></span></div>
         <ul class="signal-list" id="signalList"></ul>
       </article>
 
       <article class="analysis-card">
-        <h3>🎯 交易情景</h3>
+        <h3>交易情景</h3>
         <div class="scenario-list" id="scenarioList"></div>
-        <h3 style="margin-top:14px;">⚠️ 风险位</h3>
+        <h3 style="margin-top:14px;">风险位</h3>
         <div class="risk-table" id="riskTable"></div>
-        <div class="csv-help">
-          <h3>📁 CSV 格式</h3>
-          <p>支持字段：date, open, high, low, close, volume。日期可用 2026-05-06 或 2026/05/06。</p>
-        </div>
       </article>
     </section>
 
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260708-4"></script>
+  <script src="app.js?v=20260711-1"></script>
 </body>
 </html>

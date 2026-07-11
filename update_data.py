@@ -11,6 +11,7 @@ from urllib.parse import quote_plus
 import xml.etree.ElementTree as ET
 
 import akshare as ak
+import pandas as pd
 import requests
 
 
@@ -440,10 +441,39 @@ def bollinger_from_closes(closes: list[float], period: int = 20, width: float = 
     }
 
 
+def sanitize_ohlc_frame(df, time_column: str, label: str):
+    """Remove malformed bars before they reach indicators or deployed CSVs."""
+    if df is None or df.empty:
+        return df
+    out = df.copy()
+    required_numeric = ["open", "high", "low", "close", "volume"]
+    for column in required_numeric:
+        out[column] = pd.to_numeric(out[column], errors="coerce")
+    out = out.dropna(subset=[time_column, *required_numeric])
+    valid = (
+        (out["high"] >= out[["open", "close"]].max(axis=1))
+        & (out["low"] <= out[["open", "close"]].min(axis=1))
+        & (out["high"] >= out["low"])
+        & (out["volume"] >= 0)
+    )
+    removed_invalid = int((~valid).sum())
+    out = out.loc[valid].copy()
+    before_dedup = len(out)
+    out[time_column] = out[time_column].astype(str)
+    out = out.sort_values(time_column).drop_duplicates(time_column, keep="last")
+    removed_duplicates = before_dedup - len(out)
+    if removed_invalid or removed_duplicates:
+        print(
+            f"[{label}] sanitized bars: invalid={removed_invalid}, "
+            f"duplicates={removed_duplicates}"
+        )
+    return out
+
+
 def normalize_intraday_df(df, limit: int = 220):
     if df is None or df.empty:
         return df
-    out = df.copy().tail(limit)
+    out = sanitize_ohlc_frame(df, "datetime", "intraday").tail(limit)
     out["datetime"] = out["datetime"].astype(str)
     keep = ["datetime", "open", "high", "low", "close", "volume", "hold"]
     return out[keep]
@@ -467,6 +497,37 @@ def intraday_summary(df, label: str) -> dict[str, object] | None:
     change_pct = (float(latest["close"]) - float(previous["close"])) / float(previous["close"]) if float(previous["close"]) else 0
     recent20 = df.tail(20)
     recent30 = df.tail(30)
+    numeric = df.copy()
+    for column in ("open", "high", "low", "close", "volume", "hold"):
+        numeric[column] = pd.to_numeric(numeric[column], errors="coerce")
+    previous_close = numeric["close"].shift(1)
+    true_range = pd.concat(
+        [
+            numeric["high"] - numeric["low"],
+            (numeric["high"] - previous_close).abs(),
+            (numeric["low"] - previous_close).abs(),
+        ],
+        axis=1,
+    ).max(axis=1)
+    atr14 = float(true_range.tail(14).mean()) if len(true_range.dropna()) >= 2 else None
+    ema20_series = numeric["close"].ewm(span=20, adjust=False).mean()
+    ema20 = float(ema20_series.iloc[-1])
+    ema20_prev = float(ema20_series.iloc[-6]) if len(ema20_series) >= 6 else ema20
+    ema20_slope_5 = (ema20 - ema20_prev) / float(latest["close"]) if float(latest["close"]) else 0
+    volume_avg20 = float(numeric["volume"].tail(20).mean())
+    volume_ratio20 = float(latest["volume"]) / volume_avg20 if volume_avg20 else 0
+    hold_change = float(latest["hold"]) - float(previous["hold"])
+
+    up_move = numeric["high"].diff()
+    down_move = -numeric["low"].diff()
+    plus_dm = up_move.where((up_move > down_move) & (up_move > 0), 0.0)
+    minus_dm = down_move.where((down_move > up_move) & (down_move > 0), 0.0)
+    atr_roll = true_range.rolling(14).mean()
+    plus_di = 100 * plus_dm.rolling(14).mean() / atr_roll.replace(0, pd.NA)
+    minus_di = 100 * minus_dm.rolling(14).mean() / atr_roll.replace(0, pd.NA)
+    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, pd.NA)
+    adx14_value = dx.rolling(14).mean().iloc[-1] if len(dx) >= 28 else pd.NA
+    adx14 = float(adx14_value) if pd.notna(adx14_value) else None
     return {
         "label": label,
         "latest_time": str(latest["datetime"]),
@@ -477,6 +538,12 @@ def intraday_summary(df, label: str) -> dict[str, object] | None:
         "change_pct": pct(change_pct),
         "volume": int(latest["volume"]),
         "rsi14": round(rsi(closes, 14), 2) if len(closes) > 14 else None,
+        "atr14": round(atr14, 2) if atr14 is not None else None,
+        "adx14": round(adx14, 2) if adx14 is not None else None,
+        "ema20": round(ema20, 2),
+        "ema20_slope_5": round(ema20_slope_5, 4),
+        "volume_ratio20": round(volume_ratio20, 2),
+        "open_interest_change": int(hold_change),
         "bollinger": boll,
         "high20": float(recent20["high"].max()),
         "low20": float(recent20["low"].min()),
@@ -921,6 +988,29 @@ def normalize_ai_analysis(parsed: dict, snapshot: dict) -> dict:
     strategy = parsed.get("intraday_strategy", {})
     if not isinstance(strategy, dict):
         strategy = {}
+    decision_frame = parsed.get("decision_frame", {})
+    if not isinstance(decision_frame, dict):
+        decision_frame = {}
+
+    def normalize_case(value: object) -> dict[str, object]:
+        case = value if isinstance(value, dict) else {}
+        raw_targets = case.get("targets", [])
+        if isinstance(raw_targets, (str, int, float)):
+            raw_targets = [raw_targets]
+        targets = [str(item) for item in raw_targets[:3]] if isinstance(raw_targets, list) else []
+        return {
+            "trigger": str(case.get("trigger", "等待确认")),
+            "entry_zone": str(case.get("entry_zone", "未给出")),
+            "stop": str(case.get("stop", "未给出")),
+            "targets": targets,
+            "invalidation": str(case.get("invalidation", "未给出")),
+            "risk_reward": str(case.get("risk_reward", "未计算")),
+        }
+
+    try:
+        confidence = max(0, min(100, int(float(decision_frame.get("confidence", 0)))))
+    except (TypeError, ValueError):
+        confidence = 0
 
     return {
         "summary":       str(parsed.get("summary", "暂无 AI 摘要。")),
@@ -933,6 +1023,16 @@ def normalize_ai_analysis(parsed: dict, snapshot: dict) -> dict:
             "take_profit": str(strategy.get("take_profit", "未给出")),
             "invalidation": str(strategy.get("invalidation", "未给出")),
             "notes": str(strategy.get("notes", "仅供研究，不构成投资建议")),
+        },
+        "decision_frame": {
+            "confidence": confidence,
+            "regime": str(decision_frame.get("regime", "未判断")),
+            "edge": str(decision_frame.get("edge", "暂无明确优势")),
+            "no_trade_condition": str(decision_frame.get("no_trade_condition", "数据或方向不足时观望")),
+            "long_case": normalize_case(decision_frame.get("long_case")),
+            "short_case": normalize_case(decision_frame.get("short_case")),
+            "event_risks": to_str_list(decision_frame.get("event_risks")),
+            "data_limits": to_str_list(decision_frame.get("data_limits")),
         },
         "news_impact":   to_str_list(parsed.get("news_impact")),   # short bullet strings
         "news_articles": normalize_articles(parsed.get("news_articles", [])),  # rich cards
@@ -970,6 +1070,16 @@ def fallback_ai_analysis(snapshot: dict, reason: str) -> dict:
             "take_profit": "未给出",
             "invalidation": "未给出",
             "notes": "当前为规则备用分析",
+        },
+        "decision_frame": {
+            "confidence": 0,
+            "regime": "数据不足",
+            "edge": "等待 DeepSeek",
+            "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
+            "long_case": {},
+            "short_case": {},
+            "event_risks": [],
+            "data_limits": ["当前为备用规则分析"],
         },
         "news_impact": [],
         "news_articles": [],
@@ -1037,8 +1147,12 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         "4) intraday_strategy 对象：必须包含 bias, entry, stop, take_profit, invalidation, notes 六个字段，给出以 1小时 + 4小时 尺度为主的日内策略，明确说明适用哪个交易时段（早盘 09:00-11:30 / 午盘 13:30-15:00 / 夜盘 21:00-23:00）；\n"
         f"{news_instructions}"
         "6) watch_levels 包含数字 support 和 resistance；\n"
-        "7) 强调不构成投资建议；\n"
-        "8) 只输出 JSON；字段：summary, bias, analysis, intraday_strategy, news_impact, news_articles, watch_levels, risk_note。\n"
+        "7) decision_frame 对象必须包含：confidence(0-100，表示证据强度而非胜率)、regime、edge、no_trade_condition、long_case、short_case、event_risks、data_limits。"
+        "long_case 和 short_case 都必须包含 trigger, entry_zone, stop, targets, invalidation, risk_reward；如果首目标盈亏比低于1.5，必须明确写入 no_trade_condition，不得硬给方向；\n"
+        "8) P0/Y0 是连续合约分析口径，不是可直接下单的具体月份合约。必须提醒实际执行前核对主力月份、换月价差、流动性和保证金；\n"
+        "9) 舆情只能引用给定搜索结果，区分事实、市场预期和你的推断；禁止编造数字、发布时间或来源；\n"
+        "10) 强调不构成投资建议；\n"
+        "11) 只输出 JSON；字段：summary, bias, analysis, intraday_strategy, decision_frame, news_impact, news_articles, watch_levels, risk_note。\n"
         f"\n数据:\n{json.dumps(snapshot, ensure_ascii=False)}"
     )
 
@@ -1053,7 +1167,11 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
             "messages": [
                 {
                     "role": "system",
-                    "content": "你是谨慎的中文期货技术面和基本面综合分析助手，只基于用户给出的数据与舆情作答。",
+                    "content": (
+                        "你是机构级中文油脂期货风险分析助手。先验证数据时效和证据，再讨论方向；"
+                        "不确定时明确观望，不把连续合约当作可直接下单的具体月份合约，"
+                        "不编造新闻、价格、胜率或概率，只基于用户给出的行情和舆情作答。"
+                    ),
                 },
                 {"role": "user", "content": prompt_content},
             ],
@@ -1198,6 +1316,9 @@ def run_profile(symbol: str) -> None:
     else:
         print(f"OI column not found in daily df; columns={list(df.columns)}")
         export = df[["date", "open", "high", "low", "close", "volume"]].copy()
+    export = sanitize_ohlc_frame(export, "date", f"{symbol} daily")
+    if export is None or export.empty:
+        raise RuntimeError(f"{symbol} daily data is empty after OHLC validation")
     output = out_dir / "daily.csv"
     export.to_csv(output, index=False)
 

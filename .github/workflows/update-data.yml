@@ -14,13 +14,9 @@ on:
     # GitHub Actions scheduled workflows support a shortest interval of 5 minutes.
     # Data-only refresh.
     - cron: "*/5 * * * *"
-    # AI-analysis triggers, three times per trading day (Beijing time):
-    #   08:30 CST (pre-market) = 00:30 UTC
-    #   11:30 CST (mid-session) = 03:30 UTC
-    #   15:30 CST (post-market) = 07:30 UTC
-    - cron: "30 0 * * *"
-    - cron: "30 3 * * *"
-    - cron: "30 7 * * *"
+    # DeepSeek every 3 hours. Beijing times are 08:00, 11:00, 14:00,
+    # 17:00, 20:00 and 23:00, covering both day and night sessions.
+    - cron: "0 */3 * * *"
 
 permissions:
   contents: write
@@ -58,7 +54,10 @@ jobs:
           # update_data.PROFILES). Default runs both P0 (palm oil) and Y0
           # (soybean oil) — expect ~2x AI wall time on scheduled AI runs.
           SYMBOLS: "P0,Y0"
-          RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && contains(fromJSON('["30 0 * * *","30 3 * * *","30 7 * * *"]'), github.event.schedule)) }}
+          RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && github.event.schedule == '0 */3 * * *') }}
+
+      - name: Validate dashboard data and security invariants
+        run: python test_dashboard.py
 
       - name: Commit updated data (save-and-replay on push conflict)
         # When two runs (or update-data + notify) push data at the same time,

@@ -1,55 +1,51 @@
-# 大连棕榈油连续行情 K 线分析
+# 大连油脂连续合约交易分析终端
 
-这是一个纯静态网页，用于查看大连棕榈油 `P0` 连续合约日线 K 线、1小时/2小时布林通道、规则技术分析、实时舆情快照和 DeepSeek 短线分析。
+面向大连商品交易所棕榈油 `P0` 与豆油 `Y0` 连续合约的静态分析网页。页面整合日线、1H/2H/4H、布林通道、ADX、RSI、关键价位、海外油脂市场、新闻快照与 DeepSeek 分析。
 
-## 使用方法
+线上地址：<https://franksun0616.github.io/palm_dalian/>
 
-直接打开 `index.html` 可以看内置示例数据。
+## 交易决策层
 
-当前已验证的数据口径是大连商品交易所棕榈油 `P0` 连续合约，即 `棕榈油连续`。
+- 交易许可：结合市场时段、数据可信度、多周期共振、均衡区和盈亏比，输出允许做多、允许做空、观望、暂停或休市。
+- 双向计划：多头和空头同时给出触发区、止损、两个目标及对应盈亏比。
+- 数据保护：AI 过期或落后于行情时自动降级为历史参考，由确定性规则接管策略。
+- 仓位控制：推荐手数同时受单笔风险预算和最大保证金占用限制，并计入滑点。
+- 数据口径：`P0/Y0` 是连续合约分析序列，不是可直接下单的具体月份合约。执行前必须核对主力月份、换月价差、流动性和交易所保证金。
 
-如果要自动加载最新 CSV，请先更新数据，然后用本地服务器打开：
+## 数据更新
+
+- 浏览器在交易时段内每 5 秒尝试读取新浪实时行情。
+- 页面每 60 秒检查仓库中的日线、小时线、新闻、海外行情和 AI JSON。
+- GitHub Actions 的数据任务配置为每 5 分钟触发，但 GitHub 可能延迟或节流，不能承诺分钟级后台落盘。
+- DeepSeek 配置为每 3 小时自动运行一次，北京时间约为 08:00、11:00、14:00、17:00、20:00、23:00；GitHub 实际执行时间可能延后。
+
+## 本地运行
+
+直接使用 HTTP 服务打开，避免 `file://` 阻止 CSV/JSON 请求：
 
 ```bash
-.venv/bin/python update_data.py
 python3 -m http.server 8080
 ```
 
-然后访问 `http://localhost:8080`。
+访问 <http://127.0.0.1:8080/>。
 
-页面也支持手动导入 CSV 替换行情。
+更新真实数据需要安装依赖：
 
-线上部署和自动更新见 `DEPLOY.md`。
+```bash
+python3 -m pip install -r requirements.txt
+RUN_AI_ANALYSIS=false python3 update_data.py
+```
 
-DeepSeek AI 分析需要在 GitHub repo 的 `Settings -> Secrets and variables -> Actions` 中添加 secret：
+## DeepSeek
+
+在 GitHub 仓库 `Settings -> Secrets and variables -> Actions` 中配置：
 
 ```text
 DEEPSEEK_API_KEY
 ```
 
-AI 分析现在只会在 GitHub Actions 手动运行时生成，并会把 1H/2H 布林通道、实时行情、日线背景和舆情快照一起发给 DeepSeek：
-
-```text
-Actions -> Update palm oil data -> Run workflow -> Generate DeepSeek AI analysis = true
-```
-
-自动定时任务每 5 分钟更新日线 CSV、1H/2H 短线数据、布林通道摘要和舆情快照，不自动调用 DeepSeek。
-
-网页里的 `触发 DeepSeek 短线分析` 按钮会打开 GitHub Actions 手动运行页面；为了保护 GitHub token 和 DeepSeek key，静态网页不会直接从浏览器调用 workflow。
-
-GitHub Pages 目标地址：
-
-```text
-https://franksun0616.github.io/palm_dalian/
-```
-
-## CSV 字段
-
-```csv
-date,open,high,low,close,volume
-2026-05-06,7800,7890,7750,7860,523000
-```
+页面不会保存或发送 GitHub PAT，也不会把 DeepSeek key 放到浏览器。手动分析按钮只打开 GitHub Actions 页面，由已登录的仓库管理员运行 `Update palm oil data`，并保持 `Generate DeepSeek AI analysis = true`。
 
 ## 说明
 
-页面中的趋势信号基于均线、涨跌、支撑压力和波动率做技术分析演示，不构成投资建议。
+本项目用于行情研究和交易纪律辅助，不构成投资建议。期货存在杠杆、跳空、流动性和保证金追加风险。

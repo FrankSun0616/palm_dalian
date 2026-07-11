@@ -1,59 +1,33 @@
-# Deploy Online
+# GitHub Pages Deployment
 
-The current validated data source is DCE palm oil continuous contract `P0` through AKShare/Sina.
+## Repository settings
 
-## What Can Auto-Update
+1. Open `Settings -> Pages`.
+2. Set the source to `GitHub Actions`.
+3. Add the Actions secret `DEEPSEEK_API_KEY`.
+4. Run `Update palm oil data` once, then open <https://franksun0616.github.io/palm_dalian/>.
 
-- The webpage is static HTML/CSS/JS.
-- The Python script `update_data.py` fetches the newest `P0` daily K-line, 1H/2H intraday bars, Bollinger summaries, and a recent news snapshot. It writes:
-  - `data/palm_oil_p0_daily.csv`
-  - `data/source_meta.json`
-  - `data/intraday_1h.csv`
-  - `data/intraday_2h.csv`
-  - `data/intraday_meta.json`
-  - `data/news_snapshot.json`
-- The page auto-loads these files when served over HTTP.
-- The page checks for refreshed market data, intraday Bollinger summaries, sentiment snapshots, and AI analysis every 1 minute.
+## Workflows
 
-## GitHub Pages Setup
+- `.github/workflows/update-data.yml`
+  - Data schedule: `*/5 * * * *`.
+  - DeepSeek schedule: `0 */3 * * *`.
+  - Manual dispatch keeps the `run_ai_analysis` toggle.
+  - Updates both `P0` and `Y0`, commits generated files, uploads the Pages artifact and deploys it.
+- `.github/workflows/ask.yml`
+  - Manual DeepSeek question with symbol and question inputs.
+  - Commits the answer JSON; the resulting push triggers the normal Pages workflow.
+- `.github/workflows/notify.yml`
+  - Evaluates configured notification rules.
 
-1. Create or use the GitHub repository named `palm_dalian`.
-2. Upload this folder's files to the repository root, or push this local git repository.
-3. In GitHub, open `Settings -> Pages`.
-4. Set source to `GitHub Actions`.
-5. Run the workflow `Update palm oil data`, or push a new commit.
-6. Open the generated GitHub Pages URL.
+GitHub scheduled workflows are best-effort. The five-minute cron is not a guarantee that a new commit or deployment will occur every five minutes. The webpage distinguishes browser polling time from backend data time.
 
-Expected project URL after Pages is enabled:
+## Security invariants
 
-```text
-https://franksun0616.github.io/palm_dalian/
-```
+- Never commit `DEEPSEEK_API_KEY`, a GitHub PAT, or any other credential.
+- Never embed a token in `app.js`, HTML, Base64 text, URL parameters or browser storage.
+- Static GitHub Pages cannot securely perform authenticated workflow dispatches. Manual buttons must open the GitHub Actions page and rely on the user's authenticated GitHub session.
 
-The workflow `.github/workflows/update-data.yml` is set to run every 5 minutes, which is the shortest interval supported by GitHub Actions scheduled workflows.
+## Contract scope
 
-GitHub can throttle scheduled workflows, so exact execution time is not guaranteed.
-
-The same workflow updates the CSV and deploys the static site to GitHub Pages.
-
-## DeepSeek AI Analysis
-
-To enable AI analysis, add this GitHub Actions secret:
-
-```text
-DEEPSEEK_API_KEY
-```
-
-The key must not be committed to the repository. AI analysis is generated only when you manually run the workflow:
-
-```text
-Actions -> Update palm oil data -> Run workflow -> Generate DeepSeek AI analysis = true
-```
-
-Scheduled and push-triggered runs update the daily/intraday data and sentiment snapshot but skip DeepSeek, so they do not consume AI API quota. The webpage refreshes `data/ai_analysis.json` every minute and shows the latest manual AI analysis.
-
-You can also run it manually from GitHub Actions with `Run workflow`.
-
-## Important Limitation
-
-This validates the `P0` continuous contract for 大连棕榈油.
+`P0` and `Y0` are continuous analysis series. They are useful for trend continuity but do not replace the actual tradable delivery-month contract. Before execution, confirm the main contract, spread around rollover, liquidity, tick size and current margin requirements.

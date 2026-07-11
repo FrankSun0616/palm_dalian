@@ -53,6 +53,37 @@ const els = {
   lastDistance: document.getElementById("lastDistance"),
   themeToggleBtn: document.getElementById("themeToggleBtn"),
   marketBanner: document.getElementById("marketBanner"),
+  sessionClock: document.getElementById("sessionClock"),
+  tradeGate: document.getElementById("tradeGate"),
+  tradeGateReason: document.getElementById("tradeGateReason"),
+  tradeGateFactors: document.getElementById("tradeGateFactors"),
+  marketRegime: document.getElementById("marketRegime"),
+  regimeDetail: document.getElementById("regimeDetail"),
+  nearestSupport: document.getElementById("nearestSupport"),
+  nearestResistance: document.getElementById("nearestResistance"),
+  levelContext: document.getElementById("levelContext"),
+  dataConfidence: document.getElementById("dataConfidence"),
+  dataConfidenceDetail: document.getElementById("dataConfidenceDetail"),
+  planAsOf: document.getElementById("planAsOf"),
+  longSetupStatus: document.getElementById("longSetupStatus"),
+  longSetupEntry: document.getElementById("longSetupEntry"),
+  longSetupTrigger: document.getElementById("longSetupTrigger"),
+  longSetupStop: document.getElementById("longSetupStop"),
+  longSetupTarget1: document.getElementById("longSetupTarget1"),
+  longSetupTarget2: document.getElementById("longSetupTarget2"),
+  longSetupRR: document.getElementById("longSetupRR"),
+  shortSetupStatus: document.getElementById("shortSetupStatus"),
+  shortSetupEntry: document.getElementById("shortSetupEntry"),
+  shortSetupTrigger: document.getElementById("shortSetupTrigger"),
+  shortSetupStop: document.getElementById("shortSetupStop"),
+  shortSetupTarget1: document.getElementById("shortSetupTarget1"),
+  shortSetupTarget2: document.getElementById("shortSetupTarget2"),
+  shortSetupRR: document.getElementById("shortSetupRR"),
+  noTradeStatus: document.getElementById("noTradeStatus"),
+  noTradeZone: document.getElementById("noTradeZone"),
+  noTradeReason: document.getElementById("noTradeReason"),
+  planQuality: document.getElementById("planQuality"),
+  planQualityDetail: document.getElementById("planQualityDetail"),
   aiNewsEmpty: document.getElementById("aiNewsEmpty"),
   aiStrategyEmpty: document.getElementById("aiStrategyEmpty"),
   signalText: document.getElementById("signalText"),
@@ -75,6 +106,7 @@ const els = {
   scenarioList: document.getElementById("scenarioList"),
   riskTable: document.getElementById("riskTable"),
   aiMeta: document.getElementById("aiMeta"),
+  aiFreshness: document.getElementById("aiFreshness"),
   aiBias: document.getElementById("aiBias"),
   aiSummary: document.getElementById("aiSummary"),
   aiStrategy: document.getElementById("aiStrategy"),
@@ -100,14 +132,25 @@ const els = {
   askResponseText: document.getElementById("askResponseText"),
   posCapital: document.getElementById("posCapital"),
   posRisk: document.getElementById("posRisk"),
+  posMaxMargin: document.getElementById("posMaxMargin"),
+  posDirection: document.getElementById("posDirection"),
   posEntry: document.getElementById("posEntry"),
   posStop: document.getElementById("posStop"),
+  posTarget: document.getElementById("posTarget"),
+  posSlippage: document.getElementById("posSlippage"),
   posMult: document.getElementById("posMult"),
   posMargin: document.getElementById("posMargin"),
+  posRiskBudget: document.getElementById("posRiskBudget"),
   posPerLotRisk: document.getElementById("posPerLotRisk"),
+  posRiskLots: document.getElementById("posRiskLots"),
+  posMarginLots: document.getElementById("posMarginLots"),
   posLotsRec: document.getElementById("posLotsRec"),
   posMarginUse: document.getElementById("posMarginUse"),
-  posGap: document.getElementById("posGap")
+  posMarginUsePct: document.getElementById("posMarginUsePct"),
+  posRR: document.getElementById("posRR"),
+  posGap: document.getElementById("posGap"),
+  posTargetPnl: document.getElementById("posTargetPnl"),
+  posWarning: document.getElementById("posWarning")
 };
 
 function readColors() {
@@ -142,7 +185,8 @@ let state = {
   sibling: null,
   isDragging: false,
   dragStartX: null,
-  dragStartVisibleStart: null
+  dragStartVisibleStart: null,
+  decisionModel: null
 };
 
 // ── Theme (dark/light) ─────────────────────────────────────
@@ -218,6 +262,23 @@ function marketStatus() {
 
 function updateMarketStatus() {
   const status = marketStatus();
+  const statusLabels = {
+    "day-open": "日盘交易中",
+    "night-open": "夜盘交易中",
+    "day-break": "午间休市",
+    weekend: "周末休市",
+    closed: "非交易时段",
+  };
+  if (els.sessionClock) {
+    const clock = new Date().toLocaleTimeString("zh-CN", {
+      timeZone: "Asia/Shanghai",
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    els.sessionClock.textContent = `北京时间 ${clock} · ${statusLabels[status]}`;
+  }
   // Update the pulse indicator
   const liveInd = document.querySelector(".live-indicator");
   if (liveInd) {
@@ -238,20 +299,20 @@ function updateMarketStatus() {
   els.marketBanner.hidden = false;
   if (status === "weekend") {
     els.marketBanner.classList.add("weekend");
-    els.marketBanner.textContent = "⏸ 本周末休市，数据截至周五 15:00 收盘";
+    els.marketBanner.textContent = "周末休市。周五夜盘会按下一个交易日归属，页面中的未来交易日标签不代表未来行情。";
   } else if (status === "day-break") {
     els.marketBanner.classList.remove("weekend");
-    els.marketBanner.textContent = "⏸ 午间休市（11:30-13:30），日盘 13:30 继续 · 夜盘 21:00-23:00";
+    els.marketBanner.textContent = "午间休市（11:30-13:30），日盘 13:30 继续，夜盘 21:00-23:00。";
   } else {
     els.marketBanner.classList.remove("weekend");
-    els.marketBanner.textContent = "⏸ 非交易时段，日盘 09:00-11:30 / 13:30-15:00 · 夜盘 21:00-23:00";
+    els.marketBanner.textContent = "非交易时段。日盘 09:00-11:30 / 13:30-15:00，夜盘 21:00-23:00。";
   }
 }
 
 function setLoadStatus(status, detail = "") {
   if (!els.dataStatus || !els.dataFreshness) return;
   els.dataStatus.textContent = status;
-  els.dataStatus.className = status === "真实CSV" ? "up" : status === "加载失败" ? "down" : "";
+  els.dataStatus.className = status === "真实CSV" ? "quality-good" : status === "加载失败" ? "quality-bad" : "";
   els.dataFreshness.textContent = detail;
 }
 
@@ -500,6 +561,11 @@ function strategyForTimeframe(meta, label) {
     rsiNote,
     price: close,
     changePct: meta.change_pct || "",
+    upper: b.upper,
+    mid: b.mid,
+    lower: b.lower,
+    bandWidth: Number(b.band_width ?? b.bandWidth ?? 0),
+    rsi: Number(meta.rsi14),
   };
 }
 
@@ -530,10 +596,10 @@ function renderMultiStrategyPanel() {
       </div>
       <div class="tf-price">${s.price.toFixed(0)} <span class="${/^\+/.test(s.changePct)?'up':/^-/.test(s.changePct)?'down':''}">${escapeHtml(s.changePct)}</span>${escapeHtml(s.rsiNote)}</div>
       <div class="tf-rows">
-        <div class="row"><span>入场</span><span>${escapeHtml(s.entry)}</span></div>
-        <div class="row"><span>止损</span><span class="down">${escapeHtml(s.stop)}</span></div>
-        <div class="row"><span>止盈</span><span class="up">${escapeHtml(s.take_profit)}</span></div>
-        <div class="row"><span>失效</span><span>${escapeHtml(s.invalidation)}</span></div>
+        <div class="row"><span>中轨</span><span>${s.mid.toFixed(0)}</span></div>
+        <div class="row"><span>通道</span><span>${s.lower.toFixed(0)}-${s.upper.toFixed(0)}</span></div>
+        <div class="row"><span>带宽</span><span>${formatPct(s.bandWidth)}</span></div>
+        <div class="row"><span>纪律</span><span>${escapeHtml(s.invalidation)}</span></div>
       </div>
     </div>
   `).join("");
@@ -654,7 +720,7 @@ function analyze(data) {
   const avgChange = mean(recent20);
   const variance = mean(recent20.map((item) => (item - avgChange) ** 2));
   const vol = Math.sqrt(variance) * Math.sqrt(252);
-  const upCount = changes.filter((item) => item > 0).length;
+  const upCount = recent20.filter((item) => item > 0).length;
   const high20 = Math.max(...data.slice(-20).map((row) => row.high));
   const low20 = Math.min(...data.slice(-20).map((row) => row.low));
   const high60 = Math.max(...data.slice(-60).map((row) => row.high));
@@ -680,6 +746,9 @@ function analyze(data) {
   const riskReward = distanceToSupport > 0 ? distanceToResistance / distanceToSupport : null;
   const fib382 = high60 - (high60 - low60) * 0.382;
   const fib618 = high60 - (high60 - low60) * 0.618;
+  const adx14 = adx(data, 14);
+  const efficiency20 = efficiencyRatio(data, 20);
+  const volPercentile = realizedVolPercentile(data, 20);
 
   const checks = [
     { label: "收盘价站上 MA20", ok: last.close > ma20, weight: 1.1 },
@@ -704,7 +773,7 @@ function analyze(data) {
     changePct,
     vol,
     upCount,
-    winRate: upCount / Math.max(1, changes.length),
+    winRate: upCount / Math.max(1, recent20.length),
     high20,
     low20,
     high60,
@@ -730,6 +799,9 @@ function analyze(data) {
     riskReward,
     fib382,
     fib618,
+    adx14,
+    efficiency20,
+    volPercentile,
     signal,
     score,
     checks,
@@ -742,6 +814,498 @@ function analyze(data) {
       `距离 20 日压力约 ${(distanceToResistance * 100).toFixed(2)}%，距离 20 日支撑约 ${(distanceToSupport * 100).toFixed(2)}%。`
     ]
   };
+}
+
+function clamp(value, minValue, maxValue) {
+  return Math.max(minValue, Math.min(maxValue, value));
+}
+
+function ageMinutes(value) {
+  if (!value) return null;
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return null;
+  return Math.max(0, (Date.now() - timestamp) / 60000);
+}
+
+function humanAge(minutes) {
+  if (!Number.isFinite(minutes)) return "未知";
+  if (minutes < 1) return "刚刚";
+  if (minutes < 60) return `${Math.round(minutes)} 分钟前`;
+  if (minutes < 1440) return `${(minutes / 60).toFixed(minutes < 360 ? 1 : 0)} 小时前`;
+  return `${(minutes / 1440).toFixed(1)} 天前`;
+}
+
+function efficiencyRatio(data, lookback = 20) {
+  if (!Array.isArray(data) || data.length < 3) return null;
+  const rows = data.slice(-(lookback + 1));
+  if (rows.length < 3) return null;
+  const net = Math.abs(rows.at(-1).close - rows[0].close);
+  const path = rows.slice(1).reduce((sum, row, index) => {
+    return sum + Math.abs(row.close - rows[index].close);
+  }, 0);
+  return path > 0 ? net / path : 0;
+}
+
+function adx(data, period = 14) {
+  if (!Array.isArray(data) || data.length < period + 3) return null;
+  const tr = [];
+  const plusDm = [];
+  const minusDm = [];
+  for (let i = 1; i < data.length; i += 1) {
+    const current = data[i];
+    const previous = data[i - 1];
+    const upMove = current.high - previous.high;
+    const downMove = previous.low - current.low;
+    plusDm.push(upMove > downMove && upMove > 0 ? upMove : 0);
+    minusDm.push(downMove > upMove && downMove > 0 ? downMove : 0);
+    tr.push(Math.max(
+      current.high - current.low,
+      Math.abs(current.high - previous.close),
+      Math.abs(current.low - previous.close),
+    ));
+  }
+  const dx = [];
+  for (let end = period - 1; end < tr.length; end += 1) {
+    const start = end - period + 1;
+    const atrWindow = mean(tr.slice(start, end + 1));
+    if (!(atrWindow > 0)) continue;
+    const plusDi = 100 * mean(plusDm.slice(start, end + 1)) / atrWindow;
+    const minusDi = 100 * mean(minusDm.slice(start, end + 1)) / atrWindow;
+    const sumDi = plusDi + minusDi;
+    if (sumDi > 0) dx.push(100 * Math.abs(plusDi - minusDi) / sumDi);
+  }
+  if (!dx.length) return null;
+  return mean(dx.slice(-period));
+}
+
+function realizedVolPercentile(data, period = 20) {
+  if (!Array.isArray(data) || data.length < period + 5) return null;
+  const returns = data.slice(1).map((row, index) => {
+    const previous = data[index].close;
+    return previous > 0 ? Math.log(row.close / previous) : 0;
+  });
+  const samples = [];
+  for (let end = period; end <= returns.length; end += 1) {
+    samples.push(stddev(returns.slice(end - period, end)));
+  }
+  if (!samples.length) return null;
+  const current = samples.at(-1);
+  return samples.filter((value) => value <= current).length / samples.length * 100;
+}
+
+function rowsFromMeta(meta) {
+  const rows = Array.isArray(meta?.last_30_bars) ? meta.last_30_bars : [];
+  return rows.map((row) => ({
+    open: Number(row.open),
+    high: Number(row.high),
+    low: Number(row.low),
+    close: Number(row.close),
+    volume: Number(row.volume || 0),
+  })).filter((row) => [row.open, row.high, row.low, row.close].every(Number.isFinite));
+}
+
+function atrFromMeta(meta, fallback) {
+  const value = atr(rowsFromMeta(meta), 14);
+  if (Number.isFinite(value) && value > 0) return value;
+  const boll = meta?.bollinger;
+  if (boll && Number.isFinite(Number(boll.upper)) && Number.isFinite(Number(boll.lower))) {
+    return Math.max(2, (Number(boll.upper) - Number(boll.lower)) / 4);
+  }
+  return fallback;
+}
+
+function signalForMeta(meta, currentPrice = null) {
+  if (!meta?.bollinger) return null;
+  const boll = meta.bollinger;
+  const close = Number.isFinite(currentPrice) ? currentPrice : Number(meta.close);
+  const halfBand = Math.max(1, (Number(boll.upper) - Number(boll.lower)) / 2);
+  const position = clamp((close - Number(boll.mid)) / halfBand, -1.5, 1.5);
+  const rsiValue = Number(meta.rsi14);
+  const rsiComponent = Number.isFinite(rsiValue) ? clamp((rsiValue - 50) / 35, -1, 1) : 0;
+  const rows = rowsFromMeta(meta);
+  const tfAtr = atrFromMeta(meta, halfBand / 2);
+  const slope = rows.length >= 6 && tfAtr > 0
+    ? clamp((rows.at(-1).close - rows.at(-6).close) / (tfAtr * 2), -1, 1)
+    : 0;
+  return clamp((position * 0.55 + rsiComponent * 0.2 + slope * 0.25) * 70, -100, 100);
+}
+
+function assessAiFreshness(ai) {
+  const generatedAge = ageMinutes(ai?.generated_at_utc);
+  const generatedMs = Date.parse(ai?.generated_at_utc || "");
+  const dataTimes = [state.dataMeta?.updated_at_utc, state.intradayMeta?.updated_at_utc]
+    .map((value) => Date.parse(value || ""))
+    .filter(Number.isFinite);
+  const latestDataMs = dataTimes.length ? Math.max(...dataTimes) : null;
+  const lagMinutes = Number.isFinite(generatedMs) && Number.isFinite(latestDataMs)
+    ? Math.max(0, (latestDataMs - generatedMs) / 60000)
+    : null;
+  const status = marketStatus();
+  const trading = status === "day-open" || status === "night-open";
+  const maxAge = trading ? 240 : 1440;
+  const maxLag = trading ? 90 : 720;
+  const fresh = ai?.status === "ok"
+    && Number.isFinite(generatedAge)
+    && generatedAge <= maxAge
+    && (!Number.isFinite(lagMinutes) || lagMinutes <= maxLag);
+  let label = "AI 时间未知";
+  if (Number.isFinite(generatedAge)) {
+    if (fresh && trading) label = `AI 可执行 · ${humanAge(generatedAge)}`;
+    else if (fresh) label = `休市参考 · ${humanAge(generatedAge)}`;
+    else label = `AI 已过期 · ${humanAge(generatedAge)}`;
+  }
+  return { fresh, trading, generatedAge, lagMinutes, label };
+}
+
+function computeDataConfidence(analysis) {
+  let score = 100;
+  const reasons = [];
+  const status = marketStatus();
+  const trading = status === "day-open" || status === "night-open";
+  const weekend = status === "weekend";
+  const dailyAge = Math.max(0, Number(analysis.staleDays || 0));
+  const intradayAge = ageMinutes(state.intradayMeta?.updated_at_utc);
+  const newsAge = ageMinutes(state.newsSnapshot?.updated_at_utc);
+  const quoteAge = lastQuote?.receivedAt ? Math.max(0, (Date.now() - lastQuote.receivedAt) / 60000) : null;
+  const aiFreshness = assessAiFreshness(state.lastAi);
+
+  if (!state.autoLoaded || !state.dataMeta) {
+    score -= 40;
+    reasons.push("当前不是自动真实数据");
+  }
+  if (dailyAge > (weekend ? 4 : 2)) {
+    score -= 24;
+    reasons.push(`日线距今 ${dailyAge} 天`);
+  }
+  if (trading) {
+    if (!Number.isFinite(quoteAge)) {
+      score -= 25;
+      reasons.push("实时行情未接通");
+    } else if (quoteAge > 1.5) {
+      score -= 20;
+      reasons.push(`实时报价 ${humanAge(quoteAge)}`);
+    }
+    if (!Number.isFinite(intradayAge) || intradayAge > 120) {
+      score -= 18;
+      reasons.push("小时线后台快照偏旧");
+    }
+  } else if (Number.isFinite(intradayAge) && intradayAge > 4320) {
+    score -= 12;
+    reasons.push("小时线超过 3 天未更新");
+  }
+  if (Number.isFinite(newsAge) && newsAge > (trading ? 720 : 1440)) {
+    score -= 8;
+    reasons.push("舆情快照偏旧");
+  }
+  if (state.lastAi && !aiFreshness.fresh) {
+    score -= 5;
+    reasons.push("AI 仅作历史参考");
+  }
+
+  score = clamp(Math.round(score), 0, 100);
+  const label = score >= 85 ? "高" : score >= 65 ? "中" : "低";
+  return {
+    score,
+    label,
+    reasons,
+    intradayAge,
+    newsAge,
+    quoteAge,
+    aiFreshness,
+  };
+}
+
+function classifyRegime(analysis, compositeSignal) {
+  const adxValue = Number(analysis.adx14);
+  const efficiency = Number(analysis.efficiency20);
+  const volPct = Number(analysis.volPercentile);
+  const highVol = Number.isFinite(volPct) ? volPct >= 75 : analysis.atrPct >= 0.02;
+  const trending = (Number.isFinite(adxValue) && adxValue >= 24)
+    || (Number.isFinite(efficiency) && efficiency >= 0.34);
+  const direction = compositeSignal >= 18 ? "上行" : compositeSignal <= -18 ? "下行" : "无方向";
+
+  let label;
+  let kind;
+  if (trending && direction === "无方向") { label = "趋势强度高 · 周期冲突"; kind = "neutral"; }
+  else if (trending && highVol) { label = `高波动${direction}趋势`; kind = compositeSignal >= 0 ? "up" : "down"; }
+  else if (trending) { label = `${direction}趋势`; kind = compositeSignal >= 0 ? "up" : "down"; }
+  else if (highVol) { label = "高波动震荡"; kind = "neutral"; }
+  else { label = "均值回归震荡"; kind = "neutral"; }
+
+  const adxText = Number.isFinite(adxValue) ? `ADX ${adxValue.toFixed(0)}` : "ADX --";
+  const volText = Number.isFinite(volPct) ? `波动分位 ${volPct.toFixed(0)}%` : `ATR ${formatPct(analysis.atrPct)}`;
+  return { label, kind, trending, highVol, detail: `${adxText} · ${volText} · 共振 ${compositeSignal.toFixed(0)}` };
+}
+
+function clusterLevels(candidates, tolerance) {
+  const sorted = candidates
+    .filter((item) => Number.isFinite(item.value) && item.value > 0)
+    .sort((a, b) => a.value - b.value);
+  const clusters = [];
+  sorted.forEach((item) => {
+    const last = clusters.at(-1);
+    if (last && Math.abs(item.value - last.value) <= tolerance) {
+      last.sum += item.value * item.weight;
+      last.weight += item.weight;
+      last.value = last.sum / last.weight;
+      if (!last.labels.includes(item.label)) last.labels.push(item.label);
+    } else {
+      clusters.push({
+        value: item.value,
+        sum: item.value * item.weight,
+        weight: item.weight,
+        labels: [item.label],
+      });
+    }
+  });
+  return clusters;
+}
+
+function computeKeyLevels(analysis, price, tfAtr) {
+  const candidates = [];
+  const add = (value, label, weight = 1) => candidates.push({ value: Number(value), label, weight });
+  const addBoll = (meta, label, weight) => {
+    const boll = meta?.bollinger;
+    if (!boll) return;
+    add(boll.lower, `${label}下轨`, weight);
+    add(boll.mid, `${label}中轨`, weight + 0.2);
+    add(boll.upper, `${label}上轨`, weight);
+    add(meta.low20, `${label}前低`, weight);
+    add(meta.high20, `${label}前高`, weight);
+  };
+  addBoll(state.intradayMeta?.one_hour, "1H", 1.2);
+  addBoll(state.intradayMeta?.two_hour, "2H", 1.0);
+  addBoll(state.intradayMeta?.four_hour, "4H", 1.5);
+  add(analysis.boll.lower, "日线下轨", 1.5);
+  add(analysis.boll.mid, "日线中轨", 1.7);
+  add(analysis.boll.upper, "日线上轨", 1.5);
+  add(analysis.ma20, "MA20", 1.5);
+  add(analysis.low20, "20日低点", 1.8);
+  add(analysis.high20, "20日高点", 1.8);
+  add(analysis.low60, "60日低点", 1.2);
+  add(analysis.high60, "60日高点", 1.2);
+
+  const aiFreshness = assessAiFreshness(state.lastAi);
+  if (state.lastAi?.watch_levels && aiFreshness.fresh) {
+    add(state.lastAi.watch_levels.support, "AI支撑", 0.8);
+    add(state.lastAi.watch_levels.resistance, "AI压力", 0.8);
+  }
+
+  const clusters = clusterLevels(candidates, Math.max(6, tfAtr * 0.14));
+  const supports = clusters.filter((item) => item.value < price - 1);
+  const resistances = clusters.filter((item) => item.value > price + 1);
+  const support = supports.at(-1) || { value: price - tfAtr, labels: ["ATR支撑"] };
+  const nextSupport = supports.at(-2) || { value: support.value - tfAtr, labels: ["下一支撑"] };
+  const resistance = resistances[0] || { value: price + tfAtr, labels: ["ATR压力"] };
+  const nextResistance = resistances[1] || { value: resistance.value + tfAtr, labels: ["下一压力"] };
+  return { support, nextSupport, resistance, nextResistance, clusters };
+}
+
+function roundToTick(value, tick = 2) {
+  return Math.round(value / tick) * tick;
+}
+
+function buildDirectionalSetup(direction, context) {
+  const { price, tfAtr, levels, compositeSignal, regime } = context;
+  const isLong = direction === "long";
+  const anchor = isLong ? levels.support.value : levels.resistance.value;
+  const otherSide = isLong ? levels.resistance.value : levels.support.value;
+  const nextOther = isLong ? levels.nextResistance.value : levels.nextSupport.value;
+  const entryCenter = isLong ? anchor + tfAtr * 0.12 : anchor - tfAtr * 0.12;
+  const entryLow = roundToTick(entryCenter - tfAtr * 0.08);
+  const entryHigh = roundToTick(entryCenter + tfAtr * 0.08);
+  const entry = (entryLow + entryHigh) / 2;
+  let stop = isLong ? anchor - tfAtr * 0.32 : anchor + tfAtr * 0.32;
+  const minRisk = tfAtr * 0.45;
+  if (isLong && entry - stop < minRisk) stop = entry - minRisk;
+  if (!isLong && stop - entry < minRisk) stop = entry + minRisk;
+  stop = roundToTick(stop);
+  const risk = Math.max(2, Math.abs(entry - stop));
+
+  let target1 = otherSide;
+  if (isLong && target1 <= entry + risk * 1.2) target1 = entry + risk * 1.2;
+  if (!isLong && target1 >= entry - risk * 1.2) target1 = entry - risk * 1.2;
+  let target2 = nextOther;
+  if (isLong && target2 <= entry + risk * 2) target2 = entry + risk * 2;
+  if (!isLong && target2 >= entry - risk * 2) target2 = entry - risk * 2;
+  target1 = roundToTick(target1);
+  target2 = roundToTick(target2);
+
+  const reward1 = isLong ? target1 - entry : entry - target1;
+  const reward2 = isLong ? target2 - entry : entry - target2;
+  const rr1 = reward1 / risk;
+  const rr2 = reward2 / risk;
+  const aligned = isLong ? compositeSignal >= 20 : compositeSignal <= -20;
+  const nearEntry = price >= entryLow - tfAtr * 0.12 && price <= entryHigh + tfAtr * 0.12;
+  const status = aligned ? (nearEntry ? "接近触发" : "顺势等待") : "逆势备用";
+  const statusClass = aligned ? (isLong ? "up" : "down") : "neutral";
+  const trigger = regime.trending
+    ? (isLong
+      ? `${entryLow.toFixed(0)}-${entryHigh.toFixed(0)} 回踩后，15分钟重新收回并伴随量能确认`
+      : `${entryLow.toFixed(0)}-${entryHigh.toFixed(0)} 反弹受阻后，15分钟重新跌回并伴随量能确认`)
+    : (isLong
+      ? `${entryLow.toFixed(0)}-${entryHigh.toFixed(0)} 出现止跌形态后再执行`
+      : `${entryLow.toFixed(0)}-${entryHigh.toFixed(0)} 出现滞涨形态后再执行`);
+  return {
+    direction,
+    entryLow,
+    entryHigh,
+    entry,
+    stop,
+    target1,
+    target2,
+    rr1,
+    rr2,
+    trigger,
+    status,
+    statusClass,
+  };
+}
+
+function buildDecisionModel(analysis) {
+  const price = Number.isFinite(lastQuote?.price)
+    ? lastQuote.price
+    : Number(state.intradayMeta?.one_hour?.close || analysis.last.close);
+  const fallbackAtr = Math.max(12, Number(analysis.atr14 || 40) * 0.42);
+  const tfAtr = Math.max(6, atrFromMeta(state.intradayMeta?.one_hour, fallbackAtr));
+  const oneSignal = signalForMeta(state.intradayMeta?.one_hour, price);
+  const twoSignal = signalForMeta(state.intradayMeta?.two_hour, price);
+  const fourSignal = signalForMeta(state.intradayMeta?.four_hour, price);
+  let dailySignal = (analysis.score - 50) * 1.35;
+  if (analysis.last.close > analysis.ma20 && analysis.ma10 > analysis.ma20) dailySignal += 12;
+  if (analysis.last.close < analysis.ma20 && analysis.ma10 < analysis.ma20) dailySignal -= 12;
+  if (analysis.macdValue.hist > 0) dailySignal += 6;
+  else dailySignal -= 6;
+  dailySignal = clamp(dailySignal, -100, 100);
+
+  const weighted = [
+    [dailySignal, 0.35],
+    [fourSignal, 0.30],
+    [twoSignal, 0.15],
+    [oneSignal, 0.20],
+  ].filter(([value]) => Number.isFinite(value));
+  const weightSum = weighted.reduce((sum, item) => sum + item[1], 0);
+  const compositeSignal = weightSum
+    ? weighted.reduce((sum, item) => sum + item[0] * item[1], 0) / weightSum
+    : dailySignal;
+  const regime = classifyRegime(analysis, compositeSignal);
+  const confidence = computeDataConfidence(analysis);
+  const levels = computeKeyLevels(analysis, price, tfAtr);
+
+  const mids = [
+    Number(state.intradayMeta?.one_hour?.bollinger?.mid),
+    Number(state.intradayMeta?.two_hour?.bollinger?.mid),
+    Number(state.intradayMeta?.four_hour?.bollinger?.mid),
+    Number(analysis.boll.mid),
+  ].filter(Number.isFinite);
+  const center = mids.length ? mean(mids) : price;
+  const halfZone = clamp(stddev(mids) + tfAtr * 0.12, tfAtr * 0.18, tfAtr * 0.55);
+  const noTradeLow = roundToTick(center - halfZone);
+  const noTradeHigh = roundToTick(center + halfZone);
+  const inNoTradeZone = price >= noTradeLow && price <= noTradeHigh;
+
+  const context = { price, tfAtr, levels, compositeSignal, regime };
+  const longSetup = buildDirectionalSetup("long", context);
+  const shortSetup = buildDirectionalSetup("short", context);
+  const preferred = compositeSignal >= 0 ? longSetup : shortSetup;
+  const preferredRr = Math.max(0, preferred.rr1);
+  const qualityPenalty = (inNoTradeZone ? 15 : 0) + (preferredRr < 1.45 ? 8 : 0);
+  const quality = clamp(Math.round(
+    confidence.score * 0.45
+      + (50 + Math.min(50, Math.abs(compositeSignal))) * 0.3
+      + clamp(preferredRr / 2.5, 0, 1) * 25
+      - qualityPenalty
+  ), 0, 100);
+
+  const status = marketStatus();
+  let gate = { label: "仅条件单", kind: "neutral", reason: "等待价格离开均衡区并完成触发确认。" };
+  if (status === "weekend") {
+    gate = { label: "休市", kind: "neutral", reason: "市场关闭，当前计划只用于下个交易时段预案。" };
+  } else if (status === "closed" || status === "day-break") {
+    gate = { label: "等待开盘", kind: "neutral", reason: "非交易时段，不把静态报价当作可执行价格。" };
+  } else if (confidence.score < 65) {
+    gate = { label: "暂停交易", kind: "down", reason: "数据可信度不足，先恢复实时行情或小时线快照。" };
+  } else if (inNoTradeZone && Math.abs(compositeSignal) < 35) {
+    gate = { label: "观望", kind: "neutral", reason: "价格处于多周期均衡区，方向优势不足。" };
+  } else if (compositeSignal >= 25 && longSetup.rr1 >= 1.45) {
+    gate = { label: "允许做多", kind: "up", reason: "多周期偏多且首目标盈亏比达到执行门槛，仍需触发确认。" };
+  } else if (compositeSignal <= -25 && shortSetup.rr1 >= 1.45) {
+    gate = { label: "允许做空", kind: "down", reason: "多周期偏空且首目标盈亏比达到执行门槛，仍需触发确认。" };
+  }
+
+  return {
+    price,
+    tfAtr,
+    signals: { oneSignal, twoSignal, fourSignal, dailySignal, compositeSignal },
+    regime,
+    confidence,
+    levels,
+    noTradeLow,
+    noTradeHigh,
+    inNoTradeZone,
+    longSetup,
+    shortSetup,
+    quality,
+    gate,
+  };
+}
+
+function renderSetup(setup, side) {
+  const prefix = side === "long" ? "long" : "short";
+  const statusEl = els[`${prefix}SetupStatus`];
+  if (statusEl) {
+    statusEl.textContent = setup.status;
+    statusEl.className = `setup-status ${setup.statusClass}`;
+  }
+  els[`${prefix}SetupEntry`].textContent = `${setup.entryLow.toFixed(0)}-${setup.entryHigh.toFixed(0)}`;
+  els[`${prefix}SetupTrigger`].textContent = setup.trigger;
+  els[`${prefix}SetupStop`].textContent = setup.stop.toFixed(0);
+  els[`${prefix}SetupTarget1`].textContent = setup.target1.toFixed(0);
+  els[`${prefix}SetupTarget2`].textContent = setup.target2.toFixed(0);
+  els[`${prefix}SetupRR`].textContent = `T1 ${setup.rr1.toFixed(1)}R · T2 ${setup.rr2.toFixed(1)}R`;
+}
+
+function renderDecisionCockpit(analysis) {
+  if (!els.tradeGate) return;
+  const model = buildDecisionModel(analysis);
+  state.decisionModel = model;
+  els.tradeGate.textContent = model.gate.label;
+  els.tradeGate.className = `gate-pill ${model.gate.kind}`;
+  els.tradeGateReason.textContent = model.gate.reason;
+  const factorItems = [
+    [`数据 ${model.confidence.score}`, model.confidence.score >= 85 ? "quality-good" : model.confidence.score < 65 ? "quality-bad" : ""],
+    [`共振 ${model.signals.compositeSignal.toFixed(0)}`, model.signals.compositeSignal >= 20 ? "up" : model.signals.compositeSignal <= -20 ? "down" : ""],
+    [`首目标 ${Math.max(model.longSetup.rr1, model.shortSetup.rr1).toFixed(1)}R`, ""],
+    [model.inNoTradeZone ? "均衡区内" : "均衡区外", model.inNoTradeZone ? "" : "quality-good"],
+  ];
+  els.tradeGateFactors.innerHTML = factorItems.map(([text, kind]) => `<span class="${kind}">${escapeHtml(text)}</span>`).join("");
+
+  els.marketRegime.textContent = model.regime.label;
+  els.marketRegime.className = model.regime.kind;
+  els.regimeDetail.textContent = model.regime.detail;
+  els.nearestSupport.textContent = roundToTick(model.levels.support.value).toFixed(0);
+  els.nearestResistance.textContent = roundToTick(model.levels.resistance.value).toFixed(0);
+  els.levelContext.textContent = `距支撑 ${Math.max(0, model.price - model.levels.support.value).toFixed(0)} 点 · 距压力 ${Math.max(0, model.levels.resistance.value - model.price).toFixed(0)} 点`;
+  els.dataConfidence.textContent = `${model.confidence.score} / 100 · ${model.confidence.label}`;
+  els.dataConfidence.className = model.confidence.score >= 85 ? "quality-good" : model.confidence.score < 65 ? "quality-bad" : "";
+  els.dataConfidenceDetail.textContent = model.confidence.reasons.length
+    ? model.confidence.reasons.slice(0, 2).join(" · ")
+    : "行情、小时线、AI 与舆情时间检查通过";
+
+  renderSetup(model.longSetup, "long");
+  renderSetup(model.shortSetup, "short");
+  els.noTradeZone.textContent = `${model.noTradeLow.toFixed(0)}-${model.noTradeHigh.toFixed(0)}`;
+  els.noTradeStatus.textContent = model.inNoTradeZone ? "区域内不追单" : "等待触发";
+  els.noTradeReason.textContent = model.inNoTradeZone
+    ? "当前位于多周期中轨密集区，先等价格离开后再判断方向。"
+    : "不在计划入场区时不追价；止损失效后当日不在同方向立即重仓反手。";
+  els.planQuality.textContent = `${model.quality} / 100`;
+  els.planQuality.className = model.quality >= 75 ? "quality-good" : model.quality < 55 ? "quality-bad" : "";
+  els.planQualityDetail.textContent = model.quality >= 75 ? "结构清晰" : model.quality >= 55 ? "等待确认" : "优势不足";
+  const asOf = lastQuote?.tradedate && lastQuote?.ticktime
+    ? formatMarketBarTime(`${lastQuote.tradedate} ${lastQuote.ticktime}`)
+    : state.intradayMeta?.one_hour?.latest_time || analysis.last.date;
+  els.planAsOf.textContent = `现价 ${model.price.toFixed(0)} · 行情标记 ${asOf}`;
 }
 
 function draw() {
@@ -761,6 +1325,7 @@ function draw() {
   if (state.intradayMeta) updateIntradayPanel();
   renderMultiStrategyPanel();
   renderAlignmentScore();
+  renderDecisionCockpit(analysis);
   populatePosCalcDefaults();
 }
 
@@ -934,14 +1499,21 @@ function updateSummary(data, analysis) {
   } else {
     els.chartSubhead.textContent = state.imported || state.autoLoaded ? `已载入 ${lbl.code} 连续合约 CSV 数据` : "示例数据：未自动载入 CSV 时显示，日期不会超过今天";
   }
-  els.lastPrice.textContent = analysis.last.close.toFixed(0);
-  els.lastChange.textContent = `${formatSigned(analysis.change)} (${formatPct(analysis.changePct)})`;
-  els.lastChange.className = analysis.change >= 0 ? "up" : "down";
+  const snapshotPrice = Number(state.intradayMeta?.one_hour?.close);
+  const displayPrice = Number.isFinite(lastQuote?.price)
+    ? lastQuote.price
+    : Number.isFinite(snapshotPrice) ? snapshotPrice : analysis.last.close;
+  const referencePrice = displayPrice !== analysis.last.close ? analysis.last.close : analysis.prev.close;
+  const displayChange = displayPrice - referencePrice;
+  const displayChangePct = referencePrice > 0 ? displayChange / referencePrice : 0;
+  els.lastPrice.textContent = displayPrice.toFixed(0);
+  els.lastChange.textContent = `${formatSigned(displayChange)} (${formatPct(displayChangePct)})`;
+  els.lastChange.className = displayChange >= 0 ? "up" : "down";
   els.signalText.textContent = analysis.signal;
   els.signalText.className = analysis.signal === "偏强" ? "up" : analysis.signal === "偏弱" ? "down" : "";
   els.signalDetail.textContent = `综合评分 ${analysis.score.toFixed(0)} / 100`;
-  els.upDays.textContent = `${analysis.upCount} 天`;
-  els.winRate.textContent = `样本上涨率 ${formatPct(analysis.winRate)}`;
+  els.upDays.textContent = `${analysis.upCount} / 20`;
+  els.winRate.textContent = `最近 20 个交易日 ${formatPct(analysis.winRate)}`;
   els.volatility.textContent = formatPct(analysis.vol);
   updateDataStatus(analysis);
   els.resistance.textContent = analysis.resistance.toFixed(0);
@@ -1124,6 +1696,26 @@ function bjNow(opts = {}) {
   return new Date().toLocaleTimeString("zh-CN", { timeZone: TZ, hour12: false, ...opts });
 }
 
+function bjDateIso() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function formatMarketBarTime(value) {
+  const text = String(value || "");
+  const datePart = text.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart) && datePart > bjDateIso()) {
+    return `${datePart}（交易日归属）`;
+  }
+  return text;
+}
+
 function parseCsv(text) {
   const lines = text.trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) throw new Error("CSV 至少需要表头和一行数据");
@@ -1150,7 +1742,10 @@ function parseCsv(text) {
 // ── Position size calculator ──────────────────────────────
 // Tracks per-field "user_edited" flags so auto-populated defaults don't
 // wipe values the user has typed. Cleared on symbol switch.
-const POS_CALC_INPUT_IDS = ["posCapital", "posRisk", "posEntry", "posStop", "posMult", "posMargin"];
+const POS_CALC_INPUT_IDS = [
+  "posCapital", "posRisk", "posMaxMargin", "posDirection", "posEntry",
+  "posStop", "posTarget", "posSlippage", "posMult", "posMargin",
+];
 let posCalcUserEdited = new Set();
 
 function bindPosCalcInputs() {
@@ -1173,34 +1768,46 @@ function resetPosCalcUserEdited() {
 function populatePosCalcDefaults() {
   if (!els.posEntry || !els.posStop) return;
 
+  const model = state.decisionModel;
+  const modelDirection = model?.signals?.compositeSignal < 0 ? "short" : "long";
+  const modelSetup = modelDirection === "short" ? model?.shortSetup : model?.longSetup;
+
+  if (!posCalcUserEdited.has("posDirection") && els.posDirection) {
+    els.posDirection.value = modelDirection;
+  }
+
   // Entry default: live price → last close
   if (!posCalcUserEdited.has("posEntry")) {
-    let price = null;
-    if (lastQuote && Number.isFinite(lastQuote.price)) price = lastQuote.price;
+    let price = Number(modelSetup?.entry);
+    if (!Number.isFinite(price) && lastQuote && Number.isFinite(lastQuote.price)) price = lastQuote.price;
     else if (state.data && state.data.length) {
       const last = state.data[state.data.length - 1];
-      if (last) price = last.close;
+      if (!Number.isFinite(price) && last) price = last.close;
     }
     if (Number.isFinite(price)) {
-      els.posEntry.value = Math.round(price);
+      els.posEntry.value = roundToTick(price);
     }
   }
 
-  // Stop default: derived from AI bias + watch_levels
+  // Deterministic execution plan has priority. AI levels are only a fallback.
   if (!posCalcUserEdited.has("posStop")) {
-    const ai = state.lastAi;
-    const wl = ai && typeof ai.watch_levels === "object" && ai.watch_levels !== null ? ai.watch_levels : null;
-    const support    = wl ? Number(wl.support    || 0) : 0;
-    const resistance = wl ? Number(wl.resistance || 0) : 0;
-    const bias = ai ? String(ai.bias || "") : "";
-    const isBullish = /多|强/.test(bias);
-    const isBearish = /空|弱/.test(bias);
-    let stop = null;
-    if (isBullish && support > 0) stop = support;
-    else if (isBearish && resistance > 0) stop = resistance;
-    else if (support > 0) stop = support;   // sensible default when no bias
+    let stop = Number(modelSetup?.stop);
+    if (!Number.isFinite(stop)) {
+      const ai = state.lastAi;
+      const wl = ai && typeof ai.watch_levels === "object" && ai.watch_levels !== null ? ai.watch_levels : null;
+      const support = wl ? Number(wl.support || 0) : 0;
+      const resistance = wl ? Number(wl.resistance || 0) : 0;
+      stop = modelDirection === "short" ? resistance : support;
+    }
     if (Number.isFinite(stop) && stop > 0) {
-      els.posStop.value = Math.round(stop);
+      els.posStop.value = roundToTick(stop);
+    }
+  }
+
+  if (!posCalcUserEdited.has("posTarget") && els.posTarget) {
+    const target = Number(modelSetup?.rr1 >= 1.5 ? modelSetup?.target1 : modelSetup?.target2);
+    if (Number.isFinite(target) && target > 0) {
+      els.posTarget.value = roundToTick(target);
     }
   }
 
@@ -1211,30 +1818,85 @@ function updatePosCalc() {
   if (!els.posPerLotRisk) return;
   const capital   = Number(els.posCapital?.value || 0);
   const riskPct   = Number(els.posRisk?.value    || 0);
+  const maxMarginPct = Number(els.posMaxMargin?.value || 0);
+  const direction = els.posDirection?.value || "long";
   const entry     = Number(els.posEntry?.value   || 0);
   const stop      = Number(els.posStop?.value    || 0);
+  const target    = Number(els.posTarget?.value  || 0);
+  const slippage  = Math.max(0, Number(els.posSlippage?.value || 0));
   const mult      = Number(els.posMult?.value    || 0);
   const marginPct = Number(els.posMargin?.value  || 0);
 
-  if (!(entry > 0 && stop > 0 && mult > 0)) {
-    els.posPerLotRisk.textContent = "--";
-    els.posLotsRec.textContent    = "--";
-    els.posMarginUse.textContent  = "--";
-    els.posGap.textContent        = "--";
+  const outputEls = [
+    els.posRiskBudget, els.posPerLotRisk, els.posRiskLots, els.posMarginLots,
+    els.posLotsRec, els.posMarginUse, els.posRR, els.posTargetPnl, els.posGap,
+  ];
+  if (!(capital > 0 && riskPct > 0 && maxMarginPct > 0 && entry > 0 && stop > 0 && target > 0 && mult > 0 && marginPct > 0)) {
+    outputEls.forEach((el) => { if (el) el.textContent = "--"; });
+    if (els.posMarginUsePct) els.posMarginUsePct.textContent = "--";
+    if (els.posWarning) els.posWarning.textContent = "请补全资金、方向、入场、止损、目标和保证金参数。";
     return;
   }
 
-  const perLotRisk = Math.abs(entry - stop) * mult;
-  const lotsRec    = perLotRisk > 0 ? Math.floor((capital * riskPct / 100) / perLotRisk) : 0;
-  const lotsSafe   = Math.max(0, lotsRec);
-  const marginUse  = entry * mult * lotsSafe * marginPct / 100;
-  const gap        = Math.abs(entry - stop);
-  const gapPct     = entry > 0 ? gap / entry * 100 : 0;
+  const directionValid = direction === "long"
+    ? stop < entry && target > entry
+    : stop > entry && target < entry;
+  if (!directionValid) {
+    outputEls.forEach((el) => { if (el) el.textContent = "--"; });
+    if (els.posMarginUsePct) els.posMarginUsePct.textContent = "--";
+    if (els.posWarning) {
+      els.posWarning.textContent = direction === "long"
+        ? "做多参数必须满足：止损价 < 入场价 < 目标价。"
+        : "做空参数必须满足：目标价 < 入场价 < 止损价。";
+      els.posWarning.className = "pos-warning error";
+    }
+    return;
+  }
 
+  const riskBudget = capital * riskPct / 100;
+  const riskPoints = Math.abs(entry - stop) + slippage * 2;
+  const rewardPoints = Math.max(0, Math.abs(target - entry) - slippage * 2);
+  const perLotRisk = riskPoints * mult;
+  const riskLots = perLotRisk > 0 ? Math.floor(riskBudget / perLotRisk) : 0;
+  const marginPerLot = entry * mult * marginPct / 100;
+  const marginBudget = capital * maxMarginPct / 100;
+  const marginLots = marginPerLot > 0 ? Math.floor(marginBudget / marginPerLot) : 0;
+  const lotsSafe = Math.max(0, Math.min(riskLots, marginLots));
+  const marginUse = marginPerLot * lotsSafe;
+  const marginUsePct = capital > 0 ? marginUse / capital * 100 : 0;
+  const rr = riskPoints > 0 ? rewardPoints / riskPoints : 0;
+  const targetPnl = rewardPoints * mult * lotsSafe;
+  const gap = Math.abs(entry - stop);
+  const gapPct = gap / entry * 100;
+
+  els.posRiskBudget.textContent = Math.round(riskBudget).toLocaleString();
   els.posPerLotRisk.textContent = Math.round(perLotRisk).toLocaleString();
-  els.posLotsRec.textContent    = String(lotsSafe);
-  els.posMarginUse.textContent  = Math.round(marginUse).toLocaleString();
-  els.posGap.textContent        = `${gap.toFixed(0)} / ${gapPct.toFixed(2)}%`;
+  els.posRiskLots.textContent = String(Math.max(0, riskLots));
+  els.posMarginLots.textContent = String(Math.max(0, marginLots));
+  els.posLotsRec.textContent = String(lotsSafe);
+  els.posMarginUse.textContent = Math.round(marginUse).toLocaleString();
+  els.posMarginUsePct.textContent = `${marginUsePct.toFixed(1)}% 账户资金`;
+  els.posRR.textContent = `${rr.toFixed(2)}R`;
+  els.posGap.textContent = `止损 ${gap.toFixed(0)} 点 / ${gapPct.toFixed(2)}%`;
+  els.posTargetPnl.textContent = Math.round(targetPnl).toLocaleString();
+
+  let warning = "参数通过风险预算与保证金双重约束。";
+  let warningClass = "pos-warning success";
+  if (lotsSafe === 0) {
+    warning = "当前资金与风险参数不足以安全开 1 手，请缩小止损距离或降低合约暴露。";
+    warningClass = "pos-warning error";
+  } else if (rr < 1.5) {
+    warning = `计划盈亏比只有 ${rr.toFixed(2)}R，低于 1.5R 执行门槛。`;
+    warningClass = "pos-warning warn";
+  } else if (marginLots < riskLots) {
+    warning = "最终手数受最大保证金占用约束。";
+  } else if (riskLots < marginLots) {
+    warning = "最终手数受单笔风险预算约束。";
+  }
+  if (els.posWarning) {
+    els.posWarning.textContent = warning;
+    els.posWarning.className = warningClass;
+  }
 }
 
 // ── Overseas markets ──────────────────────────────────────
@@ -1244,7 +1906,7 @@ async function autoLoadOverseas() {
   if (location.protocol === "file:") return;
   if (!els.overseasGrid) return;
   try {
-    const r = await fetch(`data/overseas.json?t=${Date.now()}`, { cache: "no-store" });
+    const r = await fetchWithRetry(`data/overseas.json?t=${Date.now()}`, { cache: "no-store" });
     if (!r.ok) {
       els.overseasGrid.innerHTML = `<div class="overseas-card"><span>暂无海外行情数据</span></div>`;
       if (els.overseasMeta) els.overseasMeta.textContent = `等待 data/overseas.json`;
@@ -1258,8 +1920,8 @@ async function autoLoadOverseas() {
     if (els.overseasMeta) {
       const upd = data.updated_at_utc ? `更新 ${formatDateTime(data.updated_at_utc)}` : "";
       els.overseasMeta.textContent = items.length
-        ? `每 60 秒刷新 · ${items.length} 个市场${upd ? " · " + upd : ""}`
-        : `每 60 秒刷新 · 暂无数据${upd ? " · " + upd : ""}`;
+        ? `页面每 60 秒检查 · ${items.length} 个市场${upd ? " · " + upd : ""}`
+        : `页面每 60 秒检查 · 暂无数据${upd ? " · " + upd : ""}`;
     }
     if (!items.length) {
       els.overseasGrid.innerHTML = `<div class="overseas-card"><span>暂无海外行情数据</span></div>`;
@@ -1300,7 +1962,7 @@ async function autoLoadAccuracy() {
   if (!els.aiAccuracy) return;
   const _fetchSym = state.activeSymbol;
   try {
-    const r = await fetch(`${dataPath("ai_accuracy.json")}?t=${Date.now()}`, { cache: "no-store" });
+    const r = await fetchWithRetry(`${dataPath("ai_accuracy.json")}?t=${Date.now()}`, { cache: "no-store" });
     if (_fetchSym !== state.activeSymbol) return;
     if (!r.ok) {
       els.aiAccuracy.hidden = true;
@@ -1313,6 +1975,12 @@ async function autoLoadAccuracy() {
     const total   = Number(d.total_evaluated || 0);
     if (!Number.isFinite(rateRaw)) {
       els.aiAccuracy.hidden = true;
+      return;
+    }
+    if (total < 10) {
+      els.aiAccuracy.textContent = `AI 复盘样本 ${total} / 10 · 样本不足，暂不评价命中率`;
+      els.aiAccuracy.hidden = false;
+      els.aiAccuracy.classList.remove("warn");
       return;
     }
     // Defensive: accept fraction (0..1) or percent (0..100) in case an older
@@ -1359,7 +2027,7 @@ async function autoLoadAskResponse() {
   if (!els.askResponse) return;
   const _fetchSym = state.activeSymbol;
   try {
-    const r = await fetch(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" });
+    const r = await fetchWithRetry(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" }, 2);
     if (_fetchSym !== state.activeSymbol) return;
     if (!r.ok) {
       state.lastAskResponse = null;
@@ -1374,72 +2042,39 @@ async function autoLoadAskResponse() {
   }
 }
 
+const GH_ASK_WORKFLOW_URL = "https://github.com/FrankSun0616/palm_dalian/actions/workflows/ask.yml";
+
 async function submitAskQuestion() {
-  const pat = localStorage.getItem(PAT_KEY) || "";
   const question = (els.askInput?.value || "").trim();
   if (!question) {
     setAskStatus("请输入问题", "error");
     return;
   }
-  if (!pat) {
-    setAskStatus("PAT 未设置，无法触发", "error");
-    return;
-  }
-  if (els.askBtn) els.askBtn.disabled = true;
-  setAskStatus("正在触发 GitHub Actions...", "loading");
-
-  // Snapshot previous asked_at_utc so we detect the new answer landing.
-  let prevTime = null;
+  const prevTime = state.lastAskResponse?.asked_at_utc || null;
+  let copied = false;
   try {
-    const r = await fetch(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" });
-    if (r.ok) {
-      const d = await r.json();
-      prevTime = d.asked_at_utc || null;
-    }
+    await navigator.clipboard.writeText(question);
+    copied = true;
   } catch (_) {}
-
-  try {
-    const resp = await fetch(
-      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/ask.yml/dispatches`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${pat}`,
-          Accept: "application/vnd.github+json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ ref: "main", inputs: { symbol: state.activeSymbol, question } })
-      }
-    );
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => "");
-      const hint = resp.status === 401 || resp.status === 403
-        ? " (PAT 可能已失效)"
-        : "";
-      setAskStatus(`触发失败 (${resp.status})${hint}${body ? "：" + body.slice(0, 80) : ""}`, "error");
-      if (els.askBtn) els.askBtn.disabled = false;
-      return;
-    }
-  } catch (err) {
-    setAskStatus(`网络错误：${err.message}`, "error");
-    if (els.askBtn) els.askBtn.disabled = false;
-    return;
-  }
-
-  setAskStatus("正在思考...", "loading");
+  window.open(GH_ASK_WORKFLOW_URL, "_blank", "noopener,noreferrer");
+  setAskStatus(
+    copied
+      ? `问题已复制。请在 Actions 中选择 ${state.activeSymbol}，粘贴问题并运行；本页会检查回复。`
+      : `已打开 Actions。请选择 ${state.activeSymbol} 并输入问题后运行；本页会检查回复。`,
+    "loading",
+  );
   const startTime = Date.now();
-  const maxWait   = 90 * 1000;
+  const maxWait = 12 * 60 * 1000;
   if (askPollInterval) clearInterval(askPollInterval);
   askPollInterval = setInterval(async () => {
     if (Date.now() - startTime > maxWait) {
       clearInterval(askPollInterval);
       askPollInterval = null;
-      setAskStatus("超时（90 秒未收到回复），请稍后再试", "error");
-      if (els.askBtn) els.askBtn.disabled = false;
+      setAskStatus("尚未检测到新回复，可再次打开 Actions 查看运行状态。", "error");
       return;
     }
     try {
-      const r = await fetch(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" });
+      const r = await fetchWithRetry(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" }, 2);
       if (!r.ok) return;
       const d = await r.json();
       const newTime = d.asked_at_utc || null;
@@ -1448,11 +2083,10 @@ async function submitAskQuestion() {
         askPollInterval = null;
         state.lastAskResponse = d;
         renderAskResponse(d, /*fresh=*/true);
-        setAskStatus(`✓ 已回复 (${formatDateTime(newTime)})`, "success");
-        if (els.askBtn) els.askBtn.disabled = false;
+        setAskStatus(`已回复 (${formatDateTime(newTime)})`, "success");
       }
     } catch (_) {}
-  }, 3 * 1000);  // Tight poll — DeepSeek answers in ~5s, workflow overhead ~15s
+  }, 20 * 1000);
 }
 
 if (els.askBtn) els.askBtn.addEventListener("click", submitAskQuestion);
@@ -1478,113 +2112,45 @@ els.demoBtn.addEventListener("click", () => {
   draw();
 });
 
-const GH_OWNER = "FrankSun0616";
-const GH_REPO = "palm_dalian";
-const GH_WORKFLOW = "update-data.yml";
-const PAT_KEY = "gh_pat_palm_dalian";
+const GH_WORKFLOW_URL = "https://github.com/FrankSun0616/palm_dalian/actions/workflows/update-data.yml";
+let aiManualPollInterval = null;
 
-// Embedded PAT for one-click triggering. Base64 only to bypass GitHub
-// secret-scanning on push (the user explicitly approved making it public).
-localStorage.setItem(PAT_KEY, atob(
-  "Z2l0aHViX3BhdF8xMUJIWlpDU1kwZDdKb050dVczVXU5X2dmMjd1c0V4aldwRHRMenU2ZXFNNHVKeF" +
-  "VHM2Z6eDRYVW5ocE9WVGhlVjRPRzdGVEVaVU8yc3phbUEx"
-));
+// Remove the credential cached by older public builds. A static GitHub Pages
+// site must never contain a GitHub token or DeepSeek key.
+try { localStorage.removeItem("gh_pat_palm_dalian"); } catch (_) {}
 
 function setAiStatus(text, type) {
   els.aiStatus.textContent = text;
   els.aiStatus.className = `ai-status${type ? ` ${type}` : ""}`;
 }
 
-async function generateAiAnalysis() {
-  const pat = localStorage.getItem(PAT_KEY) || "";
-  if (!pat) {
-    setAiStatus("PAT 未设置，无法触发", "error");
-    return;
-  }
-
-  els.generateAiBtn.disabled = true;
-  setAiStatus("正在触发 GitHub Actions...", "loading");
-
-  // Remember previous generation time so we can detect when a fresh one lands.
-  let prevGenTime = null;
-  try {
-    const r = await fetch(`${dataPath("ai_analysis.json")}?t=${Date.now()}`, { cache: "no-store" });
-    if (r.ok) {
-      const ai = await r.json();
-      prevGenTime = ai.generated_at_utc || null;
-    }
-  } catch (_) {}
-
-  // Retry once on Failed-to-fetch — many browsers surface a transient DNS
-  // or TCP hiccup that way, and a second attempt usually goes through.
-  async function tryDispatch() {
-    return fetch(
-      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${pat}`,
-          Accept: "application/vnd.github+json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ ref: "main", inputs: { run_ai_analysis: "true" } })
-      }
-    );
-  }
-
-  let resp;
-  try {
-    resp = await tryDispatch();
-  } catch (err1) {
-    // Retry once after 1.5s in case it was a transient network hiccup.
-    setAiStatus(`网络错误 (${err1.message})，正在重试...`, "loading");
-    await new Promise(r => setTimeout(r, 1500));
-    try {
-      resp = await tryDispatch();
-    } catch (err2) {
-      setAiStatus(
-        `网络错误：${err2.message}。可能是：①浏览器扩展拦截了 api.github.com；`
-        + `②公司网络屏蔽；③PAT 失效。打开 F12 → Console 看具体报错。`,
-        "error"
-      );
-      els.generateAiBtn.disabled = false;
-      return;
-    }
-  }
-  if (!resp.ok) {
-    const body = await resp.text().catch(() => "");
-    const hint = resp.status === 401 || resp.status === 403
-      ? " (PAT 可能已失效，请检查 token 权限)"
-      : "";
-    setAiStatus(`触发失败 (${resp.status})${hint}${body ? "：" + body.slice(0, 80) : ""}`, "error");
-    els.generateAiBtn.disabled = false;
-    return;
-  }
-
-  setAiStatus("正在并行分析 P0 + Y0（搜索 + 深度分析），约 2–3 分钟后自动刷新...", "loading");
-
+function generateAiAnalysis() {
+  const prevGenTime = state.lastAi?.generated_at_utc || null;
+  window.open(GH_WORKFLOW_URL, "_blank", "noopener,noreferrer");
+  setAiStatus("已打开 GitHub Actions。点击 Run workflow 并保持 AI 分析为 true；本页会检查新结果。", "loading");
+  if (aiManualPollInterval) clearInterval(aiManualPollInterval);
   const startTime = Date.now();
-  const maxWait = 6 * 60 * 1000;
-  const interval = setInterval(async () => {
+  const maxWait = 12 * 60 * 1000;
+  aiManualPollInterval = setInterval(async () => {
     if (Date.now() - startTime > maxWait) {
-      clearInterval(interval);
-      setAiStatus("超时，请手动刷新页面", "error");
-      els.generateAiBtn.disabled = false;
+      clearInterval(aiManualPollInterval);
+      aiManualPollInterval = null;
+      setAiStatus("尚未检测到新结果，可再次打开 Actions 查看运行状态。", "error");
       return;
     }
     try {
-      const r = await fetch(`${dataPath("ai_analysis.json")}?t=${Date.now()}`, { cache: "no-store" });
+      const r = await fetchWithRetry(`${dataPath("ai_analysis.json")}?t=${Date.now()}`, { cache: "no-store" }, 2);
       if (!r.ok) return;
       const ai = await r.json();
       const newTime = ai.generated_at_utc || null;
       if (newTime && newTime !== prevGenTime) {
-        clearInterval(interval);
+        clearInterval(aiManualPollInterval);
+        aiManualPollInterval = null;
         updateAiPanel(ai);
-        setAiStatus(`✓ 分析完成 (${formatDateTime(newTime)})`, "success");
-        els.generateAiBtn.disabled = false;
+        setAiStatus(`分析完成 (${formatDateTime(newTime)})`, "success");
       }
     } catch (_) {}
-  }, 25 * 1000);
+  }, 20 * 1000);
 }
 
 els.generateAiBtn.addEventListener("click", generateAiAnalysis);
@@ -1728,6 +2294,26 @@ els.priceCanvas.addEventListener("wheel", (event) => {
   draw();
 }, { passive: false });
 
+async function fetchWithRetry(url, options = {}, attempts = 3) {
+  let lastError = null;
+  let lastResponse = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, options);
+      lastResponse = response;
+      if (response.ok || response.status < 500) return response;
+      lastError = new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt < attempts) {
+      await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+    }
+  }
+  if (lastResponse) return lastResponse;
+  throw lastError || new Error("网络请求失败");
+}
+
 async function autoLoadCsv() {
   if (location.protocol === "file:") {
     const message = "请通过 GitHub Pages 或本地 http server 打开，file:// 无法自动读取 CSV";
@@ -1741,8 +2327,8 @@ async function autoLoadCsv() {
   try {
     const cacheBust = `t=${Date.now()}`;
     const [response, metaResponse] = await Promise.all([
-      fetch(`${dataPath("daily.csv")}?${cacheBust}`, { cache: "no-store" }),
-      fetch(`${dataPath("source_meta.json")}?${cacheBust}`, { cache: "no-store" })
+      fetchWithRetry(`${dataPath("daily.csv")}?${cacheBust}`, { cache: "no-store" }),
+      fetchWithRetry(`${dataPath("source_meta.json")}?${cacheBust}`, { cache: "no-store" })
     ]);
     if (_fetchSym !== state.activeSymbol) return;  // user switched — drop stale response
     if (response.status === 404) {
@@ -1788,7 +2374,7 @@ async function autoLoadAiAnalysis() {
   const _fetchSym = state.activeSymbol;
   try {
     const cacheBust = `t=${Date.now()}`;
-    const response = await fetch(`${dataPath("ai_analysis.json")}?${cacheBust}`, { cache: "no-store" });
+    const response = await fetchWithRetry(`${dataPath("ai_analysis.json")}?${cacheBust}`, { cache: "no-store" });
     if (_fetchSym !== state.activeSymbol) return;
     if (response.status === 404) {
       // Fresh symbol without an AI run yet — show placeholder, don't crash.
@@ -1797,6 +2383,10 @@ async function autoLoadAiAnalysis() {
       els.aiBias.textContent = "--";
       els.aiBias.className = "bias-pill neutral";
       els.aiList.innerHTML = "";
+      if (els.aiFreshness) {
+        els.aiFreshness.textContent = "AI 尚未生成";
+        els.aiFreshness.className = "ai-freshness stale";
+      }
       state.lastAi = null;
       return;
     }
@@ -1808,6 +2398,10 @@ async function autoLoadAiAnalysis() {
     els.aiSummary.textContent = error.message || "未知错误";
     els.aiBias.textContent = "--";
     els.aiList.innerHTML = "";
+    if (els.aiFreshness) {
+      els.aiFreshness.textContent = "AI 读取失败";
+      els.aiFreshness.className = "ai-freshness stale";
+    }
   }
 }
 
@@ -1815,7 +2409,7 @@ async function autoLoadIntradayMeta() {
   if (location.protocol === "file:") return;
   const _fetchSym = state.activeSymbol;
   try {
-    const response = await fetch(`${dataPath("intraday_meta.json")}?t=${Date.now()}`, { cache: "no-store" });
+    const response = await fetchWithRetry(`${dataPath("intraday_meta.json")}?t=${Date.now()}`, { cache: "no-store" });
     if (_fetchSym !== state.activeSymbol) return;
     if (response.status === 404) {
       state.intradayMeta = null;
@@ -1835,11 +2429,9 @@ async function autoLoadIntradayMeta() {
     state.intradayMeta = await response.json();
     updateIntradayPanel();
     renderMultiStrategyPanel();
-    // If AI is loaded but missing intraday_strategy, refresh AI panel so
-    // the rule-based fallback uses the latest 1H/2H bollinger numbers.
-    if (state.lastAi && !state.lastAi.intraday_strategy) {
-      updateAiPanel(state.lastAi);
-    }
+    // Re-run freshness and strategy selection against the newest market data.
+    if (state.lastAi) updateAiPanel(state.lastAi);
+    draw();
   } catch (error) {
     els.boll1hStatus.textContent = "加载失败";
     els.boll1hDetail.textContent = error.message || "无法读取1小时数据";
@@ -1852,7 +2444,7 @@ async function autoLoadNewsSnapshot() {
   if (location.protocol === "file:") return;
   const _fetchSym = state.activeSymbol;
   try {
-    const response = await fetch(`${dataPath("news_snapshot.json")}?t=${Date.now()}`, { cache: "no-store" });
+    const response = await fetchWithRetry(`${dataPath("news_snapshot.json")}?t=${Date.now()}`, { cache: "no-store" });
     if (_fetchSym !== state.activeSymbol) return;
     if (response.status === 404) {
       state.newsSnapshot = null;
@@ -1884,7 +2476,7 @@ function bandStatus(summary, realtimePrice = null) {
   else read = "位于弱势半区";
   return {
     title: `${pos}`,
-    detail: `价 ${Number(price).toFixed(0)}｜上 ${Number(boll.upper).toFixed(0)} 中 ${Number(boll.mid).toFixed(0)} 下 ${Number(boll.lower).toFixed(0)}｜带宽 ${width}｜${read}｜${summary.latest_time || ""}`
+    detail: `价 ${Number(price).toFixed(0)}｜上 ${Number(boll.upper).toFixed(0)} 中 ${Number(boll.mid).toFixed(0)} 下 ${Number(boll.lower).toFixed(0)}｜带宽 ${width}｜${read}｜${formatMarketBarTime(summary.latest_time)}`
   };
 }
 
@@ -1933,32 +2525,30 @@ function updateIntradayPanel() {
   }
 
   const onePos = meta.one_hour?.bollinger?.position || "";
-  const twoPos = meta.two_hour?.bollinger?.position || "";
-  // Read 2-day position too so the strategy card considers all three timeframes
-  const twoDayClose = state.twoDay?.close;
-  const twoDayBoll  = state.twoDay?.bollinger;
-  const twoDayAbove = twoDayClose && twoDayBoll && twoDayClose > twoDayBoll.mid;
-  const twoDayBelow = twoDayClose && twoDayBoll && twoDayClose < twoDayBoll.mid;
+  const fourPos = meta.four_hour?.bollinger?.position || "";
+  const daily = computeDailyMeta(state.data || []);
+  const dailyAbove = daily?.bollinger && daily.close > daily.bollinger.mid;
+  const dailyBelow = daily?.bollinger && daily.close < daily.bollinger.mid;
 
-  const alignedUp   = /上方|上轨/.test(onePos) && /上方|上轨/.test(twoPos);
-  const alignedDown = /下方|下轨/.test(onePos) && /下方|下轨/.test(twoPos);
+  const alignedUp   = /上方|上轨/.test(onePos) && /上方|上轨/.test(fourPos);
+  const alignedDown = /下方|下轨/.test(onePos) && /下方|下轨/.test(fourPos);
 
   let biasLabel, biasText, biasClass;
-  if (alignedUp && twoDayAbove) {
+  if (alignedUp && dailyAbove) {
     biasLabel = "三周期共振偏多"; biasClass = "up";
-    biasText = "1H/2H/2D 同在中轨上方，趋势共振；回踩 2H 中轨不破可顺势加多。";
-  } else if (alignedDown && twoDayBelow) {
+    biasText = "1H/4H/日线同在中轨上方；只在计划回踩区确认后顺势，不追涨。";
+  } else if (alignedDown && dailyBelow) {
     biasLabel = "三周期共振偏空"; biasClass = "down";
-    biasText = "1H/2H/2D 同在中轨下方，下行共振；反弹 2H 中轨受阻继续看空。";
+    biasText = "1H/4H/日线同在中轨下方；只在计划反弹区受阻后顺势，不追跌。";
   } else if (alignedUp) {
     biasLabel = "短线偏多"; biasClass = "up";
-    biasText = "1H/2H 偏多但 2D 未跟进，警惕短线冲高回落。";
+    biasText = "1H/4H 偏多但日线未确认，仓位和持有时间都应降低。";
   } else if (alignedDown) {
     biasLabel = "短线偏弱"; biasClass = "down";
-    biasText = "1H/2H 偏弱但 2D 未跌破，关注是否抢反弹。";
+    biasText = "1H/4H 偏弱但日线未确认，防止低位追空后快速反抽。";
   } else {
     biasLabel = "区间震荡"; biasClass = "";
-    biasText = "1H/2H/2D 信号不一致，优先按布林上下轨做区间观察。";
+    biasText = "1H/4H/日线信号不一致，均衡区内保持观望。";
   }
   els.intradayStrategyBias.textContent = biasLabel;
   els.intradayStrategyBias.className = biasClass;
@@ -1978,7 +2568,7 @@ function updateNewsPanel() {
 
   // Full ticker list (clickable cards)
   if (els.newsTickerList && articles.length > 0) {
-    els.newsTickerMeta.textContent = `${articles.length} 条 · 更新于 ${updated} · 每 60 秒自动刷新`;
+    els.newsTickerMeta.textContent = `${articles.length} 条 · 数据更新于 ${updated} · 页面每 60 秒检查`;
     els.newsTickerList.innerHTML = articles.map((a) => {
       const title  = escapeHtml(a.title || "(无标题)");
       const source = escapeHtml(a.source || "未知来源");
@@ -2021,15 +2611,15 @@ function biasClass(text) {
   return "neutral";
 }
 
-// Rule-based intraday strategy from live 1H/2H bollinger data — used when
-// DeepSeek's ai.intraday_strategy is missing or stale.
+// Rule-based strategy from 1H/4H plus daily context. It replaces an AI plan
+// whenever that plan is missing or older than the current market snapshot.
 function computeIntradayStrategyFromMeta(meta) {
-  if (!meta || !meta.one_hour || !meta.two_hour) return null;
+  if (!meta || !meta.one_hour || !meta.four_hour) return null;
   const h1 = meta.one_hour;
-  const h2 = meta.two_hour;
+  const h4 = meta.four_hour;
   const b1 = h1.bollinger || {};
-  const b2 = h2.bollinger || {};
-  if (!b1.mid || !b1.upper || !b1.lower || !b2.mid || !b2.upper || !b2.lower) return null;
+  const b4 = h4.bollinger || {};
+  if (!b1.mid || !b1.upper || !b1.lower || !b4.mid || !b4.upper || !b4.lower) return null;
 
   const pos = (close, b) =>
     close > b.upper ? "上轨上方" :
@@ -2037,54 +2627,50 @@ function computeIntradayStrategyFromMeta(meta) {
     close > b.lower ? "中轨下方" : "下轨下方";
 
   const pos1 = pos(h1.close, b1);
-  const pos2 = pos(h2.close, b2);
+  const pos4 = pos(h4.close, b4);
   const above1 = h1.close > b1.mid;
-  const above2 = h2.close > b2.mid;
+  const above4 = h4.close > b4.mid;
 
   let bias, entry, stop, takeProfit, invalidation;
-  if (above1 && above2) {
+  if (above1 && above4) {
     bias = "短线偏多";
-    entry = `回踩 1H 中轨 ${b1.mid.toFixed(0)} 附近且量能不放大，分批轻仓多`;
-    stop = `跌破 2H 中轨 ${b2.mid.toFixed(0)} 即止损`;
-    takeProfit = `1H 上轨 ${b1.upper.toFixed(0)} 减仓，2H 上轨 ${b2.upper.toFixed(0)} 清仓`;
-    invalidation = `2H 收盘跌破中轨 ${b2.mid.toFixed(0)} 视为方向失效`;
-  } else if (!above1 && !above2) {
+    entry = `回踩 1H 中轨 ${b1.mid.toFixed(0)} 后重新收回，且 4H 保持中轨 ${b4.mid.toFixed(0)} 上方再考虑多单`;
+    stop = `1H 收盘跌破 ${Math.min(b1.lower, b4.mid).toFixed(0)} 即退出`;
+    takeProfit = `1H 上轨 ${b1.upper.toFixed(0)} 先减仓，4H 上轨 ${b4.upper.toFixed(0)} 为扩展目标`;
+    invalidation = `4H 收盘跌破中轨 ${b4.mid.toFixed(0)}，多头逻辑失效`;
+  } else if (!above1 && !above4) {
     bias = "短线偏空";
-    entry = `反弹至 1H 中轨 ${b1.mid.toFixed(0)} 受阻、量能萎缩后分批轻仓空`;
-    stop = `突破 2H 中轨 ${b2.mid.toFixed(0)} 即止损`;
-    takeProfit = `1H 下轨 ${b1.lower.toFixed(0)} 减仓，2H 下轨 ${b2.lower.toFixed(0)} 清仓`;
-    invalidation = `2H 收盘站上中轨 ${b2.mid.toFixed(0)} 视为方向失效`;
+    entry = `反弹至 1H 中轨 ${b1.mid.toFixed(0)} 后再次转弱，且 4H 仍在中轨 ${b4.mid.toFixed(0)} 下方再考虑空单`;
+    stop = `1H 收盘突破 ${Math.max(b1.upper, b4.mid).toFixed(0)} 即退出`;
+    takeProfit = `1H 下轨 ${b1.lower.toFixed(0)} 先减仓，4H 下轨 ${b4.lower.toFixed(0)} 为扩展目标`;
+    invalidation = `4H 收盘站上中轨 ${b4.mid.toFixed(0)}，空头逻辑失效`;
   } else {
     bias = "区间震荡";
-    entry = `1H 通道 ${b1.lower.toFixed(0)}–${b1.upper.toFixed(0)} 内高抛低吸，不追单边`;
-    stop = `单笔风险控制在通道宽度 30% 以内`;
-    takeProfit = `回到 1H 中轨 ${b1.mid.toFixed(0)} 减仓`;
-    invalidation = `2H 站稳上轨 ${b2.upper.toFixed(0)} 或跌破下轨 ${b2.lower.toFixed(0)} 视为方向选择`;
+    entry = `1H 与 4H 方向冲突，等待价格离开 ${Math.min(b1.mid, b4.mid).toFixed(0)}-${Math.max(b1.mid, b4.mid).toFixed(0)} 均衡区`;
+    stop = "未形成方向优势前不建立主动仓位";
+    takeProfit = `形成突破后先观察 1H 上下轨 ${b1.lower.toFixed(0)} / ${b1.upper.toFixed(0)}`;
+    invalidation = `1H 与 4H 重新回到相反两侧时，取消原方向计划`;
   }
 
-  // Pull 2-day context if available (computed from daily data)
-  const twoDay = state.twoDay;
-  let twoDayNote = "";
-  if (twoDay && twoDay.bollinger) {
-    const bd = twoDay.bollinger;
-    const posD = twoDay.close > bd.upper ? "上轨上方"
-               : twoDay.close > bd.mid   ? "中轨上方"
-               : twoDay.close > bd.lower ? "中轨下方" : "下轨下方";
-    twoDayNote = ` / 2D ${posD} (中 ${bd.mid.toFixed(0)})`;
-    const dayAbove = twoDay.close > bd.mid;
-    // Upgrade bias when all 3 timeframes agree
-    if (above1 && above2 && dayAbove) bias = "三周期共振偏多";
-    if (!above1 && !above2 && !dayAbove) bias = "三周期共振偏空";
+  const daily = computeDailyMeta(state.data || []);
+  let dailyNote = "";
+  if (daily?.bollinger) {
+    const bd = daily.bollinger;
+    const dayAbove = daily.close > bd.mid;
+    const dayPosition = dayAbove ? "中轨上方" : "中轨下方";
+    dailyNote = ` / 日线${dayPosition} (中 ${bd.mid.toFixed(0)})`;
+    if (above1 && above4 && dayAbove) bias = "1H/4H/日线共振偏多";
+    if (!above1 && !above4 && !dayAbove) bias = "1H/4H/日线共振偏空";
   }
 
-  const rsiNote = `1H RSI ${(h1.rsi14 ?? 0).toFixed(1)} / 2H RSI ${(h2.rsi14 ?? 0).toFixed(1)}`;
+  const rsiNote = `1H RSI ${(h1.rsi14 ?? 0).toFixed(1)} / 4H RSI ${(h4.rsi14 ?? 0).toFixed(1)}`;
   return {
     bias,
     entry,
     stop,
     take_profit: takeProfit,
     invalidation,
-    notes: `本地规则推导（实时 · 1H ${pos1} / 2H ${pos2}${twoDayNote} · ${rsiNote}）。DeepSeek 重跑后会替换为更精细策略。`,
+    notes: `确定性规则（1H ${pos1} / 4H ${pos4}${dailyNote} · ${rsiNote}）。只有时效检查通过的 DeepSeek 结果才会替换本策略。`,
     _fallback: true,
   };
 }
@@ -2099,24 +2685,38 @@ function updateAiPanel(ai) {
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
 
   // Remember the latest AI payload so we can re-render the strategy panel
-  // whenever the live 1H/2H meta refreshes.
+  // whenever the live 1H/4H meta refreshes.
   state.lastAi = ai;
+  const freshness = assessAiFreshness(ai);
+  if (els.aiFreshness) {
+    els.aiFreshness.textContent = freshness.label;
+    els.aiFreshness.className = `ai-freshness ${freshness.fresh ? "fresh" : "stale"}`;
+  }
+  const aiPanel = els.aiMeta?.closest(".ai-panel");
+  if (aiPanel) aiPanel.classList.toggle("ai-stale", !freshness.fresh);
 
   let strategy = ai.intraday_strategy && typeof ai.intraday_strategy === "object" ? ai.intraday_strategy : null;
   const hasAiStrategy = strategy && (strategy.entry || strategy.stop || strategy.take_profit);
-  if (!hasAiStrategy) {
+  if (!hasAiStrategy || !freshness.fresh) {
     strategy = computeIntradayStrategyFromMeta(state.intradayMeta);
+    if (strategy && hasAiStrategy && !freshness.fresh) strategy._staleAi = true;
   }
 
   if (strategy) {
     els.aiStrategy.hidden = false;
     const title = strategy._fallback
-      ? `1H / 2H 日内策略 <small style="color:var(--gold);font-weight:700">· 规则备用（实时计算）</small>`
-      : `1H / 2H 日内策略`;
+      ? `1H / 4H 日内策略 <small class="strategy-source-note">· ${strategy._staleAi ? "AI 过期，规则接管" : "实时规则"}</small>`
+      : `1H / 4H 日内策略 <small class="strategy-source-note fresh">· AI 时效通过</small>`;
     const heading = els.aiStrategy.querySelector("h3");
     if (heading) heading.innerHTML = title;
 
+    const frame = ai.decision_frame && typeof ai.decision_frame === "object" ? ai.decision_frame : null;
     const rows = [
+      ...(frame ? [
+        ["证据强度", `${Number(frame.confidence || 0).toFixed(0)} / 100`],
+        ["市场状态", frame.regime || "--"],
+        ["不交易条件", frame.no_trade_condition || "--"],
+      ] : []),
       ["短线方向", strategy.bias],
       ["入场观察", strategy.entry],
       ["止损/风控", strategy.stop],
@@ -2243,8 +2843,12 @@ function updateDistanceLine() {
   let price = null;
   if (lastQuote && Number.isFinite(lastQuote.price)) price = lastQuote.price;
   else {
-    const last = state.data && state.data.length ? state.data[state.data.length - 1] : null;
-    if (last) price = last.close;
+    const intradayClose = Number(state.intradayMeta?.one_hour?.close);
+    if (Number.isFinite(intradayClose)) price = intradayClose;
+    else {
+      const last = state.data && state.data.length ? state.data[state.data.length - 1] : null;
+      if (last) price = last.close;
+    }
   }
   if (!Number.isFinite(price)) {
     els.lastDistance.textContent = "--";
@@ -2295,8 +2899,8 @@ async function autoLoadSibling() {
   let ai = null;
   try {
     const [smResp, aiResp] = await Promise.all([
-      fetch(`data/${dir}/source_meta.json?${cacheBust}`, { cache: "no-store" }),
-      fetch(`data/${dir}/ai_analysis.json?${cacheBust}`, { cache: "no-store" }),
+      fetchWithRetry(`data/${dir}/source_meta.json?${cacheBust}`, { cache: "no-store" }),
+      fetchWithRetry(`data/${dir}/ai_analysis.json?${cacheBust}`, { cache: "no-store" }),
     ]);
     if (smResp.ok) sourceMeta = await smResp.json();
     if (aiResp.ok) ai = await aiResp.json();
@@ -2361,14 +2965,11 @@ async function autoLoadSibling() {
 
 let lastQuote = null;
 
-// Beijing-time predicates — reuse the single Intl-based bjParts() source of
-// truth from the top of the file. Night session is 21:00–23:00 (Y0/P0
-// contracts). Day is 09:00–15:00 including the 11:30–13:30 lunch window
-// (isDaySession returns true through the break so live-bar / preliminary
-// logic doesn't flap; use marketStatus() when the break matters).
+// Session predicates delegate to marketStatus() so lunch and off-hours never
+// masquerade as active trading.
 function bjHour()         { return bjParts().hour; }
-function isNightSession() { const h = bjHour(); return h >= 21 && h < 23; }
-function isDaySession()   { const h = bjHour(); return h >= 9  && h < 15; }
+function isNightSession() { return marketStatus() === "night-open"; }
+function isDaySession()   { return marketStatus() === "day-open"; }
 function isTrading()      { return isDaySession() || isNightSession(); }
 
 function sinaFuturesUrl(node) {
@@ -2397,7 +2998,8 @@ async function fetchRealtimeQuote() {
       change:    price - prevClose,
       changePct: prevClose > 0 ? (price - prevClose) / prevClose : 0,
       tradedate: hit.tradedate || "",
-      ticktime:  hit.ticktime  || ""
+      ticktime:  hit.ticktime  || "",
+      receivedAt: Date.now(),
     };
   } catch (_) {
     return null;
@@ -2472,7 +3074,7 @@ function applyActiveSymbolLabels() {
     els.eyebrowText.textContent = lbl.code === "P0" ? "DCE Palm Oil Continuous" : "DCE Soybean Oil Continuous";
   }
   if (els.contractPill) {
-    els.contractPill.textContent = `${lbl.exchange} ${lbl.code} 1H / 2H / 日线`;
+    els.contractPill.textContent = `${lbl.exchange} ${lbl.code} 1H / 4H / 日线`;
   }
   // Toggle button active class
   if (els.symBtns) {
@@ -2502,6 +3104,7 @@ function reloadAll() {
   state.newsSnapshot = null;
   state.lastAi = null;
   state.lastAskResponse = null;
+  state.decisionModel = null;
   state.visibleStart = null;
   state.visibleCount = null;
   state.hoverIndex = null;

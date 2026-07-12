@@ -137,6 +137,7 @@ def validate_symbol(symbol: str) -> None:
 def validate_frontend() -> None:
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     app = (ROOT / "app.js").read_text(encoding="utf-8")
+    execution = (ROOT / "execution_logic.js").read_text(encoding="utf-8")
     collector = IdCollector()
     collector.feed(html)
     duplicates = sorted({value for value in collector.ids if collector.ids.count(value) > 1})
@@ -149,6 +150,7 @@ def validate_frontend() -> None:
         "shortSetupEntry",
         "posLotsRec",
         "posRR",
+        "posFee",
         "aiFreshness",
         "aiIntegrity",
         "aiIntegrityStatus",
@@ -165,6 +167,8 @@ def validate_frontend() -> None:
     js_version = re.search(r"app\.js\?v=([\w-]+)", html)
     assert css_version and js_version, "cache-busting versions are missing"
     assert css_version.group(1) == js_version.group(1), "CSS/JS cache versions differ"
+    execution_version = re.search(r"execution_logic\.js\?v=([\w-]+)", html)
+    assert execution_version and execution_version.group(1) == js_version.group(1), "execution logic cache version differs"
 
     combined = html + "\n" + app
     forbidden = (
@@ -181,6 +185,14 @@ def validate_frontend() -> None:
     assert 'run_ai_analysis: "true", symbols: "P0,Y0"' in app, "dual-symbol AI input is missing"
     assert "DeepSeek V4-Pro" in html, "V4-Pro identity is missing from the UI"
     assert "assessAiReliability" in app, "AI decision firewall is missing"
+    assert "executionRoundTripCostPoints" in app and "executionRoundTripCostPoints" in execution, "round-trip execution costs are missing"
+    assert "netRewardPerLot" in app and "roundTripFee" in app, "position sizing does not deduct fees"
+    assert "decideTradeGate" in app and "decideTradeGate" in execution, "central execution gate is missing"
+    assert "mapping_verified === true" in execution, "verified main-contract mapping is not enforced"
+    assert "rollState === \"urgent\"" in execution, "urgent roll gate is missing"
+    assert "日内未验证" in app and "日内样本外验证" in execution, "intraday validation scope warning is missing"
+    assert "净 T1" in app and "净盈亏比" in html, "net reward-to-risk copy is missing"
+    assert app.count("refreshDecisionLayer();") >= 4, "async evidence loads do not refresh the decision gate"
 
 
 def validate_workflow() -> None:
@@ -194,7 +206,10 @@ def validate_workflow() -> None:
     assert "inputs.symbols" in workflow, "manual symbol selection is missing"
     assert "test_dashboard.py" in workflow, "dashboard validation step missing"
     assert "test_model_logic.py" in workflow, "model logic unit test step missing"
+    assert "test_execution_logic.js" in workflow, "execution logic unit test step missing"
     assert "ThreadPoolExecutor(max_workers=len(symbols))" in pipeline, "P0/Y0 pipeline is not parallel"
+    assert 'PYTHONUNBUFFERED: "1"' in workflow, "parallel pipeline logs are buffered"
+    assert "DeepSeek analysis start" in pipeline, "per-symbol DeepSeek timing marker is missing"
     for path, source in (("update_data.py", pipeline), ("ask_deepseek.py", ask_backend)):
         assert 'DEEPSEEK_MODEL = "deepseek-v4-pro"' in source, f"{path}: V4-Pro is not fixed"
         assert '"thinking": DEEPSEEK_THINKING' in source, f"{path}: thinking mode is missing"

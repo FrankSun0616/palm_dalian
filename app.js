@@ -3,6 +3,11 @@ const SYMBOL_LABELS = {
   P0: { code: "P0", name: "棕榈油", emoji: "🌴", exchange: "DCE", sinaNode: "zly_qh" },
   Y0: { code: "Y0", name: "豆油",   emoji: "🌱", exchange: "DCE", sinaNode: "dy_qh" },
 };
+const {
+  EXECUTION_ASSUMPTIONS,
+  executionRoundTripCostPoints,
+  decideTradeGate,
+} = window.PalmExecutionLogic;
 function activeLabel() { return SYMBOL_LABELS[state.activeSymbol] || SYMBOL_LABELS.P0; }
 function siblingSymbol() { return state.activeSymbol === "P0" ? "Y0" : "P0"; }
 function siblingLabel() { return SYMBOL_LABELS[siblingSymbol()]; }
@@ -167,6 +172,7 @@ const els = {
   posStop: document.getElementById("posStop"),
   posTarget: document.getElementById("posTarget"),
   posSlippage: document.getElementById("posSlippage"),
+  posFee: document.getElementById("posFee"),
   posMult: document.getElementById("posMult"),
   posMargin: document.getElementById("posMargin"),
   posRiskBudget: document.getElementById("posRiskBudget"),
@@ -1211,10 +1217,14 @@ function buildDirectionalSetup(direction, context) {
   target1 = roundToTick(target1);
   target2 = roundToTick(target2);
 
-  const reward1 = isLong ? target1 - entry : entry - target1;
-  const reward2 = isLong ? target2 - entry : entry - target2;
-  const rr1 = reward1 / risk;
-  const rr2 = reward2 / risk;
+  const grossReward1 = isLong ? target1 - entry : entry - target1;
+  const grossReward2 = isLong ? target2 - entry : entry - target2;
+  const costPoints = executionRoundTripCostPoints(Number(activeContractSpecs().multiplier || 10));
+  const netRisk = risk + costPoints;
+  const netReward1 = Math.max(0, grossReward1 - costPoints);
+  const netReward2 = Math.max(0, grossReward2 - costPoints);
+  const rr1 = netReward1 / netRisk;
+  const rr2 = netReward2 / netRisk;
   const aligned = isLong ? compositeSignal >= 20 : compositeSignal <= -20;
   const nearEntry = price >= entryLow - tfAtr * 0.12 && price <= entryHigh + tfAtr * 0.12;
   const status = aligned ? (nearEntry ? "接近触发" : "顺势等待") : "逆势备用";
@@ -1234,6 +1244,13 @@ function buildDirectionalSetup(direction, context) {
     stop,
     target1,
     target2,
+    grossRisk: risk,
+    grossReward1,
+    grossReward2,
+    netRisk,
+    netReward1,
+    netReward2,
+    costPoints,
     rr1,
     rr2,
     trigger,
@@ -1289,33 +1306,30 @@ function buildDecisionModel(analysis) {
   const shortSetup = buildDirectionalSetup("short", context);
   const preferred = compositeSignal >= 0 ? longSetup : shortSetup;
   const preferredRr = Math.max(0, preferred.rr1);
-  const qualityPenalty = (inNoTradeZone ? 15 : 0) + (preferredRr < 1.45 ? 8 : 0);
+  const status = marketStatus();
+  const gate = decideTradeGate({
+    status,
+    confidence,
+    inNoTradeZone,
+    compositeSignal,
+    longSetup,
+    shortSetup,
+    contractBridge: state.contractBridge,
+    modelValidation: state.modelValidation,
+  });
+  const baselineRejected = state.modelValidation?.status === "rejected";
+  const qualityPenalty = (inNoTradeZone ? 15 : 0)
+    + (preferredRr < EXECUTION_ASSUMPTIONS.minNetRr ? 8 : 0)
+    + (baselineRejected ? 10 : 0)
+    + (gate.rollState === "watch" ? 8 : gate.rollState === "urgent" ? 20 : 0)
+    + (!gate.mappingVerified ? 15 : 0)
+    + (!gate.intradayValidated ? 6 : 0);
   const quality = clamp(Math.round(
     confidence.score * 0.45
       + (50 + Math.min(50, Math.abs(compositeSignal))) * 0.3
       + clamp(preferredRr / 2.5, 0, 1) * 25
       - qualityPenalty
   ), 0, 100);
-
-  const status = marketStatus();
-  let gate = { label: "仅条件单", kind: "neutral", reason: "等待价格离开均衡区并完成触发确认。" };
-  if (status === "weekend") {
-    gate = { label: "休市", kind: "neutral", reason: "市场关闭，当前计划只用于下个交易时段预案。" };
-  } else if (status === "closed" || status === "day-break") {
-    gate = { label: "等待开盘", kind: "neutral", reason: "非交易时段，不把静态报价当作可执行价格。" };
-  } else if (!Number.isFinite(confidence.quoteAge) || confidence.quoteAge > 1.5) {
-    gate = { label: "暂停交易", kind: "blocked", reason: "实时行情未接通或已经过期，不使用后台快照代替执行价格。" };
-  } else if (!Number.isFinite(confidence.intradayAge) || confidence.intradayAge > 120) {
-    gate = { label: "暂停交易", kind: "blocked", reason: "小时线后台快照超过两小时，等待刷新后再评估。" };
-  } else if (confidence.score < 65) {
-    gate = { label: "暂停交易", kind: "blocked", reason: "数据可信度不足，先恢复实时行情、主力映射或小时线快照。" };
-  } else if (inNoTradeZone && Math.abs(compositeSignal) < 35) {
-    gate = { label: "观望", kind: "neutral", reason: "价格处于多周期均衡区，方向优势不足。" };
-  } else if (compositeSignal >= 25 && longSetup.rr1 >= 1.45) {
-    gate = { label: "允许做多", kind: "up", reason: "多周期偏多且首目标盈亏比达到执行门槛，仍需触发确认。" };
-  } else if (compositeSignal <= -25 && shortSetup.rr1 >= 1.45) {
-    gate = { label: "允许做空", kind: "down", reason: "多周期偏空且首目标盈亏比达到执行门槛，仍需触发确认。" };
-  }
 
   return {
     price,
@@ -1346,7 +1360,7 @@ function renderSetup(setup, side) {
   els[`${prefix}SetupStop`].textContent = setup.stop.toFixed(0);
   els[`${prefix}SetupTarget1`].textContent = setup.target1.toFixed(0);
   els[`${prefix}SetupTarget2`].textContent = setup.target2.toFixed(0);
-  els[`${prefix}SetupRR`].textContent = `T1 ${setup.rr1.toFixed(1)}R · T2 ${setup.rr2.toFixed(1)}R`;
+  els[`${prefix}SetupRR`].textContent = `净 T1 ${setup.rr1.toFixed(1)}R · 净 T2 ${setup.rr2.toFixed(1)}R`;
 }
 
 function renderDecisionCockpit(analysis) {
@@ -1359,15 +1373,20 @@ function renderDecisionCockpit(analysis) {
   const factorItems = [
     [`数据 ${model.confidence.score}`, model.confidence.score >= 85 ? "quality-good" : model.confidence.score < 65 ? "quality-bad" : ""],
     [`共振 ${model.signals.compositeSignal.toFixed(0)}`, model.signals.compositeSignal >= 20 ? "up" : model.signals.compositeSignal <= -20 ? "down" : ""],
-    [`首目标 ${Math.max(model.longSetup.rr1, model.shortSetup.rr1).toFixed(1)}R`, ""],
+    [`净首标 ${model.gate.preferredRr.toFixed(1)}R`, model.gate.preferredRr >= EXECUTION_ASSUMPTIONS.minNetRr ? "quality-good" : ""],
     [model.inNoTradeZone ? "均衡区内" : "均衡区外", model.inNoTradeZone ? "" : "quality-good"],
+    [model.gate.mappingVerified ? `主力 ${state.contractBridge.main.symbol}` : "主力未核对", model.gate.mappingVerified ? "quality-good" : "quality-bad"],
+    [model.gate.intradayValidated ? "日内已验证" : "日内未验证", model.gate.intradayValidated ? "quality-good" : "quality-bad"],
   ];
+  if (model.gate.rollState === "watch") factorItems.push(["换月监控", ""]);
+  else if (model.gate.rollState === "urgent") factorItems.push(["紧急换月", "quality-bad"]);
   const baselineExpectancy = Number(state.modelValidation?.holdout?.expectancy_r);
   if (Number.isFinite(baselineExpectancy)) {
     const baselineKind = state.modelValidation?.status === "positive"
       ? "quality-good"
       : state.modelValidation?.status === "rejected" ? "quality-bad" : "";
-    factorItems.push([`基准 ${baselineExpectancy >= 0 ? "+" : ""}${baselineExpectancy.toFixed(2)}R`, baselineKind]);
+    const baselineLabel = model.gate.validationSameScope ? "日内基准" : "日线基准";
+    factorItems.push([`${baselineLabel} ${baselineExpectancy >= 0 ? "+" : ""}${baselineExpectancy.toFixed(2)}R`, baselineKind]);
   }
   els.tradeGateFactors.innerHTML = factorItems.map(([text, kind]) => `<span class="${kind}">${escapeHtml(text)}</span>`).join("");
 
@@ -1397,6 +1416,13 @@ function renderDecisionCockpit(analysis) {
     ? formatMarketBarTime(`${lastQuote.tradedate} ${lastQuote.ticktime}`)
     : state.intradayMeta?.one_hour?.latest_time || analysis.last.date;
   els.planAsOf.textContent = `现价 ${model.price.toFixed(0)} · 行情标记 ${asOf}`;
+}
+
+function refreshDecisionLayer() {
+  const data = visibleData();
+  if (data.length < 5 || !els.tradeGate) return;
+  renderDecisionCockpit(analyze(data));
+  populatePosCalcDefaults();
 }
 
 function draw() {
@@ -1835,7 +1861,7 @@ function parseCsv(text) {
 // wipe values the user has typed. Cleared on symbol switch.
 const POS_CALC_INPUT_IDS = [
   "posCapital", "posRisk", "posMaxMargin", "posDirection", "posEntry",
-  "posStop", "posTarget", "posSlippage", "posMult", "posMargin",
+  "posStop", "posTarget", "posSlippage", "posFee", "posMult", "posMargin",
 ];
 let posCalcUserEdited = new Set();
 
@@ -1918,6 +1944,7 @@ function updatePosCalc() {
   const stop      = Number(els.posStop?.value    || 0);
   const target    = Number(els.posTarget?.value  || 0);
   const slippage  = Math.max(0, Number(els.posSlippage?.value || 0));
+  const feePerSide = Math.max(0, Number(els.posFee?.value || 0));
   const mult      = Number(els.posMult?.value    || 0);
   const marginPct = Number(els.posMargin?.value  || 0);
 
@@ -1950,7 +1977,9 @@ function updatePosCalc() {
   const riskBudget = capital * riskPct / 100;
   const riskPoints = Math.abs(entry - stop) + slippage * 2;
   const rewardPoints = Math.max(0, Math.abs(target - entry) - slippage * 2);
-  const perLotRisk = riskPoints * mult;
+  const roundTripFee = feePerSide * 2;
+  const perLotRisk = riskPoints * mult + roundTripFee;
+  const netRewardPerLot = Math.max(0, rewardPoints * mult - roundTripFee);
   const riskLots = perLotRisk > 0 ? Math.floor(riskBudget / perLotRisk) : 0;
   const marginPerLot = entry * mult * marginPct / 100;
   const marginBudget = capital * maxMarginPct / 100;
@@ -1958,8 +1987,8 @@ function updatePosCalc() {
   const lotsSafe = Math.max(0, Math.min(riskLots, marginLots));
   const marginUse = marginPerLot * lotsSafe;
   const marginUsePct = capital > 0 ? marginUse / capital * 100 : 0;
-  const rr = riskPoints > 0 ? rewardPoints / riskPoints : 0;
-  const targetPnl = rewardPoints * mult * lotsSafe;
+  const rr = perLotRisk > 0 ? netRewardPerLot / perLotRisk : 0;
+  const targetPnl = netRewardPerLot * lotsSafe;
   const gap = Math.abs(entry - stop);
   const gapPct = gap / entry * 100;
 
@@ -1971,7 +2000,7 @@ function updatePosCalc() {
   els.posMarginUse.textContent = Math.round(marginUse).toLocaleString();
   els.posMarginUsePct.textContent = `${marginUsePct.toFixed(1)}% 账户资金`;
   els.posRR.textContent = `${rr.toFixed(2)}R`;
-  els.posGap.textContent = `止损 ${gap.toFixed(0)} 点 / ${gapPct.toFixed(2)}%`;
+  els.posGap.textContent = `止损 ${gap.toFixed(0)} 点 / ${gapPct.toFixed(2)}% · 往返费 ${roundTripFee.toFixed(0)} 元/手`;
   els.posTargetPnl.textContent = Math.round(targetPnl).toLocaleString();
 
   let warning = "参数通过风险预算与保证金双重约束。";
@@ -2608,6 +2637,7 @@ async function autoLoadContractBridge() {
     if (!response.ok) throw new Error(`合约映射 HTTP ${response.status}`);
     state.contractBridge = await response.json();
     renderContractBridge(state.contractBridge);
+    refreshDecisionLayer();
   } catch (error) {
     if (!state.contractBridge) renderContractBridge(null);
     if (els.contractBridgeFreshness) els.contractBridgeFreshness.textContent = `${error.message || "合约映射读取失败"}；执行前在交易软件人工确认。`;
@@ -2623,6 +2653,7 @@ async function autoLoadModelValidation() {
     if (!response.ok) throw new Error(`模型检验 HTTP ${response.status}`);
     state.modelValidation = await response.json();
     renderModelValidation(state.modelValidation);
+    refreshDecisionLayer();
   } catch (error) {
     if (!state.modelValidation) renderModelValidation(null);
     if (els.modelVerdict) els.modelVerdict.textContent = error.message || "模型检验读取失败";
@@ -2772,6 +2803,7 @@ async function autoLoadNewsSnapshot() {
     if (!response.ok) throw new Error(`News HTTP ${response.status}`);
     state.newsSnapshot = await response.json();
     updateNewsPanel();
+    refreshDecisionLayer();
   } catch (error) {
     els.newsRealtimeStatus.textContent = "舆情读取失败";
     els.newsRealtimeText.textContent = error.message || "无法读取舆情数据";
@@ -3149,10 +3181,10 @@ function updateAiPanel(ai) {
   if (els.aiStrategyEmpty) els.aiStrategyEmpty.hidden = Boolean(strategy);
 
   updateDistanceLine();
-  // AI bias just landed → refresh position-calc stop default (if user
-  // hasn't edited it) and re-score alignment (label depends on AI too).
-  populatePosCalcDefaults();
+  // AI bias just landed: re-score alignment and refresh the decision layer.
+  // The decision refresh also updates untouched position-calculator defaults.
   renderAlignmentScore();
+  refreshDecisionLayer();
 }
 
 // ── Distance to AI support/resistance ──────────────────────

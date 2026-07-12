@@ -4,6 +4,7 @@ import json
 import os
 import html
 import re
+import time
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -2142,10 +2143,12 @@ def detect_oi_column(df) -> str | None:
 def run_profile(symbol: str) -> None:
     """Run the full data + AI pipeline for one symbol, writing all outputs to
     DATA_DIR / PROFILES[symbol]["dir"]."""
+    profile_started = time.monotonic()
     profile = PROFILES[symbol]
     name = profile["name"]
     out_dir = DATA_DIR / profile["dir"]
     out_dir.mkdir(exist_ok=True, parents=True)
+    print(f"[{symbol}] pipeline start", flush=True)
 
     df = fetch_daily_with_retry(symbol=symbol)
     if df.empty:
@@ -2273,6 +2276,8 @@ def run_profile(symbol: str) -> None:
             print(f"[{symbol}] News snapshot articles: {len(news_snapshot.get('articles') or [])}")
 
         # Step 2 – full analysis
+        ai_started = time.monotonic()
+        print(f"[{symbol}] DeepSeek analysis start", flush=True)
         try:
             ai_analysis = generate_ai_analysis(
                 snapshot, news_summary, profile_name=name, symbol=symbol
@@ -2284,7 +2289,11 @@ def run_profile(symbol: str) -> None:
             json.dumps(ai_analysis, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
-        print(f"[{symbol}] AI analysis: {ai_analysis['status']}")
+        print(
+            f"[{symbol}] AI analysis: {ai_analysis['status']} "
+            f"({time.monotonic() - ai_started:.1f}s)",
+            flush=True,
+        )
 
         # F3: append this analysis to the per-symbol history
         # F3+F7: re-grade the history against current price
@@ -2324,6 +2333,7 @@ def run_profile(symbol: str) -> None:
         f"trades={holdout['trades']} expectancy={holdout['expectancy_r']}R "
         f"PF={holdout['profit_factor']}"
     )
+    print(f"[{symbol}] pipeline complete ({time.monotonic() - profile_started:.1f}s)", flush=True)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260712-4">
+  <link rel="stylesheet" href="styles.css?v=20260712-6">
 </head>
 <body>
   <main class="app-shell">
@@ -105,7 +105,7 @@
       <article class="cockpit-cell gate-cell">
         <span class="cockpit-label">交易许可</span>
         <strong id="tradeGate" class="gate-pill neutral">等待数据</strong>
-        <p id="tradeGateReason">正在检查周期共振、数据质量和盈亏比。</p>
+        <p id="tradeGateReason">正在检查周期共振、净盈亏比、主力映射与策略证据。</p>
         <div class="factor-row" id="tradeGateFactors"></div>
       </article>
       <article class="cockpit-cell">
@@ -163,7 +163,7 @@
           <h2>双向执行计划</h2>
           <small id="planAsOf">等待最新行情</small>
         </div>
-        <small>确定性规则实时计算，AI 只作为补充证据</small>
+        <small>净盈亏比计入单边滑点 2 点与单边手续费 3 元/手</small>
       </div>
       <div class="execution-grid">
         <article class="setup-card long-setup">
@@ -177,7 +177,7 @@
             <div><dt>止损</dt><dd id="longSetupStop">--</dd></div>
             <div><dt>目标一</dt><dd id="longSetupTarget1">--</dd></div>
             <div><dt>目标二</dt><dd id="longSetupTarget2">--</dd></div>
-            <div><dt>盈亏比</dt><dd id="longSetupRR">--</dd></div>
+            <div><dt>净盈亏比</dt><dd id="longSetupRR">--</dd></div>
           </dl>
         </article>
 
@@ -206,7 +206,7 @@
             <div><dt>止损</dt><dd id="shortSetupStop">--</dd></div>
             <div><dt>目标一</dt><dd id="shortSetupTarget1">--</dd></div>
             <div><dt>目标二</dt><dd id="shortSetupTarget2">--</dd></div>
-            <div><dt>盈亏比</dt><dd id="shortSetupRR">--</dd></div>
+            <div><dt>净盈亏比</dt><dd id="shortSetupRR">--</dd></div>
           </dl>
         </article>
       </div>
@@ -423,18 +423,19 @@
                 <label>止损价       <input id="posStop"    type="number" value=""></label>
                 <label>目标价       <input id="posTarget"  type="number" value=""></label>
                 <label>滑点预留     <input id="posSlippage" type="number" value="2" step="1" min="0"><small>单边点数</small></label>
+                <label>手续费       <input id="posFee" type="number" value="3" step="0.5" min="0"><small>单边元/手</small></label>
                 <label>合约乘数     <input id="posMult"    type="number" value="10"     step="1"><small>P0/Y0 = 10 吨/手</small></label>
                 <label>保证金比例 % <input id="posMargin"  type="number" value="12"     step="1"></label>
               </div>
               <div class="pos-calc-out">
                 <div><span>风险预算</span><strong id="posRiskBudget">--</strong><small>元</small></div>
-                <div><span>每手风险</span><strong id="posPerLotRisk">--</strong><small>含滑点</small></div>
+                <div><span>每手风险</span><strong id="posPerLotRisk">--</strong><small>含滑点与手续费</small></div>
                 <div><span>风险允许</span><strong id="posRiskLots">--</strong><small>手</small></div>
                 <div><span>保证金允许</span><strong id="posMarginLots">--</strong><small>手</small></div>
                 <div class="primary-out"><span>最终手数</span><strong id="posLotsRec">--</strong><small>取两项较小值</small></div>
                 <div><span>保证金占用</span><strong id="posMarginUse">--</strong><small id="posMarginUsePct">--</small></div>
-                <div><span>计划盈亏比</span><strong id="posRR">--</strong><small id="posGap">--</small></div>
-                <div><span>目标盈利</span><strong id="posTargetPnl">--</strong><small>元，未扣手续费</small></div>
+                <div><span>净盈亏比</span><strong id="posRR">--</strong><small id="posGap">--</small></div>
+                <div><span>净目标盈利</span><strong id="posTargetPnl">--</strong><small>元，已扣滑点与手续费</small></div>
               </div>
               <p id="posWarning" class="pos-warning"></p>
             </details>
@@ -492,6 +493,7 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260712-4"></script>
+  <script src="execution_logic.js?v=20260712-6"></script>
+  <script src="app.js?v=20260712-6"></script>
 </body>
 </html>

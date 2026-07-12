@@ -14,6 +14,7 @@
   - DeepSeek schedule: `0 */3 * * *`.
   - Manual dispatch keeps the `run_ai_analysis` toggle.
   - Updates both `P0` and `Y0`, commits generated files, uploads the Pages artifact and deploys it.
+  - Uses `deepseek-v4-pro` with thinking enabled and high reasoning effort for both symbols in parallel.
 - `.github/workflows/ask.yml`
   - Manual DeepSeek question with symbol and question inputs.
   - Commits the answer JSON; the resulting push triggers the normal Pages workflow.
@@ -22,11 +23,11 @@
 
 GitHub scheduled workflows are best-effort. The five-minute cron is not a guarantee that a new commit or deployment will occur every five minutes. The webpage distinguishes browser polling time from backend data time.
 
-## Security invariants
+## Credential model
 
-- Never commit `DEEPSEEK_API_KEY`, a GitHub PAT, or any other credential.
-- Never embed a token in `app.js`, HTML, Base64 text, URL parameters or browser storage.
-- Static GitHub Pages cannot securely perform authenticated workflow dispatches. Manual buttons must open the GitHub Actions page and rely on the user's authenticated GitHub session.
+- `DEEPSEEK_API_KEY` remains an Actions Secret and is never sent to the browser.
+- The repository owner explicitly chose a one-click public workflow dispatch, so `app.js` contains a Base64-encoded GitHub PAT. This is public exposure, not encryption; anyone who can inspect the page can recover it.
+- The exposed PAT should be limited to this repository and only the permissions required to dispatch Actions. Rotating or revoking it disables the one-click button until `app.js` is updated.
 
 ## Contract scope
 

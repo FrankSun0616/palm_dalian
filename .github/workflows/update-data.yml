@@ -65,7 +65,7 @@ jobs:
           SYMBOLS: ${{ github.event_name == 'workflow_dispatch' && inputs.symbols || 'P0,Y0' }}
           RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && github.event.schedule == '0 */3 * * *') }}
 
-      - name: Validate dashboard data and security invariants
+      - name: Validate dashboard data and decision invariants
         run: |
           python -m unittest -q test_model_logic.py
           python test_dashboard.py

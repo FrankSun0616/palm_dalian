@@ -6,100 +6,97 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260712-3">
+  <link rel="stylesheet" href="styles.css?v=20260712-4">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <section>
-        <p class="eyebrow">
-          <span id="eyebrowText">DCE Palm Oil Continuous</span>
-          <span class="live-indicator" title="交易时段内每 5 秒尝试读取实时报价；后台数据按 GitHub Actions 实际运行时间更新">
-            <span class="live-pulse"></span> <span class="live-label">实时</span>
-          </span>
-        </p>
-        <h1 id="topbarTitle">大连棕榈油 P0 连续短线分析</h1>
-      </section>
+      <div class="topbar-main">
+        <section>
+          <p class="eyebrow">
+            <span id="eyebrowText">DCE Palm Oil Continuous</span>
+            <span class="live-indicator" title="交易时段内每 5 秒尝试读取实时报价；后台数据按 GitHub Actions 实际运行时间更新">
+              <span class="live-pulse"></span> <span class="live-label">实时</span>
+            </span>
+          </p>
+          <h1 id="topbarTitle">大连棕榈油 P0 连续短线分析</h1>
+        </section>
+        <nav class="symbol-switcher" aria-label="切换品种">
+          <button class="sym-btn" data-sym="P0">P0 棕榈油</button>
+          <button class="sym-btn" data-sym="Y0">Y0 豆油</button>
+          <script>
+            (function() {
+              var sym = localStorage.getItem("activeSymbol") || "P0";
+              var btn = document.querySelector('.sym-btn[data-sym="' + sym + '"]');
+              if (btn) btn.classList.add("active");
+            })();
+          </script>
+        </nav>
+      </div>
       <div class="topbar-status">
         <div class="session-clock" id="sessionClock">北京时间 --:--</div>
         <div class="contract-pill" id="contractPill">DCE P0 1H / 4H / 日线</div>
       </div>
     </header>
 
-    <p class="contract-disclaimer">
-      P0/Y0 是连续合约分析口径。实际下单前必须核对可交易主力月份、换月价差、流动性与交易所保证金。
-    </p>
-
-    <section class="contract-bridge" aria-label="连续合约与可交易合约映射">
-      <div class="bridge-head">
-        <div>
-          <span class="section-kicker">可交易合约桥接</span>
-          <h2 id="contractMapping">P0 → 正在核对主力月份</h2>
-        </div>
-        <strong id="contractMappingStatus" class="bridge-status neutral">等待盘口</strong>
-      </div>
-      <div class="contract-bridge-grid">
-        <div class="bridge-metric mapping-metric">
-          <span>映射证据</span>
-          <strong id="mappingEvidence">等待价格与持仓比对</strong>
-          <small id="mappingMarketTime">--</small>
-        </div>
-        <div class="bridge-metric">
-          <span>主力实时价</span>
-          <strong id="mainContractPrice">--</strong>
-          <small id="mainContractChange">--</small>
-        </div>
-        <div class="bridge-metric">
-          <span>主力持仓</span>
-          <strong id="mainOpenInterest">--</strong>
-          <small id="mainOpenInterestShare">--</small>
-        </div>
-        <div class="bridge-metric">
-          <span>次主力价差</span>
-          <strong id="secondarySpread">--</strong>
-          <small id="secondaryOpenInterest">--</small>
-        </div>
-        <div class="bridge-metric">
-          <span>换月风险</span>
-          <strong id="rollRisk">--</strong>
-          <small id="rollRiskReason">--</small>
-        </div>
-        <div class="bridge-metric">
-          <span>合约规则</span>
-          <strong id="contractSpec">--</strong>
-          <small id="contractRuleRef">--</small>
-        </div>
-      </div>
-      <p class="bridge-freshness" id="contractBridgeFreshness">后台每 5 分钟更新，交易时段浏览器同步核对实时盘口。</p>
-    </section>
-
-    <section class="symbol-switcher" aria-label="切换品种">
-      <button class="sym-btn" data-sym="P0">P0 棕榈油</button>
-      <button class="sym-btn" data-sym="Y0">Y0 豆油</button>
-      <script>
-        // Stamp .active before render so users with saved Y0 don't see a P0 flash
-        (function() {
-          var sym = localStorage.getItem("activeSymbol") || "P0";
-          var btn = document.querySelector('.sym-btn[data-sym="' + sym + '"]');
-          if (btn) btn.classList.add("active");
-        })();
-      </script>
-    </section>
-
-    <section class="sibling-widget" aria-label="联动品种">
-      <a class="sibling-link" id="siblingLink" href="#">
-        <span class="sibling-emoji" id="siblingEmoji">🌱</span>
-        <div class="sibling-body">
-          <small class="sibling-tag">🔗 联动品种 · 参考对照</small>
-          <div class="sibling-head">
-            <strong id="siblingName">豆油 Y0</strong>
-            <span id="siblingPrice">--</span>
-            <span id="siblingChange" class="pct">--</span>
+    <section class="market-context-row" aria-label="合约与联动行情">
+      <details class="contract-bridge">
+        <summary class="bridge-summary">
+          <span class="bridge-summary-main">
+            <span class="section-kicker">可交易合约</span>
+            <strong id="contractMapping">P0 → 正在核对主力月份</strong>
+          </span>
+          <span class="bridge-live-price">
+            <small>主力价</small>
+            <strong id="mainContractPrice">--</strong>
+            <small id="mainContractChange">--</small>
+          </span>
+          <strong id="contractMappingStatus" class="bridge-status neutral">等待盘口</strong>
+        </summary>
+        <div class="bridge-expanded">
+          <p class="contract-disclaimer">P0/Y0 是连续分析口径，下单前核对主力月份、换月价差、流动性和保证金。</p>
+          <div class="contract-bridge-grid">
+            <div class="bridge-metric mapping-metric">
+              <span>映射证据</span>
+              <strong id="mappingEvidence">等待价格与持仓比对</strong>
+              <small id="mappingMarketTime">--</small>
+            </div>
+            <div class="bridge-metric">
+              <span>主力持仓</span>
+              <strong id="mainOpenInterest">--</strong>
+              <small id="mainOpenInterestShare">--</small>
+            </div>
+            <div class="bridge-metric">
+              <span>次主力价差</span>
+              <strong id="secondarySpread">--</strong>
+              <small id="secondaryOpenInterest">--</small>
+            </div>
+            <div class="bridge-metric">
+              <span>换月风险</span>
+              <strong id="rollRisk">--</strong>
+              <small id="rollRiskReason">--</small>
+            </div>
+            <div class="bridge-metric">
+              <span>合约规则</span>
+              <strong id="contractSpec">--</strong>
+              <small id="contractRuleRef">--</small>
+            </div>
           </div>
-          <small id="siblingBias">--</small>
+          <p class="bridge-freshness" id="contractBridgeFreshness">后台每 5 分钟更新，交易时段浏览器同步核对实时盘口。</p>
         </div>
-        <span class="sibling-cta">点击切换到该品种 →</span>
-      </a>
+      </details>
+
+      <section class="sibling-widget" aria-label="联动品种">
+        <a class="sibling-link" id="siblingLink" href="#">
+          <span class="sibling-emoji" id="siblingEmoji">🌱</span>
+          <span class="sibling-tag">联动</span>
+          <strong id="siblingName">豆油 Y0</strong>
+          <span id="siblingPrice">--</span>
+          <span id="siblingChange" class="pct">--</span>
+          <small id="siblingBias">--</small>
+          <span class="sibling-cta">切换</span>
+        </a>
+      </section>
     </section>
 
     <section id="marketBanner" class="market-banner" hidden></section>
@@ -215,26 +212,29 @@
       </div>
     </section>
 
-    <section class="model-validation" aria-label="固定规则样本外检验">
-      <div class="section-head validation-head">
+    <details class="model-validation" aria-label="固定规则样本外检验">
+      <summary class="validation-summary">
         <div>
-          <h2>固定规则样本外检验</h2>
+          <span>策略证据</span>
+          <strong>固定规则样本外检验</strong>
           <small id="modelMethod">信号收盘确认，下一交易日开盘执行</small>
         </div>
         <strong id="modelStatus" class="model-status neutral">等待检验结果</strong>
+      </summary>
+      <div class="model-validation-body">
+        <div class="validation-grid">
+          <div><span>样本外交易</span><strong id="modelTrades">--</strong><small id="modelSplitDate">--</small></div>
+          <div><span>单笔期望</span><strong id="modelExpectancy">--</strong><small>扣除成本后 R</small></div>
+          <div><span>盈利因子</span><strong id="modelProfitFactor">--</strong><small>总盈利 / 总亏损</small></div>
+          <div><span>最大回撤</span><strong id="modelDrawdown">--</strong><small>按累计 R 计算</small></div>
+          <div><span>胜率</span><strong id="modelWinRate">--</strong><small id="modelDirectionCount">--</small></div>
+        </div>
+        <div class="validation-verdict">
+          <p id="modelVerdict">正在读取固定参数基准模型的历史样本外表现。</p>
+          <small id="modelLimitations">日线基准模型与 1H/4H 日内方案不同，结果不代表未来收益。</small>
+        </div>
       </div>
-      <div class="validation-grid">
-        <div><span>样本外交易</span><strong id="modelTrades">--</strong><small id="modelSplitDate">--</small></div>
-        <div><span>单笔期望</span><strong id="modelExpectancy">--</strong><small>扣除成本后 R</small></div>
-        <div><span>盈利因子</span><strong id="modelProfitFactor">--</strong><small>总盈利 / 总亏损</small></div>
-        <div><span>最大回撤</span><strong id="modelDrawdown">--</strong><small>按累计 R 计算</small></div>
-        <div><span>胜率</span><strong id="modelWinRate">--</strong><small id="modelDirectionCount">--</small></div>
-      </div>
-      <div class="validation-verdict">
-        <p id="modelVerdict">正在读取固定参数基准模型的历史样本外表现。</p>
-        <small id="modelLimitations">日线基准模型与 1H/4H 日内方案不同，结果不代表未来收益。</small>
-      </div>
-    </section>
+    </details>
 
     <section class="intraday-board" aria-label="短线布林与舆情">
       <article class="board-card">
@@ -337,7 +337,7 @@
         <section class="ai-panel">
           <div class="ai-head">
             <div class="ai-head-main">
-              <h2>DeepSeek 决策参考</h2>
+              <h2>DeepSeek V4-Pro 决策参考</h2>
               <p id="aiMeta">等待加载...</p>
               <p id="aiFreshness" class="ai-freshness">正在核对分析时效</p>
               <p id="aiAccuracy" class="ai-accuracy" hidden></p>
@@ -351,8 +351,13 @@
               </div>
             </div>
           </div>
+          <div class="ai-integrity blocked" id="aiIntegrity">
+            <span>AI 决策防火墙</span>
+            <strong id="aiIntegrityStatus">等待审计</strong>
+            <small id="aiIntegrityDetail">数值一致性、固定前向复盘和时效均通过后，AI 才进入执行层。</small>
+          </div>
           <div class="ai-actions">
-            <button id="generateAiBtn" type="button">触发 DeepSeek 短线分析</button>
+            <button id="generateAiBtn" type="button">触发 V4-Pro P0/Y0 分析</button>
             <p id="aiStatus" class="ai-status"></p>
           </div>
 
@@ -487,6 +492,6 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="app.js?v=20260712-3"></script>
+  <script src="app.js?v=20260712-4"></script>
 </body>
 </html>

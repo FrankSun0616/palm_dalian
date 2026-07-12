@@ -27,6 +27,9 @@ import requests
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
+DEEPSEEK_MODEL = "deepseek-v4-pro"
+DEEPSEEK_THINKING = {"type": "enabled"}
+DEEPSEEK_REASONING_EFFORT = "high"
 
 
 PROFILES: dict[str, dict] = {
@@ -103,13 +106,14 @@ def ask_deepseek(api_key: str, symbol: str, name: str, question: str, context: d
             "Content-Type": "application/json",
         },
         json={
-            "model": "deepseek-chat",
+            "model": DEEPSEEK_MODEL,
             "messages": [
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": user_msg},
             ],
-            "temperature": 0.3,
-            "max_tokens": 800,
+            "thinking": DEEPSEEK_THINKING,
+            "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
+            "max_tokens": 2400,
         },
         timeout=120,
     )
@@ -142,6 +146,9 @@ def main() -> int:
         "asked_at_utc": now_iso,
         "question": question,
         "symbol": symbol,
+        "model": DEEPSEEK_MODEL,
+        "thinking_mode": "enabled",
+        "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
     }
 
     if not api_key:

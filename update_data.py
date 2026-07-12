@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from urllib.parse import quote_plus
+from zoneinfo import ZoneInfo
 import xml.etree.ElementTree as ET
 
 import akshare as ak
@@ -18,6 +19,10 @@ import requests
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
+
+DEEPSEEK_MODEL = "deepseek-v4-pro"
+DEEPSEEK_THINKING = {"type": "enabled"}
+DEEPSEEK_REASONING_EFFORT = "high"
 
 
 # ── AI history / accuracy helpers ────────────────────────────────────────────
@@ -43,11 +48,13 @@ def _bias_sign(bias: str | None) -> int:
 
 AI_HISTORY_MAX = 100
 AI_HISTORY_MIN_FOR_SCORING = 5
-AI_ACCURACY_ELAPSED_DAYS = 3
+AI_ACCURACY_HORIZON_BARS = 4
+AI_ACCURACY_METHOD = "fixed_4_completed_1h_bars_v2"
 AI_ACCURACY_WINDOW = 20
 AI_ACCURACY_MOVE_THRESHOLD = 0.005  # 0.5%
 AI_ACCURACY_LOW_THRESHOLD = 0.40
 AI_ACCURACY_LOW_MIN_EVAL = 10
+BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 
 
 def _load_json(path: Path) -> dict:
@@ -85,6 +92,8 @@ def archive_ai_history(profile_dir, ai_analysis: dict, current_price: float) -> 
         "price_at": _num(current_price),
         "resistance": _num(resistance),
         "support": _num(support),
+        "model": ai_analysis.get("model"),
+        "integrity_score": _num((ai_analysis.get("integrity") or {}).get("score")),
     }
 
     existing = _load_json(hist_path)
@@ -101,49 +110,65 @@ def archive_ai_history(profile_dir, ai_analysis: dict, current_price: float) -> 
     )
 
 
-def _grade_entry(entry: dict, current_price: float) -> str | None:
-    """Return 'hit'|'miss'|'neutral' if this entry has enough elapsed time and
-    can be graded against current_price, else None."""
-    gen = entry.get("generated_at_utc")
-    price_at = entry.get("price_at")
-    if not gen or price_at in (None, 0):
+def _parse_generated_beijing(value: object) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
         return None
     try:
-        gen_dt = datetime.fromisoformat(gen.replace("Z", "+00:00") if gen.endswith("Z") else gen)
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00") if text.endswith("Z") else text)
     except ValueError:
         return None
-    if gen_dt.tzinfo is None:
-        gen_dt = gen_dt.replace(tzinfo=timezone.utc)
-    elapsed_days = (datetime.now(timezone.utc) - gen_dt).total_seconds() / 86400.0
-    if elapsed_days < AI_ACCURACY_ELAPSED_DAYS:
-        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(BEIJING_TZ).replace(tzinfo=None)
+
+
+def _load_accuracy_bars(profile_dir: Path) -> list[dict[str, object]]:
+    path = profile_dir / "intraday_1h.csv"
     try:
-        pa = float(price_at)
-        cp = float(current_price)
+        frame = pd.read_csv(path)
+    except (FileNotFoundError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return []
+    if "datetime" not in frame.columns or "close" not in frame.columns:
+        return []
+    frame = frame[["datetime", "close"]].copy()
+    frame["datetime"] = pd.to_datetime(frame["datetime"], errors="coerce")
+    frame["close"] = pd.to_numeric(frame["close"], errors="coerce")
+    frame = frame.dropna().sort_values("datetime").drop_duplicates("datetime", keep="last")
+    return [
+        {"datetime": row.datetime.to_pydatetime(), "close": float(row.close)}
+        for row in frame.itertuples(index=False)
+    ]
+
+
+def _grade_fixed_horizon(entry: dict, outcome_price: float) -> tuple[str, float] | None:
+    try:
+        price_at = float(entry.get("price_at"))
+        price_out = float(outcome_price)
     except (TypeError, ValueError):
         return None
-    move = (cp - pa) / pa
+    if not price_at:
+        return None
+    move = (price_out - price_at) / price_at
     sign = int(entry.get("bias_sign") or 0)
     thr = AI_ACCURACY_MOVE_THRESHOLD
     if sign > 0:
         if move > thr:
-            return "hit"
+            return "hit", move
         if move < -thr:
-            return "miss"
-        return "neutral"
+            return "miss", move
+        return "flat", move
     if sign < 0:
         if move < -thr:
-            return "hit"
+            return "hit", move
         if move > thr:
-            return "miss"
-        return "neutral"
-    # neutral bias: hit if move stays inside ±thr, miss if big move
-    return "hit" if abs(move) <= thr else "miss"
+            return "miss", move
+        return "flat", move
+    return ("hit" if abs(move) <= thr else "miss"), move
 
 
-def compute_ai_accuracy(profile_dir, current_price: float) -> dict:
-    """Grade past AI entries in ai_history.json against current_price and
-    write data/{profile_dir}/ai_accuracy.json. Returns the written dict."""
+def compute_ai_accuracy(profile_dir, current_price: float | None = None) -> dict:
+    """Grade each independent AI forecast at a fixed four completed 1H-bar horizon."""
     profile_dir = Path(profile_dir)
     profile_dir.mkdir(parents=True, exist_ok=True)
     acc_path = profile_dir / "ai_accuracy.json"
@@ -153,43 +178,74 @@ def compute_ai_accuracy(profile_dir, current_price: float) -> dict:
         entries = []
 
     now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    if len(entries) < AI_HISTORY_MIN_FOR_SCORING:
-        result = {
-            "updated_at_utc": now_iso,
-            "recent_hit_rate": None,
-            "total_evaluated": 0,
-            "hits": 0,
-            "misses": 0,
-            "neutrals": 0,
-            "warning_low_accuracy": False,
-            "last_grade": None,
-        }
-        acc_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-        return result
-
-    graded: list[dict] = []
-    for e in entries:
-        outcome = _grade_entry(e, current_price)
-        if outcome is None:
+    bars = _load_accuracy_bars(profile_dir)
+    candidates: dict[str, dict[str, object]] = {}
+    pending = 0
+    unmatched = 0
+    eligible = 0
+    for entry in entries:
+        generated = _parse_generated_beijing(entry.get("generated_at_utc"))
+        if generated is None or entry.get("price_at") in (None, 0):
+            unmatched += 1
             continue
+        start_index = next(
+            (index for index, bar in enumerate(bars) if bar["datetime"] > generated),
+            None,
+        )
+        if start_index is None:
+            pending += 1
+            continue
+        start_time = bars[start_index]["datetime"]
+        if (start_time - generated).total_seconds() > 96 * 3600:
+            unmatched += 1
+            continue
+        target_index = start_index + AI_ACCURACY_HORIZON_BARS - 1
+        if target_index >= len(bars):
+            pending += 1
+            continue
+        eligible += 1
+        key = start_time.isoformat(sep=" ")
+        candidate = {
+            "entry": entry,
+            "generated": generated,
+            "entry_bar_time": key,
+            "outcome_bar_time": bars[target_index]["datetime"].isoformat(sep=" "),
+            "outcome_price": float(bars[target_index]["close"]),
+        }
+        existing = candidates.get(key)
+        if existing is None or generated > existing["generated"]:
+            candidates[key] = candidate
+
+    graded: list[dict[str, object]] = []
+    for candidate in sorted(candidates.values(), key=lambda item: item["entry_bar_time"]):
+        entry = candidate["entry"]
+        grade = _grade_fixed_horizon(entry, candidate["outcome_price"])
+        if grade is None:
+            unmatched += 1
+            continue
+        outcome, move = grade
         graded.append({
-            "bias": e.get("bias"),
-            "generated_at_utc": e.get("generated_at_utc"),
-            "price_at": e.get("price_at"),
-            "current_price": float(current_price),
+            "bias": entry.get("bias"),
+            "generated_at_utc": entry.get("generated_at_utc"),
+            "price_at": entry.get("price_at"),
+            "entry_bar_time": candidate["entry_bar_time"],
+            "outcome_bar_time": candidate["outcome_bar_time"],
+            "outcome_price": candidate["outcome_price"],
+            "move_pct": round(move, 6),
             "outcome": outcome,
         })
 
-    total_evaluated = len(graded)
-    hits = sum(1 for g in graded if g["outcome"] == "hit")
-    misses = sum(1 for g in graded if g["outcome"] == "miss")
-    neutrals = sum(1 for g in graded if g["outcome"] == "neutral")
-
-    recent = graded[-AI_ACCURACY_WINDOW:]
-    if len(recent) >= AI_HISTORY_MIN_FOR_SCORING:
-        recent_hit_rate = sum(1 for g in recent if g["outcome"] == "hit") / len(recent)
-    else:
-        recent_hit_rate = None
+    scored = [item for item in graded if item["outcome"] in {"hit", "miss"}]
+    total_evaluated = len(scored)
+    hits = sum(1 for item in scored if item["outcome"] == "hit")
+    misses = sum(1 for item in scored if item["outcome"] == "miss")
+    flats = sum(1 for item in graded if item["outcome"] == "flat")
+    recent = scored[-AI_ACCURACY_WINDOW:]
+    recent_hit_rate = (
+        sum(1 for item in recent if item["outcome"] == "hit") / len(recent)
+        if len(recent) >= AI_HISTORY_MIN_FOR_SCORING
+        else None
+    )
 
     warning = bool(
         recent_hit_rate is not None
@@ -199,13 +255,21 @@ def compute_ai_accuracy(profile_dir, current_price: float) -> dict:
 
     result = {
         "updated_at_utc": now_iso,
+        "evaluation_method": AI_ACCURACY_METHOD,
+        "horizon_bars": AI_ACCURACY_HORIZON_BARS,
+        "move_threshold": AI_ACCURACY_MOVE_THRESHOLD,
         "recent_hit_rate": round(recent_hit_rate, 4) if recent_hit_rate is not None else None,
         "total_evaluated": total_evaluated,
+        "total_matured": len(graded),
         "hits": hits,
         "misses": misses,
-        "neutrals": neutrals,
+        "neutrals": flats,
+        "pending": pending,
+        "duplicates_collapsed": max(0, eligible - len(candidates)),
+        "unmatched": unmatched,
         "warning_low_accuracy": warning,
         "last_grade": graded[-1] if graded else None,
+        "recent_grades": graded[-AI_ACCURACY_WINDOW:],
     }
     acc_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     return result
@@ -826,6 +890,7 @@ def daily_snapshot(
     contract_bridge: dict | None = None,
     model_validation: dict | None = None,
 ) -> dict:
+    generated_utc = datetime.now(timezone.utc)
     rows = export.tail(120).to_dict(orient="records")
     closes = [float(row["close"]) for row in rows]
     volumes = [float(row["volume"]) for row in rows]
@@ -836,6 +901,8 @@ def daily_snapshot(
     low20 = min(float(row["low"]) for row in rows[-20:])
     volume_avg20 = sum(volumes[-20:]) / 20
     snap: dict = {
+        "analysis_as_of_utc": generated_utc.isoformat(timespec="seconds"),
+        "analysis_as_of_beijing": generated_utc.astimezone(BEIJING_TZ).isoformat(timespec="seconds"),
         "latest_date": str(latest["date"]),
         "open": float(latest["open"]),
         "high": float(latest["high"]),
@@ -1430,12 +1497,13 @@ def fetch_news_raw(api_key: str, snapshot: dict, profile_name: str = "棕榈油"
                     "Content-Type": "application/json",
                 },
                 json={
-                    "model": "deepseek-chat",
+                    "model": DEEPSEEK_MODEL,
                     "messages": messages,
                     "tools": tool_def,
                     "tool_choice": tool_choice,
-                    "temperature": 0.2,
-                    "max_tokens": 5000,
+                    "thinking": DEEPSEEK_THINKING,
+                    "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
+                    "max_tokens": 12000,
                 },
                 timeout=120,
             )
@@ -1443,7 +1511,9 @@ def fetch_news_raw(api_key: str, snapshot: dict, profile_name: str = "棕榈油"
             data = resp.json()
             choice = data["choices"][0]
             msg = choice["message"]
-            messages.append(msg)
+            # Thinking content is output-only and must not be sent back in the
+            # next tool-calling round.
+            messages.append({key: value for key, value in msg.items() if key != "reasoning_content"})
 
             if choice["finish_reason"] == "tool_calls":
                 for tc in msg.get("tool_calls", []):
@@ -1512,8 +1582,17 @@ def normalize_ai_analysis(parsed: dict, snapshot: dict) -> dict:
     watch_levels = parsed.get("watch_levels", {})
     if not isinstance(watch_levels, dict):
         watch_levels = {}
-    support = watch_levels.get("support", snapshot["low20"])
-    resistance = watch_levels.get("resistance", snapshot["high20"])
+    normalization_warnings: list[str] = []
+
+    def safe_float(value: object, fallback: float, label: str) -> float:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            normalization_warnings.append(label)
+            return float(fallback)
+
+    support = safe_float(watch_levels.get("support"), snapshot["low20"], "support")
+    resistance = safe_float(watch_levels.get("resistance"), snapshot["high20"], "resistance")
     strategy = parsed.get("intraday_strategy", {})
     if not isinstance(strategy, dict):
         strategy = {}
@@ -1565,8 +1644,175 @@ def normalize_ai_analysis(parsed: dict, snapshot: dict) -> dict:
         },
         "news_impact":   to_str_list(parsed.get("news_impact")),   # short bullet strings
         "news_articles": normalize_articles(parsed.get("news_articles", [])),  # rich cards
-        "watch_levels":  {"support": float(support), "resistance": float(resistance)},
+        "watch_levels":  {"support": support, "resistance": resistance},
+        "normalization_warnings": normalization_warnings,
         "risk_note":     str(parsed.get("risk_note", "本分析仅供行情研究，不构成投资建议。")),
+    }
+
+
+def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
+    """Check free-text AI claims against deterministic market facts.
+
+    The audit never rewrites prose. It can repair unsafe numeric watch levels,
+    and the frontend uses execution_allowed to decide whether AI may enter the
+    strategy and key-level layers.
+    """
+    issues: list[dict[str, str]] = []
+    score = 100
+
+    def add_issue(code: str, severity: str, message: str, penalty: int) -> None:
+        nonlocal score
+        if any(item["code"] == code for item in issues):
+            return
+        issues.append({"code": code, "severity": severity, "message": message})
+        score = max(0, score - penalty)
+
+    realtime = snapshot.get("realtime") if isinstance(snapshot.get("realtime"), dict) else {}
+    current_price = realtime.get("price", snapshot.get("close"))
+    try:
+        current_price = float(current_price)
+    except (TypeError, ValueError):
+        current_price = None
+
+    watch = ai_analysis.get("watch_levels")
+    if not isinstance(watch, dict):
+        watch = {}
+    try:
+        support = float(watch.get("support"))
+        resistance = float(watch.get("resistance"))
+    except (TypeError, ValueError):
+        support = float(snapshot["low20"])
+        resistance = float(snapshot["high20"])
+        add_issue("invalid_watch_levels", "high", "AI 支撑/压力不是有效数字，已改用确定性区间。", 40)
+    if ai_analysis.get("normalization_warnings"):
+        add_issue("invalid_watch_levels", "high", "AI 支撑/压力不是有效数字，已改用确定性区间。", 40)
+    if support >= resistance:
+        support = float(snapshot["low20"])
+        resistance = float(snapshot["high20"])
+        add_issue("reversed_watch_levels", "high", "AI 支撑不低于压力，已改用确定性区间。", 40)
+    ai_analysis["watch_levels"] = {"support": support, "resistance": resistance}
+
+    summary = str(ai_analysis.get("summary") or "")
+    analysis = ai_analysis.get("analysis") if isinstance(ai_analysis.get("analysis"), list) else []
+    text = "\n".join([summary, *[str(item) for item in analysis]])
+    sentences = [item.strip() for item in re.split(r"[。！？；\n]+", text) if item.strip()]
+    rsi_value = snapshot.get("rsi14")
+    try:
+        rsi_value = float(rsi_value)
+    except (TypeError, ValueError):
+        rsi_value = None
+    if rsi_value is not None:
+        def affirmative_daily_rsi_claim(sentence: str, term: str) -> bool:
+            if "日线" not in sentence or "RSI" not in sentence.upper() or term not in sentence:
+                return False
+            negated = re.search(rf"(?:未|无|不|没有|非).{{0,6}}{term}", sentence)
+            paired_negation = re.search(r"(?:未|无|不|没有|非).{0,6}(?:超买|超卖).{0,4}(?:或|和|及).{0,4}(?:超买|超卖)", sentence)
+            return not negated and not paired_negation
+
+        overbought_claim = any(affirmative_daily_rsi_claim(sentence, "超买") for sentence in sentences)
+        oversold_claim = any(affirmative_daily_rsi_claim(sentence, "超卖") for sentence in sentences)
+        if overbought_claim and rsi_value < 70:
+            add_issue("false_rsi_overbought", "high", f"文本声称 RSI 超买，但日线 RSI 为 {rsi_value:.1f}。", 35)
+        if oversold_claim and rsi_value > 30:
+            add_issue("false_rsi_oversold", "high", f"文本声称 RSI 超卖，但日线 RSI 为 {rsi_value:.1f}。", 35)
+
+    def boll_position(meta: object) -> str | None:
+        if not isinstance(meta, dict) or current_price is None:
+            return None
+        boll = meta.get("bollinger")
+        if not isinstance(boll, dict):
+            return None
+        try:
+            upper = float(boll["upper"])
+            middle = float(boll["mid"])
+            lower = float(boll["lower"])
+        except (KeyError, TypeError, ValueError):
+            return None
+        if current_price > upper:
+            return "上轨上方"
+        if current_price >= middle:
+            return "中轨上方"
+        if current_price >= lower:
+            return "中轨下方"
+        return "下轨下方"
+
+    intraday = snapshot.get("intraday") if isinstance(snapshot.get("intraday"), dict) else {}
+    expected_positions = {
+        "1小时": boll_position(intraday.get("one_hour")),
+        "4小时": boll_position(intraday.get("four_hour")),
+    }
+    position_terms = ("上轨上方", "中轨上方", "中轨下方", "下轨下方")
+    for label, expected in expected_positions.items():
+        if not expected:
+            continue
+        aliases = (label, "1H" if label == "1小时" else "4H")
+        clauses = [
+            clause.strip()
+            for sentence in sentences
+            for clause in re.split(r"[，,、]+", sentence)
+            if clause.strip()
+        ]
+        claims = {
+            term
+            for clause in clauses
+            if any(alias.lower() in clause.lower() for alias in aliases)
+            for term in position_terms
+            if term in clause
+        }
+        if claims and expected not in claims:
+            add_issue(
+                f"{label}_boll_mismatch",
+                "high",
+                f"文本的{label}布林位置与确定性计算不一致，当前应为{expected}。",
+                30,
+            )
+
+    strategy = ai_analysis.get("intraday_strategy")
+    required_strategy = ("bias", "entry", "stop", "take_profit", "invalidation")
+    missing = [
+        key for key in required_strategy
+        if not isinstance(strategy, dict)
+        or not str(strategy.get(key) or "").strip()
+        or str(strategy.get(key)).startswith("未给出")
+    ]
+    if missing:
+        add_issue("incomplete_strategy", "medium", f"AI 策略缺少字段：{', '.join(missing)}。", 20)
+
+    frame = ai_analysis.get("decision_frame") if isinstance(ai_analysis.get("decision_frame"), dict) else {}
+    try:
+        evidence_confidence = max(0, min(100, int(float(frame.get("confidence", 0)))))
+    except (TypeError, ValueError):
+        evidence_confidence = 0
+    if evidence_confidence < 50:
+        add_issue("low_evidence_confidence", "medium", f"AI 自评证据强度仅 {evidence_confidence}/100。", 15)
+
+    score = max(0, min(100, score))
+    has_high_issue = any(item["severity"] == "high" for item in issues)
+    execution_allowed = score >= 75 and evidence_confidence >= 50 and not has_high_issue
+    if execution_allowed and score >= 90:
+        status = "passed"
+        label = "通过"
+    elif has_high_issue or score < 60:
+        status = "blocked"
+        label = "规则接管"
+    else:
+        status = "caution"
+        label = "仅供参考"
+    return {
+        "version": "deterministic-integrity-v1",
+        "checked_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "score": score,
+        "status": status,
+        "label": label,
+        "execution_allowed": execution_allowed,
+        "evidence_confidence": evidence_confidence,
+        "issues": issues,
+        "facts": {
+            "realtime_price": current_price,
+            "daily_rsi14": rsi_value,
+            "one_hour_boll_position": expected_positions["1小时"],
+            "four_hour_boll_position": expected_positions["4小时"],
+        },
     }
 
 
@@ -1580,7 +1826,9 @@ def fallback_ai_analysis(snapshot: dict, reason: str) -> dict:
     )
     return {
         "source": "fallback-rule-analysis",
-        "model": None,
+        "model": DEEPSEEK_MODEL,
+        "thinking_mode": "enabled",
+        "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
         "status": "fallback",
         "error": reason,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -1613,6 +1861,17 @@ def fallback_ai_analysis(snapshot: dict, reason: str) -> dict:
         "news_impact": [],
         "news_articles": [],
         "watch_levels": {"support": snapshot["low20"], "resistance": snapshot["high20"]},
+        "integrity": {
+            "version": "deterministic-integrity-v1",
+            "checked_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "score": 0,
+            "status": "blocked",
+            "label": "规则接管",
+            "execution_allowed": False,
+            "evidence_confidence": 0,
+            "issues": [{"code": "ai_unavailable", "severity": "high", "message": reason}],
+            "facts": {},
+        },
         "risk_note": "本分析仅供行情研究，不构成投资建议。",
     }
 
@@ -1683,6 +1942,8 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         f"{realtime_instruction}{intraday_instruction}{contract_instruction}{validation_instruction}"
         f"{news_block}"
         "要求：\n"
+        f"0) 本次分析基准时刻为 UTC {snapshot.get('analysis_as_of_utc')}、北京时间 {snapshot.get('analysis_as_of_beijing')}。"
+        "所有‘今晚/明日/即将’必须相对该时刻成立；已经发生的报告或事件必须使用过去时，不能继续写成报告前或即将公布；\n"
         "1) 先给日内短线判断（结合 1H + 4H），再给日线级别背景，不能只做中长期分析；\n"
         "2) bias 字段给出偏多/震荡/偏空；\n"
         "3) analysis 数组：6–8 条技术面要点，必须包含 **1小时布林、4小时布林、日线布林/均线、实时价位置、趋势、量能、支撑压力**，每条 2–3 句；\n"
@@ -1705,7 +1966,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
             "Content-Type": "application/json",
         },
         json={
-            "model": "deepseek-chat",
+            "model": DEEPSEEK_MODEL,
             "messages": [
                 {
                     "role": "system",
@@ -1717,8 +1978,9 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
                 },
                 {"role": "user", "content": prompt_content},
             ],
-            "temperature": 0.2,
-            "max_tokens": 8000,
+            "thinking": DEEPSEEK_THINKING,
+            "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
+            "max_tokens": 16000,
             "response_format": {"type": "json_object"},
         },
         timeout=120,
@@ -1739,7 +2001,9 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
     parsed.update(
         {
             "source": "DeepSeek API",
-            "model": "deepseek-chat",
+            "model": DEEPSEEK_MODEL,
+            "thinking_mode": "enabled",
+            "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
             "status": "ok",
             "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "latest_date": snapshot["latest_date"],
@@ -1750,6 +2014,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
             "instrument_name": profile_name,
         }
     )
+    parsed["integrity"] = audit_ai_analysis(parsed, snapshot)
     return parsed
 
 

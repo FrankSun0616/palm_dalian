@@ -133,6 +133,9 @@ const els = {
   riskTable: document.getElementById("riskTable"),
   aiMeta: document.getElementById("aiMeta"),
   aiFreshness: document.getElementById("aiFreshness"),
+  aiIntegrity: document.getElementById("aiIntegrity"),
+  aiIntegrityStatus: document.getElementById("aiIntegrityStatus"),
+  aiIntegrityDetail: document.getElementById("aiIntegrityDetail"),
   aiBias: document.getElementById("aiBias"),
   aiSummary: document.getElementById("aiSummary"),
   aiStrategy: document.getElementById("aiStrategy"),
@@ -211,6 +214,8 @@ let state = {
   sibling: null,
   contractBridge: null,
   modelValidation: null,
+  lastAi: null,
+  aiAccuracy: null,
   isDragging: false,
   dragStartX: null,
   dragStartVisibleStart: null,
@@ -985,6 +990,40 @@ function assessAiFreshness(ai) {
   return { fresh, trading, generatedAge, lagMinutes, label };
 }
 
+function assessAiReliability(ai) {
+  const freshness = assessAiFreshness(ai);
+  const integrity = ai?.integrity && typeof ai.integrity === "object" ? ai.integrity : null;
+  const accuracy = state.aiAccuracy && typeof state.aiAccuracy === "object" ? state.aiAccuracy : null;
+  const fixedHorizon = accuracy?.evaluation_method === "fixed_4_completed_1h_bars_v2";
+  const accuracyBlocked = Boolean(
+    fixedHorizon
+    && Number(accuracy.total_evaluated || 0) >= 10
+    && accuracy.warning_low_accuracy,
+  );
+  const integrityPassed = integrity?.execution_allowed === true;
+  const trusted = freshness.fresh && integrityPassed && !accuracyBlocked;
+
+  let status = "blocked";
+  let label = "规则接管";
+  const reasons = [];
+  if (!freshness.fresh) reasons.push(freshness.label);
+  if (!integrity) reasons.push("尚无一致性审计");
+  else if (!integrityPassed) {
+    const firstIssue = Array.isArray(integrity.issues) ? integrity.issues[0]?.message : "";
+    reasons.push(firstIssue || `一致性 ${Number(integrity.score || 0).toFixed(0)}/100`);
+  }
+  if (accuracyBlocked) reasons.push("固定前向样本命中率过低");
+  if (trusted) {
+    status = "passed";
+    label = "可作补充证据";
+    reasons.push(`一致性 ${Number(integrity.score || 0).toFixed(0)}/100`);
+  } else if (freshness.fresh && integrity && integrity.status === "caution" && !accuracyBlocked) {
+    status = "caution";
+    label = "仅供参考";
+  }
+  return { trusted, status, label, reasons, freshness, integrity, accuracyBlocked };
+}
+
 function computeDataConfidence(analysis) {
   let score = 100;
   const reasons = [];
@@ -996,7 +1035,7 @@ function computeDataConfidence(analysis) {
   const newsAge = ageMinutes(state.newsSnapshot?.updated_at_utc);
   const bridgeAge = ageMinutes(state.contractBridge?.updated_at_utc);
   const quoteAge = lastQuote?.receivedAt ? Math.max(0, (Date.now() - lastQuote.receivedAt) / 60000) : null;
-  const aiFreshness = assessAiFreshness(state.lastAi);
+  const aiReliability = assessAiReliability(state.lastAi);
 
   if (!state.autoLoaded || !state.dataMeta) {
     score -= 40;
@@ -1036,9 +1075,9 @@ function computeDataConfidence(analysis) {
     score -= 8;
     reasons.push("舆情快照偏旧");
   }
-  if (state.lastAi && !aiFreshness.fresh) {
-    score -= 5;
-    reasons.push("AI 仅作历史参考");
+  if (state.lastAi && !aiReliability.trusted) {
+    score -= 7;
+    reasons.push("AI 决策防火墙接管");
   }
 
   score = clamp(Math.round(score), 0, 100);
@@ -1051,7 +1090,8 @@ function computeDataConfidence(analysis) {
     newsAge,
     quoteAge,
     bridgeAge,
-    aiFreshness,
+    aiFreshness: aiReliability.freshness,
+    aiReliability,
   };
 }
 
@@ -1125,8 +1165,8 @@ function computeKeyLevels(analysis, price, tfAtr) {
   add(analysis.low60, "60日低点", 1.2);
   add(analysis.high60, "60日高点", 1.2);
 
-  const aiFreshness = assessAiFreshness(state.lastAi);
-  if (state.lastAi?.watch_levels && aiFreshness.fresh) {
+  const aiReliability = assessAiReliability(state.lastAi);
+  if (state.lastAi?.watch_levels && aiReliability.trusted) {
     add(state.lastAi.watch_levels.support, "AI支撑", 0.8);
     add(state.lastAi.watch_levels.resistance, "AI压力", 0.8);
   }
@@ -1845,7 +1885,10 @@ function populatePosCalcDefaults() {
     let stop = Number(modelSetup?.stop);
     if (!Number.isFinite(stop)) {
       const ai = state.lastAi;
-      const wl = ai && typeof ai.watch_levels === "object" && ai.watch_levels !== null ? ai.watch_levels : null;
+      const reliable = assessAiReliability(ai).trusted;
+      const wl = reliable && ai && typeof ai.watch_levels === "object" && ai.watch_levels !== null
+        ? ai.watch_levels
+        : null;
       const support = wl ? Number(wl.support || 0) : 0;
       const resistance = wl ? Number(wl.resistance || 0) : 0;
       stop = modelDirection === "short" ? resistance : support;
@@ -2016,33 +2059,48 @@ async function autoLoadAccuracy() {
     const r = await fetchWithRetry(`${dataPath("ai_accuracy.json")}?t=${Date.now()}`, { cache: "no-store" });
     if (_fetchSym !== state.activeSymbol) return;
     if (!r.ok) {
+      state.aiAccuracy = null;
       els.aiAccuracy.hidden = true;
       return;
     }
     const d = await r.json();
-    // Backend writes `recent_hit_rate` as a fraction (0..1) or null when
-    // there aren't enough graded entries yet.
+    state.aiAccuracy = d;
+    if (d.evaluation_method !== "fixed_4_completed_1h_bars_v2") {
+      els.aiAccuracy.textContent = "旧复盘口径已停用 · 等待固定 4 根 1H 前向样本";
+      els.aiAccuracy.hidden = false;
+      els.aiAccuracy.classList.remove("warn");
+      if (state.lastAi) updateAiPanel(state.lastAi);
+      draw();
+      return;
+    }
     const rateRaw = Number(d.recent_hit_rate);
     const total   = Number(d.total_evaluated || 0);
     if (!Number.isFinite(rateRaw)) {
-      els.aiAccuracy.hidden = true;
+      const pending = Number(d.pending || 0);
+      els.aiAccuracy.textContent = `固定 4 根 1H 前向样本 ${total} / 10${pending ? ` · 待到期 ${pending}` : ""}`;
+      els.aiAccuracy.hidden = false;
+      els.aiAccuracy.classList.remove("warn");
+      if (state.lastAi) updateAiPanel(state.lastAi);
+      draw();
       return;
     }
     if (total < 10) {
-      els.aiAccuracy.textContent = `AI 复盘样本 ${total} / 10 · 样本不足，暂不评价命中率`;
+      els.aiAccuracy.textContent = `固定 4 根 1H 前向样本 ${total} / 10 · 暂不评价`;
       els.aiAccuracy.hidden = false;
       els.aiAccuracy.classList.remove("warn");
+      if (state.lastAi) updateAiPanel(state.lastAi);
+      draw();
       return;
     }
-    // Defensive: accept fraction (0..1) or percent (0..100) in case an older
-    // ai_accuracy.json format from an earlier run is still on disk.
     const pct  = rateRaw <= 1 ? rateRaw * 100 : rateRaw;
     const warn = Boolean(d.warning_low_accuracy);
-    const prefix = warn ? "⚠️ " : "";
-    els.aiAccuracy.textContent = `${prefix}近 20 次命中率: ${pct.toFixed(0)}% (总评估 ${total})`;
+    els.aiAccuracy.textContent = `固定 4 根 1H 命中率 ${pct.toFixed(0)}% · 有效样本 ${total}`;
     els.aiAccuracy.hidden = false;
     els.aiAccuracy.classList.toggle("warn", warn);
+    if (state.lastAi) updateAiPanel(state.lastAi);
+    draw();
   } catch (_) {
+    state.aiAccuracy = null;
     els.aiAccuracy.hidden = true;
   }
 }
@@ -2936,38 +2994,53 @@ function updateAiPanel(ai) {
   els.aiBias.textContent = ai.bias || "--";
   els.aiBias.className = `bias-pill ${biasClass(ai.bias || "")}`;
   const status = ai.status === "ok" ? "DeepSeek" : "规则备用";
+  const modelLabel = ai.model === "deepseek-v4-pro" ? "V4-Pro · 高强度思考" : (ai.model || "模型未知");
   const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
   const realtimeTag = ai.realtime_price ? ` | 实时价 ${ai.realtime_price}` : "";
-  els.aiMeta.textContent = `${status} | 日线 ${ai.latest_date || "--"}${realtimeTag} | 生成 ${generated}`;
+  els.aiMeta.textContent = `${status} ${modelLabel} | 日线 ${ai.latest_date || "--"}${realtimeTag} | 生成 ${generated}`;
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
 
   // Remember the latest AI payload so we can re-render the strategy panel
   // whenever the live 1H/4H meta refreshes.
   state.lastAi = ai;
-  const freshness = assessAiFreshness(ai);
+  const reliability = assessAiReliability(ai);
+  const freshness = reliability.freshness;
   if (els.aiFreshness) {
     els.aiFreshness.textContent = freshness.label;
     els.aiFreshness.className = `ai-freshness ${freshness.fresh ? "fresh" : "stale"}`;
   }
+  if (els.aiIntegrity && els.aiIntegrityStatus && els.aiIntegrityDetail) {
+    els.aiIntegrity.className = `ai-integrity ${reliability.status}`;
+    els.aiIntegrityStatus.textContent = reliability.label;
+    els.aiIntegrityDetail.textContent = reliability.reasons.join(" · ") || "等待确定性审计";
+  }
   const aiPanel = els.aiMeta?.closest(".ai-panel");
-  if (aiPanel) aiPanel.classList.toggle("ai-stale", !freshness.fresh);
+  if (aiPanel) {
+    aiPanel.classList.toggle("ai-stale", !freshness.fresh);
+    aiPanel.classList.toggle("ai-untrusted", !reliability.trusted);
+  }
 
   let strategy = ai.intraday_strategy && typeof ai.intraday_strategy === "object" ? ai.intraday_strategy : null;
   const hasAiStrategy = strategy && (strategy.entry || strategy.stop || strategy.take_profit);
-  if (!hasAiStrategy || !freshness.fresh) {
+  if (!hasAiStrategy || !reliability.trusted) {
     strategy = computeIntradayStrategyFromMeta(state.intradayMeta);
-    if (strategy && hasAiStrategy && !freshness.fresh) strategy._staleAi = true;
+    if (strategy && hasAiStrategy) {
+      strategy._aiBlocked = true;
+      strategy._blockedReason = reliability.reasons[0] || "AI 未通过决策防火墙";
+    }
   }
 
   if (strategy) {
     els.aiStrategy.hidden = false;
     const title = strategy._fallback
-      ? `1H / 4H 日内策略 <small class="strategy-source-note">· ${strategy._staleAi ? "AI 过期，规则接管" : "实时规则"}</small>`
-      : `1H / 4H 日内策略 <small class="strategy-source-note fresh">· AI 时效通过</small>`;
+      ? `1H / 4H 日内策略 <small class="strategy-source-note">· ${strategy._aiBlocked ? "决策防火墙接管" : "实时规则"}</small>`
+      : `1H / 4H 日内策略 <small class="strategy-source-note fresh">· V4-Pro 审计通过</small>`;
     const heading = els.aiStrategy.querySelector("h3");
     if (heading) heading.innerHTML = title;
 
-    const frame = ai.decision_frame && typeof ai.decision_frame === "object" ? ai.decision_frame : null;
+    const frame = !strategy._fallback && ai.decision_frame && typeof ai.decision_frame === "object"
+      ? ai.decision_frame
+      : null;
     const rows = [
       ...(frame ? [
         ["证据强度", `${Number(frame.confidence || 0).toFixed(0)} / 100`],
@@ -2979,7 +3052,7 @@ function updateAiPanel(ai) {
       ["止损/风控", strategy.stop],
       ["止盈目标", strategy.take_profit],
       ["失效条件", strategy.invalidation],
-      ["备注", strategy.notes],
+      ["备注", strategy._blockedReason ? `${strategy._blockedReason}；${strategy.notes}` : strategy.notes],
     ];
     els.aiStrategyGrid.innerHTML = rows.map(([label, value]) => {
       const cls = biasClass(label === "短线方向" ? (value || "") : "");
@@ -3472,6 +3545,7 @@ function reloadAll() {
   state.contractBridge = null;
   state.modelValidation = null;
   state.lastAi = null;
+  state.aiAccuracy = null;
   state.lastAskResponse = null;
   state.decisionModel = null;
   state.visibleStart = null;

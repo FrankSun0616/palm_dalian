@@ -150,6 +150,8 @@ def validate_frontend() -> None:
         "posLotsRec",
         "posRR",
         "aiFreshness",
+        "aiIntegrity",
+        "aiIntegrityStatus",
         "priceCanvas",
         "contractMapping",
         "mainContractPrice",
@@ -177,11 +179,14 @@ def validate_frontend() -> None:
     assert "GH_WORKFLOW_DISPATCH_URL" in app, "direct workflow dispatch is missing"
     assert "PUBLIC_ACTIONS_TOKEN = atob(" in app, "one-click public dispatch credential is missing"
     assert 'run_ai_analysis: "true", symbols: "P0,Y0"' in app, "dual-symbol AI input is missing"
+    assert "DeepSeek V4-Pro" in html, "V4-Pro identity is missing from the UI"
+    assert "assessAiReliability" in app, "AI decision firewall is missing"
 
 
 def validate_workflow() -> None:
     workflow = (ROOT / ".github" / "workflows" / "update-data.yml").read_text(encoding="utf-8")
     pipeline = (ROOT / "update_data.py").read_text(encoding="utf-8")
+    ask_backend = (ROOT / "ask_deepseek.py").read_text(encoding="utf-8")
     assert 'cron: "*/5 * * * *"' in workflow, "five-minute data cron missing"
     assert 'cron: "0 */3 * * *"' in workflow, "three-hour AI cron missing"
     assert "workflow_dispatch:" in workflow, "manual dispatch missing"
@@ -190,6 +195,13 @@ def validate_workflow() -> None:
     assert "test_dashboard.py" in workflow, "dashboard validation step missing"
     assert "test_model_logic.py" in workflow, "model logic unit test step missing"
     assert "ThreadPoolExecutor(max_workers=len(symbols))" in pipeline, "P0/Y0 pipeline is not parallel"
+    for path, source in (("update_data.py", pipeline), ("ask_deepseek.py", ask_backend)):
+        assert 'DEEPSEEK_MODEL = "deepseek-v4-pro"' in source, f"{path}: V4-Pro is not fixed"
+        assert '"thinking": DEEPSEEK_THINKING' in source, f"{path}: thinking mode is missing"
+        assert '"reasoning_effort": DEEPSEEK_REASONING_EFFORT' in source, f"{path}: high effort is missing"
+        assert "deepseek-chat" not in source and "deepseek-reasoner" not in source, f"{path}: legacy model remains"
+    assert "fixed_4_completed_1h_bars_v2" in pipeline, "fixed-horizon AI evaluation is missing"
+    assert "audit_ai_analysis" in pipeline, "AI consistency audit is missing"
 
 
 def main() -> None:

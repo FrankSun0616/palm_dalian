@@ -921,10 +921,25 @@ def daily_snapshot(
     }
     if realtime:
         snap["realtime"] = realtime
-        snap["realtime_note"] = (
-            f"实时行情截至 {realtime['tradedate']} {realtime['ticktime']}，"
-            f"当前价 {realtime['price']:.0f}，涨跌 {realtime['change_pct']}"
-        )
+        analysis_date = generated_utc.astimezone(BEIJING_TZ).date()
+        try:
+            quote_label_date = datetime.fromisoformat(str(realtime["tradedate"])).date()
+        except (KeyError, TypeError, ValueError):
+            quote_label_date = None
+        future_label = bool(quote_label_date and quote_label_date > analysis_date)
+        snap["realtime_trading_day_label"] = realtime.get("tradedate")
+        snap["realtime_tick_time"] = realtime.get("ticktime")
+        snap["realtime_label_is_future"] = future_label
+        if future_label:
+            snap["realtime_note"] = (
+                f"盘口交易日归属标签 {realtime['tradedate']}，最新盘口时间 {realtime['ticktime']}"
+                f"（不是未来行情），当前价 {realtime['price']:.0f}，涨跌 {realtime['change_pct']}"
+            )
+        else:
+            snap["realtime_note"] = (
+                f"实时行情截至 {realtime['tradedate']} {realtime['ticktime']}，"
+                f"当前价 {realtime['price']:.0f}，涨跌 {realtime['change_pct']}"
+            )
     if intraday:
         snap["intraday"] = intraday
     if contract_bridge:
@@ -1716,6 +1731,22 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
         if oversold_claim and rsi_value > 30:
             add_issue("false_rsi_oversold", "high", f"文本声称 RSI 超卖，但日线 RSI 为 {rsi_value:.1f}。", 35)
 
+    trading_day_label = str(snapshot.get("realtime_trading_day_label") or "")
+    if snapshot.get("realtime_label_is_future") and trading_day_label:
+        future_time_claim = any(
+            trading_day_label in sentence
+            and any(term in sentence for term in ("截至", "收盘"))
+            and not any(term in sentence for term in ("归属标签", "不是未来", "不代表未来"))
+            for sentence in sentences
+        )
+        if future_time_claim:
+            add_issue(
+                "future_trade_label_as_clock",
+                "high",
+                f"文本把交易日归属标签 {trading_day_label} 当作真实未来时刻。",
+                40,
+            )
+
     def boll_position(meta: object) -> str | None:
         if not isinstance(meta, dict) or current_price is None:
             return None
@@ -1812,6 +1843,8 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
             "daily_rsi14": rsi_value,
             "one_hour_boll_position": expected_positions["1小时"],
             "four_hour_boll_position": expected_positions["4小时"],
+            "realtime_trading_day_label": trading_day_label or None,
+            "realtime_label_is_future": bool(snapshot.get("realtime_label_is_future")),
         },
     }
 
@@ -1885,6 +1918,8 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
     realtime_instruction = (
         "数据中包含字段 realtime（实时行情），请在分析中明确引用当前实时价格，"
         "并结合实时价与均线、支撑压力的位置关系给出判断。"
+        "realtime.tradedate 是大商所交易日归属标签，不一定是实际日历时刻；"
+        "当 realtime_label_is_future=true 时，必须明确写成交易日归属标签，禁止使用‘截至该未来日期’或‘该未来日期收盘’。"
         if has_realtime else
         "数据中无实时行情，请基于最新日线收盘价分析。"
     )
@@ -1974,6 +2009,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
                         "你是机构级中文油脂期货风险分析助手。先验证数据时效和证据，再讨论方向；"
                         "不确定时明确观望，不把连续合约当作可直接下单的具体月份合约，"
                         "不编造新闻、价格、胜率或概率，只基于用户给出的行情和舆情作答。"
+                        "大商所 tradedate 是交易日归属标签；未来日期标签绝不代表未来行情。"
                     ),
                 },
                 {"role": "user", "content": prompt_content},

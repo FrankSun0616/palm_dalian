@@ -148,6 +148,15 @@ class AiIntegrityTests(unittest.TestCase):
         self.assertEqual(integrity["status"], "passed")
         self.assertEqual(integrity["score"], 100)
 
+    def test_future_trading_day_label_cannot_be_presented_as_future_close(self) -> None:
+        snapshot = self.snapshot()
+        snapshot["realtime_trading_day_label"] = "2026-07-13"
+        snapshot["realtime_label_is_future"] = True
+        analysis = self.analysis("截至2026-07-13 23:00夜盘收盘，价格维持震荡。")
+        integrity = audit_ai_analysis(analysis, snapshot)
+        self.assertFalse(integrity["execution_allowed"])
+        self.assertIn("future_trade_label_as_clock", {item["code"] for item in integrity["issues"]})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -202,6 +202,7 @@ def validate_workflow() -> None:
         assert "deepseek-chat" not in source and "deepseek-reasoner" not in source, f"{path}: legacy model remains"
     assert "fixed_4_completed_1h_bars_v2" in pipeline, "fixed-horizon AI evaluation is missing"
     assert "audit_ai_analysis" in pipeline, "AI consistency audit is missing"
+    assert "future_trade_label_as_clock" in pipeline, "future trading-day label guard is missing"
 
 
 def main() -> None:

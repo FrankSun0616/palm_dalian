@@ -2146,18 +2146,25 @@ function setAskStatus(text, type) {
 function renderAskResponse(data, fresh) {
   if (!els.askResponse || !data) return;
   const q = data.question || "";
-  const a = data.answer || "(无回复)";
+  const failed = data.status === "error";
+  const a = failed
+    ? `V4-Pro 暂时无法回答：${data.error || "未知错误"}`
+    : data.answer || "(无回复)";
   const time = data.asked_at_utc ? formatDateTime(data.asked_at_utc) : "";
+  const model = data.model === "deepseek-v4-pro"
+    ? "V4-Pro · 高强度思考"
+    : data.model || "模型未知";
   if (els.askResponseMeta) {
     els.askResponseMeta.textContent = fresh
-      ? `问 ${time}：${q}`
-      : `上次问题 ${time}（历史）：${q}`;
+      ? `${model} · 回答 ${time}：${q}`
+      : `${model} · 历史回答 ${time}：${q}`;
   }
   if (els.askResponseText) {
     els.askResponseText.textContent = a;
   }
   els.askResponse.hidden = false;
   els.askResponse.classList.toggle("stale", !fresh);
+  els.askResponse.classList.toggle("error", failed);
 }
 
 async function autoLoadAskResponse() {
@@ -2180,7 +2187,41 @@ async function autoLoadAskResponse() {
   }
 }
 
-const GH_ASK_WORKFLOW_URL = "https://github.com/FrankSun0616/palm_dalian/actions/workflows/ask.yml";
+const GH_ASK_WORKFLOW_DISPATCH_URL = "https://api.github.com/repos/FrankSun0616/palm_dalian/actions/workflows/ask.yml/dispatches";
+
+function decodeGithubFile(payload) {
+  if (!payload?.content || payload.encoding !== "base64") return null;
+  const binary = atob(String(payload.content).replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return JSON.parse(new TextDecoder("utf-8").decode(bytes));
+}
+
+async function fetchLatestAskResponse(resultPath) {
+  try {
+    const apiResponse = await fetchWithRetry(
+      `https://api.github.com/repos/FrankSun0616/palm_dalian/contents/${resultPath}?ref=main&t=${Date.now()}`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${PUBLIC_ACTIONS_TOKEN}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+      2,
+    );
+    if (apiResponse.ok) {
+      const decoded = decodeGithubFile(await apiResponse.json());
+      if (decoded) return decoded;
+    }
+  } catch (_) {}
+
+  try {
+    const pageResponse = await fetchWithRetry(`${resultPath}?t=${Date.now()}`, { cache: "no-store" }, 2);
+    if (pageResponse.ok) return await pageResponse.json();
+  } catch (_) {}
+  return null;
+}
 
 async function submitAskQuestion() {
   const question = (els.askInput?.value || "").trim();
@@ -2188,43 +2229,82 @@ async function submitAskQuestion() {
     setAskStatus("请输入问题", "error");
     return;
   }
-  const prevTime = state.lastAskResponse?.asked_at_utc || null;
-  let copied = false;
-  try {
-    await navigator.clipboard.writeText(question);
-    copied = true;
-  } catch (_) {}
-  window.open(GH_ASK_WORKFLOW_URL, "_blank", "noopener,noreferrer");
-  setAskStatus(
-    copied
-      ? `问题已复制。请在 Actions 中选择 ${state.activeSymbol}，粘贴问题并运行；本页会检查回复。`
-      : `已打开 Actions。请选择 ${state.activeSymbol} 并输入问题后运行；本页会检查回复。`,
-    "loading",
-  );
-  const startTime = Date.now();
-  const maxWait = 12 * 60 * 1000;
+  const requestedSymbol = state.activeSymbol;
+  const resultPath = `data/${requestedSymbol.toLowerCase()}/ask_response.json`;
+  let prevTime = state.lastAskResponse?.asked_at_utc || null;
   if (askPollInterval) clearInterval(askPollInterval);
-  askPollInterval = setInterval(async () => {
-    if (Date.now() - startTime > maxWait) {
+  askPollInterval = null;
+  els.askBtn.disabled = true;
+  setAskStatus(`正在直接提交给 V4-Pro（${requestedSymbol}）...`, "loading");
+
+  try {
+    const previous = await fetchLatestAskResponse(resultPath);
+    if (previous?.asked_at_utc) prevTime = previous.asked_at_utc;
+  } catch (_) {}
+
+  const dispatchStarted = Date.now();
+  try {
+    const response = await fetch(GH_ASK_WORKFLOW_DISPATCH_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PUBLIC_ACTIONS_TOKEN}`,
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      body: JSON.stringify({
+        ref: "main",
+        inputs: { symbol: requestedSymbol, question },
+      }),
+    });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      setAskStatus(`V4-Pro 触发失败 (${response.status})${body ? `：${body.slice(0, 100)}` : ""}`, "error");
+      els.askBtn.disabled = false;
+      return;
+    }
+  } catch (error) {
+    setAskStatus(`触发网络错误：${error.message || "未知错误"}`, "error");
+    els.askBtn.disabled = false;
+    return;
+  }
+
+  setAskStatus(`V4-Pro 正在读取 ${requestedSymbol} 最新行情并思考，回答会自动显示。`, "loading");
+  const maxWait = 8 * 60 * 1000;
+  const pollForAnswer = async () => {
+    if (Date.now() - dispatchStarted > maxWait) {
       clearInterval(askPollInterval);
       askPollInterval = null;
-      setAskStatus("尚未检测到新回复，可再次打开 Actions 查看运行状态。", "error");
+      setAskStatus("8 分钟内未检测到新回答，请稍后再试。", "error");
+      els.askBtn.disabled = false;
       return;
     }
     try {
-      const r = await fetchWithRetry(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" }, 2);
-      if (!r.ok) return;
-      const d = await r.json();
+      const d = await fetchLatestAskResponse(resultPath);
+      if (!d) return;
       const newTime = d.asked_at_utc || null;
-      if (newTime && newTime !== prevTime) {
+      const askedAt = Date.parse(newTime || "");
+      const matchesRequest = d.symbol === requestedSymbol
+        && d.question === question
+        && Number.isFinite(askedAt)
+        && askedAt >= dispatchStarted - 5000;
+      if (newTime && newTime !== prevTime && matchesRequest) {
         clearInterval(askPollInterval);
         askPollInterval = null;
         state.lastAskResponse = d;
         renderAskResponse(d, /*fresh=*/true);
-        setAskStatus(`已回复 (${formatDateTime(newTime)})`, "success");
+        setAskStatus(
+          d.status === "ok"
+            ? `V4-Pro 已回答 (${formatDateTime(newTime)})`
+            : `V4-Pro 回答失败：${d.error || "未知错误"}`,
+          d.status === "ok" ? "success" : "error",
+        );
+        els.askBtn.disabled = false;
       }
     } catch (_) {}
-  }, 20 * 1000);
+  };
+  askPollInterval = setInterval(pollForAnswer, 8 * 1000);
+  pollForAnswer();
 }
 
 if (els.askBtn) els.askBtn.addEventListener("click", submitAskQuestion);

@@ -181,8 +181,13 @@ def validate_frontend() -> None:
     hits = [token for token in forbidden if token in combined]
     assert not hits, f"credential-like frontend content found: {hits}"
     assert "GH_WORKFLOW_DISPATCH_URL" in app, "direct workflow dispatch is missing"
+    assert "GH_ASK_WORKFLOW_DISPATCH_URL" in app, "direct V4-Pro Q&A dispatch is missing"
     assert "PUBLIC_ACTIONS_TOKEN = atob(" in app, "one-click public dispatch credential is missing"
     assert 'run_ai_analysis: "true", symbols: "P0,Y0"' in app, "dual-symbol AI input is missing"
+    assert "inputs: { symbol: requestedSymbol, question }" in app, "Q&A does not send the active symbol and question"
+    assert "fetchLatestAskResponse" in app and "/contents/${resultPath}" in app, "Q&A does not poll the latest repository answer"
+    assert "window.open(GH_ASK" not in app and "问题已复制" not in app, "manual Actions Q&A flow remains"
+    assert "直接问 V4-Pro" in html, "direct V4-Pro Q&A button copy is missing"
     assert "DeepSeek V4-Pro" in html, "V4-Pro identity is missing from the UI"
     assert "assessAiReliability" in app, "AI decision firewall is missing"
     assert "executionRoundTripCostPoints" in app and "executionRoundTripCostPoints" in execution, "round-trip execution costs are missing"

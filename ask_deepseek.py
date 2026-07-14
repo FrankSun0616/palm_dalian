@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -33,9 +34,14 @@ DEEPSEEK_REASONING_EFFORT = "high"
 
 
 PROFILES: dict[str, dict] = {
-    "P0": {"name": "棕榈油", "dir": "p0"},
-    "Y0": {"name": "豆油",   "dir": "y0"},
+    "P0": {"name": "棕榈油", "dir": "p0", "market_node": "zly_qh"},
+    "Y0": {"name": "豆油",   "dir": "y0", "market_node": "dy_qh"},
 }
+
+SINA_MARKET_URL_TMPL = (
+    "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/"
+    "Market_Center.getHQFuturesData?page=1&num=100&sort=position&asc=0&node={node}&base=futures"
+)
 
 
 def load_json(path: Path) -> dict:
@@ -53,7 +59,75 @@ def write_response(profile_dir: Path, payload: dict) -> None:
     )
 
 
-def build_context(profile_dir: Path) -> dict:
+def _float(value: object) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _int(value: object) -> int:
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return 0
+
+
+def fetch_live_quote(symbol: str, market_node: str, attempts: int = 2) -> dict:
+    """Fetch a fresh P0/Y0 quote without importing the heavy data pipeline."""
+    errors: list[str] = []
+    url = SINA_MARKET_URL_TMPL.format(node=market_node)
+    for attempt in range(1, attempts + 1):
+        try:
+            response = requests.get(url, timeout=12, headers={"User-Agent": "Mozilla/5.0"})
+            response.raise_for_status()
+            board = response.json()
+            item = next(
+                (
+                    row for row in board
+                    if isinstance(row, dict)
+                    and str(row.get("symbol") or "").upper() == symbol
+                ),
+                None,
+            )
+            price = _float((item or {}).get("trade"))
+            if not item or price <= 0:
+                raise RuntimeError(f"{symbol} quote missing from Sina board")
+            previous_settlement = (
+                _float(item.get("presettlement"))
+                or _float(item.get("prevsettlement"))
+            )
+            previous_close = _float(item.get("preclose"))
+            reference = previous_settlement or previous_close
+            change = price - reference if reference else 0.0
+            return {
+                "status": "live",
+                "symbol": symbol,
+                "name": str(item.get("name") or ""),
+                "price": price,
+                "open": _float(item.get("open")),
+                "high": _float(item.get("high")),
+                "low": _float(item.get("low")),
+                "change": round(change, 4),
+                "change_pct": f"{change / reference:+.2%}" if reference else "0.00%",
+                "volume": _int(item.get("volume")),
+                "open_interest": _int(item.get("position")),
+                "previous_settlement": previous_settlement,
+                "bid_price": _float(item.get("bidprice1")),
+                "ask_price": _float(item.get("askprice1")),
+                "tradedate": str(item.get("tradedate") or ""),
+                "ticktime": str(item.get("ticktime") or ""),
+                "fetched_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "source": "Sina Market Center live request",
+            }
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"attempt {attempt}: {type(exc).__name__}: {exc}")
+            if attempt < attempts:
+                time.sleep(1)
+    raise RuntimeError("; ".join(errors))
+
+
+def build_context(profile_dir: Path, realtime: dict) -> dict:
     """Assemble a compact JSON blob DeepSeek can read. Only pass the fields
     the model actually needs to answer — the full ai_analysis + intraday +
     source_meta would blow through the token limit and dilute focus."""
@@ -75,6 +149,7 @@ def build_context(profile_dir: Path) -> dict:
         ])
 
     return {
+        "realtime": realtime,
         "source_meta": _pick(meta, [
             "symbol", "market", "instrument_name",
             "latest_date", "latest_close", "updated_at_utc",
@@ -93,7 +168,10 @@ def build_context(profile_dir: Path) -> dict:
 def ask_deepseek(api_key: str, symbol: str, name: str, question: str, context: dict) -> str:
     system_msg = (
         f"你是大连商品交易所{name}({symbol})看盘助手，"
-        "只基于用户提供的市场数据回答。回答简洁、中文、100-400字。"
+        "只基于用户提供的市场数据回答。realtime 是本次问答启动后即时抓取的最新可用盘口；"
+        "回答必须明确引用 realtime.price、ticktime 和涨跌幅，并以该价格判断持仓、入场、止损和目标，"
+        "不能拿旧 AI 摘要中的价格替代。tradedate 是交易日归属标签，不代表未来行情。"
+        "回答简洁、中文、100-400字。"
     )
     user_msg = (
         f"【市场数据】\n{json.dumps(context, ensure_ascii=False, indent=2)}\n\n"
@@ -162,8 +240,20 @@ def main() -> int:
         return 1
 
     try:
-        context = build_context(profile_dir)
+        realtime = fetch_live_quote(symbol, profile["market_node"])
+        base["realtime_input"] = realtime
+        print(
+            f"[ask] live quote {symbol} {realtime['price']} @ "
+            f"{realtime['tradedate']} {realtime['ticktime']} "
+            f"(fetched {realtime['fetched_at_utc']})"
+        )
+        context = build_context(profile_dir, realtime)
         answer = ask_deepseek(api_key, symbol, profile["name"], question, context)
+        normalized_answer = answer.replace(",", "").replace("，", "")
+        if str(round(float(realtime["price"]))) not in normalized_answer:
+            raise RuntimeError(
+                f"DeepSeek answer did not cite the live input price {realtime['price']:g}"
+            )
     except Exception as exc:  # noqa: BLE001
         write_response(profile_dir, {
             **base,

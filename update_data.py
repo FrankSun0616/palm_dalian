@@ -1693,6 +1693,19 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
         score = max(0, score - penalty)
 
     realtime = snapshot.get("realtime") if isinstance(snapshot.get("realtime"), dict) else {}
+    input_freshness = (
+        snapshot.get("input_freshness")
+        if isinstance(snapshot.get("input_freshness"), dict)
+        else {}
+    )
+    realtime_fetch_status = str(input_freshness.get("realtime_fetch_status") or "")
+    if snapshot.get("realtime_required_for_ai") and realtime_fetch_status != "live":
+        add_issue(
+            "missing_live_quote_input",
+            "high",
+            "本次分析未取得调用前实时盘口，禁止进入执行层。",
+            100,
+        )
     current_price = realtime.get("price", snapshot.get("close"))
     try:
         current_price = float(current_price)
@@ -1720,6 +1733,29 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
     summary = str(ai_analysis.get("summary") or "")
     analysis = ai_analysis.get("analysis") if isinstance(ai_analysis.get("analysis"), list) else []
     text = "\n".join([summary, *[str(item) for item in analysis]])
+    if realtime_fetch_status == "live" and current_price is not None:
+        rounded_price = round(current_price)
+        price_markers = {
+            str(rounded_price),
+            f"{rounded_price:,}",
+            f"{current_price:.1f}",
+            f"{current_price:,.1f}",
+        }
+        analysis_text = "\n".join(str(item) for item in analysis)
+        if not any(marker in summary for marker in price_markers):
+            add_issue(
+                "summary_missing_live_price",
+                "high",
+                f"摘要未明确引用本次实时价 {current_price:g}。",
+                35,
+            )
+        if not any(marker in analysis_text for marker in price_markers):
+            add_issue(
+                "analysis_missing_live_price",
+                "high",
+                f"技术分析未明确引用本次实时价 {current_price:g}。",
+                35,
+            )
     sentences = [item.strip() for item in re.split(r"[。！？；\n]+", text) if item.strip()]
     rsi_value = snapshot.get("rsi14")
     try:
@@ -1840,7 +1876,7 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
         status = "caution"
         label = "仅供参考"
     return {
-        "version": "deterministic-integrity-v1",
+        "version": "deterministic-integrity-v2",
         "checked_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "score": score,
         "status": status,
@@ -1850,6 +1886,9 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
         "issues": issues,
         "facts": {
             "realtime_price": current_price,
+            "realtime_fetch_status": realtime_fetch_status or None,
+            "realtime_fetched_at_utc": input_freshness.get("realtime_fetched_at_utc"),
+            "realtime_market_tick_time": input_freshness.get("realtime_market_tick_time"),
             "daily_rsi14": rsi_value,
             "one_hour_boll_position": expected_positions["1小时"],
             "four_hour_boll_position": expected_positions["4小时"],
@@ -1925,9 +1964,17 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         return fallback_ai_analysis(snapshot, "DEEPSEEK_API_KEY is not configured")
 
     has_realtime = bool(snapshot.get("realtime"))
+    input_freshness = (
+        snapshot.get("input_freshness")
+        if isinstance(snapshot.get("input_freshness"), dict)
+        else {}
+    )
+    realtime_fetch_status = str(input_freshness.get("realtime_fetch_status") or "")
     realtime_instruction = (
-        "数据中包含字段 realtime（实时行情），请在分析中明确引用当前实时价格，"
-        "并结合实时价与均线、支撑压力的位置关系给出判断。"
+        "数据中包含字段 realtime（本次 AI 调用前即时抓取的最新可用盘口）。"
+        "必须在 summary 和至少一条 analysis 中明确写出 realtime.price、盘口 ticktime 和涨跌幅，"
+        "并以该价格作为入场区间、止损、目标位及布林位置判断的当前基准；"
+        "不得用日线 close 或小时线 close 替代当前价。"
         "realtime.tradedate 是大商所交易日归属标签，不一定是实际日历时刻；"
         "当 realtime_label_is_future=true 时，必须明确写成交易日归属标签，禁止使用‘截至该未来日期’或‘该未来日期收盘’。"
         if has_realtime else
@@ -1960,8 +2007,9 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         "数据中无策略验证结果，不得声称策略已经回测或验证。"
     )
     freshness_instruction = (
-        "数据中包含 input_freshness，必须核对各数据时间；超过10分钟的数据要明确标注延迟，"
-        "不得把缓存快照描述成刚刚成交的实时盘口。"
+        "数据中包含 input_freshness。只有 realtime_fetch_status=live 的 realtime 才可称为本次实时输入；"
+        "必须核对各数据时间，超过10分钟的小时线、日线或新闻要明确标注延迟，"
+        "不得把缓存 K 线或历史收盘描述成刚刚成交的实时盘口。"
         if snapshot.get("input_freshness") else
         "如果无法确认采样时间，必须把数据时效列为限制。"
     )
@@ -2063,6 +2111,13 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
             "latest_date": snapshot["latest_date"],
             "realtime_price": snapshot["realtime"]["price"] if has_realtime else None,
             "realtime_note": snapshot.get("realtime_note"),
+            "realtime_input": {
+                "status": realtime_fetch_status or ("present" if has_realtime else "unavailable"),
+                "fetched_at_utc": (snapshot.get("realtime") or {}).get("fetched_at_utc"),
+                "market_trading_day": (snapshot.get("realtime") or {}).get("tradedate"),
+                "market_tick_time": (snapshot.get("realtime") or {}).get("ticktime"),
+                "source": (snapshot.get("realtime") or {}).get("source"),
+            },
             "news_summary": news_summary,
             "symbol": symbol,
             "instrument_name": profile_name,

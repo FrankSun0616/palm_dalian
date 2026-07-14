@@ -7,6 +7,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import ask_deepseek as ask_backend
+from run_ai_analysis import fetch_live_market_input, run_symbol
 from update_data import (
     _resolve_trade_bar,
     audit_ai_analysis,
@@ -52,6 +54,68 @@ class ContractBridgeTests(unittest.TestCase):
         self.assertEqual(bridge["main"]["reference_type"], "previous_settlement")
         self.assertAlmostEqual(bridge["main"]["change_ratio"], 2 / 98, places=7)
         self.assertEqual(bridge["contract_specs"]["tick_size"], 1)
+
+
+class LiveQuoteInputTests(unittest.TestCase):
+    def test_main_analysis_fetches_quote_at_inference_time(self) -> None:
+        board = [quote("P0", 100, 1_000, 500), quote("P2609", 100, 1_000, 500)]
+        with patch("run_ai_analysis.fetch_sina_market_board", return_value=board):
+            realtime, bridge = fetch_live_market_input("P0", attempts=1)
+
+        self.assertEqual(realtime["price"], 100)
+        self.assertEqual(realtime["input_status"], "live")
+        self.assertEqual(realtime["source"], "Sina Market Center live request")
+        self.assertTrue(realtime["fetched_at_utc"])
+        self.assertIsNotNone(bridge)
+        assert bridge is not None
+        self.assertEqual(bridge["main"]["symbol"], "P2609")
+
+    def test_qna_fetches_lightweight_live_quote(self) -> None:
+        class Response:
+            def raise_for_status(self) -> None:
+                return None
+
+            def json(self) -> list[dict]:
+                return [quote("Y0", 200, 2_000, 600)]
+
+        with patch("ask_deepseek.requests.get", return_value=Response()):
+            realtime = ask_backend.fetch_live_quote("Y0", "dy_qh", attempts=1)
+
+        self.assertEqual(realtime["status"], "live")
+        self.assertEqual(realtime["price"], 200)
+        self.assertEqual(realtime["open_interest"], 2_000)
+        self.assertTrue(realtime["fetched_at_utc"])
+
+    def test_missing_live_quote_blocks_deepseek_instead_of_using_cache(self) -> None:
+        snapshot = {
+            "latest_date": "2026-07-14",
+            "close": 100.0,
+            "change_pct": "+1.00%",
+            "ma10": 99.0,
+            "ma20": 98.0,
+            "ma60": 97.0,
+            "low20": 90.0,
+            "high20": 110.0,
+            "input_freshness": {
+                "realtime_fetch_status": "unavailable",
+                "realtime_fetch_error": "source timeout",
+                "cached_realtime_available_but_not_used": True,
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            out_dir = Path(tmp)
+            with (
+                patch("run_ai_analysis.load_cached_snapshot", return_value=(snapshot, out_dir, {})),
+                patch("run_ai_analysis.generate_ai_analysis") as generate,
+            ):
+                result = run_symbol("P0")
+            written = json.loads((out_dir / "ai_analysis.json").read_text(encoding="utf-8"))
+
+        generate.assert_not_called()
+        self.assertEqual(result["status"], "fallback")
+        self.assertEqual(written["realtime_input"]["status"], "unavailable")
+        self.assertFalse(written["realtime_input"]["cached_quote_used"])
+        self.assertIn("缓存报价未用于", written["error"])
 
 
 class ConservativeFillTests(unittest.TestCase):
@@ -189,6 +253,38 @@ class AiIntegrityTests(unittest.TestCase):
         integrity = audit_ai_analysis(analysis, snapshot)
         self.assertFalse(integrity["execution_allowed"])
         self.assertIn("future_trade_label_as_clock", {item["code"] for item in integrity["issues"]})
+
+    def test_live_input_must_be_cited_in_summary_and_analysis(self) -> None:
+        snapshot = self.snapshot()
+        snapshot["realtime_required_for_ai"] = True
+        snapshot["input_freshness"] = {
+            "realtime_fetch_status": "live",
+            "realtime_fetched_at_utc": "2026-07-14T13:20:00+00:00",
+            "realtime_market_tick_time": "21:20:00",
+        }
+        analysis = self.analysis("日线 RSI 56.8 未超买，但摘要没有引用盘口价。")
+        integrity = audit_ai_analysis(analysis, snapshot)
+        codes = {item["code"] for item in integrity["issues"]}
+        self.assertIn("summary_missing_live_price", codes)
+        self.assertIn("analysis_missing_live_price", codes)
+        self.assertFalse(integrity["execution_allowed"])
+
+    def test_fresh_live_price_citation_passes_live_input_gate(self) -> None:
+        snapshot = self.snapshot()
+        snapshot["realtime_required_for_ai"] = True
+        snapshot["input_freshness"] = {
+            "realtime_fetch_status": "live",
+            "realtime_fetched_at_utc": "2026-07-14T13:20:00+00:00",
+            "realtime_market_tick_time": "21:20:00",
+        }
+        analysis = self.analysis("实时价 100，日线 RSI 56.8 未超买，多周期方向分化。")
+        analysis["analysis"].append("当前实时价 100 位于布林中轨附近。")
+        integrity = audit_ai_analysis(analysis, snapshot)
+        codes = {item["code"] for item in integrity["issues"]}
+        self.assertNotIn("missing_live_quote_input", codes)
+        self.assertNotIn("summary_missing_live_price", codes)
+        self.assertNotIn("analysis_missing_live_price", codes)
+        self.assertTrue(integrity["execution_allowed"])
 
 
 if __name__ == "__main__":

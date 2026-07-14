@@ -972,6 +972,17 @@ function signalForMeta(meta, currentPrice = null) {
 function assessAiFreshness(ai) {
   const generatedAge = ageMinutes(ai?.generated_at_utc);
   const generatedMs = Date.parse(ai?.generated_at_utc || "");
+  const realtimeInput = ai?.realtime_input && typeof ai.realtime_input === "object"
+    ? ai.realtime_input : null;
+  const quoteFetchedMs = Date.parse(realtimeInput?.fetched_at_utc || "");
+  const quoteToResultMinutes = Number.isFinite(generatedMs) && Number.isFinite(quoteFetchedMs)
+    ? (generatedMs - quoteFetchedMs) / 60000
+    : null;
+  const liveInputReady = realtimeInput?.status === "live"
+    && realtimeInput?.cached_quote_used !== true
+    && Number.isFinite(quoteToResultMinutes)
+    && quoteToResultMinutes >= 0
+    && quoteToResultMinutes <= 5;
   const dataTimes = [state.dataMeta?.updated_at_utc, state.intradayMeta?.updated_at_utc]
     .map((value) => Date.parse(value || ""))
     .filter(Number.isFinite);
@@ -984,16 +995,19 @@ function assessAiFreshness(ai) {
   const maxAge = trading ? 240 : 1440;
   const maxLag = trading ? 90 : 720;
   const fresh = ai?.status === "ok"
+    && liveInputReady
     && Number.isFinite(generatedAge)
     && generatedAge <= maxAge
     && (!Number.isFinite(lagMinutes) || lagMinutes <= maxLag);
   let label = "AI 时间未知";
-  if (Number.isFinite(generatedAge)) {
+  if (!liveInputReady) {
+    label = "未使用调用前实时盘口";
+  } else if (Number.isFinite(generatedAge)) {
     if (fresh && trading) label = `AI 可执行 · ${humanAge(generatedAge)}`;
     else if (fresh) label = `休市参考 · ${humanAge(generatedAge)}`;
     else label = `AI 已过期 · ${humanAge(generatedAge)}`;
   }
-  return { fresh, trading, generatedAge, lagMinutes, label };
+  return { fresh, trading, generatedAge, lagMinutes, liveInputReady, quoteToResultMinutes, label };
 }
 
 function assessAiReliability(ai) {
@@ -2153,10 +2167,15 @@ function renderAskResponse(data, fresh) {
   const model = data.model === "deepseek-v4-pro"
     ? "V4-Pro · 高强度思考"
     : data.model || "模型未知";
+  const live = data.realtime_input && data.realtime_input.status === "live"
+    ? data.realtime_input : null;
+  const liveLabel = live
+    ? ` · 实时价 ${Number(live.price).toFixed(0)} @ ${live.ticktime || "--"}`
+    : " · 实时输入缺失";
   if (els.askResponseMeta) {
     els.askResponseMeta.textContent = fresh
-      ? `${model} · 回答 ${time}：${q}`
-      : `${model} · 历史回答 ${time}：${q}`;
+      ? `${model}${liveLabel} · 回答 ${time}：${q}`
+      : `${model}${liveLabel} · 历史回答 ${time}：${q}`;
   }
   if (els.askResponseText) {
     els.askResponseText.textContent = a;
@@ -2267,7 +2286,7 @@ async function submitAskQuestion() {
     return;
   }
 
-  setAskStatus(`V4-Pro 正在读取 ${requestedSymbol} 最新行情并思考，回答会自动显示。`, "loading");
+  setAskStatus(`正在抓取 ${requestedSymbol} 当前盘口，随后交给 V4-Pro 分析。`, "loading");
   const maxWait = 8 * 60 * 1000;
   const pollForAnswer = async () => {
     if (Date.now() - dispatchStarted > maxWait) {
@@ -2386,7 +2405,7 @@ async function generateAiAnalysis() {
     return;
   }
 
-  setAiStatus("V4-Pro 正在基于最新缓存行情并行分析 P0/Y0，结果会直接显示。", "loading");
+  setAiStatus("正在并行抓取 P0/Y0 当前盘口，随后交给 V4-Pro 分析。", "loading");
   if (aiManualPollInterval) clearInterval(aiManualPollInterval);
   const maxWait = 7 * 60 * 1000;
   const pollForAnalysis = async () => {
@@ -3113,7 +3132,11 @@ function updateAiPanel(ai) {
   const status = ai.status === "ok" ? "DeepSeek" : "规则备用";
   const modelLabel = ai.model === "deepseek-v4-pro" ? "V4-Pro · 高强度思考" : (ai.model || "模型未知");
   const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
-  const realtimeTag = ai.realtime_price ? ` | 实时价 ${ai.realtime_price}` : "";
+  const live = ai.realtime_input && ai.realtime_input.status === "live"
+    ? ai.realtime_input : null;
+  const realtimeTag = live && ai.realtime_price
+    ? ` | 实时价 ${ai.realtime_price} @ ${live.market_tick_time || "--"} | 抓取 ${formatDateTime(live.fetched_at_utc)}`
+    : " | 未取得调用前实时盘口";
   els.aiMeta.textContent = `${status} ${modelLabel} | 日线 ${ai.latest_date || "--"}${realtimeTag} | 生成 ${generated}`;
   els.aiSummary.textContent = ai.summary || "暂无 AI 摘要。";
 

@@ -5,11 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      run_ai_analysis:
-        description: "Generate DeepSeek AI analysis"
-        required: true
-        default: true
-        type: boolean
       symbols:
         description: "Symbols to update"
         required: true
@@ -21,11 +16,7 @@ on:
           - "Y0"
   schedule:
     # GitHub Actions scheduled workflows support a shortest interval of 5 minutes.
-    # Data-only refresh.
     - cron: "*/5 * * * *"
-    # DeepSeek every 3 hours. Beijing times are 08:00, 11:00, 14:00,
-    # 17:00, 20:00 and 23:00, covering both day and night sessions.
-    - cron: "0 */3 * * *"
 
 permissions:
   contents: write
@@ -41,6 +32,7 @@ concurrency:
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,12 +50,12 @@ jobs:
       - name: Update CSV
         run: python update_data.py
         env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           # Comma-separated list of profiles to run (must match keys in
-          # update_data.PROFILES). Default runs both P0 (palm oil) and Y0
-          # (soybean oil) in parallel inside update_data.py.
+          # update_data.PROFILES). AI runs in analyze-ai.yml so a slow model or
+          # market-data source cannot block the other queue.
           SYMBOLS: ${{ github.event_name == 'workflow_dispatch' && inputs.symbols || 'P0,Y0' }}
-          RUN_AI_ANALYSIS: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_ai_analysis) || (github.event_name == 'schedule' && github.event.schedule == '0 */3 * * *') }}
+          RUN_AI_ANALYSIS: "false"
+          DAILY_FETCH_TIMEOUT_SECONDS: "30"
           PYTHONUNBUFFERED: "1"
 
       - name: Validate dashboard data and decision invariants
@@ -120,6 +112,7 @@ jobs:
   deploy:
     needs: update-data
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     # Serialize with deploy-pages.yml so both workflows don't try to deploy
     # the same artifact at once — Pages can only accept one at a time.
     concurrency:

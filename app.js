@@ -2085,14 +2085,13 @@ async function autoLoadAccuracy() {
   if (!els.aiAccuracy) return;
   const _fetchSym = state.activeSymbol;
   try {
-    const r = await fetchWithRetry(`${dataPath("ai_accuracy.json")}?t=${Date.now()}`, { cache: "no-store" });
+    const d = await fetchLatestRepoJson(dataPath("ai_accuracy.json"));
     if (_fetchSym !== state.activeSymbol) return;
-    if (!r.ok) {
+    if (!d) {
       state.aiAccuracy = null;
       els.aiAccuracy.hidden = true;
       return;
     }
-    const d = await r.json();
     state.aiAccuracy = d;
     if (d.evaluation_method !== "fixed_4_completed_1h_bars_v2") {
       els.aiAccuracy.textContent = "旧复盘口径已停用 · 等待固定 4 根 1H 前向样本";
@@ -2172,14 +2171,13 @@ async function autoLoadAskResponse() {
   if (!els.askResponse) return;
   const _fetchSym = state.activeSymbol;
   try {
-    const r = await fetchWithRetry(`${dataPath("ask_response.json")}?t=${Date.now()}`, { cache: "no-store" }, 2);
+    const d = await fetchLatestRepoJson(dataPath("ask_response.json"));
     if (_fetchSym !== state.activeSymbol) return;
-    if (!r.ok) {
+    if (!d) {
       state.lastAskResponse = null;
       els.askResponse.hidden = true;
       return;
     }
-    const d = await r.json();
     state.lastAskResponse = d;
     renderAskResponse(d, /*fresh=*/false);
   } catch (_) {
@@ -2196,7 +2194,7 @@ function decodeGithubFile(payload) {
   return JSON.parse(new TextDecoder("utf-8").decode(bytes));
 }
 
-async function fetchLatestAskResponse(resultPath) {
+async function fetchLatestRepoJson(resultPath) {
   try {
     const apiResponse = await fetchWithRetry(
       `https://api.github.com/repos/FrankSun0616/palm_dalian/contents/${resultPath}?ref=main&t=${Date.now()}`,
@@ -2238,7 +2236,7 @@ async function submitAskQuestion() {
   setAskStatus(`正在直接提交给 V4-Pro（${requestedSymbol}）...`, "loading");
 
   try {
-    const previous = await fetchLatestAskResponse(resultPath);
+    const previous = await fetchLatestRepoJson(resultPath);
     if (previous?.asked_at_utc) prevTime = previous.asked_at_utc;
   } catch (_) {}
 
@@ -2280,7 +2278,7 @@ async function submitAskQuestion() {
       return;
     }
     try {
-      const d = await fetchLatestAskResponse(resultPath);
+      const d = await fetchLatestRepoJson(resultPath);
       if (!d) return;
       const newTime = d.asked_at_utc || null;
       const askedAt = Date.parse(newTime || "");
@@ -2303,7 +2301,7 @@ async function submitAskQuestion() {
       }
     } catch (_) {}
   };
-  askPollInterval = setInterval(pollForAnswer, 8 * 1000);
+  askPollInterval = setInterval(pollForAnswer, 4 * 1000);
   pollForAnswer();
 }
 
@@ -2332,7 +2330,7 @@ els.demoBtn.addEventListener("click", () => {
 
 const GH_OWNER = "FrankSun0616";
 const GH_REPO = "palm_dalian";
-const GH_WORKFLOW = "update-data.yml";
+const GH_WORKFLOW = "analyze-ai.yml";
 const GH_WORKFLOW_DISPATCH_URL = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`;
 const PUBLIC_ACTIONS_TOKEN = atob(
   "Z2l0aHViX3BhdF8xMUJIWlpDU1kwZDdKb050dVczVXU5X2dmMjd1c0V4aldwRHRMenU2ZXFNNHVKeF" +
@@ -2354,10 +2352,11 @@ async function generateAiAnalysis() {
   setAiStatus("正在直接触发 GitHub Actions...", "loading");
 
   try {
-    const previous = await fetchWithRetry(`${resultPath}?t=${Date.now()}`, { cache: "no-store" }, 2);
-    if (previous.ok) prevGenTime = (await previous.json()).generated_at_utc || prevGenTime;
+    const previous = await fetchLatestRepoJson(resultPath);
+    if (previous?.generated_at_utc) prevGenTime = previous.generated_at_utc;
   } catch (_) {}
 
+  const dispatchStarted = Date.now();
   try {
     const response = await fetch(GH_WORKFLOW_DISPATCH_URL, {
       method: "POST",
@@ -2369,7 +2368,7 @@ async function generateAiAnalysis() {
       },
       body: JSON.stringify({
         ref: "main",
-        inputs: { run_ai_analysis: "true", symbols: "P0,Y0" },
+        inputs: { symbols: "P0,Y0" },
       }),
     });
     if (!response.ok) {
@@ -2387,32 +2386,41 @@ async function generateAiAnalysis() {
     return;
   }
 
-  setAiStatus("Actions 已触发，P0/Y0 正在并行生成；本页会自动读取当前品种结果。", "loading");
+  setAiStatus("V4-Pro 正在基于最新缓存行情并行分析 P0/Y0，结果会直接显示。", "loading");
   if (aiManualPollInterval) clearInterval(aiManualPollInterval);
-  const startTime = Date.now();
-  const maxWait = 12 * 60 * 1000;
-  aiManualPollInterval = setInterval(async () => {
-    if (Date.now() - startTime > maxWait) {
+  const maxWait = 7 * 60 * 1000;
+  const pollForAnalysis = async () => {
+    if (Date.now() - dispatchStarted > maxWait) {
       clearInterval(aiManualPollInterval);
       aiManualPollInterval = null;
-      setAiStatus("尚未检测到新结果，工作流可能仍在运行，可稍后重新加载。", "error");
+      setAiStatus("7 分钟内未检测到新分析，请稍后再试。", "error");
       els.generateAiBtn.disabled = false;
       return;
     }
     try {
-      const r = await fetchWithRetry(`${resultPath}?t=${Date.now()}`, { cache: "no-store" }, 2);
-      if (!r.ok) return;
-      const ai = await r.json();
+      const ai = await fetchLatestRepoJson(resultPath);
+      if (!ai) return;
       const newTime = ai.generated_at_utc || null;
-      if (newTime && newTime !== prevGenTime) {
+      const generatedAt = Date.parse(newTime || "");
+      const matchesRequest = ai.symbol === requestedSymbol
+        && Number.isFinite(generatedAt)
+        && generatedAt >= dispatchStarted - 60 * 1000;
+      if (newTime && newTime !== prevGenTime && matchesRequest) {
         clearInterval(aiManualPollInterval);
         aiManualPollInterval = null;
         if (state.activeSymbol === requestedSymbol) updateAiPanel(ai);
-        setAiStatus(`分析完成 (${formatDateTime(newTime)})`, "success");
+        setAiStatus(
+          ai.status === "ok"
+            ? `V4-Pro 分析完成 (${formatDateTime(newTime)})`
+            : `V4-Pro 返回备用结果：${ai.error || "模型暂时不可用"}`,
+          ai.status === "ok" ? "success" : "error",
+        );
         els.generateAiBtn.disabled = false;
       }
     } catch (_) {}
-  }, 10 * 1000);
+  };
+  aiManualPollInterval = setInterval(pollForAnalysis, 5 * 1000);
+  pollForAnalysis();
 }
 
 els.generateAiBtn.addEventListener("click", generateAiAnalysis);
@@ -2799,10 +2807,9 @@ async function autoLoadAiAnalysis() {
   if (location.protocol === "file:") return;
   const _fetchSym = state.activeSymbol;
   try {
-    const cacheBust = `t=${Date.now()}`;
-    const response = await fetchWithRetry(`${dataPath("ai_analysis.json")}?${cacheBust}`, { cache: "no-store" });
+    const ai = await fetchLatestRepoJson(dataPath("ai_analysis.json"));
     if (_fetchSym !== state.activeSymbol) return;
-    if (response.status === 404) {
+    if (!ai) {
       // Fresh symbol without an AI run yet — show placeholder, don't crash.
       els.aiMeta.textContent = `${activeLabel().code} AI 分析尚未生成`;
       els.aiSummary.textContent = "等待后台生成 DeepSeek 短线分析。";
@@ -2816,8 +2823,6 @@ async function autoLoadAiAnalysis() {
       state.lastAi = null;
       return;
     }
-    if (!response.ok) throw new Error(`AI HTTP ${response.status}`);
-    const ai = await response.json();
     updateAiPanel(ai);
   } catch (error) {
     els.aiMeta.textContent = "AI 分析读取失败";
@@ -3340,12 +3345,12 @@ async function autoLoadSibling() {
   let sourceMeta = null;
   let ai = null;
   try {
-    const [smResp, aiResp] = await Promise.all([
+    const [smResp, latestAi] = await Promise.all([
       fetchWithRetry(`data/${dir}/source_meta.json?${cacheBust}`, { cache: "no-store" }),
-      fetchWithRetry(`data/${dir}/ai_analysis.json?${cacheBust}`, { cache: "no-store" }),
+      fetchLatestRepoJson(`data/${dir}/ai_analysis.json`),
     ]);
     if (smResp.ok) sourceMeta = await smResp.json();
-    if (aiResp.ok) ai = await aiResp.json();
+    ai = latestAi;
   } catch (_) {}
 
   // Pick a price: prefer AI realtime_price, then source_meta.live_bar.close, then latest_close.

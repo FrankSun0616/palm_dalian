@@ -11,13 +11,15 @@
 
 - `.github/workflows/update-data.yml`
   - Data schedule: `*/5 * * * *`.
-  - DeepSeek schedule: `0 */3 * * *`.
-  - Manual dispatch keeps the `run_ai_analysis` toggle.
   - Updates both `P0` and `Y0`, commits generated files, uploads the Pages artifact and deploys it.
-  - Uses `deepseek-v4-pro` with thinking enabled and high reasoning effort for both symbols in parallel.
+  - Runs AKShare daily reads in killable child processes and caps the data job at five minutes.
+- `.github/workflows/analyze-ai.yml`
+  - DeepSeek schedule: `0 */3 * * *` plus manual dispatch.
+  - Uses cached market files and runs `P0/Y0` in parallel without waiting for a Pages deployment.
+  - Uses `deepseek-v4-pro` with thinking enabled and high reasoning effort.
 - `.github/workflows/ask.yml`
   - Manual DeepSeek question with symbol and question inputs.
-  - Commits the answer JSON; the resulting push triggers the normal Pages workflow.
+  - Commits the answer JSON; the page reads the matching result directly from the repository.
 - `.github/workflows/notify.yml`
   - Evaluates configured notification rules.
 

@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from update_data import (
     _resolve_trade_bar,
     audit_ai_analysis,
     build_contract_bridge,
     compute_ai_accuracy,
+    fetch_daily_once_isolated,
+    fetch_daily_with_retry,
 )
 
 
@@ -62,6 +66,35 @@ class ConservativeFillTests(unittest.TestCase):
     def test_adverse_gap_fills_at_open(self) -> None:
         result = _resolve_trade_bar(1, 85, 95, 80, 90, 120)
         self.assertEqual(result, (85, "gap_stop", False))
+
+
+class DailyFetchTimeoutTests(unittest.TestCase):
+    def test_isolated_daily_fetch_enforces_hard_timeout(self) -> None:
+        with patch(
+            "update_data.subprocess.run",
+            side_effect=subprocess.TimeoutExpired(cmd=["python"], timeout=17),
+        ) as run:
+            with self.assertRaisesRegex(TimeoutError, "exceeded 17s hard timeout"):
+                fetch_daily_once_isolated("P0", timeout_seconds=17)
+        self.assertEqual(run.call_args.kwargs["timeout"], 17)
+
+    def test_exhausted_fetch_keeps_last_good_daily_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            data_dir = Path(tmp)
+            profile_dir = data_dir / "p0"
+            profile_dir.mkdir()
+            (profile_dir / "daily.csv").write_text(
+                "date,open,high,low,close,volume\n"
+                "2026-07-10,9000,9100,8950,9050,100\n",
+                encoding="utf-8",
+            )
+            with (
+                patch("update_data.DATA_DIR", data_dir),
+                patch("update_data.fetch_daily_once_isolated", side_effect=TimeoutError("timed out")),
+            ):
+                frame = fetch_daily_with_retry("P0", attempts=1, backoff=0)
+        self.assertEqual(frame.attrs["fetch_status"], "stale_fallback")
+        self.assertIn("timed out", frame.attrs["fetch_error"])
 
 
 class AiForwardEvaluationTests(unittest.TestCase):

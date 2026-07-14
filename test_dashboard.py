@@ -183,9 +183,11 @@ def validate_frontend() -> None:
     assert "GH_WORKFLOW_DISPATCH_URL" in app, "direct workflow dispatch is missing"
     assert "GH_ASK_WORKFLOW_DISPATCH_URL" in app, "direct V4-Pro Q&A dispatch is missing"
     assert "PUBLIC_ACTIONS_TOKEN = atob(" in app, "one-click public dispatch credential is missing"
-    assert 'run_ai_analysis: "true", symbols: "P0,Y0"' in app, "dual-symbol AI input is missing"
+    assert 'GH_WORKFLOW = "analyze-ai.yml"' in app, "AI button still dispatches the full data workflow"
+    assert 'inputs: { symbols: "P0,Y0" }' in app, "dual-symbol AI input is missing"
     assert "inputs: { symbol: requestedSymbol, question }" in app, "Q&A does not send the active symbol and question"
-    assert "fetchLatestAskResponse" in app and "/contents/${resultPath}" in app, "Q&A does not poll the latest repository answer"
+    assert "fetchLatestRepoJson" in app and "/contents/${resultPath}" in app, "direct repository polling is missing"
+    assert app.count("fetchLatestRepoJson(resultPath)") >= 4, "AI and Q&A do not both use direct result polling"
     assert "window.open(GH_ASK" not in app and "问题已复制" not in app, "manual Actions Q&A flow remains"
     assert "直接问 V4-Pro" in html, "direct V4-Pro Q&A button copy is missing"
     assert "DeepSeek V4-Pro" in html, "V4-Pro identity is missing from the UI"
@@ -202,19 +204,34 @@ def validate_frontend() -> None:
 
 def validate_workflow() -> None:
     workflow = (ROOT / ".github" / "workflows" / "update-data.yml").read_text(encoding="utf-8")
+    ai_workflow = (ROOT / ".github" / "workflows" / "analyze-ai.yml").read_text(encoding="utf-8")
+    ask_workflow = (ROOT / ".github" / "workflows" / "ask.yml").read_text(encoding="utf-8")
     pipeline = (ROOT / "update_data.py").read_text(encoding="utf-8")
+    ai_pipeline = (ROOT / "run_ai_analysis.py").read_text(encoding="utf-8")
     ask_backend = (ROOT / "ask_deepseek.py").read_text(encoding="utf-8")
     assert 'cron: "*/5 * * * *"' in workflow, "five-minute data cron missing"
-    assert 'cron: "0 */3 * * *"' in workflow, "three-hour AI cron missing"
+    assert 'cron: "0 */3 * * *"' in ai_workflow, "three-hour AI cron missing"
+    assert 'cron: "0 */3 * * *"' not in workflow, "AI schedule still blocks the data workflow"
     assert "workflow_dispatch:" in workflow, "manual dispatch missing"
-    assert "run_ai_analysis" in workflow, "manual AI toggle missing"
     assert "inputs.symbols" in workflow, "manual symbol selection is missing"
+    assert "workflow_dispatch:" in ai_workflow and "inputs.symbols" in ai_workflow, "manual AI dispatch missing"
+    assert "timeout-minutes: 5" in workflow, "data workflow has no global timeout"
+    assert "timeout-minutes: 6" in ai_workflow, "AI workflow has no global timeout"
+    assert "timeout-minutes: 3" in ask_workflow, "Q&A workflow has no global timeout"
+    assert 'RUN_AI_ANALYSIS: "false"' in workflow, "data workflow still performs DeepSeek analysis"
+    assert "actions/deploy-pages" not in ai_workflow, "AI workflow still waits for Pages deployment"
     assert "test_dashboard.py" in workflow, "dashboard validation step missing"
     assert "test_model_logic.py" in workflow, "model logic unit test step missing"
     assert "test_execution_logic.js" in workflow, "execution logic unit test step missing"
     assert "ThreadPoolExecutor(max_workers=len(symbols))" in pipeline, "P0/Y0 pipeline is not parallel"
+    assert "ThreadPoolExecutor(max_workers=len(symbols))" in ai_pipeline, "P0/Y0 AI analysis is not parallel"
     assert 'PYTHONUNBUFFERED: "1"' in workflow, "parallel pipeline logs are buffered"
+    assert 'PYTHONUNBUFFERED: "1"' in ai_workflow, "parallel AI logs are buffered"
     assert "DeepSeek analysis start" in pipeline, "per-symbol DeepSeek timing marker is missing"
+    assert "cached-market-data-v1" in ai_pipeline, "cached-data AI pipeline marker is missing"
+    assert "fetch_daily_once_isolated" in pipeline, "daily fetch isolation is missing"
+    assert "timeout=timeout_seconds" in pipeline, "daily fetch hard timeout is missing"
+    assert "fetch_daily_once.py" in pipeline, "isolated AKShare helper is missing"
     for path, source in (("update_data.py", pipeline), ("ask_deepseek.py", ask_backend)):
         assert 'DEEPSEEK_MODEL = "deepseek-v4-pro"' in source, f"{path}: V4-Pro is not fixed"
         assert '"thinking": DEEPSEEK_THINKING' in source, f"{path}: thinking mode is missing"

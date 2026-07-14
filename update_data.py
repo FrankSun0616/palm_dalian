@@ -4,6 +4,9 @@ import json
 import os
 import html
 import re
+import subprocess
+import sys
+import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -12,7 +15,12 @@ from urllib.parse import quote_plus
 from zoneinfo import ZoneInfo
 import xml.etree.ElementTree as ET
 
-import akshare as ak
+try:
+    import akshare as ak
+except ModuleNotFoundError:
+    # The dedicated AI workflow only reads cached files and intentionally
+    # installs no AKShare dependency.
+    ak = None
 import pandas as pd
 import requests
 
@@ -24,6 +32,7 @@ DATA_DIR.mkdir(exist_ok=True)
 DEEPSEEK_MODEL = "deepseek-v4-pro"
 DEEPSEEK_THINKING = {"type": "enabled"}
 DEEPSEEK_REASONING_EFFORT = "high"
+DAILY_FETCH_TIMEOUT_SECONDS = max(10, int(os.getenv("DAILY_FETCH_TIMEOUT_SECONDS", "30")))
 
 
 # ── AI history / accuracy helpers ────────────────────────────────────────────
@@ -1950,6 +1959,12 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         if snapshot.get("model_validation") else
         "数据中无策略验证结果，不得声称策略已经回测或验证。"
     )
+    freshness_instruction = (
+        "数据中包含 input_freshness，必须核对各数据时间；超过10分钟的数据要明确标注延迟，"
+        "不得把缓存快照描述成刚刚成交的实时盘口。"
+        if snapshot.get("input_freshness") else
+        "如果无法确认采样时间，必须把数据时效列为限制。"
+    )
 
     has_news = bool(news_summary and len(news_summary) > 60)
     news_block = (
@@ -1975,7 +1990,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
 
     prompt_content = (
         f"请基于以下大连商品交易所{profile_name} {symbol} 连续合约实时行情、1小时/2小时/4小时K线、日线数据及市场舆情做综合中文分析。"
-        f"{realtime_instruction}{intraday_instruction}{contract_instruction}{validation_instruction}"
+        f"{realtime_instruction}{intraday_instruction}{contract_instruction}{validation_instruction}{freshness_instruction}"
         f"{news_block}"
         "要求：\n"
         f"0) 本次分析基准时刻为 UTC {snapshot.get('analysis_as_of_utc')}、北京时间 {snapshot.get('analysis_as_of_beijing')}。"
@@ -1995,6 +2010,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         f"\n数据:\n{json.dumps(snapshot, ensure_ascii=False)}"
     )
 
+    api_started = time.monotonic()
     resp = requests.post(
         "https://api.deepseek.com/chat/completions",
         headers={
@@ -2024,6 +2040,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
     )
     resp.raise_for_status()
     resp_json = resp.json()
+    api_latency_seconds = round(time.monotonic() - api_started, 1)
     choice = resp_json["choices"][0]
     content = choice["message"]["content"]
     # Defensive: if DeepSeek truncated the response (finish_reason='length'),
@@ -2049,6 +2066,8 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
             "news_summary": news_summary,
             "symbol": symbol,
             "instrument_name": profile_name,
+            "api_latency_seconds": api_latency_seconds,
+            "token_usage": resp_json.get("usage") or {},
         }
     )
     parsed["integrity"] = audit_ai_analysis(parsed, snapshot)
@@ -2101,15 +2120,49 @@ def should_run_ai_analysis() -> bool:
 
 # ── Daily fetch with retry ───────────────────────────────────────────────────
 
-def fetch_daily_with_retry(symbol: str = "P0", attempts: int = 4, backoff: int = 20):
-    """Sina's futures API blocks GitHub Actions IPs intermittently. Retry with
-    linear backoff so a single transient timeout doesn't fail the workflow."""
-    import time
+def fetch_daily_once_isolated(symbol: str, timeout_seconds: int = DAILY_FETCH_TIMEOUT_SECONDS):
+    """Run AKShare in a child process so a stuck network call can be killed."""
+    helper = ROOT / "fetch_daily_once.py"
+    with tempfile.TemporaryDirectory(prefix=f"palm-{symbol.lower()}-") as tmp:
+        output = Path(tmp) / "daily.csv"
+        try:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(helper),
+                    "--symbol",
+                    symbol,
+                    "--output",
+                    str(output),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise TimeoutError(
+                f"AKShare {symbol} daily fetch exceeded {timeout_seconds}s hard timeout"
+            ) from exc
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "child process failed").strip()[-600:]
+            raise RuntimeError(f"AKShare {symbol} child failed: {detail}")
+        if not output.exists():
+            raise RuntimeError(f"AKShare {symbol} child produced no CSV")
+        frame = pd.read_csv(output)
+        if frame.empty:
+            raise RuntimeError(f"AKShare {symbol} child produced an empty CSV")
+        return frame
+
+
+def fetch_daily_with_retry(symbol: str = "P0", attempts: int = 2, backoff: int = 5):
+    """Fetch daily bars with bounded retries, then retain the last good cache."""
     last_exc: Exception | None = None
     for i in range(1, attempts + 1):
         try:
-            df = ak.futures_zh_daily_sina(symbol=symbol)
+            df = fetch_daily_once_isolated(symbol)
             if df is not None and not df.empty:
+                df.attrs["fetch_status"] = "live"
                 if i > 1:
                     print(f"Daily fetch succeeded on attempt {i}/{attempts}")
                 return df
@@ -2118,10 +2171,25 @@ def fetch_daily_with_retry(symbol: str = "P0", attempts: int = 4, backoff: int =
             last_exc = exc
             print(f"Daily fetch attempt {i}/{attempts} failed: {type(exc).__name__}: {exc}")
         if i < attempts:
-            wait = backoff * i  # 20s, 40s, 60s
+            wait = backoff * i
             print(f"  retrying in {wait}s...")
             time.sleep(wait)
-    raise RuntimeError(f"AKShare futures_zh_daily_sina failed after {attempts} attempts: {last_exc}")
+
+    profile = PROFILES.get(symbol) or {}
+    cached_path = DATA_DIR / str(profile.get("dir") or symbol.lower()) / "daily.csv"
+    if cached_path.exists():
+        cached = pd.read_csv(cached_path)
+        if not cached.empty:
+            cached.attrs["fetch_status"] = "stale_fallback"
+            cached.attrs["fetch_error"] = str(last_exc)
+            print(
+                f"[{symbol}] daily fetch exhausted after {attempts} bounded attempts; "
+                f"keeping cached {cached_path.name}"
+            )
+            return cached
+    raise RuntimeError(
+        f"AKShare futures_zh_daily_sina failed after {attempts} bounded attempts: {last_exc}"
+    )
 
 
 # Candidate OI column names in AKShare's Sina daily output — order matters,
@@ -2153,6 +2221,8 @@ def run_profile(symbol: str) -> None:
     df = fetch_daily_with_retry(symbol=symbol)
     if df.empty:
         raise RuntimeError(f"AKShare returned empty {symbol} daily data")
+    daily_fetch_status = str(df.attrs.get("fetch_status") or "live")
+    daily_fetch_error = str(df.attrs.get("fetch_error") or "")
 
     # F2: include open interest (持仓量) after volume when the daily feed has it.
     oi_col = detect_oi_column(df)
@@ -2228,6 +2298,9 @@ def run_profile(symbol: str) -> None:
         "main_contract": ((contract_bridge or {}).get("main") or {}).get("symbol"),
         "model_validation_status": model_validation.get("status"),
         "model_validation_generated_at_utc": model_validation.get("generated_at_utc"),
+        "daily_fetch_status": daily_fetch_status,
+        "daily_fetch_error": daily_fetch_error or None,
+        "realtime_quote": realtime,
     }
 
     # F2: attach open-interest fields when available.

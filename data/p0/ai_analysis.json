@@ -1,86 +1,195 @@
 {
-  "source": "fallback-rule-analysis",
+  "summary": "当前棕榈油连续合约 P0 realtime 价格 9279（ticktime 2026-07-15 15:04:29），较前一交易日结算价微涨 +0.02%。日线高开低走，收盘 9279 低于 20 日均线，全天跌 0.77%。技术面多周期震荡收敛，成交量萎缩，市场观望情绪浓厚，短期方向不明。",
+  "bias": "震荡",
+  "analysis": [
+    "【1小时布林】当前价 9279 位于布林带中轨（9271.45）上方，上轨 9355.04，下轨 9187.86，带宽 0.018（缩窄）。价格紧贴中轨运行，波动收敛，短期缺乏明确方向，关注突破。",
+    "【4小时布林】价格 9279 略高于 4 小时中轨（9274.15），上轨 9428.57，下轨 9119.73，带宽 0.0333。中轨走平，价格在布林带内震荡，未突破上下轨，中期维持区间格局。",
+    "【日线均线系统】收盘 9279 低于 20 日均线 9283.25，高于 10 日均线 9261.2，远低于 60 日均线 9480.12。均线维持空头排列，中期弱势未改，但 10 日均线提供短线支撑。",
+    "【实时价格位置】realtime 价格 9279（15:04:29）处于 1 小时中轨上方、4 小时中轨附近、日线 20 均线下方，上方均线压力明显，下方有短期均线支撑，价格夹在中间。",
+    "【趋势强度】1 小时 ADX 25.78，EMA20 斜率接近零；4 小时 ADX 17.37 极低；日线 RSI 47.63 中性。多周期均无明确趋势，市场处于无方向震荡状态。",
+    "【成交量能】1 小时成交量为 20 均量 1%，极度萎缩；日线量 455567 手，为 20 日均量 82%。缩量表明市场参与度低，突破动能不足，宜观望。",
+    "【支撑压力】短期支撑为 1 小时下轨 9188 及近期低点 9195，4 小时下轨 9120；压力为 1 小时上轨 9355、前期高点 9373，4 小时上轨 9428。",
+    "【多周期共振】1 小时与 4 小时均无趋势信号，日线弱势震荡。布林带收窄后可能酝酿单边，但在成交量放大前，倾向维持 9180-9360 区间波动。"
+  ],
+  "intraday_strategy": {
+    "bias": "震荡",
+    "entry": "区间内高抛低吸。若价格回踩 9200 附近企稳可轻仓试多，或反弹至 9340-9350 承压试空。",
+    "stop": "多单止损设于 9170 下方，空单止损设于 9380 上方。",
+    "take_profit": "多单目标看至 9300 附近，空单目标看至 9220 附近。",
+    "invalidation": "价格放量突破 9360 或跌破 9180，则震荡格局可能失效，策略取消。",
+    "notes": "适用今晚夜盘 21:00 开盘后。成交量清淡，建议小仓或观望，严格设好止损。"
+  },
+  "decision_frame": {
+    "confidence": 45,
+    "regime": "震荡",
+    "edge": "无明显优势，建议谨慎交易或观望。",
+    "no_trade_condition": "当前波动率低，以典型止损 30-50 点计算，止盈目标需至少 45-75 点才能达到 1.5 盈亏比，但在 9180-9360 区间内难度较大。若不能获得理想盈亏比，应避免强行交易。",
+    "long_case": {
+      "trigger": "价格回落至 9200-9220 区域，且 1 小时 K 线收出较长下影线或 RSI 进入超卖。",
+      "entry_zone": "9200-9230",
+      "stop": "9170",
+      "targets": [
+        "9300",
+        "9340"
+      ],
+      "invalidation": "价格跌破 9180 或收盘低于 9180。",
+      "risk_reward": "约 1:1.5 至 1:2（止损 30-50 点，目标 70-100 点）。"
+    },
+    "short_case": {
+      "trigger": "价格反弹至 9340-9350 区间，且 15 分钟图出现顶部形态或 RSI 超买。",
+      "entry_zone": "9340-9370",
+      "stop": "9380",
+      "targets": [
+        "9300",
+        "9250"
+      ],
+      "invalidation": "价格突破 9400 或收盘站上 9400。",
+      "risk_reward": "约 1:1.2 至 1:1.5（止损 30-40 点，目标 40-50 点），盈亏比偏弱，建议谨慎。"
+    },
+    "event_risks": [
+      "今晚夜盘关注美盘豆油和原油走势对油脂的传导。",
+      "印尼棕榈油出口政策后续变化。",
+      "MPOB 数据利空是否已被市场消化仍需观察。"
+    ],
+    "data_limits": [
+      "模型历史样本外表现不佳，胜率仅 28%，无预测能力，不可作为决策依据。",
+      "日内成交量极低，存在流动性风险和滑点可能。",
+      "连续合约分析，实际下单应切换至主力月份 P2609 并核对盘口。"
+    ]
+  },
+  "news_impact": [
+    "[利多] 印尼诉欧盟脂肪酸反倾销案获部分胜利（2026-07-15），该结果可能有助于维持其对欧盟棕榈油出口，对市场情绪有提振，但具体关税调整仍需后续谈判，短期间接利多。",
+    "[利空] 汇通网（2026-07-13）指出棕榈油在原油与豆油共振下推涨，但马来西亚及印尼高库存叠加增产预期令反弹高度存疑，警惕冲高回落风险。",
+    "[利空] 金十数据（2026-07-12）MPOB 2 月月报前瞻显示马棕油季节性减产，但出口或明显下滑，去库可能停滞甚至累库，对盘面形成压制。",
+    "[利空] 手机网易网（2026-07-13）油脂晚评称棕榈油领跌三大油脂，增产累库逻辑持续压制价格，短期基本面偏空。",
+    "[利多] 手机网易网（2026-07-14）晚评提及地缘风险点燃原油涨势，原油走强通过生物柴油链条支撑油脂，但棕榈油跟涨力度受制于自身供需。",
+    "[利空] 汇通网（2026-07-14）报道印度棕榈油需求坠入冰点，尽管原油溢价提供短期支撑，但需求疲弱可能导致价格反弹后再次承压。",
+    "[中性] 导油网（2026-07-10）展望下半年油脂市场多空交织，天气、政策、能源等不确定性大，市场等待新驱动，短期难有方向性突破。"
+  ],
+  "news_articles": [
+    {
+      "title": "印尼诉欧盟脂肪酸反倾销案获部分胜利 政府将继续维护大宗商品出口利益",
+      "source": "Shangbao Indonesia",
+      "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE5EeWRDT0RvTkxtSF9KRllaT2FzVU8wSVZ1Rm53dUVKNFVNYlFURXFDdktXYkNpWFpzbVp3WDVfdndfTEdaYzBteFpuQjl1ZjJrODhwdlhOZlNBNnVlRWViWGxDRGtiUXhRNUJocHljVVJRaHI4eDln?oc=5",
+      "detail": "印尼在世贸组织诉欧盟脂肪酸反倾销案中获胜诉，可能取消或降低对印尼棕榈油产品的惩罚性关税，有利于印尼棕榈油出口，对国际棕榈油价格构成潜在利多，但具体实施时间未定。",
+      "impact": "利多"
+    },
+    {
+      "title": "棕榈油：原油与豆油共振推涨，高库存令反弹高度存疑",
+      "source": "汇通网 Fx678",
+      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFB0TElTam9QcVZmaWhUMVV3UG55b1ZEMmY3T3VXSk1MV3BURDRhdVBGMjhWWmc5OUtOMEluYWFFVThDbzVRaEtMeUpaWUV1YkhaRGxNQTV6VFhoOFk?oc=5",
+      "detail": "受原油和豆油上涨带动，棕榈油价格反弹，但马来西亚和印尼高库存压制上方空间，反弹持续性存疑，市场可能重回弱势。",
+      "impact": "利空"
+    },
+    {
+      "title": "【MPOB 2月月报前瞻】马棕油季节性减产趋势持续，但出口或明显下滑！2月会否延续去库？",
+      "source": "金十数据",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE5Scy1FNDZ1cGxUNnFueHB4MTl3aXR5bXVWV0lDSVNNYlFfZFJaanZ6OWl5LTZGTVJNZTBMWXQ0MjQtTm1mOG42WXF3TTlhMFU?oc=5",
+      "detail": "MPOB 2月数据前瞻显示产量季节性下降但出口降幅可能更大，导致去库速度放缓，甚至库存增加，对盘面形成利空压力。",
+      "impact": "利空"
+    },
+    {
+      "title": "Mhy20260713油脂晚评：棕榈油领跌三大油脂 增产累库压制反弹",
+      "source": "手机网易网",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTFBrcVdST3BOM2pneV9ERnpqX0JJWkJGdE5mTTBaa3BqMmNfaldDWTlFSGNuUVpEM3IxSmJvclJURWptWEhRTFpRLWh6YkdDNWgyUGZCWWMxQUsxd0U0Y1l6Ujd3?oc=5",
+      "detail": "7月13日国内油脂期货普遍下跌，棕榈油跌幅居前，主因马棕产量增长和库存累积预期打压，短期反弹困难。",
+      "impact": "利空"
+    },
+    {
+      "title": "Mhy20260714油脂晚评：地缘风险点燃原油涨势",
+      "source": "手机网易网",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9yWU1BdUI5R0wzVzFmbERWbTNMUDFQVy14eUdPWWdwMF93cGE0NGx4dEJtNk5zc1JDV0RWVlZDUExzYUlMRXZ0ZzR6MzJvTC16UVNPbWl1MW11RVlBZF9wSlFB?oc=5",
+      "detail": "中东地缘风险升级推动原油价格大涨，生物柴油属性下棕榈油受原油带动上涨，但自身基本面疲弱可能限制跟涨幅度。",
+      "impact": "利多"
+    },
+    {
+      "title": "棕榈油连涨两日背后：印度需求坠入冰点，原油溢价还能撑多久？",
+      "source": "汇通网 Fx678",
+      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBNZUlnbFJKY2ZMaEtoendlN1FQZ1JLcjBTcFR6dVp4b3Y3RDBfbnY0Wk56LVpORmpJMEpkVVBFRUpVbGwzcVFsTWppMUJsLUIxVDBEUmpuUzhXM0k?oc=5",
+      "detail": "印度棕榈油进口需求急剧萎缩，尽管原油上涨提供支撑，但需求疲弱可能导致棕榈油反弹后再次回落。",
+      "impact": "利空"
+    }
+  ],
+  "watch_levels": {
+    "support": 9188.0,
+    "resistance": 9355.0
+  },
+  "normalization_warnings": [],
+  "risk_note": "本分析基于连续合约 P0，实际下单请选择主力合约 P2609 并核对盘口和流动性。所有观点仅供参考，不构成投资建议。模型历史回测表现为样本外亏损，无胜率依据。市场有风险，投资需谨慎。",
+  "source": "DeepSeek API",
   "model": "deepseek-v4-pro",
   "thinking_mode": "enabled",
   "reasoning_effort": "high",
-  "status": "fallback",
-  "error": "JSONDecodeError: Invalid control character at: line 19 column 92 (char 1177)",
-  "generated_at_utc": "2026-07-15T08:07:02+00:00",
-  "latest_date": "2026-07-14",
-  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
-  "bias": "等待AI",
-  "analysis": [
-    "实时价 9279（实时行情截至 2026-07-15 15:04:29，当前价 9279，涨跌 +0.02%），最新日线收盘 9351，日涨跌 +1.51%。",
-    "MA10/MA20/MA60 分别为 9260/9287/9482。",
-    "20日区间支撑压力为 9028-9470。"
-  ],
-  "intraday_strategy": {
-    "bias": "等待AI",
-    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
-    "stop": "未给出",
-    "take_profit": "未给出",
-    "invalidation": "未给出",
-    "notes": "当前为规则备用分析"
+  "status": "ok",
+  "generated_at_utc": "2026-07-15T10:50:52+00:00",
+  "latest_date": "2026-07-15",
+  "realtime_price": 9279.0,
+  "realtime_note": "实时行情截至 2026-07-15 15:04:29，当前价 9279，涨跌 +0.02%",
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-07-15T10:47:29+00:00",
+    "market_trading_day": "2026-07-15",
+    "market_tick_time": "15:04:29",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   },
-  "decision_frame": {
-    "confidence": 0,
-    "regime": "数据不足",
-    "edge": "等待 DeepSeek",
-    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
-    "long_case": {},
-    "short_case": {},
-    "event_risks": [],
-    "data_limits": [
-      "当前为备用规则分析"
-    ]
-  },
-  "news_impact": [],
-  "news_articles": [],
-  "watch_levels": {
-    "support": 9028.0,
-    "resistance": 9470.0
-  },
-  "integrity": {
-    "version": "deterministic-integrity-v1",
-    "checked_at_utc": "2026-07-15T08:07:02+00:00",
-    "score": 0,
-    "status": "blocked",
-    "label": "规则接管",
-    "execution_allowed": false,
-    "evidence_confidence": 0,
-    "issues": [
-      {
-        "code": "ai_unavailable",
-        "severity": "high",
-        "message": "JSONDecodeError: Invalid control character at: line 19 column 92 (char 1177)"
-      }
-    ],
-    "facts": {}
-  },
-  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "news_summary": "[1] 印尼诉欧盟脂肪酸反倾销案获部分胜利 政府将继续维护大宗商品出口利益 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-07-15T06:44:00+00:00\nURL: https://news.google.com/rss/articles/CBMid0FVX3lxTE5EeWRDT0RvTkxtSF9KRllaT2FzVU8wSVZ1Rm53dUVKNFVNYlFURXFDdktXYkNpWFpzbVp3WDVfdndfTEdaYzBteFpuQjl1ZjJrODhwdlhOZlNBNnVlRWViWGxDRGtiUXhRNUJocHljVVJRaHI4eDln?oc=5\n摘要: 印尼诉欧盟脂肪酸反倾销案获部分胜利 政府将继续维护大宗商品出口利益 Shangbao Indonesia\n\n[2] 印尼没想到！中企撤场连块铁皮都没留！普拉后悔，它成最大捡漏王 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-10T14:10:47+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE42S3lHZnB2WXlBVmpoUm5UX2VrWVhLNmdPcGFhdHNfdlNZRmFMcHR2WjhXMDRZSTI3U0JnQ2VrVTZYVUFrcTZES2tiV2ppUUVQcVRDWGV1VFN2ZHBmOW5WdWZ3?oc=5\n摘要: 印尼没想到！中企撤场连块铁皮都没留！普拉后悔，它成最大捡漏王 手机网易网\n\n[3] 棕榈油：原油与豆油共振推涨，高库存令反弹高度存疑 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-07-13T12:07:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTFB0TElTam9QcVZmaWhUMVV3UG55b1ZEMmY3T3VXSk1MV3BURDRhdVBGMjhWWmc5OUtOMEluYWFFVThDbzVRaEtMeUpaWUV1YkhaRGxNQTV6VFhoOFk?oc=5\n摘要: 棕榈油：原油与豆油共振推涨，高库存令反弹高度存疑 汇通网 Fx678\n\n[4] 【MPOB 2月月报前瞻】马棕油季节性减产趋势持续，但出口或明显下滑！2月会否延续去库？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-07-12T23:55:54+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE5Scy1FNDZ1cGxUNnFueHB4MTl3aXR5bXVWV0lDSVNNYlFfZFJaanZ6OWl5LTZGTVJNZTBMWXQ0MjQtTm1mOG42WXF3TTlhMFU?oc=5\n摘要: 【MPOB 2月月报前瞻】马棕油季节性减产趋势持续，但出口或明显下滑！2月会否延续去库？-市场参考 金十数据\n\n[5] 棕榈油涨了1000多块又跌回来了——这半年到底发生了什么？ - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-11T17:01:31+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE94V3BtUnNieXAxYkk1YWY4OWxxbEdPVmJPUk1RN3JZbTgwWnIwNlhDQThpZjJBQTdsbF96OWNyUU1fT0RfV3JoMVBUN2ExbVhlRE5kdmoxT01XS2pocHR2djJR?oc=5\n摘要: 棕榈油涨了1000多块又跌回来了——这半年到底发生了什么？ 手机网易网\n\n[6] Mhy20260713油脂晚评：棕榈油领跌三大油脂 增产累库压制反弹 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-13T12:39:25+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTFBrcVdST3BOM2pneV9ERnpqX0JJWkJGdE5mTTBaa3BqMmNfaldDWTlFSGNuUVpEM3IxSmJvclJURWptWEhRTFpRLWh6YkdDNWgyUGZCWWMxQUsxd0U0Y1l6Ujd3?oc=5\n摘要: Mhy20260713油脂晚评：棕榈油领跌三大油脂 增产累库压制反弹 手机网易网\n\n[7] 【棕榈油】MPOB报告利空，棕榈油近弱远强 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-11T06:57:38+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE1aN0I0SHBGZV9YRlV5ckFjMmNXMlg1RndYU0RIb0NhWUlHSFc1Szd6OGhBT1BmYXFlZTNmTmVOYmpmMkhTTERNdnJ6UjFReG1SQ3hBVGItM3k3T3d0TmRPYWNn?oc=5\n摘要: 【棕榈油】MPOB报告利空，棕榈油近弱远强 手机网易网\n\n[8] Mhy20260714油脂晚评：地缘风险点燃原油涨势 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-14T10:44:02+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE9yWU1BdUI5R0wzVzFmbERWbTNMUDFQVy14eUdPWWdwMF93cGE0NGx4dEJtNk5zc1JDV0RWVlZDUExzYUlMRXZ0ZzR6MzJvTC16UVNPbWl1MW11RVlBZF9wSlFB?oc=5\n摘要: Mhy20260714油脂晚评：地缘风险点燃原油涨势 手机网易网\n\n[9] 棕榈油连涨两日背后：印度需求坠入冰点，原油溢价还能撑多久？ - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-07-14T11:11:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTFBNZUlnbFJKY2ZMaEtoendlN1FQZ1JLcjBTcFR6dVp4b3Y3RDBfbnY0Wk56LVpORmpJMEpkVVBFRUpVbGwzcVFsTWppMUJsLUIxVDBEUmpuUzhXM0k?oc=5\n摘要: 棕榈油连涨两日背后：印度需求坠入冰点，原油溢价还能撑多久？ 汇通网 Fx678\n\n[10] 2026下半年，油脂能否开启新周期？ - 导油网\n来源: 导油网\n发布时间UTC: 2026-07-10T15:14:24+00:00\nURL: https://news.google.com/rss/articles/CBMiYEFVX3lxTFBOaFZLM0lPNXloRjdFdEozb1lqeE1jM0hlb1RENjdBcDFlWVRmcjBfbG5fNmNSU1dmMk84MDRZdUJoTjAwR2g4VjlYUG5fc3EtLTNFcTdoUmUzVFZYVjB4OQ?oc=5\n摘要: 2026下半年，油脂能否开启新周期？ 导油网",
   "symbol": "P0",
   "instrument_name": "棕榈油",
+  "api_latency_seconds": 203.2,
+  "token_usage": {
+    "prompt_tokens": 15247,
+    "completion_tokens": 7561,
+    "total_tokens": 22808,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 4532
+    },
+    "prompt_cache_hit_tokens": 512,
+    "prompt_cache_miss_tokens": 14735
+  },
+  "integrity": {
+    "version": "deterministic-integrity-v2",
+    "checked_at_utc": "2026-07-15T10:50:52+00:00",
+    "score": 85,
+    "status": "caution",
+    "label": "仅供参考",
+    "execution_allowed": false,
+    "evidence_confidence": 45,
+    "issues": [
+      {
+        "code": "low_evidence_confidence",
+        "severity": "medium",
+        "message": "AI 自评证据强度仅 45/100。"
+      }
+    ],
+    "facts": {
+      "realtime_price": 9279.0,
+      "realtime_fetch_status": "live",
+      "realtime_fetched_at_utc": "2026-07-15T10:47:29+00:00",
+      "realtime_market_tick_time": "15:04:29",
+      "daily_rsi14": 47.63,
+      "one_hour_boll_position": "中轨上方",
+      "four_hour_boll_position": "中轨上方",
+      "realtime_trading_day_label": "2026-07-15",
+      "realtime_label_is_future": false
+    }
+  },
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-07-15T08:05:09+00:00",
+    "realtime_fetched_at_utc": "2026-07-15T10:47:29+00:00",
     "realtime_market_trading_day": "2026-07-15",
     "realtime_market_tick_time": "15:04:29",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-07-15T06:01:13+00:00",
+    "daily_updated_at_utc": "2026-07-15T10:15:24+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-07-15T06:01:13+00:00",
-    "news_updated_at_utc": "2026-07-15T06:01:09+00:00",
-    "contract_bridge_updated_at_utc": "2026-07-15T06:01:10+00:00"
-  },
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-07-15T08:05:09+00:00",
-    "market_trading_day": "2026-07-15",
-    "market_tick_time": "15:04:29",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
+    "intraday_updated_at_utc": "2026-07-15T10:15:24+00:00",
+    "news_updated_at_utc": "2026-07-15T10:15:20+00:00",
+    "contract_bridge_updated_at_utc": "2026-07-15T10:15:20+00:00"
   }
 }

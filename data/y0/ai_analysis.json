@@ -1,71 +1,208 @@
 {
-  "source": "fallback-rule-analysis",
-  "model": "deepseek-v4-pro",
-  "thinking_mode": "enabled",
-  "reasoning_effort": "high",
-  "status": "fallback",
-  "error": "ChunkedEncodingError: Response ended prematurely",
-  "generated_at_utc": "2026-07-16T14:11:37+00:00",
-  "latest_date": "2026-07-16",
-  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
-  "bias": "等待AI",
+  "summary": "基于实时盘口时间 22:19:36，当前价 8573，涨跌幅 -0.13%，豆油连续合约 Y0 夜盘小幅低开震荡，日内短期回调但中期偏多结构未破。",
+  "bias": "震荡偏多",
   "analysis": [
-    "实时价 8560（盘口交易日归属标签 2026-07-17，最新盘口时间 22:10:30（不是未来行情），当前价 8560，涨跌 -0.28%），最新日线收盘 8570，日涨跌 -0.33%。",
-    "MA10/MA20/MA60 分别为 8562/8482/8495。",
-    "20日区间支撑压力为 8302-8657。"
+    "1小时布林：上轨 8617.09，中轨 8586.1，下轨 8555.11，带宽 0.0072；当前价 8573 位于中轨下方，短线偏弱；RSI14 44.6 显示下行动能，但夜盘成交量极低，信号可靠性有限。",
+    "4小时布林：上轨 8670.68，中轨 8570.45，下轨 8470.22，带宽 0.0234；价格 8562 接近中轨，EMA20 斜率 0.0018 向上，ADX 36.26 表明中期上升趋势未破坏。",
+    "日线均线：MA10 8561.6，MA20 8482.05，MA60 8494.68；当前价 8573 站在所有均线上方，中期多头排列，RSI 57.24 未超买，仍有上行空间。",
+    "实时价位置：当前价 8573 高于日线 MA10，但低于1小时中轨 8586；短期阻力在 8586-8590 区间，支撑在 8555（1小时下轨）及 8550 水平。",
+    "趋势共振：1小时 EMA20 向下，4小时 EMA20 向上，日线 MA20 向上，显示短期回调与中期上行矛盾，可能演化为震荡蓄势。",
+    "量能：夜盘开盘一个多小时成交量仅 58589 手（实时数据），持仓减少 5829 手至 546195，市场交投清淡，主力移仓至 Y2701，需关注流动性。",
+    "布林带宽：1小时带宽 0.0072 偏窄，暗示变盘可能临近；4小时带宽 0.0234 适度，价格围绕中轨波动。",
+    "支撑阻力：支撑依次为 8555（1h下轨）、8546（今日低点）、8470（4h下轨）；阻力 8586（1h中轨）、8617（1h上轨）、8625（前高）。"
   ],
   "intraday_strategy": {
-    "bias": "等待AI",
-    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
-    "stop": "未给出",
-    "take_profit": "未给出",
-    "invalidation": "未给出",
-    "notes": "当前为规则备用分析"
+    "bias": "偏多震荡",
+    "entry": "8555-8565 区间轻仓试多",
+    "stop": "8545",
+    "take_profit": "8590-8610",
+    "invalidation": "价格跌破 8550 并放量，或成交量持续低迷",
+    "notes": "适用时段：今晚夜盘（21:00-23:00）及明日早盘（09:00-11:30）。因夜盘成交量小，建议轻仓。关注持仓变化与主力合约 Y2609 流动性。"
   },
   "decision_frame": {
-    "confidence": 0,
-    "regime": "数据不足",
-    "edge": "等待 DeepSeek",
-    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
-    "long_case": {},
-    "short_case": {},
-    "event_risks": [],
+    "confidence": 50,
+    "regime": "震荡偏多",
+    "edge": "中期均线多头排列，4小时趋势向上，短期回踩关键支撑位。",
+    "no_trade_condition": "若价格跌破 8550 或反弹至 8600 以上但无成交量配合，则不进行交易。",
+    "long_case": {
+      "trigger": "价格回踩 8555-8565 区间获得支撑，15分钟图出现止跌信号",
+      "entry_zone": "8555-8565",
+      "stop": "8545",
+      "targets": [
+        "8590",
+        "8610"
+      ],
+      "invalidation": "跌破 8550",
+      "risk_reward": "2.0（以 8560 进场，止损 15 点，目标 30 点）"
+    },
+    "short_case": {
+      "trigger": "价格跌破 8550 或反弹至 8590-8600 遇阻，且1小时图出现阴线",
+      "entry_zone": "8590-8600",
+      "stop": "8610",
+      "targets": [
+        "8560",
+        "8540"
+      ],
+      "invalidation": "涨破 8615",
+      "risk_reward": "0.75（以 8595 进场，止损 15 点，目标 20 点，盈亏比不佳，不作为首选）"
+    },
+    "event_risks": [
+      "夜盘至明日无重大报告，但需关注外盘美豆油走势；USDA 报告前瞻可能影响明日市场情绪。"
+    ],
     "data_limits": [
-      "当前为备用规则分析"
+      "日内分析基于1小时和4小时K线，成交量极低可能降低信号可靠性；连续合约价格不代表具体月份合约，下单请确认实际月份。"
     ]
   },
-  "news_impact": [],
-  "news_articles": [],
+  "news_impact": [
+    "[利多] USDA 7月 WASDE 前瞻报告可能下调美豆库存预估，支撑豆类价格；豆油作为下游产品，成本端获提振。",
+    "[利空] 中国6月大豆进口创13个月新高，大豆到港量增加将提升压榨开工率，豆油供应预期上升，压制价格。",
+    "[利多] 厄尔尼诺气候预期可能影响美国大豆单产，远期供应风险溢价上升，对油脂有支撑。",
+    "[中性] 光大期货农产品日报未给出明确方向，但提及油脂震荡，市场等待突破。",
+    "[利空] 棕榈油供应宽松现实偏弱，可能拖累豆油市场情绪。",
+    "[利多] 美国持续向中国销售大豆，中美贸易流利多美豆，支撑国内进口成本。",
+    "[中性] 宏观经济数据强劲（出口大增）可能提振商品需求预期，但传导至豆油需时间。"
+  ],
+  "news_articles": [
+    {
+      "title": "光大期货：7月14日农产品日报",
+      "source": "新浪网",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQMEptdWVmYlNLa0hMel8tLTdJRGY1ZDlTeVN1MjFrOU9odm5HdnR3UUxpSm9fSlE5YlFUcHNFRjJLdzhWc0NZVzV2cXZPdHFVcWJVUWMzZlA5NGVzeE5GQWlBNGVaeHdxSlN2X1NrTFZ6WGNoNVJLbHFHWnJGcnRsZmpJamdjZG9CbWhyUFQ1UW1rMm5acXZNTzg4RmlqMmMyY282VGZGeTBfQzhjTzNnNw?oc=5",
+      "detail": "光大期货7月14日农产品日报分析了豆油、棕榈油等品种，指出豆油短期跟随外盘波动，国内库存有所回升，需求清淡，整体维持震荡格局。",
+      "impact": "中性"
+    },
+    {
+      "title": "USDA 7月WASDE全球农产品供需报告前瞻",
+      "source": "手机网易网",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE4tR2hpSlc2Nk15N0gzYUFBSU1fb2wxVEpiMURhSHBKZXl5VU0zYUt3NmZVMG54MkNldHhnWkNYbUxTYWlaTzY5QXp1bnY2X21uWkYxNnpnVWlaTnlCYjl3ZGx3?oc=5",
+      "detail": "报告前瞻预计USDA 7月供需报告可能下调美国2026/27年度大豆期末库存预估至2.5亿蒲式耳，低于上月预测，或对豆类价格形成支撑。",
+      "impact": "利多"
+    },
+    {
+      "title": "豆粕依托外盘震荡偏强 棕榈油供应宽松现实偏弱",
+      "source": "新浪网",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQMXVqb2RFeGFRbXF6LUxTRGxza0J1MG42cVRUSDd5SzZZSXlVUmtzYV9UWWFfRGgycTdFU2sxTy04Uk9VcHVBNDdPdGgxX2VGbFRTbVBKdS16cGx4YzZMRUJDZ01wbFh3YWZoYzAxWXpsUVVXMjBla3lUYzlPaHdaY0hWUjZFQ0xXYVIwdmJQeWsycVQyaG90aHFXSnF1V3JlZzRQbEFFZEd5TmFXeGVELQ?oc=5",
+      "detail": "文章指出豆粕受美豆成本支撑震荡偏强，但棕榈油因产地增产和出口放缓而供应宽松，价格承压，油脂板块走势分化。豆油受两者博弈影响，波动有限。",
+      "impact": "中性"
+    },
+    {
+      "title": "【农产品专研】厄尔尼诺气候下如何捕捉农产品投资机会",
+      "source": "手机网易网",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5tZjFHMm1ibWVzbDByc1pSRVBCekh1ZFl4czFya3BYcUF2UU0zUW9wWml0WHBXTlBDbmRwOWtKc3ItRFNXMEtoSnBlQS1aUXZ5bFZBSWlsekpBSldBOFhOcUxn?oc=5",
+      "detail": "分析厄尔尼诺现象可能影响美国大豆主产区降水，导致单产下降，从而提升豆油等农产品价格波动率，建议关注天气升水交易机会。",
+      "impact": "利多"
+    },
+    {
+      "title": "中国6月原油进口显著下降，大豆进口创13个月新高，铝出口创历史新高，上半年算力硬件进出口增长55.6%",
+      "source": "华尔街见闻",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE84dHVhWWNfdmJULXM1RW9Sb0M2UVN0elA0S3FvX2ZETVRoSEVfTF9KZjZ6M2NMekIwOURXWDJsVDRCcjVNX0lWYWw0MFhjczNDUVVn?oc=5",
+      "detail": "6月中国大豆进口量达到1027万吨，创13个月新高，远超市场预期，主要因前期买船集中到港。大豆压榨量上升将直接增加豆油产出，供应压力增大。",
+      "impact": "利空"
+    },
+    {
+      "title": "95%国人搞错了！中国舍近求远，为何选美国而不从俄罗斯采购大豆",
+      "source": "搜狐网",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNWW5hUWZTbUhrUWhEVkpRQXdLYmtYWm0xT1ZDWFdQZ2JwaXFCTHNUSU5FbVJsOURzc3Z3ZXp2bVl4a0pnSU1jeWRGc0hKWEtYVkVydzZURHdqNUM2ZjN2RHpEN211RFIyUVpkOEwwcXNuRWotSTlKMTZTUDJBNG9sUkFUc0RDQ0JoYjdXMw?oc=5",
+      "detail": "文章探讨中国大豆进口来源，美国大豆仍占主导地位，近期中美关系下美豆进口量保持稳定，短期内进口格局不变，对国内豆类构成稳定供应。",
+      "impact": "中性"
+    },
+    {
+      "title": "中国宁向美国购买大量转基因大豆，也不从俄罗斯购买，这是为啥？",
+      "source": "手机网易网",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9ZZmlZd3VFVjBjUEJKNDJGQ0hwM2RRT2loS0ZZT1lKc21PTE5UaVhVQ3BES2dzMEpfV0ZQUFlUYUVtdXJkV1ZualcyRnc1UHFKVW1VSHNlNTJfNkpCWnFlNkJ3?oc=5",
+      "detail": "进一步分析中国大豆进口依赖美国，因性价比和供应链稳定，短期内难以替代，暗示中美大豆贸易持续，对国内大豆价格有支撑。",
+      "impact": "中性"
+    },
+    {
+      "title": "一边卡芯片，一边卖大豆！特朗普如愿以偿了？",
+      "source": "QQ News",
+      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9LODJzSzB1WnA4RXBCTlY1OVVrOVI2N25lOFp3LXg3M0twYVZHdGtNU3duWmhGY2ZHdmk2R1lYY0NLaWVfbUFsbHQyWldIaXE1ZFBXbFRn?oc=5",
+      "detail": "评论美国对华策略，大豆出口成为政治筹码，但中国需求强劲，贸易流未受严重影响，大豆价格受到支撑。",
+      "impact": "中性"
+    },
+    {
+      "title": "AI投资热潮驱动！中国6月出口同比大增27%远超预期，创逾四年新高，上半年出口同比增长17.6%",
+      "source": "华尔街见闻",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBRczBFbnIwWVMyeHVhRlFHdS10Z0Nid05BYmVNazRfSXZ5cF9ER1lHNUFIRnR1cG9peHg3QU1zVURYTkp0V3NmR3lKcmU2UXZuOXNJ?oc=5",
+      "detail": "中国6月出口数据远超预期，显示整体经济需求韧性，可能提振大宗商品市场情绪，但对豆油直接需求拉动有限，更多通过宏观氛围间接影响。",
+      "impact": "中性"
+    }
+  ],
   "watch_levels": {
     "support": 8302.0,
     "resistance": 8657.0
   },
+  "normalization_warnings": [
+    "support",
+    "resistance"
+  ],
+  "risk_note": "以上分析基于大连商品交易所豆油连续合约 Y0，不构成投资建议。实际交易需结合具体月份合约（当前主力 Y2609）流动性、盘口深度及个人风险偏好，注意控制仓位。换月期间价差波动可能影响连续合约信号映射，下单前请二次确认合约及价格。",
+  "source": "DeepSeek API",
+  "model": "deepseek-v4-pro",
+  "thinking_mode": "enabled",
+  "reasoning_effort": "high",
+  "status": "ok",
+  "generated_at_utc": "2026-07-16T14:21:45+00:00",
+  "latest_date": "2026-07-16",
+  "realtime_price": 8573.0,
+  "realtime_note": "盘口交易日归属标签 2026-07-17，最新盘口时间 22:19:36（不是未来行情），当前价 8573，涨跌 -0.13%",
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-07-16T14:19:40+00:00",
+    "market_trading_day": "2026-07-17",
+    "market_tick_time": "22:19:36",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
+  },
+  "news_summary": "[1] 光大期货：7月14日农产品日报 - 新浪网\n来源: 新浪网\n发布时间UTC: 2026-07-14T02:13:47+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQMEptdWVmYlNLa0hMel8tLTdJRGY1ZDlTeVN1MjFrOU9odm5HdnR3UUxpSm9fSlE5YlFUcHNFRjJLdzhWc0NZVzV2cXZPdHFVcWJVUWMzZlA5NGVzeE5GQWlBNGVaeHdxSlN2X1NrTFZ6WGNoNVJLbHFHWnJGcnRsZmpJamdjZG9CbWhyUFQ1UW1rMm5acXZNTzg4RmlqMmMyY282VGZGeTBfQzhjTzNnNw?oc=5\n摘要: 光大期货：7月14日农产品日报 新浪网\n\n[2] USDA 7月WASDE全球农产品供需报告前瞻 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-11T00:30:53+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE4tR2hpSlc2Nk15N0gzYUFBSU1fb2wxVEpiMURhSHBKZXl5VU0zYUt3NmZVMG54MkNldHhnWkNYbUxTYWlaTzY5QXp1bnY2X21uWkYxNnpnVWlaTnlCYjl3ZGx3?oc=5\n摘要: USDA 7月WASDE全球农产品供需报告前瞻 手机网易网\n\n[3] 豆粕依托外盘震荡偏强 棕榈油供应宽松现实偏弱 - 新浪网\n来源: 新浪网\n发布时间UTC: 2026-07-14T12:13:02+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQMXVqb2RFeGFRbXF6LUxTRGxza0J1MG42cVRUSDd5SzZZSXlVUmtzYV9UWWFfRGgycTdFU2sxTy04Uk9VcHVBNDdPdGgxX2VGbFRTbVBKdS16cGx4YzZMRUJDZ01wbFh3YWZoYzAxWXpsUVVXMjBla3lUYzlPaHdaY0hWUjZFQ0xXYVIwdmJQeWsycVQyaG90aHFXSnF1V3JlZzRQbEFFZEd5TmFXeGVELQ?oc=5\n摘要: 豆粕依托外盘震荡偏强 棕榈油供应宽松现实偏弱 新浪网\n\n[4] 【农产品专研】厄尔尼诺气候下如何捕捉农产品投资机会 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-16T08:48:25+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE5tZjFHMm1ibWVzbDByc1pSRVBCekh1ZFl4czFya3BYcUF2UU0zUW9wWml0WHBXTlBDbmRwOWtKc3ItRFNXMEtoSnBlQS1aUXZ5bFZBSWlsekpBSldBOFhOcUxn?oc=5\n摘要: 【农产品专研】厄尔尼诺气候下如何捕捉农产品投资机会 手机网易网\n\n[5] 中国6月原油进口显著下降，大豆进口创13个月新高，铝出口创历史新高，上半年算力硬件进出口增长55.6% - 华尔街见闻\n来源: 华尔街见闻\n发布时间UTC: 2026-07-14T07:02:57+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE84dHVhWWNfdmJULXM1RW9Sb0M2UVN0elA0S3FvX2ZETVRoSEVfTF9KZjZ6M2NMekIwOURXWDJsVDRCcjVNX0lWYWw0MFhjczNDUVVn?oc=5\n摘要: 中国6月原油进口显著下降，大豆进口创13个月新高，铝出口创历史新高，上半年算力硬件进出口增长55.6% 华尔街见闻\n\n[6] 95%国人搞错了！中国舍近求远，为何选美国而不从俄罗斯采购大豆 - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-07-14T05:47:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNWW5hUWZTbUhrUWhEVkpRQXdLYmtYWm0xT1ZDWFdQZ2JwaXFCTHNUSU5FbVJsOURzc3Z3ZXp2bVl4a0pnSU1jeWRGc0hKWEtYVkVydzZURHdqNUM2ZjN2RHpEN211RFIyUVpkOEwwcXNuRWotSTlKMTZTUDJBNG9sUkFUc0RDQ0JoYjdXMw?oc=5\n摘要: 95%国人搞错了！中国舍近求远，为何选美国而不从俄罗斯采购大豆 搜狐网\n\n[7] 中国宁向美国购买大量转基因大豆，也不从俄罗斯购买，这是为啥？ - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-13T18:50:14+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE9ZZmlZd3VFVjBjUEJKNDJGQ0hwM2RRT2loS0ZZT1lKc21PTE5UaVhVQ3BES2dzMEpfV0ZQUFlUYUVtdXJkV1ZualcyRnc1UHFKVW1VSHNlNTJfNkpCWnFlNkJ3?oc=5\n摘要: 中国宁向美国购买大量转基因大豆，也不从俄罗斯购买，这是为啥？ 手机网易网\n\n[8] 一边卡芯片，一边卖大豆！特朗普如愿以偿了？ - QQ News\n来源: QQ News\n发布时间UTC: 2026-07-12T08:08:00+00:00\nURL: https://news.google.com/rss/articles/CBMiVkFVX3lxTE9LODJzSzB1WnA4RXBCTlY1OVVrOVI2N25lOFp3LXg3M0twYVZHdGtNU3duWmhGY2ZHdmk2R1lYY0NLaWVfbUFsbHQyWldIaXE1ZFBXbFRn?oc=5\n摘要: 一边卡芯片，一边卖大豆！特朗普如愿以偿了？ QQ News\n\n[9] 中国连续11季度出口增长：AI需求正在重写全球贸易格局？_宏观数据_全球资讯 - bihainews.com\n来源: bihainews.com\n发布时间UTC: 2026-07-14T13:24:00+00:00\nURL: https://news.google.com/rss/articles/CBMiZ0FVX3lxTE50ckczc3JXenRzeUFOd1h0MXpGMTFJZnhOX3RNdmdEMExNR2JkT2dtZlZLa0pPWjlwejJ1VlgtdFVkZ2U1X09hZVBRWjl3cXBvZGoyNVpGTXBvcjRCVDNkbEh5VFZEV00?oc=5\n摘要: 中国连续11季度出口增长：AI需求正在重写全球贸易格局？_宏观数据_全球资讯 bihainews.com\n\n[10] AI投资热潮驱动！中国6月出口同比大增27%远超预期，创逾四年新高，上半年出口同比增长17.6% - 华尔街见闻\n来源: 华尔街见闻\n发布时间UTC: 2026-07-14T03:28:11+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTFBRczBFbnIwWVMyeHVhRlFHdS10Z0Nid05BYmVNazRfSXZ5cF9ER1lHNUFIRnR1cG9peHg3QU1zVURYTkp0V3NmR3lKcmU2UXZuOXNJ?oc=5\n摘要: AI投资热潮驱动！中国6月出口同比大增27%远超预期，创逾四年新高，上半年出口同比增长17.6% 华尔街见闻",
+  "symbol": "Y0",
+  "instrument_name": "豆油",
+  "api_latency_seconds": 125.5,
+  "token_usage": {
+    "prompt_tokens": 15312,
+    "completion_tokens": 9254,
+    "total_tokens": 24566,
+    "prompt_tokens_details": {
+      "cached_tokens": 2688
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 5868
+    },
+    "prompt_cache_hit_tokens": 2688,
+    "prompt_cache_miss_tokens": 12624
+  },
   "integrity": {
-    "version": "deterministic-integrity-v1",
-    "checked_at_utc": "2026-07-16T14:11:37+00:00",
-    "score": 0,
+    "version": "deterministic-integrity-v2",
+    "checked_at_utc": "2026-07-16T14:21:45+00:00",
+    "score": 60,
     "status": "blocked",
     "label": "规则接管",
     "execution_allowed": false,
-    "evidence_confidence": 0,
+    "evidence_confidence": 50,
     "issues": [
       {
-        "code": "ai_unavailable",
+        "code": "invalid_watch_levels",
         "severity": "high",
-        "message": "ChunkedEncodingError: Response ended prematurely"
+        "message": "AI 支撑/压力不是有效数字，已改用确定性区间。"
       }
     ],
-    "facts": {}
+    "facts": {
+      "realtime_price": 8573.0,
+      "realtime_fetch_status": "live",
+      "realtime_fetched_at_utc": "2026-07-16T14:19:40+00:00",
+      "realtime_market_tick_time": "22:19:36",
+      "daily_rsi14": 57.24,
+      "one_hour_boll_position": "中轨下方",
+      "four_hour_boll_position": "中轨上方",
+      "realtime_trading_day_label": "2026-07-17",
+      "realtime_label_is_future": true
+    }
   },
-  "risk_note": "本分析仅供行情研究，不构成投资建议。",
-  "symbol": "Y0",
-  "instrument_name": "豆油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-07-16T14:10:36+00:00",
+    "realtime_fetched_at_utc": "2026-07-16T14:19:40+00:00",
     "realtime_market_trading_day": "2026-07-17",
-    "realtime_market_tick_time": "22:10:30",
+    "realtime_market_tick_time": "22:19:36",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
@@ -74,13 +211,5 @@
     "intraday_updated_at_utc": "2026-07-16T13:22:15+00:00",
     "news_updated_at_utc": "2026-07-16T13:22:13+00:00",
     "contract_bridge_updated_at_utc": "2026-07-16T13:22:13+00:00"
-  },
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-07-16T14:10:36+00:00",
-    "market_trading_day": "2026-07-17",
-    "market_tick_time": "22:10:30",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
   }
 }

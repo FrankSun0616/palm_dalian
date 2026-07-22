@@ -1,86 +1,198 @@
 {
-  "source": "fallback-rule-analysis",
-  "model": "deepseek-v4-pro",
-  "thinking_mode": "enabled",
-  "reasoning_effort": "high",
-  "status": "fallback",
-  "error": "JSONDecodeError: Invalid control character at: line 11 column 157 (char 1547)",
-  "generated_at_utc": "2026-07-21T22:03:53+00:00",
-  "latest_date": "2026-07-21",
-  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
-  "bias": "等待AI",
+  "summary": "大连豆油连续合约Y0（映射主力Y2609）实时价8516元/吨（北京时间09:16:04），较昨日结算价跌0.54%。1小时和4小时图显示价格跌破布林中轨且4小时曾跌破下轨，日线测试MA20支撑，持仓持续下降，短期偏空。在8570下方维持短线空头思路，但追空需谨慎。历史模型优势尚未证实，不作为概率依据。",
+  "bias": "偏空",
   "analysis": [
-    "实时价 8498（实时行情截至 2026-07-22 23:00:00，当前价 8498，涨跌 -0.75%），最新日线收盘 8542，日涨跌 -0.66%。",
-    "MA10/MA20/MA60 分别为 8579/8512/8495。",
-    "20日区间支撑压力为 8302-8657。"
+    "1小时布林通道上轨8619.88，中轨8557.7，下轨8495.52，当前价8516位于中轨下方、下轨之上，通道带宽0.0145较前期收敛，表明短期下行空间受限，但空头仍未改变。",
+    "4小时布林通道上轨8630.7，中轨8573.25，下轨8515.8，实时价8516刚好回到下轨上方，此前K线收盘一度跌破下轨，显示空头力量占优；下轨8515-8485区域构成关键支撑，若再度跌破将打开更大下跌空间。",
+    "日线MA10 8578.9、MA20 8512.4、MA60 8494.52呈多头排列，但价格已跌破MA10，回落至MA20附近，当前价8516略高于MA20，RSI14 52.85中性；若日线收盘跌破MA20，中期趋势转弱。",
+    "近一个月波动区间为8302-8657，当前价8516处于区间中下沿，上方压力密集于8557（1H中轨）-8573（4H中轨），下方支撑关注8485（昨日低点）及8300区域。",
+    "持仓量已从6月初60万手降至47万手，主力减仓明显；今日1小时持仓减少1162手，4小时减少13361手，资金持续流出，限制下跌动能，但也暗示短期难有大幅反弹。",
+    "小时图RSI 37.52接近超卖，4小时44.44中性，日线52.85中性，多周期未形成一致超卖，但小时指标有修复需求，可能引发盘中弱反弹。",
+    "量能方面，今日开盘后1小时成交量仅600手，远低于前日同时段，市场观望情绪浓厚；下跌缩量表明空头打压力度减弱，但反弹亦缺乏量能支持。"
   ],
   "intraday_strategy": {
-    "bias": "等待AI",
-    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
-    "stop": "未给出",
-    "take_profit": "未给出",
-    "invalidation": "未给出",
-    "notes": "当前为规则备用分析"
+    "bias": "偏空",
+    "entry": "反弹至8557-8562区域轻仓做空（1小时中轨与开盘高点）；或跌破8490后反弹确认追空。（所有报价以主力合约Y2609为准）",
+    "stop": "空单止损设于8590上方（突破1小时上轨）；追空止损设于8520（回破8490）",
+    "take_profit": "第一目标8490，第二目标8440，极限目标8300。",
+    "invalidation": "价格有效站上8570（15分钟K线收盘突破），则空头策略失效，转观望。",
+    "notes": "适用时段：今日早盘09:00-11:30及午盘13:30-15:00。夜盘需结合CBOT外盘表现再评估。当前持仓持续下降，行情流畅度可能受限，建议轻仓参与，严格止损。"
   },
   "decision_frame": {
-    "confidence": 0,
-    "regime": "数据不足",
-    "edge": "等待 DeepSeek",
-    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
-    "long_case": {},
-    "short_case": {},
-    "event_risks": [],
+    "confidence": 45,
+    "regime": "区间震荡偏弱",
+    "edge": "短期均线死叉，价格跌破1H/4H中轨，持仓流出，空头占据主动，但下方支撑密集且量能衰减，追空风险较高。",
+    "no_trade_condition": "历史模型优势尚未证实，任何交易决策不得基于历史胜率；若价格反弹站稳8570，空头逻辑失效；若首次反弹入场盈亏比低于1.5，不宜参与。",
+    "long_case": {
+      "trigger": "价格放量突破并站稳8570，或15分钟图出现双底配合RSI底背离。",
+      "entry_zone": "8560-8575",
+      "stop": "8540（日线MA20附近）",
+      "targets": [
+        "8600",
+        "8630"
+      ],
+      "invalidation": "未能站稳8570或跌破8540",
+      "risk_reward": "入场约8565，目标8600（35点），止损8540（25点），盈亏比1.4:1，低于1.5，不建议做多。"
+    },
+    "short_case": {
+      "trigger": "价格反弹至8557-8562承压回落，或跌破8490并反抽确认。",
+      "entry_zone": "反弹单：8557-8562；突破单：8490附近",
+      "stop": "反弹单止损8590；突破单止损8520",
+      "targets": [
+        "8490",
+        "8440",
+        "8300"
+      ],
+      "invalidation": "反弹单突破8590；突破单回抽站稳8520",
+      "risk_reward": "反弹单：入场均价8560，目标8490（70点），止损8590（30点），盈亏比2.3:1；突破单：入场8490，目标8440（50点），止损8520（30点），盈亏比1.67:1。首目标盈亏比超1.5，可轻仓参与。"
+    },
+    "event_risks": [
+      "明日凌晨USDA出口销售报告、外盘CBOT波动、国内豆油库存变化数据"
+    ],
     "data_limits": [
-      "当前为备用规则分析"
+      "1小时/4小时K线数据更新至北京时间09:01左右，较当前实时可能滞后；舆情多数为7月16-20日，时效性略有不足。"
     ]
   },
-  "news_impact": [],
-  "news_articles": [],
+  "news_impact": [
+    "[利多] 7月20日新闻显示美豆出口激增、压榨量超预期、豆油库存骤降，CBOT大豆站稳12美元/蒲式耳，天气溢价仍存在空间。这直接提振豆油成本端，对国内豆油形成底部支撑，但该信息已部分反映在前几日盘面，且当前回落表明短期消化完毕。",
+    "[中性] 金十数据预告下周值得关注的大事件，可能包括USDA报告、天气变化等，对豆油方向影响未定；需关注实际数据是否超预期。",
+    "[利多] 高温天气导致农产品投资机会受关注，棉花、大豆等作物面临减产风险，若天气持续，美豆及全球油脂供应可能收紧，长期利多豆油。",
+    "[利多] 厄尔尼诺气候专题指出农产品价格易受极端天气推升，棕榈油、大豆等可能受减产预期影响，对豆油价格形成潜在提振。",
+    "[中性] 中国加速采购美国大豆的消息表明中美农产品贸易活跃，增加国内大豆供应预期，若压榨利润尚可，豆油产出可能增加，但采购也反映出需求强劲和远期锁利，实际影响需视压榨节奏。",
+    "[中性] 巴西大豆对华出口稳固，中国市场供应来源充足，减弱了对单一来源的依赖，平衡了天气升水预期，整体影响中性。"
+  ],
+  "news_articles": [
+    {
+      "title": "出口激增+压榨超预期+豆油库存骤降，CBOT大豆站稳12美元！天气溢价还有多少空间？",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPY3JqVmFxOHQxNXBNZHJxdzF3OHh4WGt2STFIN2Rla2M2RkptSzlmSWczVDFmbkdHOUptcWxZWEI5YTZYSTljaTgwYTY1YUthYTRlRnk2dm01UkI3VEhTMnBudDV6V0VnOWJ3cGxDYXk3VTdGOWNpcnZ4aE1JSGJ5UzhaN09xWktSaVEyMnBabF9RTXRUX2hnV2lLMGR3NWtKRlhpRWVscFBTbjZJT2xfeg?oc=5",
+      "detail": "据报道，美国大豆出口需求激增，压榨量超市场预期，同时豆油库存出现骤降，推动CBOT大豆期货站稳12美元/蒲式耳。市场继续关注天气溢价空间，担忧高温干燥天气影响作物优良率，为豆油价格提供强支撑。短期利多情绪浓厚。",
+      "impact": "利多"
+    },
+    {
+      "title": "期货市场下周值得关注的大事件有哪些？各板块有哪些关注点？-市场参考",
+      "source": "金十数据",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBmR0JPX1M5MGFFSVMtOHJzNmp6THF5d2d4WGZSQUdGOFFzWDM1dDVTb2Z1RXB1Rk1aZ3JvT0duRFV3d290MnB5TVgwSUNGYkk?oc=5",
+      "detail": "文章梳理了下周农产品板块的潜在交易机会，提及USDA出口及压榨数据更新、产区天气跟踪以及巴西装运进度，对豆油市场影响偏中性，具体方向需等待数据指引。",
+      "impact": "中性"
+    },
+    {
+      "title": "高温“烤”出史诗级机会？农产品投资窗口全解析：棉花、大豆、红枣、橡胶、白糖谁更值得布局？",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxNdFNYUXBoOVA0MGVfTDdfMVo5S1ViVzZxaWpQWENBeFl4aWkyRkhKT2FDRjRIR1c3N3E3dnVDZVZDOGZ3VFctNFlsWm5oYlpiQkNaVmp4TkJrTTFrZ2I1VVpwN0RleVFKV2dIalUtN0YtNHN4VE1LVXBlelVuUjlEajRXakdVdWV3bkh3R0VOM3RkdFY3QWRKZ2otblh6VEFhYms5R0NGVExWSmpObjJuZF83Ni1jT0hraFdzTFFya3d3alEwUldXZmcxckdJXzBCaGY0MGFUMEJobXFGbTROTk5B?oc=5",
+      "detail": "分析指出高温炙烤将对棉花、大豆等作物造成实质减产威胁，供应端收缩预期强烈，农产品投资窗口出现。大豆单产受损将间接带动豆油成本上升，中长期利多。",
+      "impact": "利多"
+    },
+    {
+      "title": "厄尔尼诺气候下如何捕捉农产品投资机会",
+      "source": "手机网易网",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5tMnF4NlBVR2J1WC1ydnVHUlRaU1M2TlRxRUZwNmxpWnVzQmlCY2hmWFdLLUpaRFFUSDVQcWZpX3JUQ1ViZHplbEtDbXkycERhU2ZWVjQxa05Kd0RiUkxsTzVB?oc=5",
+      "detail": "文章讨论厄尔尼诺现象对全球农产品供需的干扰，棕榈油和大豆产区干旱风险上升，历史上厄尔尼诺年份油脂价格易出现阶段性大涨，豆油或得到天气溢价。",
+      "impact": "利多"
+    },
+    {
+      "title": "中国加速采购美国大豆，不是给面子，反倒把特朗普的算盘珠子拨乱",
+      "source": "手机网易网",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE94TFVVSE52dmtibzNsV2ViMHBrRlo0eHNUeGlITDVXVWVIdDk2QXdvbDlnT1BUYTFzYk11bE1iUUxlblhhZEhZc0VmWW13cGdwYnpzVWk4QTR1LUR4QmRGYVZn?oc=5",
+      "detail": "近期市场消息称中国加紧采购美国大豆，以充实储备或满足压榨需求。大量进口大豆料将提高国内压榨量，豆油供应预期增加，但采购节奏也显示需求良好，影响偏中性。",
+      "impact": "中性"
+    },
+    {
+      "title": "卖中国大豆，巴西把美国甩得更远了",
+      "source": "观察者",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1Mc3dfZWROU2FiU0kwRnBoTHJWWEYzTjhCZWNnTVlsYmFaTmhSd0locmVFRUtPXzNJNExjdlJUT1dzazZDS24yRExaR1ZVZDVJZFh1NHJMdWpkVVNiYXE1ZE9mR0Y3ZmRLb0E?oc=5",
+      "detail": "文章指出巴西大豆在中国市场份额持续扩大，供应来源多元化削弱了单一供应风险，也对美豆天气升水形成制约，对国内豆油价格偏中性。",
+      "impact": "中性"
+    }
+  ],
   "watch_levels": {
     "support": 8302.0,
     "resistance": 8657.0
   },
+  "normalization_warnings": [
+    "support",
+    "resistance"
+  ],
+  "risk_note": "本分析基于大连商品交易所豆油连续合约Y0及主力Y2609的实时行情和公开信息，仅供参考，不构成投资建议。连续合约包含换月跳空，具体交易时请以Y2609等具体月份合约盘口为准，并二次确认交易软件报价。历史模型样本外结果仅为回测表现，不代表未来收益。市场有风险，入市需谨慎。",
+  "source": "DeepSeek API",
+  "model": "deepseek-v4-pro",
+  "thinking_mode": "enabled",
+  "reasoning_effort": "high",
+  "status": "ok",
+  "generated_at_utc": "2026-07-22T01:18:32+00:00",
+  "latest_date": "2026-07-21",
+  "realtime_price": 8516.0,
+  "realtime_note": "实时行情截至 2026-07-22 09:16:04，当前价 8516，涨跌 -0.54%",
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-07-22T01:16:23+00:00",
+    "market_trading_day": "2026-07-22",
+    "market_tick_time": "09:16:04",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
+  },
+  "news_summary": "[1] 出口激增+压榨超预期+豆油库存骤降，CBOT大豆站稳12美元！天气溢价还有多少空间？ - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-20T15:45:00+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxPY3JqVmFxOHQxNXBNZHJxdzF3OHh4WGt2STFIN2Rla2M2RkptSzlmSWczVDFmbkdHOUptcWxZWEI5YTZYSTljaTgwYTY1YUthYTRlRnk2dm01UkI3VEhTMnBudDV6V0VnOWJ3cGxDYXk3VTdGOWNpcnZ4aE1JSGJ5UzhaN09xWktSaVEyMnBabF9RTXRUX2hnV2lLMGR3NWtKRlhpRWVscFBTbjZJT2xfeg?oc=5\n摘要: 出口激增+压榨超预期+豆油库存骤降，CBOT大豆站稳12美元！天气溢价还有多少空间？ 新浪财经\n\n[2] 光大期货：7月17日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-17T05:00:24+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNVG5LUmFjUFg5aHpLS0MtUG9qSE5OeXRBOUhQY0NRMWpFM3hFdTc2X0d4ODVoRkdTZ3gtYkxYeDQ0elVYdFMwZGNsbmduR1FkdHhPY0doaVFZci1JdDE2aV93aURiQ1dqek4zSWhPODlZQWNoS3dGZHZmZEZabE5yeWhsMWRsTi1kM0lYOUpoNU5acUs5UnRtS0ZOanRHMEhXRnk0Wi1HTzdnU2x6cHBXTw?oc=5\n摘要: 光大期货：7月17日农产品日报 新浪财经\n\n[3] 光大期货农产品类日报7.15 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-15T07:06:00+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQVUY1VGNyVkkzbVU5czlEbU12bDhNcGNNSUlaRDR6X001NzRZZERkdUVRVHpEclBDTVduWkhQMkhqUXowUnZFOVBDYVRPcHB1UHJHUHJfZHpDX19jN1JRVDVPUUZXMzRIOERmaXBBMUZIaTZtSllPYlFTbTRZbGViY2lmZkRhRjMxZWZNTXh6RndYV184YzB1bTZXZGs5Um5xR3c3R2hHTG55LXktUUgzOQ?oc=5\n摘要: 光大期货农产品类日报7.15 新浪财经\n\n[4] ATFX复盘:美联储2022~2023年加息周期， 美元指数表现 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-17T15:06:00+00:00\nURL: https://news.google.com/rss/articles/CBMimwJBVV95cUxPVEpPZDFzS1h3UlYtRWNPbXZYZm1qQTNzRXRjalJlRnppSTE2czBGSFFQZmRfYjFlMThpY1JiSlVjRXJ4bG1FSDlETjY2ZW1BVndiUXZoTUFaNUltUGRaWkYxbTdvYzR6WmdCSy15blRYcEZ5cmt4TV9DX1dkZl9uczFTQkd0Z2hXMEVBLWVOa3gxUFR6bFNOd2ZqXzFWUk5OdDZ1bTVCbmNhYzBXRU5yMVc0N0JlTXZ6NFJmdDBtX2pmcGVDRlQwb1E4N1NYcV94QXpWWWFpdmxOSGZia1NSTmwycmdaWUVyT2QwTkV6T0dPOW1hWjVwd1gwLUJtdHdNV0FfSEF6WFl3dVl3SUFOWE1vRXZhNTVyTzI0?oc=5\n摘要: ATFX复盘:美联储2022~2023年加息周期， 美元指数表现 新浪财经\n\n[5] 期货市场下周值得关注的大事件有哪些？各板块有哪些关注点？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-07-17T11:46:56+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTFBmR0JPX1M5MGFFSVMtOHJzNmp6THF5d2d4WGZSQUdGOFFzWDM1dDVTb2Z1RXB1Rk1aZ3JvT0duRFV3d290MnB5TVgwSUNGYkk?oc=5\n摘要: 期货市场下周值得关注的大事件有哪些？各板块有哪些关注点？-市场参考 金十数据\n\n[6] 出口激增+压榨超预期+豆油库存骤降，CBOT大豆站稳12美元！天气溢价还有多少空间？ - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-20T00:57:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxONl9tMElzZFRJXzhsQVNfd3RZTFN0RzZkWGNSU0FiRGtJWGRiTDd3V2R1Nng4aTIzaTc2c0FIRnJGZFRxVzBYd085YUlQRl9PUVBzRWZJaDNRang4YVV6SUV1QWF6ellDZ3dvU0NYdVpjMHJRQlBxUDV2eWh5Mmhrb09pVjRLQm45RXl0Vw?oc=5\n摘要: 出口激增+压榨超预期+豆油库存骤降，CBOT大豆站稳12美元！天气溢价还有多少空间？ 新浪财经\n\n[7] 高温“烤”出史诗级机会？农产品投资窗口全解析：棉花、大豆、红枣、橡胶、白糖谁更值得布局？ - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-16T07:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMi4gFBVV95cUxNdFNYUXBoOVA0MGVfTDdfMVo5S1ViVzZxaWpQWENBeFl4aWkyRkhKT2FDRjRIR1c3N3E3dnVDZVZDOGZ3VFctNFlsWm5oYlpiQkNaVmp4TkJrTTFrZ2I1VVpwN0RleVFKV2dIalUtN0YtNHN4VE1LVXBlelVuUjlEajRXakdVdWV3bkh3R0VOM3RkdFY3QWRKZ2otblh6VEFhYms5R0NGVExWSmpObjJuZF83Ni1jT0hraFdzTFFya3d3alEwUldXZmcxckdJXzBCaGY0MGFUMEJobXFGbTROTk5B?oc=5\n摘要: 高温“烤”出史诗级机会？农产品投资窗口全解析：棉花、大豆、红枣、橡胶、白糖谁更值得布局？ 新浪财经\n\n[8] 厄尔尼诺气候下如何捕捉农产品投资机会 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-17T10:45:52+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE5tMnF4NlBVR2J1WC1ydnVHUlRaU1M2TlRxRUZwNmxpWnVzQmlCY2hmWFdLLUpaRFFUSDVQcWZpX3JUQ1ViZHplbEtDbXkycERhU2ZWVjQxa05Kd0RiUkxsTzVB?oc=5\n摘要: 厄尔尼诺气候下如何捕捉农产品投资机会 手机网易网\n\n[9] 中国加速采购美国大豆，不是给面子，反倒把特朗普的算盘珠子拨乱 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-19T13:23:22+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE94TFVVSE52dmtibzNsV2ViMHBrRlo0eHNUeGlITDVXVWVIdDk2QXdvbDlnT1BUYTFzYk11bE1iUUxlblhhZEhZc0VmWW13cGdwYnpzVWk4QTR1LUR4QmRGYVZn?oc=5\n摘要: 中国加速采购美国大豆，不是给面子，反倒把特朗普的算盘珠子拨乱 手机网易网\n\n[10] 卖中国大豆，巴西把美国甩得更远了 - 观察者\n来源: 观察者\n发布时间UTC: 2026-07-21T01:38:00+00:00\nURL: https://news.google.com/rss/articles/CBMiakFVX3lxTE1Mc3dfZWROU2FiU0kwRnBoTHJWWEYzTjhCZWNnTVlsYmFaTmhSd0locmVFRUtPXzNJNExjdlJUT1dzazZDS24yRExaR1ZVZDVJZFh1NHJMdWpkVVNiYXE1ZE9mR0Y3ZmRLb0E?oc=5\n摘要: 卖中国大豆，巴西把美国甩得更远了 观察者",
+  "symbol": "Y0",
+  "instrument_name": "豆油",
+  "api_latency_seconds": 129.0,
+  "token_usage": {
+    "prompt_tokens": 15665,
+    "completion_tokens": 10504,
+    "total_tokens": 26169,
+    "prompt_tokens_details": {
+      "cached_tokens": 896
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7322
+    },
+    "prompt_cache_hit_tokens": 896,
+    "prompt_cache_miss_tokens": 14769
+  },
   "integrity": {
-    "version": "deterministic-integrity-v1",
-    "checked_at_utc": "2026-07-21T22:03:53+00:00",
-    "score": 0,
+    "version": "deterministic-integrity-v2",
+    "checked_at_utc": "2026-07-22T01:18:32+00:00",
+    "score": 45,
     "status": "blocked",
     "label": "规则接管",
     "execution_allowed": false,
-    "evidence_confidence": 0,
+    "evidence_confidence": 45,
     "issues": [
       {
-        "code": "ai_unavailable",
+        "code": "invalid_watch_levels",
         "severity": "high",
-        "message": "JSONDecodeError: Invalid control character at: line 11 column 157 (char 1547)"
+        "message": "AI 支撑/压力不是有效数字，已改用确定性区间。"
+      },
+      {
+        "code": "low_evidence_confidence",
+        "severity": "medium",
+        "message": "AI 自评证据强度仅 45/100。"
       }
     ],
-    "facts": {}
+    "facts": {
+      "realtime_price": 8516.0,
+      "realtime_fetch_status": "live",
+      "realtime_fetched_at_utc": "2026-07-22T01:16:23+00:00",
+      "realtime_market_tick_time": "09:16:04",
+      "daily_rsi14": 52.85,
+      "one_hour_boll_position": "中轨下方",
+      "four_hour_boll_position": "中轨下方",
+      "realtime_trading_day_label": "2026-07-22",
+      "realtime_label_is_future": false
+    }
   },
-  "risk_note": "本分析仅供行情研究，不构成投资建议。",
-  "symbol": "Y0",
-  "instrument_name": "豆油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-07-21T22:02:07+00:00",
+    "realtime_fetched_at_utc": "2026-07-22T01:16:23+00:00",
     "realtime_market_trading_day": "2026-07-22",
-    "realtime_market_tick_time": "23:00:00",
+    "realtime_market_tick_time": "09:16:04",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-07-21T21:49:47+00:00",
+    "daily_updated_at_utc": "2026-07-22T01:01:40+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-07-21T21:49:47+00:00",
-    "news_updated_at_utc": "2026-07-21T21:49:45+00:00",
-    "contract_bridge_updated_at_utc": "2026-07-21T21:49:45+00:00"
-  },
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-07-21T22:02:07+00:00",
-    "market_trading_day": "2026-07-22",
-    "market_tick_time": "23:00:00",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
+    "intraday_updated_at_utc": "2026-07-22T01:01:40+00:00",
+    "news_updated_at_utc": "2026-07-22T01:01:37+00:00",
+    "contract_bridge_updated_at_utc": "2026-07-22T01:01:37+00:00"
   }
 }

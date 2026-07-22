@@ -1,131 +1,106 @@
 {
-  "summary": "基于实时行情（P0 连续合约，价 9294 元/吨，+0.11%，ticktime 10:08:03），日内短线偏多震荡，日线级别仍受压于 MA60（9456）下方。主力合约 P2609，次主力 P2701 升水 287 点，持仓比 0.5，处于监控移仓阶段。模型样本外验证为负面，历史优势未证。",
-  "bias": "偏多震荡",
+  "summary": "策略基准价：9289元/吨（2026-07-22 10:15:00实时价，涨跌+0.05%）。1小时布林中轨9283、4小时中轨9286、日线MA20 9272，价格微幅站上中轨，但1小时EMA20斜率仍为负，4小时ADX低于20，日线RSI中性，整体缺乏方向。库存高位与印尼B50/出口新政形成多空拉锯，技术面指向震荡。建议午盘维持观望，若价格持续受阻于9320可轻仓试空，止损9386上方，目标看至9200附近；若放量跌破9270则空头信号增强。盈亏比1.5以上再考虑入场。",
+  "bias": "震荡偏空",
   "analysis": [
-    "1小时布林通道上轨 9386.8，中轨 9282.8，下轨 9178.7，带宽 0.0224；当前实时价 9294 已升破中轨，显示短线反弹动能，但通道仍未明显扩张，后续需确认有效站稳中轨。",
-    "4小时布林通道上轨 9392.6，中轨 9286.2，下轨 9179.8，带宽 0.0229；实时价 9294 同样站上中轨，但通道趋平，ADX仅 19.9，说明大周期仍处震荡，反弹空间或受限。",
-    "日线 MA10 / MA20 分别为 9286.4 / 9272.3，当前价 9294 略高于两线，形成短线支撑；MA60 在 9456.4 仍显著向下，构成中期压力，日线级别尚未扭转弱势格局。",
-    "实时价位 9294 处于 1 小时与 4 小时中轨共振区域上方，日内若能守住 9285-9290，则反弹延续；若回落至 9260 下方，则反弹结束重归区间。",
-    "日内趋势信号分化：1 小时 EMA20 斜率仍为负，但价格已站上均线，RSI 46.5 中性偏弱；4 小时 EMA20 斜率微正，ADX 低位，表明短期方向不明确。",
-    "成交量与持仓：今日早盘成交 26.2 万手，较昨日同期略增；持仓减少约 1 万手至 44.9 万手，主力合约近期呈减仓状态，反弹资金跟进意愿有待观察。",
-    "支撑与压力：下方支撑首先在9260（4 小时中轨附近），其次为 9212（昨日低点）；上方压力先看 9340（近期小时线密集区），突破后看 9394（周度高）。",
-    "布林带宽 1H/4H 均处于低位收缩状态，暗示变盘窗口临近；若未来数小时放量突破 9340 或跌破 9260，可能触发单边行情，否则维持区间整理。"
+    "1小时布林：上轨9387，中轨9283，下轨9179，带宽0.0224，当前价9289位于中轨上方但紧贴中轨，通道窄幅未提供明确方向。若无法放大成交量，价格大概率再次回测中轨或下轨。",
+    "4小时布林：上轨9393，中轨9286，下轨9180，带宽0.0229，价格9289贴近中轨，ADX仅19.93，趋势强度极弱，行情将以横盘震荡为主，突破需要等待带宽扩张。",
+    "日线均线/布林：MA20 9272.3，当前价9289略高于均线，但MA60 9456.37构成上方压制。以MA20为中轨的布林通道近几日收缩，价格在通道中部，若跌破9272则重回弱势，上方阻力参考前高9439。",
+    "实时价位置：9289，较昨日结算价9284微涨，位于1小时/4小时中轨上方约6-3个点，属于中性区域，多空均无显著优势，短期方向取决于午后量能配合。",
+    "趋势指标：1小时EMA20斜率为-0.0018，仍呈下行态势；4小时EMA20斜率0.0007近乎水平；日线RSI14为46.51，未进入超买超卖区。各周期趋势一致性差，不支持单边交易。",
+    "成交量能：今日截至10:15成交量268776手，20日量比0.93，明显低于平均水平，持仓减少259手，市场参与热情不足，价格突破9320-9340阻力区的概率偏低。",
+    "支撑阻力：上方阻力依次为1小时上轨9386、4小时上轨9393及近期高点9394；下方支撑为1小时下轨9179、4小时下轨9180及前低9028。有效突破任一方向前维持区间思路。"
   ],
   "intraday_strategy": {
-    "bias": "偏多震荡",
-    "entry": "回踩 9285-9295 区域企稳后轻仓试多",
-    "stop": "9259（跌破 4H 中轨下方，宣告反弹失效）",
-    "take_profit": "首目标 9330，其次 9360，若强势上破则推保护至 9380-9390",
-    "invalidation": "若 15 分钟内未站上 9290 或直接跌破 9270，则取消多单计划",
-    "notes": "适用时段：今日午盘 13:30-15:00 及夜盘 21:00-23:00。早盘已过，未入场；策略基于 1H 中轨支撑，盈亏比约 1.5:1。换月阶段警惕流动性突变，模型验证负面，仓位须轻（<1%）。"
+    "bias": "震荡偏空",
+    "entry": "若价格反弹至9350-9360区间受阻回落，或有效跌破9270后反抽不过，可轻仓试空。多单仅限快速下探9170-9180有长下影线时短线介入。",
+    "stop": "空单止损设置在9386上方；多单止损设置在9170下方。",
+    "take_profit": "空单第一目标9200，第二目标9150；多单目标9300-9320。",
+    "invalidation": "如果价格放量站上9340并守住，则空头逻辑失效。",
+    "notes": "适用今晚夜盘21:00开盘后关注。当前午盘剩余时段（13:30-15:00）成交量可能进一步缩减，建议观望，等待夜盘明确信号。下单时需确认具体月份P2609，注意换月监控。"
   },
   "decision_frame": {
     "confidence": 45,
-    "regime": "震荡偏多（日内），中期仍处宽幅震荡",
-    "edge": "1 小时与 4 小时布林中轨共振支撑，价格由下轨反弹至中轨上方；但大周期方向未明，ADX 低位，多头边缘性有限。",
-    "no_trade_condition": "模型验证状态为 rejected，历史优势未证实；换月监控期，近月与次月价差拉大；若回踩 9285-9295 区域未出现企稳信号，或量能持续萎缩，则放弃多单。",
+    "regime": "震荡",
+    "edge": "多空均缺乏技术面共振，基本面消息多空交织，未出现高胜率交易机会。",
+    "no_trade_condition": "空单入场需确保盈亏比大于1.5（如止损40点，目标需≥60点）；当前潜在空单盈亏比约2:1（9280空，止损9320，目标9200），可执行，但需等待反弹或跌破信号确认。多单盈亏比不足1.5，不推荐。",
     "long_case": {
-      "trigger": "价格回落至 9285-9295 区间，1 小时 K 线收出带下影线的小阳线或锤子线，且成交放大。",
-      "entry_zone": "9285 - 9295",
-      "stop": "9259",
+      "trigger": "1小时K线收盘站上9330且成交量放大",
+      "entry_zone": "9330-9350",
+      "stop": "9270",
       "targets": [
-        "9330",
-        "9360",
-        "9380"
+        "9400"
       ],
-      "invalidation": "跌破 9259 或 30 分钟 K 线收盘低于 9280，则多单离场。",
-      "risk_reward": "以 9290 入场、首目标 9330，风险 31 点，盈利 40 点，盈亏比约 1.3；若看至 9360，则盈亏比达 2.2。"
+      "invalidation": "突破后快速跌回9330下方",
+      "risk_reward": "1.2:1（不足1.5，仅作观望提示）"
     },
     "short_case": {
-      "trigger": "价格跌破 9260 且反抽无力，或反弹至 9340 上方出现明显受阻信号（小双顶、pin bar）。",
-      "entry_zone": "跌破 9260 轻仓追空，或 9340-9350 挂空",
-      "stop": "追空止损 9290，挂空止损 9375",
+      "trigger": "价格反弹至9360受阻或跌破9270",
+      "entry_zone": "9280-9360（分两批：9360空，跌破9270加空）",
+      "stop": "9386",
       "targets": [
-        "9210",
-        "9180",
+        "9200",
         "9150"
       ],
-      "invalidation": "追空后 15 分钟未继续下行，或价格重新站上 9290，则空单离场。",
-      "risk_reward": "追空盈亏比约 1:1.5；挂空盈亏比约 1.5:1。"
+      "invalidation": "价格站稳9340上方",
+      "risk_reward": "约2:1（以9360空计算）"
     },
     "event_risks": [
-      "印尼出口政策、厄尔尼诺天气炒作、原油价格波动及主力换月流动性风险。"
+      "印尼B50政策执行细节、原油价格波动、7月下旬MPOB库存数据。"
     ],
     "data_limits": [
-      "日内 K 线数据更新至 10:00，后续行情存在数据延迟；模型验证结果仅为样本外参考，不代表未来表现。"
+      "模型验证状态为rejected，样本外无优势，日线基准策略历史表现不佳，不构成做多/做空概率依据；连续合约分析不代表可下单具体月份。"
     ]
   },
   "news_impact": [
-    "[利空] 7月16日汇通网报道库存攀至四个月高位，同期价格却发出突破信号，暗示多空分歧；库存高通常压制近月价格，但市场焦点可能转向未来供应，影响中性偏空。",
-    "[利多] 7月15日印尼B50政策报道持续发酵，该政策要求提高生物柴油掺混比例至50%，长期将大量棕榈油用于国内消费，减少出口供给，对远期合约形成利多支撑。",
-    "[利多] 7月20日手机网易网报道极强厄尔尼诺概率达81%，对东南亚棕榈油产区可能造成干旱威胁，市场担忧明年产量受损，为远月合约注入天气升水。",
-    "[利多] 7月21日每日印尼报道印尼单一出口新政九月正式落地，简化出口渠道可能提升关税征收效率，短期或影响出口节奏，但长期政策不确定性利多。",
-    "[中性] 7月21日新浪财经油脂报告指出原油带动的行情持续性存疑，说明近期油脂与原油联动性增强，但基本面差异可能导致走势分化，对棕榈油影响中性。",
-    "[利多] 7月20日印尼棕榈油制生物柴油每年省千亿外汇的新闻，强化了印尼国内消费增长预期，利多国内棕榈油定价，间接支撑国际价格。"
+    "[利空] 库存攀至四个月高位：汇通网报道指出，棕榈油反弹过程中库存压力加大，削弱价格上涨动力，短期抑制多头情绪。",
+    "[利多] 印尼B50政策重塑供应格局：多篇新闻提到印尼提高生物柴油掺混比例将增加国内消费、减少出口，远期供应趋紧，为价格提供底部支撑。",
+    "[利多] 印尼单一出口新政九月落地：每日印尼报道，九月起实施单一出口政策，可能收紧出口，市场预期近月供应或受影响，偏多。",
+    "[中性] 油脂：原油带动的行情是否持久：新浪财经分析指出，原油上涨带动油脂短期偏强，但基本面库存高企令持续性存疑，后续可能回落。",
+    "[利多] 极强厄尔尼诺概率达81%：天气风险可能影响后期棕榈油产量，为远期合约注入升水，但对当前价格传导尚需时间。",
+    "[利空] 光大期货日报观点：7.15日报或提示需求疲软及库存上升压力，加剧日内调整风险。"
   ],
   "news_articles": [
     {
       "title": "突破信号亮起，库存却攀至四个月高位——棕榈油的反弹底气何在？",
       "source": "汇通网 Fx678",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFB0V242QmJ5YmJpWmdURzVzSWJ4MXM3YVpadW9QbzdmQ0MxcmpUd0s1cmt0NVZGelpkTjhreHNSX1dJYTRxZmR3bjEtMlNhUUFxeVI3X1U3QXgwZ28?oc=5",
-      "detail": "7月16日报道，棕榈油市场出现突破信号，但库存攀升至四个月高位，多空拉锯激烈。库存压力与实际价格走强形成矛盾，暗示市场可能更多交易未来供应收紧预期，短期方向不明。",
-      "impact": "中性"
-    },
-    {
-      "title": "印尼B50政策重塑供应格局，棕榈油期货于多空拉锯中小幅收跌",
-      "source": "手机网易网",
-      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1XZFltRUVldXlGZVE0RUpIUERNVGw0SU1zaFF4VDZDazJMQTYtQ1YzMWFBa0dXdHltR0VLQ2lvb0U0X01pWWVSaENqNFFkdUU3XzRIMWFKUEctX3lnaDZwXzZn?oc=5",
-      "detail": "7月15日报道，印尼B50生物柴油政策对供应格局产生深远影响，尽管当日棕榈油期货小幅收跌，但长期利多效应明显，政策将大幅增加国内消费，挤压出口量。",
-      "impact": "利多"
+      "detail": "文章指出尽管技术面出现突破信号，但棕榈油库存升至四个月高位，供应压力限制反弹空间。高库存背景下，价格持续上涨缺乏实质支撑，市场信心不足。",
+      "impact": "利空"
     },
     {
       "title": "印尼B50政策重塑供应格局，棕榈油期货于多空拉锯中小幅收跌",
       "source": "汇通网 Fx678",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9QTlpVbFJFNXhZOGJuVlFVNWJrNjJ0RXdTUHNwZ0lXWnFueExOSHlueWRxX2JQd1Iya1VFNTluTXlkckxjMHFOT2w0VFVpSzBqTkJVYTJKVTZjUEU?oc=5",
-      "detail": "与上条类似，汇通网转载相关报道，重申印尼B50政策将重塑棕榈油供应格局，市场在消化前期涨幅后小幅收跌，但利多背景未变。",
+      "detail": "印尼B50政策将棕榈油在生物柴油中的掺混比例提高至50%，大幅提升国内需求，对出口供应产生挤压，长期利多棕榈油。但当日市场受制于其他因素小幅收跌。",
       "impact": "利多"
     },
     {
       "title": "极强厄尔尼诺概率达81%，三大农产品涨价节奏，和你想的不一样？",
       "source": "手机网易网",
       "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9raHRqLVRKWWcwZi02aC0wdVpBVVAyZHF1MVJja0EySTRsbG5qcU5VLTJFY0xrUnNGdTVyRUJscjcyYTEtRjNZaDZSNTQ0d01rODJqNzBLc0M0dE83bXBYdlpR?oc=5",
-      "detail": "7月20日报道，气象机构预测极强厄尔尼诺概率高达81%，可能影响全球农产品生产。棕榈油作为东南亚主要作物，其产量易受干旱天气冲击，市场存在天气升水预期。",
-      "impact": "利多"
-    },
-    {
-      "title": "政策精读：印尼棕榈油、印度食品安全与阿联酋 Nutri-Mark 营养标签",
-      "source": "FoodNavigator.com",
-      "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNQ0tGQ0NyeXB1YV9GT2lUQzZKRmR1bF9yVlNWNHN4NFV3Q1NNSXVwLUtSVHVOZmkwZ2Q1dU96VHFwQmg4MW5XQ2lRZDBRS0Z1MmV5NzJMRmd2U29XSmVLLXVWT3BuWXk3SjJSRDFVRzU0WGVsdWlPclVRanJadjAwekZR?oc=5",
-      "detail": "7月20日报道，印尼棕榈油政策深度解读，涉及国内消费、出口税收等多方面，整体导向仍为支持国内下游产业，长期利多国内价格。",
+      "detail": "极端厄尔尼诺发生概率高达81%，可能影响东南亚棕榈油产区天气，导致未来产量下滑。市场预期远期供应趋紧，为棕榈油价格注入风险溢价。",
       "impact": "利多"
     },
     {
       "title": "印尼单一出口新政九月正式落地",
       "source": "每日印尼",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9KS0NCeTJYVUtTRUpLeGtRMnhDeko2VkRVUDVxejhTbnBhcmxWSFJYVy1fZmk5aHJBdk1XNmNIMWE4WkNBWlh2Tnd6MC0wTndrYkxSdU4zNDdKRmM?oc=5",
-      "detail": "7月21日报道，印尼单一出口新政策将于九月正式实施，预计简化出口流程但可能加强控制。市场解读为短期或影响出口节奏，长期利多国内价格。",
+      "detail": "印尼政府宣布九月起实施单一出口政策，旨在加强对棕榈油出口的管控。市场解读为出口可能进一步收紧，短期利好棕榈油价格。",
       "impact": "利多"
     },
     {
       "title": "油脂：原油带动的行情是否持久？",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNZU05MFBiSW05elBLNHJ4NThfMFk0XzQzZFRaaTQ5R0RiN2VvbWstSEJIV2s4OWYxd0N6X19LNUI3OVZvR2l6dEUwaWdGZXpiaTZyYS1LZHFkNU95dzRJdTM1eWlKai1uR042TFF6NFNLNU1NLXItcW4zTlpnNDc1SEU2aUZodHhicU1ZMTNCa3R1T2wtYzhYY3BUbHlEVTB3X3FwanhhQ2lPTm8xS3h3QXBZanJVMG9vdzZUR2Y3SktXMXAyVWVnS0ZQWXNTSTkzNVBEZEVUQWxrZw?oc=5",
-      "detail": "7月21日分析指出，近期油脂行情部分受原油上涨带动，但基本面供需差异可能导致行情持续性存疑。棕榈油需关注自身库存及产量变化，跟随原油的波动可能减弱。",
+      "detail": "文章分析原油价格上涨带动植物油行情，但棕榈油自身库存高企，基本面偏弱，短期跟涨后劲不足，需警惕回落风险。",
       "impact": "中性"
     },
     {
-      "title": "印尼把棕榈油倒进油箱！每年省千亿外汇，但有一个问题没人敢说",
+      "title": "印尼B50政策重塑供应格局，棕榈油期货于多空拉锯中小幅收跌",
       "source": "手机网易网",
-      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTFBiYlh6ZktTT3VZQzVHUW9qbnBBVWhtVDhXNEx6UUF2cTJSSm9aeXRnUmJRemFYb3ZIZnJ1RlhEV0ZhTFhxSmF5cUxsZnNUeXkwR1dQUjI3b1lrZEhJaERhdTN3?oc=5",
-      "detail": "7月20日报道，印尼通过将棕榈油用于生物柴油每年节省大量外汇，显示其国内政策导向坚定，长期将减少出口供应，利多国际棕榈油价格。",
-      "impact": "利多"
-    },
-    {
-      "title": "光大期货农产品类日报7.15",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQVUY1VGNyVkkzbVU5czlEbU12bDhNcGNNSUlaRDR6X001NzRZZERkdUVRVHpEclBDTVduWkhQMkhqUXowUnZFOVBDYVRPcHB1UHJHUHJfZHpDX19jN1JRVDVPUUZXMzRIOERmaXBBMUZIaTZtSllPYlFTbTRZbGViY2lmZkRhRjMxZWZNTXh6RndYV184YzB1bTZXZGs5Um5xR3c3R2hHTG55LXktUUgzOQ?oc=5",
-      "detail": "7月15日日报显示，棕榈油多空交织，库存回升但政策利多支撑，短期或维持震荡。当日报告属于常规分析，影响有限。",
-      "impact": "中性"
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1XZFltRUVldXlGZVE0RUpIUERNVGw0SU1zaFF4VDZDazJMQTYtQ1YzMWFBa0dXdHltR0VLQ2lvb0U0X01pWWVSaENqNFFkdUU3XzRIMWFKUEctX3lnaDZwXzZn?oc=5",
+      "detail": "同汇通网报道，重申印尼B50政策长期利多，但当日库存数据压制涨幅，最终小幅收跌，多空分歧明显。",
+      "impact": "利空"
     }
   ],
   "watch_levels": {
@@ -136,44 +111,44 @@
     "support",
     "resistance"
   ],
-  "risk_note": "本分析基于P0连续合约，实际交易需切换至主力合约P2609，并核对软件的具体合约月份及换月安排。模型验证历史表现不佳，所有策略仅供参考，不构成投资建议。",
+  "risk_note": "分析使用的是大商所棕榈油连续合约P0，当前映射主力为P2609（9289元/吨），远月P2701升水287元，持仓比例50%以上，处于换月监控期。下单前请务必在软件中确认具体合约月份及最新盘口。模型验证历史样本外无优势，历史回测表现不代表未来收益。本报告仅为技术研讨，不构成投资建议。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-pro",
   "thinking_mode": "enabled",
   "reasoning_effort": "high",
   "status": "ok",
-  "generated_at_utc": "2026-07-22T02:10:03+00:00",
+  "generated_at_utc": "2026-07-22T02:28:09+00:00",
   "latest_date": "2026-07-21",
-  "realtime_price": 9294.0,
-  "realtime_note": "实时行情截至 2026-07-22 10:08:03，当前价 9294，涨跌 +0.11%",
+  "realtime_price": 9289.0,
+  "realtime_note": "实时行情截至 2026-07-22 10:15:00，当前价 9289，涨跌 +0.05%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-07-22T02:08:27+00:00",
+    "fetched_at_utc": "2026-07-22T02:26:41+00:00",
     "market_trading_day": "2026-07-22",
-    "market_tick_time": "10:08:03",
+    "market_tick_time": "10:15:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
   "news_summary": "[1] 突破信号亮起，库存却攀至四个月高位——棕榈油的反弹底气何在？ - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-07-16T11:26:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTFB0V242QmJ5YmJpWmdURzVzSWJ4MXM3YVpadW9QbzdmQ0MxcmpUd0s1cmt0NVZGelpkTjhreHNSX1dJYTRxZmR3bjEtMlNhUUFxeVI3X1U3QXgwZ28?oc=5\n摘要: 突破信号亮起，库存却攀至四个月高位——棕榈油的反弹底气何在？ 汇通网 Fx678\n\n[2] 印尼B50政策重塑供应格局，棕榈油期货于多空拉锯中小幅收跌 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-15T12:06:03+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE1XZFltRUVldXlGZVE0RUpIUERNVGw0SU1zaFF4VDZDazJMQTYtQ1YzMWFBa0dXdHltR0VLQ2lvb0U0X01pWWVSaENqNFFkdUU3XzRIMWFKUEctX3lnaDZwXzZn?oc=5\n摘要: 印尼B50政策重塑供应格局，棕榈油期货于多空拉锯中小幅收跌 手机网易网\n\n[3] 印尼B50政策重塑供应格局，棕榈油期货于多空拉锯中小幅收跌 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-07-15T12:05:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9QTlpVbFJFNXhZOGJuVlFVNWJrNjJ0RXdTUHNwZ0lXWnFueExOSHlueWRxX2JQd1Iya1VFNTluTXlkckxjMHFOT2w0VFVpSzBqTkJVYTJKVTZjUEU?oc=5\n摘要: 印尼B50政策重塑供应格局，棕榈油期货于多空拉锯中小幅收跌 汇通网 Fx678\n\n[4] 极强厄尔尼诺概率达81%，三大农产品涨价节奏，和你想的不一样？ - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-20T18:14:37+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE9raHRqLVRKWWcwZi02aC0wdVpBVVAyZHF1MVJja0EySTRsbG5qcU5VLTJFY0xrUnNGdTVyRUJscjcyYTEtRjNZaDZSNTQ0d01rODJqNzBLc0M0dE83bXBYdlpR?oc=5\n摘要: 极强厄尔尼诺概率达81%，三大农产品涨价节奏，和你想的不一样？ 手机网易网\n\n[5] 政策精读：印尼棕榈油、印度食品安全与阿联酋 Nutri-Mark 营养标签 - FoodNavigator.com\n来源: FoodNavigator.com\n发布时间UTC: 2026-07-20T08:23:38+00:00\nURL: https://news.google.com/rss/articles/CBMiggFBVV95cUxNQ0tGQ0NyeXB1YV9GT2lUQzZKRmR1bF9yVlNWNHN4NFV3Q1NNSXVwLUtSVHVOZmkwZ2Q1dU96VHFwQmg4MW5XQ2lRZDBRS0Z1MmV5NzJMRmd2U29XSmVLLXVWT3BuWXk3SjJSRDFVRzU0WGVsdWlPclVRanJadjAwekZR?oc=5\n摘要: 政策精读：印尼棕榈油、印度食品安全与阿联酋 Nutri-Mark 营养标签 FoodNavigator.com\n\n[6] 印尼单一出口新政九月正式落地 - 每日印尼\n来源: 每日印尼\n发布时间UTC: 2026-07-21T06:16:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9KS0NCeTJYVUtTRUpLeGtRMnhDeko2VkRVUDVxejhTbnBhcmxWSFJYVy1fZmk5aHJBdk1XNmNIMWE4WkNBWlh2Tnd6MC0wTndrYkxSdU4zNDdKRmM?oc=5\n摘要: 印尼单一出口新政九月正式落地 每日印尼\n\n[7] 光大期货农产品类日报7.15 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-15T07:06:00+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQVUY1VGNyVkkzbVU5czlEbU12bDhNcGNNSUlaRDR6X001NzRZZERkdUVRVHpEclBDTVduWkhQMkhqUXowUnZFOVBDYVRPcHB1UHJHUHJfZHpDX19jN1JRVDVPUUZXMzRIOERmaXBBMUZIaTZtSllPYlFTbTRZbGViY2lmZkRhRjMxZWZNTXh6RndYV184YzB1bTZXZGs5Um5xR3c3R2hHTG55LXktUUgzOQ?oc=5\n摘要: 光大期货农产品类日报7.15 新浪财经\n\n[8] 油脂：原油带动的行情是否持久？ - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-21T08:57:00+00:00\nURL: https://news.google.com/rss/articles/CBMi2gFBVV95cUxNZU05MFBiSW05elBLNHJ4NThfMFk0XzQzZFRaaTQ5R0RiN2VvbWstSEJIV2s4OWYxd0N6X19LNUI3OVZvR2l6dEUwaWdGZXpiaTZyYS1LZHFkNU95dzRJdTM1eWlKai1uR042TFF6NFNLNU1NLXItcW4zTlpnNDc1SEU2aUZodHhicU1ZMTNCa3R1T2wtYzhYY3BUbHlEVTB3X3FwanhhQ2lPTm8xS3h3QXBZanJVMG9vdzZUR2Y3SktXMXAyVWVnS0ZQWXNTSTkzNVBEZEVUQWxrZw?oc=5\n摘要: 油脂：原油带动的行情是否持久？ 新浪财经\n\n[9] 印尼把棕榈油倒进油箱！每年省千亿外汇，但有一个问题没人敢说 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-07-20T17:45:52+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTFBiYlh6ZktTT3VZQzVHUW9qbnBBVWhtVDhXNEx6UUF2cTJSSm9aeXRnUmJRemFYb3ZIZnJ1RlhEV0ZhTFhxSmF5cUxsZnNUeXkwR1dQUjI3b1lrZEhJaERhdTN3?oc=5\n摘要: 印尼把棕榈油倒进油箱！每年省千亿外汇，但有一个问题没人敢说 手机网易网\n\n[10] 依靠海量库存和采购节奏，亚洲大国主导石油需求端定价_国际原油市场 - 黄金网\n来源: 黄金网\n发布时间UTC: 2026-07-15T06:04:01+00:00\nURL: https://news.google.com/rss/articles/CBMibEFVX3lxTE9KQ1BTTHpURmJ6c1JfeEFBMUVFdGxrUC15NWpjU0R2blpSSEVkamM4bEw5RTg5RWNkdnhWWFpSNmZZcDZ3UVpDNlg0eDh6dnRnM0RpMm4xRDliZWF5Wjh2ODVxTG5CMVBNSEhDYg?oc=5\n摘要: 依靠海量库存和采购节奏，亚洲大国主导石油需求端定价_国际原油市场 黄金网",
   "symbol": "P0",
   "instrument_name": "棕榈油",
-  "api_latency_seconds": 95.9,
+  "api_latency_seconds": 87.9,
   "token_usage": {
-    "prompt_tokens": 15405,
-    "completion_tokens": 5503,
-    "total_tokens": 20908,
+    "prompt_tokens": 15403,
+    "completion_tokens": 5241,
+    "total_tokens": 20644,
     "prompt_tokens_details": {
-      "cached_tokens": 1024
+      "cached_tokens": 2688
     },
     "completion_tokens_details": {
-      "reasoning_tokens": 1662
+      "reasoning_tokens": 2302
     },
-    "prompt_cache_hit_tokens": 1024,
-    "prompt_cache_miss_tokens": 14381
+    "prompt_cache_hit_tokens": 2688,
+    "prompt_cache_miss_tokens": 12715
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-07-22T02:10:03+00:00",
+    "checked_at_utc": "2026-07-22T02:28:09+00:00",
     "score": 45,
     "status": "blocked",
     "label": "规则接管",
@@ -192,10 +167,10 @@
       }
     ],
     "facts": {
-      "realtime_price": 9294.0,
+      "realtime_price": 9289.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-07-22T02:08:27+00:00",
-      "realtime_market_tick_time": "10:08:03",
+      "realtime_fetched_at_utc": "2026-07-22T02:26:41+00:00",
+      "realtime_market_tick_time": "10:15:00",
       "daily_rsi14": 46.51,
       "one_hour_boll_position": "中轨上方",
       "four_hour_boll_position": "中轨上方",
@@ -206,9 +181,9 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-07-22T02:08:27+00:00",
+    "realtime_fetched_at_utc": "2026-07-22T02:26:41+00:00",
     "realtime_market_trading_day": "2026-07-22",
-    "realtime_market_tick_time": "10:08:03",
+    "realtime_market_tick_time": "10:15:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,

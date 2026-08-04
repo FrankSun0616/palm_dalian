@@ -32,6 +32,7 @@ DATA_DIR.mkdir(exist_ok=True)
 DEEPSEEK_MODEL = "deepseek-v4-flash"
 DEEPSEEK_THINKING = {"type": "enabled"}
 DEEPSEEK_REASONING_EFFORT = "high"
+DEEPSEEK_MAX_OUTPUT_TOKENS = 32768
 DAILY_FETCH_TIMEOUT_SECONDS = max(10, int(os.getenv("DAILY_FETCH_TIMEOUT_SECONDS", "30")))
 
 
@@ -1528,7 +1529,7 @@ def fetch_news_raw(api_key: str, snapshot: dict, profile_name: str = "棕榈油"
                     "tool_choice": tool_choice,
                     "thinking": DEEPSEEK_THINKING,
                     "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
-                    "max_tokens": 12000,
+                    "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
                 },
                 timeout=120,
             )
@@ -2081,7 +2082,7 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
             ],
             "thinking": DEEPSEEK_THINKING,
             "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
-            "max_tokens": 16000,
+            "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
             "response_format": {"type": "json_object"},
         },
         timeout=120,

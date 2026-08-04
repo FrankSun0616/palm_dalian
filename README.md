@@ -48,7 +48,7 @@ RUN_AI_ANALYSIS=false python3 update_data.py
 DEEPSEEK_API_KEY
 ```
 
-分析、新闻回退和问答统一固定为 `deepseek-v4-flash`，开启 thinking，并使用 `reasoning_effort=high`。页面会显示实际返回文件中的模型名称，不用营销文案代替运行证据。
+分析、新闻回退和问答统一固定为 `deepseek-v4-flash`，开启 thinking，并使用 `reasoning_effort=high`。主分析与短问答分别预留 32768 和 8192 个输出 token，避免 Flash 的推理内容挤占最终回答。页面会显示实际返回文件中的模型名称，不用营销文案代替运行证据。
 
 手动按钮会直接触发 `Generate DeepSeek AI analysis`，后台线程池为 `P0/Y0` 并行抓取触发时盘口，再结合缓存的日线、小时线、新闻与验证结果生成两份分析。该工作流不重复抓取较慢的 AKShare 历史序列，也不等待 Pages 部署；页面直接读取仓库中的新结果。问答工作流同样先抓实时盘口，且回答必须引用本次价格。为满足本项目所有者要求，公开页面内嵌了可触发 Actions 的 GitHub PAT；任何能查看源码的人都能取得该令牌权限。DeepSeek API Key 仍只保存在 GitHub Actions Secret 中，不会发送到浏览器。
 

@@ -31,6 +31,7 @@ DATA_DIR = ROOT / "data"
 DEEPSEEK_MODEL = "deepseek-v4-flash"
 DEEPSEEK_THINKING = {"type": "enabled"}
 DEEPSEEK_REASONING_EFFORT = "high"
+DEEPSEEK_MAX_OUTPUT_TOKENS = 8192
 
 
 PROFILES: dict[str, dict] = {
@@ -191,7 +192,7 @@ def ask_deepseek(api_key: str, symbol: str, name: str, question: str, context: d
             ],
             "thinking": DEEPSEEK_THINKING,
             "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
-            "max_tokens": 2400,
+            "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
         },
         timeout=120,
     )

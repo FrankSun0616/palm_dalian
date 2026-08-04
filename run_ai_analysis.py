@@ -157,7 +157,7 @@ def run_symbol(symbol: str) -> dict:
             f"(fetched {realtime['fetched_at_utc']})",
             flush=True,
         )
-        print(f"[{symbol}] live-quote V4-Pro analysis start", flush=True)
+        print(f"[{symbol}] live-quote V4-Flash analysis start", flush=True)
         try:
             analysis = generate_ai_analysis(
                 snapshot,

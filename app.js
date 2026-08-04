@@ -2161,11 +2161,11 @@ function renderAskResponse(data, fresh) {
   const q = data.question || "";
   const failed = data.status === "error";
   const a = failed
-    ? `V4-Pro 暂时无法回答：${data.error || "未知错误"}`
+    ? `V4-Flash 暂时无法回答：${data.error || "未知错误"}`
     : data.answer || "(无回复)";
   const time = data.asked_at_utc ? formatDateTime(data.asked_at_utc) : "";
-  const model = data.model === "deepseek-v4-pro"
-    ? "V4-Pro · 高强度思考"
+  const model = data.model === "deepseek-v4-flash"
+    ? "V4-Flash · 深度思考"
     : data.model || "模型未知";
   const live = data.realtime_input && data.realtime_input.status === "live"
     ? data.realtime_input : null;
@@ -2252,7 +2252,7 @@ async function submitAskQuestion() {
   if (askPollInterval) clearInterval(askPollInterval);
   askPollInterval = null;
   els.askBtn.disabled = true;
-  setAskStatus(`正在直接提交给 V4-Pro（${requestedSymbol}）...`, "loading");
+  setAskStatus(`正在直接提交给 V4-Flash（${requestedSymbol}）...`, "loading");
 
   try {
     const previous = await fetchLatestRepoJson(resultPath);
@@ -2276,7 +2276,7 @@ async function submitAskQuestion() {
     });
     if (!response.ok) {
       const body = await response.text().catch(() => "");
-      setAskStatus(`V4-Pro 触发失败 (${response.status})${body ? `：${body.slice(0, 100)}` : ""}`, "error");
+      setAskStatus(`V4-Flash 触发失败 (${response.status})${body ? `：${body.slice(0, 100)}` : ""}`, "error");
       els.askBtn.disabled = false;
       return;
     }
@@ -2286,7 +2286,7 @@ async function submitAskQuestion() {
     return;
   }
 
-  setAskStatus(`正在抓取 ${requestedSymbol} 当前盘口，随后交给 V4-Pro 分析。`, "loading");
+  setAskStatus(`正在抓取 ${requestedSymbol} 当前盘口，随后交给 V4-Flash 分析。`, "loading");
   const maxWait = 8 * 60 * 1000;
   const pollForAnswer = async () => {
     if (Date.now() - dispatchStarted > maxWait) {
@@ -2312,8 +2312,8 @@ async function submitAskQuestion() {
         renderAskResponse(d, /*fresh=*/true);
         setAskStatus(
           d.status === "ok"
-            ? `V4-Pro 已回答 (${formatDateTime(newTime)})`
-            : `V4-Pro 回答失败：${d.error || "未知错误"}`,
+            ? `V4-Flash 已回答 (${formatDateTime(newTime)})`
+            : `V4-Flash 回答失败：${d.error || "未知错误"}`,
           d.status === "ok" ? "success" : "error",
         );
         els.askBtn.disabled = false;
@@ -2405,7 +2405,7 @@ async function generateAiAnalysis() {
     return;
   }
 
-  setAiStatus("正在并行抓取 P0/Y0 当前盘口，随后交给 V4-Pro 分析。", "loading");
+  setAiStatus("正在并行抓取 P0/Y0 当前盘口，随后交给 V4-Flash 分析。", "loading");
   if (aiManualPollInterval) clearInterval(aiManualPollInterval);
   const maxWait = 7 * 60 * 1000;
   const pollForAnalysis = async () => {
@@ -2430,8 +2430,8 @@ async function generateAiAnalysis() {
         if (state.activeSymbol === requestedSymbol) updateAiPanel(ai);
         setAiStatus(
           ai.status === "ok"
-            ? `V4-Pro 分析完成 (${formatDateTime(newTime)})`
-            : `V4-Pro 返回备用结果：${ai.error || "模型暂时不可用"}`,
+            ? `V4-Flash 分析完成 (${formatDateTime(newTime)})`
+            : `V4-Flash 返回备用结果：${ai.error || "模型暂时不可用"}`,
           ai.status === "ok" ? "success" : "error",
         );
         els.generateAiBtn.disabled = false;
@@ -3130,7 +3130,7 @@ function updateAiPanel(ai) {
   els.aiBias.textContent = ai.bias || "--";
   els.aiBias.className = `bias-pill ${biasClass(ai.bias || "")}`;
   const status = ai.status === "ok" ? "DeepSeek" : "规则备用";
-  const modelLabel = ai.model === "deepseek-v4-pro" ? "V4-Pro · 高强度思考" : (ai.model || "模型未知");
+  const modelLabel = ai.model === "deepseek-v4-flash" ? "V4-Flash · 深度思考" : (ai.model || "模型未知");
   const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
   const live = ai.realtime_input && ai.realtime_input.status === "live"
     ? ai.realtime_input : null;
@@ -3174,7 +3174,7 @@ function updateAiPanel(ai) {
     els.aiStrategy.hidden = false;
     const title = strategy._fallback
       ? `1H / 4H 日内策略 <small class="strategy-source-note">· ${strategy._aiBlocked ? "决策防火墙接管" : "实时规则"}</small>`
-      : `1H / 4H 日内策略 <small class="strategy-source-note fresh">· V4-Pro 审计通过</small>`;
+      : `1H / 4H 日内策略 <small class="strategy-source-note fresh">· V4-Flash 审计通过</small>`;
     const heading = els.aiStrategy.querySelector("h3");
     if (heading) heading.innerHTML = title;
 

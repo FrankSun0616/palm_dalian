@@ -17,10 +17,10 @@
   - DeepSeek schedule: `0 */3 * * *` plus manual dispatch.
   - Fetches a fresh Sina P0/Y0 quote immediately before inference, combines it with cached bars/news, and runs both symbols in parallel without waiting for a Pages deployment.
   - If the live request fails, cached quotes are not passed off as real-time input and the execution layer is blocked.
-  - Uses `deepseek-v4-pro` with thinking enabled and high reasoning effort.
+  - Uses `deepseek-v4-flash` with thinking enabled and high reasoning effort.
 - `.github/workflows/ask.yml`
   - Manual DeepSeek question with symbol and question inputs.
-  - Fetches the selected symbol's latest Sina quote before calling V4-Pro and requires the answer to cite that price.
+  - Fetches the selected symbol's latest Sina quote before calling V4-Flash and requires the answer to cite that price.
   - Commits the answer JSON; the page reads the matching result directly from the repository.
 - `.github/workflows/notify.yml`
   - Evaluates configured notification rules.

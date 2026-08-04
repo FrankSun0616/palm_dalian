@@ -28,7 +28,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
-DEEPSEEK_MODEL = "deepseek-v4-pro"
+DEEPSEEK_MODEL = "deepseek-v4-flash"
 DEEPSEEK_THINKING = {"type": "enabled"}
 DEEPSEEK_REASONING_EFFORT = "high"
 

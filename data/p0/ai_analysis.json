@@ -1,200 +1,71 @@
 {
-  "summary": "实时行情（大商所2026-08-05交易日，盘口时间10:15:00）显示P0连续合约价格9364元/吨，较昨结上涨+0.83%，当前买一9364/卖一9366。1小时布林上轨9365.78、中轨9300.15，价格已逼近上轨；4小时布林中轨9364.75，价格正好测试中轨；日线中轨约9325，价格位于中轨上方。多周期出现短线共振偏多迹象，但4小时/日线趋势仍属震荡，且临近换月，建议以回调做多为主，严格止损。",
-  "bias": "偏多",
-  "analysis": [
-    "实时价判定：realtime.price=9364，ticktime=10:15:00，涨跌幅+0.83%，这是本次分析的唯一当前基准。价格已高于昨日收盘9299，且位于1小时布林上轨（9365.78）附近，同时基本等于4小时中轨（9364.75），日线中轨（约9325）上方。注意1小时/4小时K线数据更新滞后（1小时最新为昨晚23:00；4小时K线时间标签存在未来日期），仅作参考。",
-    "1小时布林：上轨9365.78、中轨9300.15、下轨9234.52，带宽0.0141为近期低值后开始走阔；当前价9364已冲出上轨边缘，属于短线突破信号。若1小时收盘能站上9366，则多头动能延续，否则可能回归中轨9300。",
-    "4小时布林：上轨9552.58、中轨9364.75、下轨9176.92，带宽0.0401中等；当前价正好位于中轨，是‘突破或回归中轨’的临界点。4小时K线未确认收盘（时间标签11:15异常），需待今日午盘或夜盘验证是否站稳。",
-    "日线布林（基于MA20±2σ估算）：约上轨9512、中轨9325、下轨9138，带宽约4%与前期持平；当前价9364位于中轨上方，但低于MA60（9388.97）和MA10（9363.8），说明日线级别仍处于7月下旬高点9600以来的回调-反弹结构中，尚未突破均线压制。",
-    "趋势与动能：1小时EMA20走平微降，4小时EMA20下降，日线RSI14为48.29，1/4小时RSI均约48-50，ADX低于25，表明既无强趋势也无极端超买。当前上涨更多是超跌反弹与消息面驱动，而非趋势反转。",
-    "量能：今日实时成交量218172手，超过昨日全天303115手的七成，早盘放量明显；但20日量比0.65显示总体交投清淡。1小时K线volume异常低（1038），疑为数据源统计口径问题，不作为量能判断依据。",
-    "支撑压力：短线支撑9300（1小时中轨/心理关口）和9278（今日低点附近）；压力9400（6月底以来密集区）以及9512-9550（日线上轨/4小时上轨区域）。若有效突破9400，则看至9460-9512。",
-    "合约映射：contract_bridge显示P0当前映射主力P2609（价格9364），但次主力P2701价格9665，价差301元且持仓比0.93，换月状态为urgent。连续合约并非可下单月份，实盘务必选择具体合约并复核流动性，避免在主力换月阶段产生价差跳空。"
-  ],
-  "intraday_strategy": {
-    "bias": "偏多",
-    "entry": "9310-9330（回踩1小时中轨/日线中轨区域）",
-    "stop": "9278（低于8月4日低点9230与今日早盘低点9263的防守位）",
-    "take_profit": "9400（第一目标），9460（第二目标）",
-    "invalidation": "1小时收盘价<9300，或4小时中轨9364上攻失败并回落跌破9300",
-    "notes": "适用于今日午盘13:30-15:00及今晚夜盘21:00-23:00；避开早盘尾段追高。连续合约仅作分析口径，下单前需通过合约映射确认具体月份（当前主连映射P2609，但临近换月，注意P2701流动性）。"
-  },
-  "decision_frame": {
-    "confidence": 55,
-    "regime": "震荡偏多",
-    "edge": "1小时突破布林上轨、4小时测试中轨、日线位于中轨上方，短线多头占优；但趋势指标未确认，仅作为波段性反弹。",
-    "no_trade_condition": "若小时线重新跌破9300，或实时价在4小时中轨9364附近反复受阻且成交量萎缩，放弃做多；若P0映射合约流动性不足或与P2609价格偏离扩大，不交易；日线基准模型样本外验证为rejected，不可作为概率依据。",
-    "long_case": {
-      "trigger": "回踩9310-9330不破，或1小时收盘站上9366并带动4小时中轨转为支撑",
-      "entry_zone": "9310-9330",
-      "stop": "9278",
-      "targets": [
-        "9400",
-        "9460"
-      ],
-      "invalidation": "1小时收盘价<9300或日线收盘重回MA20下方（<9325）",
-      "risk_reward": "以9320入场、止损40点、第一目标9400计算，盈亏比2.0:1"
-    },
-    "short_case": {
-      "trigger": "反弹至9400-9420受阻并出现1小时看跌吞没，或4小时收盘跌破9364且反抽不破",
-      "entry_zone": "9400-9420",
-      "stop": "9465",
-      "targets": [
-        "9325",
-        "9270"
-      ],
-      "invalidation": "1小时收盘站上9460或日线放量突破9512",
-      "risk_reward": "以9410入场、止损55点、第一目标9325计算，盈亏比1.55:1"
-    },
-    "event_risks": [
-      "厄尔尼诺天气炒作可能引发脉冲式上涨",
-      "印度进口数据若超预期将强化需求利多",
-      "原油价格波动通过生物柴油路径影响棕榈油",
-      "B50政策缺位限制涨幅",
-      "地缘局势反复影响油脂整体风险偏好"
-    ],
-    "data_limits": [
-      "1小时/4小时K线更新截至UTC 2026-08-05 00:58，滞后于实时盘口；4小时K线最新时间标签11:15存在未来标记，不可作为已确认K线",
-      "日线布林为基于MA20±2σ估算，非数据源直接提供",
-      "model_validation状态为rejected，历史样本外无优势，不能外推胜率",
-      "连续合约数据包含换月跳空，与具体月份合约存在价差"
-    ]
-  },
-  "news_impact": [
-    "[中性] 厄尔尼诺可能形成超强事件，对棕榈油产量影响具有双重性：一方面干旱可能削减东南亚产量，利多价格；另一方面若降水恢复，市场会快速交易利空。目前仅停留在预期阶段，实际影响需跟踪气象机构后续数据。",
-    "[利多] Indofood Agri Resources上半年净利增长31.6%至2460万美元，显示棕榈油上游种植企业经营改善，可能反映行业利润回升，对盘面情绪有支撑。但单一公司财报不足以改变供需平衡。",
-    "[利多] 经销商提前剧透印度油脂进口的爆发式行情，若印度斋月备货或关税调整导致进口增加，将直接拉动棕榈油需求。但官方数据8月中旬才出，目前属于预期交易，需防数据不及预期。",
-    "[利空] 增产压力及B50政策缺位限制涨幅。印尼B50生物柴油政策迟迟未落地，意味着国内消费增量不及预期，同时主产区进入增产季，库存可能累积，压制价格上行空间。",
-    "[中性] 地缘悬念叠加产量收紧，棕榈油市场重获上行动能。地缘因素通过原油和植物油替代影响棕榈油，若地缘降温则支撑减弱；产量收紧是季节性利多，但需看实际出口数据。",
-    "[利空] 地缘降温与天气改善压制豆类油脂价格震荡回调。豆油与棕榈油价差联动，豆类走弱会拖累棕榈油情绪。近期天气改善有利于美豆生长，CBOT豆系承压，对棕榈油形成间接利空。",
-    "[中性] 博弈中的亚洲棕榈油贸易与海运市场，运费变化影响进口成本。若运价上涨抬高到岸成本，短期利多进口国价格；但亦可能抑制需求。该因素更多是成本端传导。",
-    "[中性] 菜油日内上涨0.22%，机构称油脂板块区间震荡，品种间强弱转换。这暗示油脂整体没有趋势性方向，棕榈油难以独立走出大行情，更适合区间操作。"
-  ],
-  "news_articles": [
-    {
-      "title": "Indofood Agri Resources上半年净利增长31.6%至2460万美元 - The Business Times",
-      "source": "The Business Times",
-      "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQS0s3eTFELS1tRDV2VUJaVGlhVjZrSDltc2l0SkxnVXFJSy14NHotSDk0UzNqNXdnSnhNYzVyc0VPc1p5ZXlhMnBBMzJrQWFEUm9QbUxiQkhFLXlZVkt1Tjlub2Fpc19PbjhRcGZvMDlQVTVnRW9CLVduZC13cVkzS09zM0NnWnBRUTVha1BGSFZsaGFSaldOZ0VmMFNWYldPV3NyZUJwYTQ1UDZNdTdoVnZ0WTE3V3AzZURiQzFjUQ?oc=5",
-      "detail": "该公司2026年上半年净利润同比增长31.6%至2460万美元，显示种植园业务盈利能力改善。该业绩或反映棕榈油价格中枢上移带来的利润弹性，但公司规模较小，对整体供需影响有限。",
-      "impact": "利多"
-    },
-    {
-      "title": "可能形成超强厄尔尼诺，将对棕榈油产生实质影响 - 同花顺财经",
-      "source": "同花顺财经",
-      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE5XQ2lral9EeDhvb3d5MHhoNk9TdGVvRlVVQmZHc1pLeUl6LVE5SS1LcERrNXpfSnFZWmM3RjRnZTlJNFRSendQT2VHT0J0a2pIZlZzN2hxMHhlNW1FV0E?oc=5",
-      "detail": "气象模型提示可能形成超强厄尔尼诺，若兑现将扰动东南亚棕榈油产区降水，从而影响产量。市场已开始计入天气升水，但强度和时间仍有不确定性。",
-      "impact": "利多"
-    },
-    {
-      "title": "棕榈油：逢低买盘与原油反弹驱动回升，增产压力及B50政策缺位限制涨幅 - 新浪财经",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMiiwJBVV95cUxPbnVjVW9WTW5oSW5zS0NybGZxd2p0enFxQ1U2eVI4RE5yRHk5bEIyV0Y2UDM3MV8tZkZzMWxPR3pLcDQ1Z3g4UEVISnV6UFJ1SjBZR21kTEVWTkoxRUY2LXVjSGJRZU5lNGxMYWtVQUhJVlc0cTdnSlk0REVHU3AyTk1jSEtUdUVscDVhZGVna3RDdjZnYkcwMUx1eWNOQnFRMVNWdHdJMkN6RUFQZm5MVy1VcldpRllzMktxaEw0eUQtcXo1aHJXNG9kWW9jbDZuemhvSlNGMGwxcUNZRlNEVkdqdzNkckN0YmxjMG5oSUswSXNJV1NXMk5YaEZ4YktXTk1EUWJNWFQ3Wkk?oc=5",
-      "detail": "近期棕榈油受逢低买盘和原油反弹带动回升，但主产区增产周期和印尼B50政策未落地限制上方空间。短期内宽幅震荡概率较大。",
-      "impact": "中性"
-    },
-    {
-      "title": "地缘悬念叠加产量收紧，棕榈油市场重获上行动能 - 富途牛牛",
-      "source": "富途牛牛",
-      "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOSmk0MTlMb0x1UGZxMzU1SUpoZUxHQmNrZVRFVFZ1R2xEZ3E2NzRZS1pmdS13WWJra2FWTWtvT1NMbkcxRzBweThJaEFJSWlKdkltOC0yWHNnbnFVTUY2bGYxY0IzbjBIdHM1cHBHVTk5TEZxQmI5RkQ0aEhQNDdhWWpuZUFEcTJ4YlFfd0N3THZQTXc4LTFZZFpIdEtFb3M1OGxZRjA4RFdCcm1VR2s1Rk9WMXRyNG9LcUp4cFhzcmFrZEliNFI3UDFmbkVpcVpDb2c?oc=5",
-      "detail": "地缘政治不确定性叠加产地供给收紧预期，推动棕榈油价格重新走强。不过市场也担忧地缘降温后的回吐风险。",
-      "impact": "利多"
-    },
-    {
-      "title": "地缘降温与天气改善压制 豆类油脂价格震荡回调 - 新浪财经",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQR09rWVZYZklyODlfelBsbkRxN0lBdDFjdFU4NndtMzkxTEhDWVM1bmM1THVSOW9JckJxazVMUWZNYVRpWkZlcE1KNnRzYmVXVHUwb3ExV1BuV0Y2RjVMX3BGc3lMR2YxcF9CNDNxQXZFWm5MSTFDcWpUZ1hLQmZzVk8tT2pGTklKOXlSTzJXTDB6RnR1VVRSX1Z2Snl2S2ktTWJqbjc4ZjhHakxuWnNHVw?oc=5",
-      "detail": "地缘局势缓和及美国天气改善有利于大豆生长，豆类油脂价格震荡回调。棕榈油作为油脂板块一员，联动承压。",
-      "impact": "利空"
-    },
-    {
-      "title": "博弈中的亚洲棕榈油贸易与海运市场！ - cj.sina.cn",
-      "source": "cj.sina.cn",
-      "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxOTlFPQklpc2J0Rk1JUzY3bkhTTmRQSDlBemVaMUxNZHlqZDNwUkRpOHVwaVFIR1MxSmt5dDZfWkRPMC1mMmZ5VXdGcTRHRlIwWGJkM1U0N3hyN0RQNXk5QV9NMVR6R1haSC16VE43MlNEZ2thSWRBN2I3MVA1SThwSG1mbW0?oc=5",
-      "detail": "亚洲棕榈油贸易与海运市场博弈加剧，运费和船期变化影响贸易流，进而影响区域供需平衡。对价格影响较为间接。",
-      "impact": "中性"
-    },
-    {
-      "title": "官方数据8月中旬才出，经销商提前剧透印度油脂进口的爆发式行情 - 搜狐网",
-      "source": "搜狐网",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNN1hIXy1SckpTM0hvcnh4a0JFZnU5ZG1XTWtoc18zU2RtS3RiM1ZmZFktNUdCV09hYmJXWURwdElub2k4NjNTN05EenlLNVpodTJKWkpGdHlOend0NDBIT3lXdWF6ejNMc1NQWV9VSUNjR1RqZnhVcnZQeTRPVXJ4T0dPUGIxY2NGenVTQg?oc=5",
-      "detail": "经销商反馈印度油脂进口可能爆发，市场提前交易需求预期。但官方数据尚未公布，若不及预期，价格可能回落。",
-      "impact": "利多"
-    },
-    {
-      "title": "棕榈油：逢低买盘与原油反弹驱动回升，增产压力及B50政策缺位限制涨幅_外汇动态报道 - 汇通网 Fx678",
-      "source": "汇通网 Fx678",
-      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFBLS2RBMG1wZkVwSy1WNWVNTUgzb3pOSTBmdTNnRUhTZkpKUVFhbU05MXpsZ2lkNVctd1VsZUc1VS1XaHg4X2p6N3dQNUFZaWVVb2xyRUR5bkVwdw?oc=5",
-      "detail": "与新浪财经报道相似，强调原油反弹和买盘支撑，但增产和B50缺位限制涨幅。可作为多空因素并存的中性消息。",
-      "impact": "中性"
-    }
-  ],
-  "watch_levels": {
-    "support": 9300.0,
-    "resistance": 9400.0
-  },
-  "normalization_warnings": [],
-  "risk_note": "本分析基于连续合约P0的合成数据及公开舆情，不构成投资建议。期货交易风险极高，连续合约不等于具体月份合约，请以交易所实时行情和实际合约规则为准，下单前二次确认。历史模型验证结果为rejected，不代表未来收益。市场有风险，入市需谨慎。",
-  "source": "DeepSeek API",
+  "source": "fallback-rule-analysis",
   "model": "deepseek-v4-flash",
   "thinking_mode": "enabled",
   "reasoning_effort": "high",
-  "status": "ok",
-  "generated_at_utc": "2026-08-05T02:28:41+00:00",
+  "status": "fallback",
+  "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+  "generated_at_utc": "2026-08-05T02:46:21+00:00",
   "latest_date": "2026-08-04",
-  "realtime_price": 9364.0,
-  "realtime_note": "实时行情截至 2026-08-05 10:15:00，当前价 9364，涨跌 +0.83%",
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-08-05T02:26:56+00:00",
-    "market_trading_day": "2026-08-05",
-    "market_tick_time": "10:15:00",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
+  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
+  "bias": "等待AI",
+  "analysis": [
+    "实时价 9342（实时行情截至 2026-08-05 10:41:18，当前价 9342，涨跌 +0.59%），最新日线收盘 9299，日涨跌 +0.50%。",
+    "MA10/MA20/MA60 分别为 9364/9325/9389。",
+    "20日区间支撑压力为 9191-9600。"
+  ],
+  "intraday_strategy": {
+    "bias": "等待AI",
+    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
+    "stop": "未给出",
+    "take_profit": "未给出",
+    "invalidation": "未给出",
+    "notes": "当前为规则备用分析"
   },
-  "news_summary": "[1] Indofood Agri Resources上半年净利增长31.6%至2460万美元 - The Business Times\n来源: The Business Times\n发布时间UTC: 2026-07-31T12:18:00+00:00\nURL: https://news.google.com/rss/articles/CBMivwFBVV95cUxQS0s3eTFELS1tRDV2VUJaVGlhVjZrSDltc2l0SkxnVXFJSy14NHotSDk0UzNqNXdnSnhNYzVyc0VPc1p5ZXlhMnBBMzJrQWFEUm9QbUxiQkhFLXlZVkt1Tjlub2Fpc19PbjhRcGZvMDlQVTVnRW9CLVduZC13cVkzS09zM0NnWnBRUTVha1BGSFZsaGFSaldOZ0VmMFNWYldPV3NyZUJwYTQ1UDZNdTdoVnZ0WTE3V3AzZURiQzFjUQ?oc=5\n摘要: Indofood Agri Resources上半年净利增长31.6%至2460万美元 The Business Times\n\n[2] 可能形成超强厄尔尼诺，将对棕榈油产生实质影响 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-07-31T16:32:45+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE5XQ2lral9EeDhvb3d5MHhoNk9TdGVvRlVVQmZHc1pLeUl6LVE5SS1LcERrNXpfSnFZWmM3RjRnZTlJNFRSendQT2VHT0J0a2pIZlZzN2hxMHhlNW1FV0E?oc=5\n摘要: 可能形成超强厄尔尼诺，将对棕榈油产生实质影响 同花顺财经\n\n[3] 棕榈油：逢低买盘与原油反弹驱动回升，增产压力及B50政策缺位限制涨幅 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-30T00:15:36+00:00\nURL: https://news.google.com/rss/articles/CBMiiwJBVV95cUxPbnVjVW9WTW5oSW5zS0NybGZxd2p0enFxQ1U2eVI4RE5yRHk5bEIyV0Y2UDM3MV8tZkZzMWxPR3pLcDQ1Z3g4UEVISnV6UFJ1SjBZR21kTEVWTkoxRUY2LXVjSGJRZU5lNGxMYWtVQUhJVlc0cTdnSlk0REVHU3AyTk1jSEtUdUVscDVhZGVna3RDdjZnYkcwMUx1eWNOQnFRMVNWdHdJMkN6RUFQZm5MVy1VcldpRllzMktxaEw0eUQtcXo1aHJXNG9kWW9jbDZuemhvSlNGMGwxcUNZRlNEVkdqdzNkckN0YmxjMG5oSUswSXNJV1NXMk5YaEZ4YktXTk1EUWJNWFQ3Wkk?oc=5\n摘要: 棕榈油：逢低买盘与原油反弹驱动回升，增产压力及B50政策缺位限制涨幅 新浪财经\n\n[4] 地缘悬念叠加产量收紧，棕榈油市场重获上行动能 - 富途牛牛\n来源: 富途牛牛\n发布时间UTC: 2026-08-02T15:24:12+00:00\nURL: https://news.google.com/rss/articles/CBMi0gFBVV95cUxOSmk0MTlMb0x1UGZxMzU1SUpoZUxHQmNrZVRFVFZ1R2xEZ3E2NzRZS1pmdS13WWJra2FWTWtvT1NMbkcxRzBweThJaEFJSWlKdkltOC0yWHNnbnFVTUY2bGYxY0IzbjBIdHM1cHBHVTk5TEZxQmI5RkQ0aEhQNDdhWWpuZUFEcTJ4YlFfd0N3THZQTXc4LTFZZFpIdEtFb3M1OGxZRjA4RFdCcm1VR2s1Rk9WMXRyNG9LcUp4cFhzcmFrZEliNFI3UDFmbkVpcVpDb2c?oc=5\n摘要: 地缘悬念叠加产量收紧，棕榈油市场重获上行动能 富途牛牛\n\n[5] 地缘降温与天气改善压制 豆类油脂价格震荡回调 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-07-29T01:20:32+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQR09rWVZYZklyODlfelBsbkRxN0lBdDFjdFU4NndtMzkxTEhDWVM1bmM1THVSOW9JckJxazVMUWZNYVRpWkZlcE1KNnRzYmVXVHUwb3ExV1BuV0Y2RjVMX3BGc3lMR2YxcF9CNDNxQXZFWm5MSTFDcWpUZ1hLQmZzVk8tT2pGTklKOXlSTzJXTDB6RnR1VVRSX1Z2Snl2S2ktTWJqbjc4ZjhHakxuWnNHVw?oc=5\n摘要: 地缘降温与天气改善压制 豆类油脂价格震荡回调 新浪财经\n\n[6] 博弈中的亚洲棕榈油贸易与海运市场！ - cj.sina.cn\n来源: cj.sina.cn\n发布时间UTC: 2026-08-03T23:22:24+00:00\nURL: https://news.google.com/rss/articles/CBMihAFBVV95cUxOTlFPQklpc2J0Rk1JUzY3bkhTTmRQSDlBemVaMUxNZHlqZDNwUkRpOHVwaVFIR1MxSmt5dDZfWkRPMC1mMmZ5VXdGcTRHRlIwWGJkM1U0N3hyN0RQNXk5QV9NMVR6R1haSC16VE43MlNEZ2thSWRBN2I3MVA1SThwSG1mbW0?oc=5\n摘要: 博弈中的亚洲棕榈油贸易与海运市场！ cj.sina.cn\n\n[7] 官方数据8月中旬才出，经销商提前剧透印度油脂进口的爆发式行情 - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-08-04T22:04:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNN1hIXy1SckpTM0hvcnh4a0JFZnU5ZG1XTWtoc18zU2RtS3RiM1ZmZFktNUdCV09hYmJXWURwdElub2k4NjNTN05EenlLNVpodTJKWkpGdHlOend0NDBIT3lXdWF6ejNMc1NQWV9VSUNjR1RqZnhVcnZQeTRPVXJ4T0dPUGIxY2NGenVTQg?oc=5\n摘要: 官方数据8月中旬才出，经销商提前剧透印度油脂进口的爆发式行情 搜狐网\n\n[8] 棕榈油：逢低买盘与原油反弹驱动回升，增产压力及B50政策缺位限制涨幅_外汇动态报道 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-07-29T10:48:46+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTFBLS2RBMG1wZkVwSy1WNWVNTUgzb3pOSTBmdTNnRUhTZkpKUVFhbU05MXpsZ2lkNVctd1VsZUc1VS1XaHg4X2p6N3dQNUFZaWVVb2xyRUR5bkVwdw?oc=5\n摘要: 棕榈油：逢低买盘与原油反弹驱动回升，增产压力及B50政策缺位限制涨幅_外汇动态报道 汇通网 Fx678\n\n[9] 【收评】菜油日内上涨0.22% 机构称油脂板块维持区间震荡，品种间强弱不断转换 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-08-04T07:04:59+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTFBrVUkzdjMyYjhaQjlJVzlTXzNtc09uM0c5cHBpcWVRbGc0QTJndk9DbW5YdWdsRElnay1NT0d4R0VHaDVMQzVqQmlQMU5NU1U5bXg2UnZJNnBPOWhfRjdHUDN3?oc=5\n摘要: 【收评】菜油日内上涨0.22% 机构称油脂板块维持区间震荡，品种间强弱不断转换 同花顺财经\n\n[10] 印尼镍矿下游化会扩大对华贸易逆差吗？ - idnfinancials.com\n来源: idnfinancials.com\n发布时间UTC: 2026-08-04T08:20:00+00:00\nURL: https://news.google.com/rss/articles/CBMiowJBVV95cUxOMFNjTVpkczJrSkprZDB3OFBpb2czNVVENjFZV3VoZmhPZHotRUZ2eW16QlF4d1dDa2Y2R3h5SmFYdkFGM1VTNkJUOU05NUJCNWpOdGpvS21NaU5taUM4Z1NRajhFLXNESjUySk9FZllycmhfQ1RMRmVxOVRlNzQzUGtOa005cjNENHFEMnlfMkJJS2FyZjZFRXU5WWQyUFk2c3ZBb3pPTmdpVDdMSm1lU3E2LTVYNUx4M0twUWtXcG9pZUxRUnBoUndSaU1fV3E3dU5qOHJPWngyNzR6VElCWC0xU0xCU0M0eS1ZYVMxblFZeEJudE9PVjVYNXNwVWU1aDZJbS1HTnRZa1g3YnVZQ3dZNHhPQ2lNbHRJZTZGMTVaQ2s?oc=5\n摘要: 印尼镍矿下游化会扩大对华贸易逆差吗？ idnfinancials.com",
-  "symbol": "P0",
-  "instrument_name": "棕榈油",
-  "api_latency_seconds": 104.7,
-  "token_usage": {
-    "prompt_tokens": 16020,
-    "completion_tokens": 13598,
-    "total_tokens": 29618,
-    "prompt_tokens_details": {
-      "cached_tokens": 3328
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 9233
-    },
-    "prompt_cache_hit_tokens": 3328,
-    "prompt_cache_miss_tokens": 12692
+  "decision_frame": {
+    "confidence": 0,
+    "regime": "数据不足",
+    "edge": "等待 DeepSeek",
+    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
+    "long_case": {},
+    "short_case": {},
+    "event_risks": [],
+    "data_limits": [
+      "当前为备用规则分析"
+    ]
+  },
+  "news_impact": [],
+  "news_articles": [],
+  "watch_levels": {
+    "support": 9191.0,
+    "resistance": 9600.0
   },
   "integrity": {
-    "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-08-05T02:28:41+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
-    "evidence_confidence": 55,
-    "issues": [],
-    "facts": {
-      "realtime_price": 9364.0,
-      "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-08-05T02:26:56+00:00",
-      "realtime_market_tick_time": "10:15:00",
-      "daily_rsi14": 48.29,
-      "one_hour_boll_position": "中轨上方",
-      "four_hour_boll_position": "中轨下方",
-      "realtime_trading_day_label": "2026-08-05",
-      "realtime_label_is_future": false
-    }
+    "version": "deterministic-integrity-v1",
+    "checked_at_utc": "2026-08-05T02:46:21+00:00",
+    "score": 0,
+    "status": "blocked",
+    "label": "规则接管",
+    "execution_allowed": false,
+    "evidence_confidence": 0,
+    "issues": [
+      {
+        "code": "ai_unavailable",
+        "severity": "high",
+        "message": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+      }
+    ],
+    "facts": {}
   },
+  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "symbol": "P0",
+  "instrument_name": "棕榈油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-05T02:26:56+00:00",
+    "realtime_fetched_at_utc": "2026-08-05T02:45:24+00:00",
     "realtime_market_trading_day": "2026-08-05",
-    "realtime_market_tick_time": "10:15:00",
+    "realtime_market_tick_time": "10:41:18",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
@@ -203,5 +74,13 @@
     "intraday_updated_at_utc": "2026-08-05T00:58:40+00:00",
     "news_updated_at_utc": "2026-08-05T00:58:38+00:00",
     "contract_bridge_updated_at_utc": "2026-08-05T00:58:38+00:00"
+  },
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-08-05T02:45:24+00:00",
+    "market_trading_day": "2026-08-05",
+    "market_tick_time": "10:41:18",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   }
 }

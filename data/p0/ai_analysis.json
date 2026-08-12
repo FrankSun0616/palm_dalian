@@ -1,86 +1,208 @@
 {
-  "source": "fallback-rule-analysis",
-  "model": "deepseek-v4-flash",
-  "thinking_mode": "enabled",
-  "reasoning_effort": "high",
-  "status": "fallback",
-  "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-  "generated_at_utc": "2026-08-12T13:04:02+00:00",
-  "latest_date": "2026-08-12",
-  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
-  "bias": "等待AI",
+  "summary": "实时盘口显示 P0 最新价为 9713 元/吨（ticktime 23:00:00，涨跌幅 +0.18%），该价格为夜盘收盘前最新可成交参考。当前连续合约映射主力为 P2701，次主力 P2609 价差 -323（远月贴水），主力持仓占比 51.39%，换月状态稳定。1 小时布林带极度收口（带宽 0.0108），价格紧贴中轨；4 小时布林中轨上方且趋势强度较高；日线位于估算布林上轨附近，均线多头排列。综合判断短线震荡偏多，但 1 小时方向未明，建议以回调做多或突破追多为主，并务必使用具体月份合约下单。",
+  "bias": "偏多",
   "analysis": [
-    "实时价 9686（盘口交易日归属标签 2026-08-13，最新盘口时间 21:03:03（不是未来行情），当前价 9686，涨跌 -0.10%），最新日线收盘 9691，日涨跌 -0.54%。",
-    "MA10/MA20/MA60 分别为 9481/9416/9397。",
-    "20日区间支撑压力为 9191-9773。"
+    "实时价格位置：realtime.price=9713，ticktime=23:00:00，涨跌幅 +0.18%。夜盘在 9671-9724 区间运行，最终收于 9713，较日盘收盘 9691 上涨 22 点，显示夜盘买盘略占优，但未能突破日高 9724，高位存在阻力。",
+    "1 小时布林：上轨 9764.38，中轨 9711.95，下轨 9659.52，带宽 0.0108，为极窄收口状态。当前价 9713 位于中轨上方 1 点，几乎贴轨，表明短线进入方向选择期；若 1 小时 K 线有效突破上轨 9764 则打开上行空间，跌破下轨 9659 则转弱。",
+    "4 小时布林：上轨 9883.06，中轨 9502.95，下轨 9122.84，带宽 0.08，通道开口较大。当前价 9713 位于中轨上方，且距离上轨约 170 点，趋势仍偏多。ADX 46.84，趋势强度较高，但追高性价比一般，回踩中轨或 EMA20（9563）附近更佳。",
+    "日线布林/均线：根据最近 20 日收盘价估算，日线布林上轨约 9751，中轨约 9416.5，下轨约 9082。当前价 9713 位于中轨上方、接近上轨（距离约 38 点）。MA10=9481、MA20=9417、MA60=9397，均线多头排列，价格位于所有均线之上，日线中期趋势向上。",
+    "趋势结构：自 8 月 6 日低点 9385 以来，价格连续上行，8 月 11 日创 20 日新高 9773，目前在高位 9700 上方整理。4 小时和日线均维持上行通道，1 小时带宽极窄暗示短线即将变盘，整体趋势仍以多头为主导。",
+    "量能配合：日线成交量 332450 手，20 日均量比 0.81，成交量较前几日略缩；夜盘最新 1 小时 bar 成交量 1869 手（因临近收盘数据不完整），持仓较日盘增加约 9200 手至 439577，增仓但价格小涨，说明多空分歧加大，需警惕冲高回落。",
+    "支撑与压力：短线支撑关注 9659（1 小时下轨）和 9671（夜盘低点），强支撑 9600 整数关口；压力位关注 9724（夜盘高点）、9764（1 小时上轨）和 9773（日线前高），突破后下一目标看 4 小时上轨 9883。",
+    "合约结构：P0 映射主力 P2701，价格 9713，次主力 P2609 价格 9390，价差 -323，远月贴水形成 back 结构；主力持仓占比 51.39%，换月信号稳定，但 P0 为连续合约，实际下单需切换至具体月份并二次确认流动性和保证金要求。"
   ],
   "intraday_strategy": {
-    "bias": "等待AI",
-    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
-    "stop": "未给出",
-    "take_profit": "未给出",
-    "invalidation": "未给出",
-    "notes": "当前为规则备用分析"
+    "bias": "偏多",
+    "entry": "回调做多：9670-9685 区间企稳后轻仓做多；或有效突破 9724 后追多（成交后收于 9724 上方确认）",
+    "stop": "回调做多止损 9655（1 小时下轨下方）；突破追多止损 9705（突破点下方 19 点）",
+    "take_profit": "第一目标 9740-9750；第二目标 9773（前高）；第三目标 9883（4 小时上轨）",
+    "invalidation": "小时线收盘跌破 9655，或日线收盘跌破 9610（4 小时 EMA20 附近），多头结构失效",
+    "notes": "适用时段：2026-08-13 交易日早盘 09:00-11:30。因夜盘已收盘，本策略基于夜盘收盘价 9713 制定。若早盘高开直接冲高至 9770 上方，不建议追多，等待回踩 9670-9685 或突破回踩确认。若早盘先回踩 9670-9685 且 1 小时出现阳线，可执行做多；若直接放量突破 9724，可轻仓追多。严格止损，仓位控制在单笔风险 ≤1%。"
   },
   "decision_frame": {
-    "confidence": 0,
-    "regime": "数据不足",
-    "edge": "等待 DeepSeek",
-    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
-    "long_case": {},
-    "short_case": {},
-    "event_risks": [],
+    "confidence": 60,
+    "regime": "上行趋势中的高位整理",
+    "edge": "4 小时及日线趋势向上，均线多头排列，价格站在所有均线上方；1 小时布林收口后一旦选择方向，突破力度可能较大。但模型验证状态为 rejected，历史优势未被证实，且近月库存累积预期压制上方空间。",
+    "no_trade_condition": "若小时线收盘跌破 9655 或开盘跳空低开并跌破 9655，则不做多；若价格在 9655-9764 之间反复震荡且无成交量配合，则减少仓位或观望；若 1 小时布林持续收口但无法突破，避免频繁交易。",
+    "long_case": {
+      "trigger": "早盘 1 小时 K 线收盘站上 9724（夜盘高点），或回踩 9670-9685 不破并出现阳线",
+      "entry_zone": "9670-9685 或突破 9724 后追多",
+      "stop": "回调做多止损 9655；突破追多止损 9705",
+      "targets": [
+        "9740-9750",
+        "9773",
+        "9883"
+      ],
+      "invalidation": "小时线收盘跌破 9655 或日线收盘跌破 9610",
+      "risk_reward": "回调做多按入场 9675、止损 9655、第一目标 9740 计算，盈亏比约 3.25；突破追多按入场 9724、止损 9705、目标 9773 计算，盈亏比约 2.58，满足 ≥1.5 要求"
+    },
+    "short_case": {
+      "trigger": "价格在 9764-9773 区域出现 1 小时看跌吞没形态，且 RSI 出现顶背离",
+      "entry_zone": "9760-9773（逆势轻仓）",
+      "stop": "9790（1 小时上轨上方 26 点）",
+      "targets": [
+        "9710（1 小时中轨）",
+        "9659（1 小时下轨）"
+      ],
+      "invalidation": "小时线收盘站稳 9773 上方",
+      "risk_reward": "按入场 9765、止损 9790、第一目标 9710 计算，盈亏比 2.2，但逆势单风险较大，仅建议轻仓试探"
+    },
+    "event_risks": [
+      "8 月 MPOB 月报公布在即，若库存增幅超预期，将压制棕榈油价格；若库存意外下降，则可能推动价格突破前期高点。",
+      "厄尔尼诺发酵程度：强厄尔尼诺概率上升可能利多远期产量预期，但当前市场已部分计价，需跟踪实际天气数据。",
+      "国际原油波动：霍尔木兹海峡地缘冲突导致油价暴涨，或通过生物柴油需求传导至油脂，但持续性存疑。",
+      "马盘棕榈油走势及国内油脂板块联动，若马盘继续走弱，将拖累国内价格。"
+    ],
     "data_limits": [
-      "当前为备用规则分析"
+      "日线和小时线数据更新于 2026-08-12T15:32:42 UTC，距分析时刻约 24 分钟，超过 10 分钟，属于轻微延迟，非实时盘口。",
+      "1 小时最新 bar 成交量仅 1869 手，因夜盘尾盘数据不完整，量能判断需结合日盘整体情况。",
+      "日线布林为根据最近 20 日收盘价估算，非系统计算值，存在一定误差。",
+      "P0 为连续合约，历史数据可能包含换月跳空，不能完全代表具体月份合约的连续走势。",
+      "model_validation 状态为 rejected，样本外无优势，历史胜率与盈亏比不代表未来，不构成交易依据。"
     ]
   },
-  "news_impact": [],
-  "news_articles": [],
+  "news_impact": [
+    "[利多] 强厄尔尼诺概率飙升，市场预期马来西亚和印尼棕榈油产量可能受损，支撑远期供应预期。但当前库存累积预期仍压制近月价格，需关注 8 月 MPOB 月报实际库存变化。",
+    "[利空] 马盘棕榈油弱势收跌，库存累积预期压制市场情绪。马来西亚棕榈油库存若超预期回升，将削弱棕榈油价格上行空间，对国内盘面形成拖累。",
+    "[利多] 棕榈油创逾四月新高，库存高压与需求韧性并行，市场静待厄尔尼诺叙事兑现。需求端（如印度进口）表现出韧性，支撑价格高位运行。",
+    "[中性] 油脂近远月呈现分化，主力合约走强而远月偏弱，反映市场对近月供需偏紧的定价与远期供应改善预期并存。这种结构可能导致资金在不同月份间轮动。",
+    "[利多] 霍尔木兹海峡地缘冲突升级，国际油价暴涨超 5%，原油走强提振生物柴油需求预期，间接利多棕榈油。但传导路径存在不确定性，需观察原油持续性和生柴政策。",
+    "[中性] 印度希望扩大进口印尼农产品，可能改善印尼棕榈油出口需求，但具体数量和落实时间未知，对价格影响有限。"
+  ],
+  "news_articles": [
+    {
+      "title": "MPOB 7月月报前瞻：强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？",
+      "source": "金十数据",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5",
+      "detail": "报道称强厄尔尼诺概率上升，可能影响马来西亚棕榈油产量，市场密切关注 8 月 MPOB 月报的库存变化。若库存拐点迟迟未现，供应端担忧将支撑价格；若库存累积超预期，则价格承压。",
+      "impact": "利多"
+    },
+    {
+      "title": "期货早报：霍尔木兹海峡争夺战升级！美伊各执一词，油价暴涨超5%",
+      "source": "同花顺财经",
+      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE5qX25QdkZFZWxGNWxoU0lJOVJNd3Z4TjhnV2FqSVJJN2xEcUNJeFpNcVBBUV9SV0hHb1lpeHptRlItcDZYT0xoRF9Tek5PdFB6YnNZZUlaZ2dKbWtXRVE?oc=5",
+      "detail": "地缘冲突升级推动国际油价单日暴涨超 5%，市场预期生物柴油需求增加，油脂板块获得成本端和需求端双重提振。但冲突持续性不确定，若局势缓和，油价回吐可能拖累油脂。",
+      "impact": "利多"
+    },
+    {
+      "title": "马盘棕榈油弱势收跌，库存累积预期压制市场情绪",
+      "source": "汇通网 Fx678",
+      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1aeXJFb1p6NnN3enNkMjNrWFZxYTVhNEFsbGJZNk5BWUhMVWNTUHBNR2JnNVpBXzZ3cFBiV0FMM3BfcWh5YzhFZndtS25ETGxRdDJXZmw0RGVwemM?oc=5",
+      "detail": "马来西亚棕榈油期货收跌，市场情绪受库存累积预期压制。马盘走弱可能传导至国内盘面，限制棕榈油上方空间，但国内供需结构略有不同，需观察进口利润和买船情况。",
+      "impact": "利空"
+    },
+    {
+      "title": "油脂：近远月呈现分化",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOaWtLaHNSVHFZdGVIaWZvcmJVNVNJcG9GU0lXTTJoRlVjemRkcEpBam1LUXdtaTZJT1BPRWt5VGF2dThLd0dxRndDQUNyZlVocXlDd05IM2NhNlVEU2w4OUtMRU9ZNnN1NHpjNTVBQ0kzVjJUWUZmM09vblN4ZW45anNtUWhrRW51ckZYZjFUdHRzSTE4Q2Vab09JM2NKQlJuQk5TdlNtc09tMXYyOExPbw?oc=5",
+      "detail": "报道指出油脂市场近远月合约走势分化，主力合约偏强而远月偏弱，反映现货紧张与远期供应改善预期并存。这种结构可能导致跨期套利机会，单边方向需关注近月交割逻辑。",
+      "impact": "中性"
+    },
+    {
+      "title": "棕榈油创逾四月新高：库存高压与需求韧性并行，市场静待厄尔尼诺叙事兑现",
+      "source": "黄金网",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE4zR2thdGY5bmxQdXRYdjRxdlJHbU9wbWZBNG5HY056UXVhNjRrUXdEVVliaVFwVWk1WHRtbFJzcTdwamVlY2p1U1c4Tm9VOHdtM184djFISzFwSDVZSlBWUTk0ZTY5MUhETldzSA?oc=5",
+      "detail": "棕榈油价格创出逾四个月新高，但库存高压依然存在，需求表现韧性。市场在等待厄尔尼诺天气对产量的实际影响兑现，若后续供应端出现问题，价格仍有上行驱动。",
+      "impact": "中性"
+    },
+    {
+      "title": "光大期货：8月5日农产品日报",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMiigJBVV95cUxPSEVjSUh6REREOHFzM1BkcFVVVjNEZ2ZUc1FUeWJ3MzVwYkxuTW5nYW1PTkZ1MlJFUnhVNFBlU2hqNjhjbW9lOFBvYVNfM1BxcEx3SzI2OC1WTklIcE1YLXpad094clZYMGU3aVQ3VWFaU1dCcHlHQWs3NDZjbnNNZnVkOXZMUkxDX2k0ODVQcThvUkZpalh2cUI2eXpZZWMxbnFVVi1ra05qelN5THhMQXZ4YU52aW9GNXJ0WG9lYTNEODQzd1U1ZGhxUmN6d2xBSnRteXNGeFB6a1JybGxhYmN6MFZJRjY1cGN4YWhkM2p0azdWclFfRkMyYjlZSEJURHZlVVV5d09ZUQ?oc=5",
+      "detail": "光大期货农产品日报回顾了当日棕榈油等品种表现，提及市场供需博弈和资金动向。该报告属于常规日报，对价格影响中性，但可作为机构观点的参考。",
+      "impact": "中性"
+    },
+    {
+      "title": "“超级”厄尔尼诺现象加剧，全球粮食库存仍安全",
+      "source": "idnfinancials.com",
+      "url": "https://news.google.com/rss/articles/CBMiuwJBVV95cUxObXJ1amMxSnF0V2xSR2NLZ0hudy12SUVIeUZMZTNZRDJOZDJYS3cwVjYzTEhHQUtKYnJibDBERFRfUUp4SGdYSUVLVkdHbTZ0dUs3SG16ckE1dXhBdF9oVnlvMHN6Rm9BOFlqejMwTUFsZGRfdFN6eGpoOHU5NmZJVWtYWHhZdHVfNkk0d2V2QVU5ZjI5dzJuYk1Gcmd3RHFYb3NPbkhkUmlYUXczWVZBLTd2bndSb0JqYjFSNGlHUUd0d0pJTENnWWtlQzRIajFVeHppSEpiU1BaWThaVVUySXFfQzY2c0dXdldQOXo4RU9FcDhKSDIzNEZ3eHpjM0R3VThNajFJVXZjOFk0aU5oMVp6c1RIV2NjVEhmcFNGV3VrTFR2SWhPMERsT3pHMUUtODE3VEhsTHJnekE?oc=5",
+      "detail": "报道称超级厄尔尼诺现象加剧，但全球粮食库存仍处于安全水平。对棕榈油而言，厄尔尼诺可能影响东南亚产量，但库存缓冲减轻了短期供应冲击，因此价格影响可能有限。",
+      "impact": "中性"
+    }
+  ],
   "watch_levels": {
     "support": 9191.0,
     "resistance": 9773.0
   },
+  "normalization_warnings": [
+    "support",
+    "resistance"
+  ],
+  "risk_note": "本分析基于历史数据和公开舆情，不构成任何投资建议。P0 为连续合约，实际交易请使用具体月份合约（如 P2701），并自行确认合约规格、保证金及流动性。模型验证显示历史策略样本外无优势，过往胜率不代表未来表现。市场有风险，入市需谨慎。",
+  "source": "DeepSeek API",
+  "model": "deepseek-v4-flash",
+  "thinking_mode": "enabled",
+  "reasoning_effort": "high",
+  "status": "ok",
+  "generated_at_utc": "2026-08-12T15:58:51+00:00",
+  "latest_date": "2026-08-12",
+  "realtime_price": 9713.0,
+  "realtime_note": "盘口交易日归属标签 2026-08-13，最新盘口时间 23:00:00（不是未来行情），当前价 9713，涨跌 +0.18%",
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-08-12T15:57:09+00:00",
+    "market_trading_day": "2026-08-13",
+    "market_tick_time": "23:00:00",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
+  },
+  "news_summary": "[1] 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-08-06T12:00:42+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5\n摘要: 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 金十数据\n\n[2] 期货早报：霍尔木兹海峡争夺战升级！美伊各执一词，油价暴涨超5% - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-08-10T23:53:35+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE5qX25QdkZFZWxGNWxoU0lJOVJNd3Z4TjhnV2FqSVJJN2xEcUNJeFpNcVBBUV9SV0hHb1lpeHptRlItcDZYT0xoRF9Tek5PdFB6YnNZZUlaZ2dKbWtXRVE?oc=5\n摘要: 期货早报：霍尔木兹海峡争夺战升级！美伊各执一词，油价暴涨超5% 同花顺财经\n\n[3] 马盘棕榈油弱势收跌，库存累积预期压制市场情绪 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-08-07T10:58:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE1aeXJFb1p6NnN3enNkMjNrWFZxYTVhNEFsbGJZNk5BWUhMVWNTUHBNR2JnNVpBXzZ3cFBiV0FMM3BfcWh5YzhFZndtS25ETGxRdDJXZmw0RGVwemM?oc=5\n摘要: 马盘棕榈油弱势收跌，库存累积预期压制市场情绪 汇通网 Fx678\n\n[4] 油脂：近远月呈现分化 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-11T16:41:15+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOaWtLaHNSVHFZdGVIaWZvcmJVNVNJcG9GU0lXTTJoRlVjemRkcEpBam1LUXdtaTZJT1BPRWt5VGF2dThLd0dxRndDQUNyZlVocXlDd05IM2NhNlVEU2w4OUtMRU9ZNnN1NHpjNTVBQ0kzVjJUWUZmM09vblN4ZW45anNtUWhrRW51ckZYZjFUdHRzSTE4Q2Vab09JM2NKQlJuQk5TdlNtc09tMXYyOExPbw?oc=5\n摘要: 油脂：近远月呈现分化 新浪财经\n\n[5] 棕榈油创逾四月新高：库存高压与需求韧性并行，市场静待厄尔尼诺叙事兑现_国际原油市场 - 黄金网\n来源: 黄金网\n发布时间UTC: 2026-08-11T11:47:08+00:00\nURL: https://news.google.com/rss/articles/CBMibEFVX3lxTE4zR2thdGY5bmxQdXRYdjRxdlJHbU9wbWZBNG5HY056UXVhNjRrUXdEVVliaVFwVWk1WHRtbFJzcTdwamVlY2p1U1c4Tm9VOHdtM184djFISzFwSDVZSlBWUTk0ZTY5MUhETldzSA?oc=5\n摘要: 棕榈油创逾四月新高：库存高压与需求韧性并行，市场静待厄尔尼诺叙事兑现_国际原油市场 黄金网\n\n[6] 印度希望扩大进口印尼农产品 腰果、槟榔等迎出口机遇 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-08-10T12:55:00+00:00\nURL: https://news.google.com/rss/articles/CBMidkFVX3lxTE5IR3NZczFtOW42Z2J3MUV2VjNHQzZHS2JJQVVEbTVMOHJOYlptMEFDOExPTWtuay1QajN6RG9JS01JMU9KSHAzR3dfRm96anZJQm1LZ2ctam5tcGktazB3OExjYjVrQzc4RHZrLU5VY0JvMVdFa0E?oc=5\n摘要: 印度希望扩大进口印尼农产品 腰果、槟榔等迎出口机遇 Shangbao Indonesia\n\n[7] 光大期货：8月5日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-05T23:34:36+00:00\nURL: https://news.google.com/rss/articles/CBMiigJBVV95cUxPSEVjSUh6REREOHFzM1BkcFVVVjNEZ2ZUc1FUeWJ3MzVwYkxuTW5nYW1PTkZ1MlJFUnhVNFBlU2hqNjhjbW9lOFBvYVNfM1BxcEx3SzI2OC1WTklIcE1YLXpad094clZYMGU3aVQ3VWFaU1dCcHlHQWs3NDZjbnNNZnVkOXZMUkxDX2k0ODVQcThvUkZpalh2cUI2eXpZZWMxbnFVVi1ra05qelN5THhMQXZ4YU52aW9GNXJ0WG9lYTNEODQzd1U1ZGhxUmN6d2xBSnRteXNGeFB6a1JybGxhYmN6MFZJRjY1cGN4YWhkM2p0azdWclFfRkMyYjlZSEJURHZlVVV5d09ZUQ?oc=5\n摘要: 光大期货：8月5日农产品日报 新浪财经\n\n[8] 油脂：近远月呈现分化 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-11T08:56:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxOOGgyU3FBazlPSVN3WTVwNHBzeS1rMEpaRjNNMjhPZTBMQkU1X29DQzAyQUZhclFMa2wtTVFfbFNZUmNId1ZsWFhEN2ZPeXBZeUU2TnY2T1M0WmFoRDFVRTdETkxLSmhLVzRPMGdwem5MbXFZQWVaZkhNRXZuT2UxVmpWMkt6ajZ2V2Q0Rg?oc=5\n摘要: 油脂：近远月呈现分化 新浪财经\n\n[9] “超级”厄尔尼诺现象加剧，全球粮食库存仍安全 - idnfinancials.com\n来源: idnfinancials.com\n发布时间UTC: 2026-08-11T10:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMiuwJBVV95cUxObXJ1amMxSnF0V2xSR2NLZ0hudy12SUVIeUZMZTNZRDJOZDJYS3cwVjYzTEhHQUtKYnJibDBERFRfUUp4SGdYSUVLVkdHbTZ0dUs3SG16ckE1dXhBdF9oVnlvMHN6Rm9BOFlqejMwTUFsZGRfdFN6eGpoOHU5NmZJVWtYWHhZdHVfNkk0d2V2QVU5ZjI5dzJuYk1Gcmd3RHFYb3NPbkhkUmlYUXczWVZBLTd2bndSb0JqYjFSNGlHUUd0d0pJTENnWWtlQzRIajFVeHppSEpiU1BaWThaVVUySXFfQzY2c0dXdldQOXo4RU9FcDhKSDIzNEZ3eHpjM0R3VThNajFJVXZjOFk0aU5oMVp6c1RIV2NjVEhmcFNGV3VrTFR2SWhPMERsT3pHMUUtODE3VEhsTHJnekE?oc=5\n摘要: “超级”厄尔尼诺现象加剧，全球粮食库存仍安全 idnfinancials.com\n\n[10] 超级厄尔尼诺或在2026年加剧，全球粮食市场凭储备与技术增强韧性| 乌克兰新闻 - Межа. Новини України.\n来源: Межа. Новини України.\n发布时间UTC: 2026-08-11T04:14:00+00:00\nURL: https://news.google.com/rss/articles/CBMiZ0FVX3lxTE85dnVweDIyN1NQdGpVb00xTVBLVnZweXJuczV4NVhyelY2a0NjLTFaWUh5b0p3TzJwZS1pZ3NKNzdtTUtNM0JlUlhMRC1CVEJ0NVF2SzVFa0pwWVBnTmhKX0ZmYUNMM00?oc=5\n摘要: 超级厄尔尼诺或在2026年加剧，全球粮食市场凭储备与技术增强韧性| 乌克兰新闻 Межа. Новини України.",
+  "symbol": "P0",
+  "instrument_name": "棕榈油",
+  "api_latency_seconds": 102.6,
+  "token_usage": {
+    "prompt_tokens": 15780,
+    "completion_tokens": 12951,
+    "total_tokens": 28731,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8468
+    },
+    "prompt_cache_hit_tokens": 1280,
+    "prompt_cache_miss_tokens": 14500
+  },
   "integrity": {
-    "version": "deterministic-integrity-v1",
-    "checked_at_utc": "2026-08-12T13:04:02+00:00",
-    "score": 0,
+    "version": "deterministic-integrity-v2",
+    "checked_at_utc": "2026-08-12T15:58:51+00:00",
+    "score": 60,
     "status": "blocked",
     "label": "规则接管",
     "execution_allowed": false,
-    "evidence_confidence": 0,
+    "evidence_confidence": 60,
     "issues": [
       {
-        "code": "ai_unavailable",
+        "code": "invalid_watch_levels",
         "severity": "high",
-        "message": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+        "message": "AI 支撑/压力不是有效数字，已改用确定性区间。"
       }
     ],
-    "facts": {}
+    "facts": {
+      "realtime_price": 9713.0,
+      "realtime_fetch_status": "live",
+      "realtime_fetched_at_utc": "2026-08-12T15:57:09+00:00",
+      "realtime_market_tick_time": "23:00:00",
+      "daily_rsi14": 62.06,
+      "one_hour_boll_position": "中轨上方",
+      "four_hour_boll_position": "中轨上方",
+      "realtime_trading_day_label": "2026-08-13",
+      "realtime_label_is_future": true
+    }
   },
-  "risk_note": "本分析仅供行情研究，不构成投资建议。",
-  "symbol": "P0",
-  "instrument_name": "棕榈油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-12T13:03:06+00:00",
+    "realtime_fetched_at_utc": "2026-08-12T15:57:09+00:00",
     "realtime_market_trading_day": "2026-08-13",
-    "realtime_market_tick_time": "21:03:03",
+    "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-12T12:07:25+00:00",
+    "daily_updated_at_utc": "2026-08-12T15:32:42+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-12T12:07:25+00:00",
-    "news_updated_at_utc": "2026-08-12T12:07:23+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-12T12:07:23+00:00"
-  },
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-08-12T13:03:06+00:00",
-    "market_trading_day": "2026-08-13",
-    "market_tick_time": "21:03:03",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
+    "intraday_updated_at_utc": "2026-08-12T15:32:42+00:00",
+    "news_updated_at_utc": "2026-08-12T15:32:38+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-12T15:32:38+00:00"
   }
 }

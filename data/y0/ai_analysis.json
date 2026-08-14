@@ -1,197 +1,86 @@
 {
-  "summary": "实时行情：豆油Y0连续最新价8504元/吨（tradedate 2026-08-14，ticktime 11:30:00，较昨结算涨+0.60%），午盘收盘前快速拉升。1小时、2小时、4小时K线均收盘于布林上轨附近，实时价已突破各短周期上轨，短线动能偏强；但日线仍处于中轨（约8568.7）下方，长周期尚未确认趋势反转。日内短线偏多，但量能未充分放大，建议今晚夜盘回踩确认后再介入，不追高。连续合约主力映射Y2701，主力持仓稳定，价差结构远月贴水。模型验证状态为unproven，历史优势未被证实，本分析不构成投资建议。",
-  "bias": "偏多",
-  "analysis": [
-    "实时盘口：realtime.price为8504元/吨，ticktime 11:30:00，涨跌幅+0.60%，高于1小时K线最新收盘8491，显示尾盘继续走强，短线多头动能仍在释放。",
-    "1小时布林：上轨8491.18、中轨8453.85、下轨8416.52，带宽0.0088（极窄），实时价8504已突破上轨，处于超买区域；中轨向上，EMA20斜率0.0015，短线趋势向上。",
-    "4小时布林：上轨8494.20、中轨8441.25、下轨8388.30，带宽0.0125，实时价8504亦突破上轨，ADX=28.01显示趋势强度中等；但K线收盘8491仍在轨道内，突破需要量能确认。",
-    "2小时过渡：上轨8490.99、中轨8448.35，收盘8491贴合上轨，实时价突破，带宽0.0101，与1H/4H形成共振，短线偏多信号一致。",
-    "日线布林（基于8月13日收盘估算）：中轨约8568.7、上轨约8806、下轨约8331，实时价8504位于中轨下方约0.55倍标准差，带宽约5.5%，日线仍处于震荡区间，中轨是上方关键压力。",
-    "日线均线：MA10=8438.2、MA20=8468.7、MA60=8465.28，实时价8504站上全部短中期均线，均线尚未多头排列但价格转强，日线级别有底部抬升迹象。",
-    "量能：8月13日日线成交量249282手，20日量比1.17，但日内1小时和4小时量比仅0.45和0.31，最新突破段量能明显不足，存在冲高回落或假突破风险。",
-    "支撑压力：下方支撑看8460-8470（今日低点8460、4小时中轨8441上方），上方压力看8509-8510（实时高点）、8535-8540（前平台），更强压力在日线中轨8568附近。"
-  ],
-  "intraday_strategy": {
-    "bias": "偏多",
-    "entry": "8490-8492（夜盘回踩该区间且小时线不破8490时做多）",
-    "stop": "8465（跌破今日低点8460且小时线收于其下离场）",
-    "take_profit": "['8535', '8568']",
-    "invalidation": "小时K线收盘跌破8460，或4小时K线收盘跌破8441，多头结构失效；若夜盘直接高开上冲8509-8510且不回落，禁止追多。",
-    "notes": "适用今晚夜盘21:00-23:00。以入场8491、止损8465计算，首目标8535盈亏比约1.69，满足要求。若入场价高于8495，盈亏比将低于1.5，则放弃交易。注意连续合约Y0，实际下单需映射Y2701并二次确认。"
-  },
-  "decision_frame": {
-    "confidence": 58,
-    "regime": "震荡偏多（短周期突破，日线中轨下方压制）",
-    "edge": "1小时、2小时、4小时布林上轨共振突破，且日线收盘站上MA10/MA20/MA60，短线动量向上；但量能不足和日线中轨压制限制上行空间，优势仅为短线脉冲，并非趋势反转。",
-    "no_trade_condition": "若夜盘无法站稳8490、或价格直接跌破8460、或量能持续低于20期均量的50%，则不交易；若入场价高于8495导致首目标盈亏比低于1.5，也不交易。",
-    "long_case": {
-      "trigger": "夜盘21:00后价格回踩8490-8492企稳，且1小时K线收盘站回8490上方。",
-      "entry_zone": "8490-8492",
-      "stop": "8465",
-      "targets": [
-        "8535",
-        "8568"
-      ],
-      "invalidation": "小时收盘跌破8460，或4小时收盘跌破8441。",
-      "risk_reward": "以入场8491、止损8465、首目标8535计算，盈亏比=(8535-8491)/(8491-8465)=44/26≈1.69。"
-    },
-    "short_case": {
-      "trigger": "若价格在8509-8520冲高回落，且小时线收阴跌破8490，则短线可反手做空。",
-      "entry_zone": "8485-8488（跌破8490后反抽不破）",
-      "stop": "8505",
-      "targets": [
-        "8455",
-        "8440"
-      ],
-      "invalidation": "价格重新站上8505。",
-      "risk_reward": "以入场8486、止损8505、首目标8455计算，盈亏比=(8486-8455)/(8505-8486)=31/19≈1.63。"
-    },
-    "event_risks": [
-      "8月USDA报告已于8月13日发布，豆油生物燃料需求增长是潜在利多；中国7月大豆进口1147.7万吨同比降1.6%影响原料供应预期；大宗商品整体波动加剧可能放大豆油波动。"
-    ],
-    "data_limits": [
-      "日内K线为缓存数据，最新时间11:15，与实时价8504存在约13点偏差；日线布林为基于8月13日收盘的估算；连续合约Y0为指数口径，不能直接下单，需映射Y2701；model_validation状态为unproven，历史样本外命中率41.56%不代表未来概率。"
-    ]
-  },
-  "news_impact": [
-    "[利多] USDA最新报告显示豆油生物燃料用量持续增长：美国生物柴油消费预期上调将带动豆油需求，长期利多豆油。该报告已于8月13日发布，市场或已部分消化，短期影响有限。",
-    "[中性] 8月USDA报告落地后盘面出现'退升水'走势：报告前市场已计入部分利多预期，报告发布后升水回吐，方向取决于实际数据与预期的差值，当前舆情未提供明细，无法判断方向。",
-    "[利空] 中国7月大豆进口1147.7万吨，同比下降1.6%：进口量虽然下降但仍处于高位，且绝对量依然庞大，原料供应充足可能压制豆油成本，但影响中性偏空。",
-    "[中性] 大宗商品市场价格波动加剧：宏观环境不确定性增加，豆油波动率可能上升，但方向不确定，交易上应控制仓位、严格止损。",
-    "[中性] 光大期货8月13日农产品日报提示'盘面退升水'：反映短期市场情绪从预期转向现实，若后续无新驱动，豆油可能维持区间震荡。"
-  ],
-  "news_articles": [
-    {
-      "title": "豆菜粕：盘面退升水 关注8月USDA报告",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPZ3ZId04wc0g5cVVQWUdXcHMxXzBHcGZ2YlBsY0FOY3RVSkFvcHNzMjcxb0dVTGUyQUY1ZVV1eFhNZ3l3WEFwZ1l1VERRT2ZSNEI5Qzhvb0FoX3FfU2ZJZnNrYmw2RUE3ME9FaVczZmxtSnpPSTR1NEpIQ2FyWGxfTlptNGdKemhTME9TVjF5NjFpRTVCZGhLdFAtQUFDNndHMk5LMlhKOHdtRG94MjhjbQ?oc=5",
-      "detail": "新浪财经报道豆菜粕市场盘面退升水，同时提示关注8月USDA报告。报告已于8月13日发布，市场可能正在消化报告数据，盘面升水回吐意味着前期预期利好部分落空。具体供需数据未在摘要中给出，但整体反映了报告后市场情绪趋于谨慎。",
-      "impact": "中性"
-    },
-    {
-      "title": "【点评报告|大豆】2026年8月USDA农产品供需报告解读",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQbENqQkZVRXNHYm94MVNscVhKLWFfRlpBNk85eUt2eC1GNEZrQ1I2RWk5amNyOGhzanJnYlc1M2NyY21kZXEwbEhtNi1CZUVTMVg2VUtZN2FFaTk3dXlabWNtdjhXc256SUtKQlFKeDE4NktmaWVTMFBSeGVkelVTY0owRQ?oc=5",
-      "detail": "这是对2026年8月USDA农产品供需报告的解读，报告发布于8月13日。内容涉及美国大豆、豆油等供需数据调整，但摘要未给出具体数字。报告可能调整了单产、库存或生物燃料需求预估，对豆油价格有方向性影响。",
-      "impact": "中性"
-    },
-    {
-      "title": "8月USDA报告发布前需要了解的要点",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOaXBZMjh3UEZjN0lKV2tPRUZzVjF4RVBNSnhIUnNLakxsT1BrNUxtNGpkM1pCQU5iRFYwR0kyajhMT0pMc1o1YUhDWlVxOXBtdXF0LWxEaEItZUt0SlZuUFh5dTBScTRGNHRDbjZld1hpOHNSdThKRzh2SmpQa01LbU1VY0ZfaFNEdG9ub0Zzd2swZ0xSeG92NUYtX1pTTU5hOTNpai1rVzdGQ0N6LV9hNw?oc=5",
-      "detail": "这是8月10日发布的报告前要点提示，属于历史信息。文中可能列出了市场关注的单产、期末库存等关键指标，为报告预期提供背景。报告已于8月13日发布，该文现在仅作为回顾参考。",
-      "impact": "中性"
-    },
-    {
-      "title": "USDA最新报告：豆油生物燃料用量持续增长",
-      "source": "搜狐",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNMi1XTXl6QU9OWV80RWlFTFhSRHoyZEl6eUFrQnNmWFdjOWFya1FuUVo5UFRqTU1WRDdMVzFEZC1GTHNvSFFWQWdyMF9GRE95Nmo2cVQyd3hsSUNJekhQOHhnNDR2NjN6dEd4QWRVbGhnSHF1T1F4XzhwMlBGRWFNclJPVzZuUnhndkZJUg?oc=5",
-      "detail": "搜狐报道USDA最新报告显示豆油生物燃料用量持续增长。生物燃料需求是豆油消费的重要增量，报告上调该预期会直接改善豆油平衡表，对价格形成支撑。但具体增幅数值未在摘要中给出，实际影响还需结合报告全文。",
-      "impact": "利多"
-    },
-    {
-      "title": "USDA 8月月报：美国大豆供需预期数据",
-      "source": "富途牛牛",
-      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQWTR3Y2NrbWZXTXZfX2NpTUdMemJCTU1HUDZRMV9RZkJsdUptY0w5cE1SODN4M1FkMmpiRkdkNXlpaFB1dW1jUjNMTUMwWFBfSTEyTVVEeXlmLUlKRG5kd29fQUQ3dklkZG8xeTNMN1ZuWFNyNTdLRXg1YTg5RnpFVmFKX3pHTndWRm9ZWUo2OVlYSGZ3T2VUaw?oc=5",
-      "detail": "富途牛牛发布USDA 8月月报关于美国大豆供需预期数据。报告通常包含新作单产、产量、期末库存等关键数字，直接影响美豆及国内豆系品种定价。由于报告已于8月13日发布，当前价格已反映部分数据，需判断超预期程度。",
-      "impact": "中性"
-    },
-    {
-      "title": "光大期货：8月13日农产品日报",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOeVF0Vm5GSm0zTDFQbUJMMy05RzhkdWc0cXpoVzB3ampONEF3b2MweUVpRHZ4cWJWZkxKeF9kOUJhbDBuUkkyVzJhWGJnR3JXYkllY0ZDWTh1enk1MEhTNVZ4RGhfUXJVSkZoMy0xTjZCNzIwNlpQYUNocWcxUXRzTVhCaXN2VE9rTEs2NUU4TGFERmp5NDVydUJiT0hJTDRaelNYTHdEUGpzQzQ4cnBjUw?oc=5",
-      "detail": "光大期货在8月13日农产品日报中讨论了盘面退升水现象，指出市场在报告后可能面临升水回落。这类专业日报经常包含持仓、基差、以及油粕比等数据，对短期交易有参考意义。摘要未给出具体数据，但情绪偏谨慎。",
-      "impact": "利空"
-    },
-    {
-      "title": "大宗商品市场价格波动加剧",
-      "source": "中金在线",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE85VjBjeDNmalQ5MXNKRHlneGpYWERnUjI3V3R0allXdDltazNUQ1B6eXFYVUFSbl9IUEdmS1dxak5Xa1BGMm9rd2pwTXVPdDdTZEY2c1RWeVF3TmVZTWtFR0c0UFRfRWZ4LXpxMVJn?oc=5",
-      "detail": "中金在线观点评论指出大宗商品市场价格波动加剧，反映宏观不确定性和资金博弈增强。豆油作为大宗商品之一，波动率可能上升，趋势交易难度加大，建议控制仓位、设置更严格止损。",
-      "impact": "中性"
-    },
-    {
-      "title": "中国7月大豆进口1147.7万吨 同比下降1.6%",
-      "source": "腾讯网",
-      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5ab1MwSWhYZDJFaWplQzdWWG84SDZ3SEQ5YWpnTTM0SHotZm9fOVVpdzgxRkJ4U3ZKSXB3UDlOZjgtNlE2dEUybTl1a3BlU2pUZzlnOHR3?oc=5",
-      "detail": "qq.com报道中国7月大豆进口1147.7万吨，同比下降1.6%。进口量虽下降但仍保持高水平，原料供应充裕，对豆油成本端影响偏空。同时进口下降可能反映国内压榨利润不佳，后期压榨量可能减少，从而影响豆油供给，方向需综合判断。",
-      "impact": "利空"
-    }
-  ],
-  "watch_levels": {
-    "support": 8460.0,
-    "resistance": 8510.0
-  },
-  "normalization_warnings": [],
-  "risk_note": "本分析基于公开行情数据与舆情搜索结果，不构成投资建议。连续合约为指数口径，实际下单请以交易所具体月份合约为准，并二次确认合约代码、保证金与流动性。期货交易风险较大，请严格控制仓位与止损。",
-  "source": "DeepSeek API",
+  "source": "fallback-rule-analysis",
   "model": "deepseek-v4-flash",
   "thinking_mode": "enabled",
   "reasoning_effort": "high",
-  "status": "ok",
-  "generated_at_utc": "2026-08-14T04:48:21+00:00",
+  "status": "fallback",
+  "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+  "generated_at_utc": "2026-08-14T06:21:12+00:00",
   "latest_date": "2026-08-13",
-  "realtime_price": 8504.0,
-  "realtime_note": "实时行情截至 2026-08-14 11:30:00，当前价 8504，涨跌 +0.60%",
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-08-14T04:46:39+00:00",
-    "market_trading_day": "2026-08-14",
-    "market_tick_time": "11:30:00",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
+  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
+  "bias": "等待AI",
+  "analysis": [
+    "实时价 8537（实时行情截至 2026-08-14 14:19:53，当前价 8537，涨跌 +0.99%），最新日线收盘 8485，日涨跌 +0.51%。",
+    "MA10/MA20/MA60 分别为 8438/8469/8465。",
+    "20日区间支撑压力为 8368-8644。"
+  ],
+  "intraday_strategy": {
+    "bias": "等待AI",
+    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
+    "stop": "未给出",
+    "take_profit": "未给出",
+    "invalidation": "未给出",
+    "notes": "当前为规则备用分析"
   },
-  "news_summary": "[1] 豆菜粕：盘面退升水 关注8月USDA报告 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-13T08:54:23+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxPZ3ZId04wc0g5cVVQWUdXcHMxXzBHcGZ2YlBsY0FOY3RVSkFvcHNzMjcxb0dVTGUyQUY1ZVV1eFhNZ3l3WEFwZ1l1VERRT2ZSNEI5Qzhvb0FoX3FfU2ZJZnNrYmw2RUE3ME9FaVczZmxtSnpPSTR1NEpIQ2FyWGxfTlptNGdKemhTME9TVjF5NjFpRTVCZGhLdFAtQUFDNndHMk5LMlhKOHdtRG94MjhjbQ?oc=5\n摘要: 豆菜粕：盘面退升水 关注8月USDA报告 新浪财经\n\n[2] 【点评报告|大豆】2026年8月USDA农产品供需报告解读 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-13T08:39:00+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxQbENqQkZVRXNHYm94MVNscVhKLWFfRlpBNk85eUt2eC1GNEZrQ1I2RWk5amNyOGhzanJnYlc1M2NyY21kZXEwbEhtNi1CZUVTMVg2VUtZN2FFaTk3dXlabWNtdjhXc256SUtKQlFKeDE4NktmaWVTMFBSeGVkelVTY0owRQ?oc=5\n摘要: 【点评报告|大豆】2026年8月USDA农产品供需报告解读 新浪财经\n\n[3] 8月USDA报告发布前需要了解的要点 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-10T23:42:57+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOaXBZMjh3UEZjN0lKV2tPRUZzVjF4RVBNSnhIUnNLakxsT1BrNUxtNGpkM1pCQU5iRFYwR0kyajhMT0pMc1o1YUhDWlVxOXBtdXF0LWxEaEItZUt0SlZuUFh5dTBScTRGNHRDbjZld1hpOHNSdThKRzh2SmpQa01LbU1VY0ZfaFNEdG9ub0Zzd2swZ0xSeG92NUYtX1pTTU5hOTNpai1rVzdGQ0N6LV9hNw?oc=5\n摘要: 8月USDA报告发布前需要了解的要点 新浪财经\n\n[4] USDA最新报告：豆油生物燃料用量持续增长 - Sohu\n来源: Sohu\n发布时间UTC: 2026-08-13T01:48:39+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNMi1XTXl6QU9OWV80RWlFTFhSRHoyZEl6eUFrQnNmWFdjOWFya1FuUVo5UFRqTU1WRDdMVzFEZC1GTHNvSFFWQWdyMF9GRE95Nmo2cVQyd3hsSUNJekhQOHhnNDR2NjN6dEd4QWRVbGhnSHF1T1F4XzhwMlBGRWFNclJPVzZuUnhndkZJUg?oc=5\n摘要: USDA最新报告：豆油生物燃料用量持续增长 Sohu\n\n[5] USDA 8月月报：美国大豆供需预期数据 - 富途牛牛\n来源: 富途牛牛\n发布时间UTC: 2026-08-12T16:41:16+00:00\nURL: https://news.google.com/rss/articles/CBMimAFBVV95cUxQWTR3Y2NrbWZXTXZfX2NpTUdMemJCTU1HUDZRMV9RZkJsdUptY0w5cE1SODN4M1FkMmpiRkdkNXlpaFB1dW1jUjNMTUMwWFBfSTEyTVVEeXlmLUlKRG5kd29fQUQ3dklkZG8xeTNMN1ZuWFNyNTdLRXg1YTg5RnpFVmFKX3pHTndWRm9ZWUo2OVlYSGZ3T2VUaw?oc=5\n摘要: USDA 8月月报：美国大豆供需预期数据 富途牛牛\n\n[6] 光大期货：8月13日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-13T20:32:17+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOeVF0Vm5GSm0zTDFQbUJMMy05RzhkdWc0cXpoVzB3ampONEF3b2MweUVpRHZ4cWJWZkxKeF9kOUJhbDBuUkkyVzJhWGJnR3JXYkllY0ZDWTh1enk1MEhTNVZ4RGhfUXJVSkZoMy0xTjZCNzIwNlpQYUNocWcxUXRzTVhCaXN2VE9rTEs2NUU4TGFERmp5NDVydUJiT0hJTDRaelNYTHdEUGpzQzQ4cnBjUw?oc=5\n摘要: 光大期货：8月13日农产品日报 新浪财经\n\n[7] 大宗商品市场价格波动加剧_观点评论 - news.cnfol.com\n来源: news.cnfol.com\n发布时间UTC: 2026-08-14T00:04:28+00:00\nURL: https://news.google.com/rss/articles/CBMibkFVX3lxTE85VjBjeDNmalQ5MXNKRHlneGpYWERnUjI3V3R0allXdDltazNUQ1B6eXFYVUFSbl9IUEdmS1dxak5Xa1BGMm9rd2pwTXVPdDdTZEY2c1RWeVF3TmVZTWtFR0c0UFRfRWZ4LXpxMVJn?oc=5\n摘要: 大宗商品市场价格波动加剧_观点评论 news.cnfol.com\n\n[8] 中国7月大豆进口1147.7万吨 同比下降1.6% - qq.com\n来源: qq.com\n发布时间UTC: 2026-08-07T02:43:00+00:00\nURL: https://news.google.com/rss/articles/CBMiVkFVX3lxTE5ab1MwSWhYZDJFaWplQzdWWG84SDZ3SEQ5YWpnTTM0SHotZm9fOVVpdzgxRkJ4U3ZKSXB3UDlOZjgtNlE2dEUybTl1a3BlNVNqUzlnOHR3?oc=5\n摘要: 中国7月大豆进口1147.7万吨 同比下降1.6% qq.com\n\n[9] 中国7月出口同比增23.9%，半导体出口按价值计算同比近乎翻番，进口同比增27.5% - 华尔街见闻\n来源: 华尔街见闻\n发布时间UTC: 2026-08-07T03:30:50+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1tWDAtNVVjeDZuX285MXZUV185VG5pZVAwYnZ6YjloV0FtTnJ5QTJOdUk4LVRYdzB1UUdHSncya1JTMHozMkt0NnkwcVFCMXVCSXRr?oc=5\n摘要: 中国7月出口同比增23.9%，半导体出口按价值计算同比近乎翻番，进口同比增27.5% 华尔街见闻\n\n[10] 扎根北疆黑土、攥牢大豆“中国芯”！黑河破解寒地大豆保供密码 - 新浪新闻_手机新浪网\n来源: 新浪新闻_手机新浪网\n发布时间UTC: 2026-08-11T08:22:00+00:00\nURL: https://news.google.com/rss/articles/CBMidkFVX3lxTFA2YUhPRUwzV3VCajR3cG5ETk15QnFPN3VuSHFvU0pZb3p2allrX1RZVHhQWDNMSEJ1ci1lbGkxWl96ZXFuenNHTG8tZnh1aXFHQklwTTRycVA2SnRPLXVHSlEtZWpsM3owUkZQNVFtb2VibG13bXc?oc=5\n摘要: 扎根北疆黑土、攥牢大豆“中国芯”！黑河破解寒地大豆保供密码 新浪新闻_手机新浪网",
-  "symbol": "Y0",
-  "instrument_name": "豆油",
-  "api_latency_seconds": 102.5,
-  "token_usage": {
-    "prompt_tokens": 15527,
-    "completion_tokens": 11254,
-    "total_tokens": 26781,
-    "prompt_tokens_details": {
-      "cached_tokens": 640
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 7293
-    },
-    "prompt_cache_hit_tokens": 640,
-    "prompt_cache_miss_tokens": 14887
+  "decision_frame": {
+    "confidence": 0,
+    "regime": "数据不足",
+    "edge": "等待 DeepSeek",
+    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
+    "long_case": {},
+    "short_case": {},
+    "event_risks": [],
+    "data_limits": [
+      "当前为备用规则分析"
+    ]
+  },
+  "news_impact": [],
+  "news_articles": [],
+  "watch_levels": {
+    "support": 8368.0,
+    "resistance": 8644.0
   },
   "integrity": {
-    "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-08-14T04:48:21+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
-    "evidence_confidence": 58,
-    "issues": [],
-    "facts": {
-      "realtime_price": 8504.0,
-      "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-08-14T04:46:39+00:00",
-      "realtime_market_tick_time": "11:30:00",
-      "daily_rsi14": 51.96,
-      "one_hour_boll_position": "上轨上方",
-      "four_hour_boll_position": "上轨上方",
-      "realtime_trading_day_label": "2026-08-14",
-      "realtime_label_is_future": false
-    }
+    "version": "deterministic-integrity-v1",
+    "checked_at_utc": "2026-08-14T06:21:12+00:00",
+    "score": 0,
+    "status": "blocked",
+    "label": "规则接管",
+    "execution_allowed": false,
+    "evidence_confidence": 0,
+    "issues": [
+      {
+        "code": "ai_unavailable",
+        "severity": "high",
+        "message": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+      }
+    ],
+    "facts": {}
   },
+  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "symbol": "Y0",
+  "instrument_name": "豆油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-14T04:46:39+00:00",
+    "realtime_fetched_at_utc": "2026-08-14T06:20:23+00:00",
     "realtime_market_trading_day": "2026-08-14",
-    "realtime_market_tick_time": "11:30:00",
+    "realtime_market_tick_time": "14:19:53",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-14T02:37:53+00:00",
+    "daily_updated_at_utc": "2026-08-14T05:50:54+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-14T02:37:53+00:00",
-    "news_updated_at_utc": "2026-08-14T02:37:50+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-14T02:37:50+00:00"
+    "intraday_updated_at_utc": "2026-08-14T05:50:54+00:00",
+    "news_updated_at_utc": "2026-08-14T05:50:50+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-14T05:50:51+00:00"
+  },
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-08-14T06:20:23+00:00",
+    "market_trading_day": "2026-08-14",
+    "market_tick_time": "14:19:53",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   }
 }

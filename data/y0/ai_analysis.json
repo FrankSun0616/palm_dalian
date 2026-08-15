@@ -1,58 +1,37 @@
 {
-  "summary": "realtime 最新价 8534（盘口时间 23:00:00，较前结算 8500 上涨 +0.40%；tradedate 为 2026-08-17，仅是大商所周五夜盘归属的下一交易日标签，不是未来行情）。多周期看：1H 在中轨上方靠近上轨，2H/4H 已突破布林上轨，日线站上 MA20/MA60 且位于中轨上方；短线偏多但 4H 超买，性价比最好是回踩 8519-8524 试多，止损 8500，首目标 8565。当前为周六凌晨，周五夜盘已收盘，下一个可交易时段为周一（8/17）早盘 09:00-11:30；无可用舆情数据；Y0 映射主力 Y2701，下单需二次确认。不构成投资建议。",
-  "bias": "震荡偏多",
+  "source": "fallback-rule-analysis",
+  "model": "deepseek-v4-flash",
+  "thinking_mode": "enabled",
+  "reasoning_effort": "high",
+  "status": "fallback",
+  "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+  "generated_at_utc": "2026-08-15T01:05:18+00:00",
+  "latest_date": "2026-08-14",
+  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
+  "bias": "等待AI",
   "analysis": [
-    "{'aspect': '实时价与盘口', 'point': 'realtime 最新价 8534，盘口时间 23:00:00，较前结算 8500 上涨 +0.40%（+34 点），买盘 8533、卖盘 8535，量 59900 手，持仓 548713 手。该 tradedate 为 2026-08-17，是大商所交易日归属标签（周五夜盘归属下一交易日），不是未来行情；后续所有入场、止损、目标位均以 8534 为当前基准。'}",
-    "{'aspect': '1小时布林', 'point': '1H 布林上轨 8543.72、中轨 8468.5、下轨 8393.28，带宽 1.78%；价格 8534 位于中轨上方、上轨下方约 9.7 点，贴近上轨但未突破。RSI 67.19、ADX 30.24，短线偏强但上方压力临近。'}",
-    "{'aspect': '2小时过渡（参考）', 'point': '2H 布林上轨 8525.02、中轨 8460.4、下轨 8395.78，带宽 1.53%；当前价 8534 已越过上轨，显示动量强于 1H。2H 仅作 1H/4H 之间的过渡确认，不单独作为开仓依据。'}",
-    "{'aspect': '4小时布林', 'point': '4H 布林上轨 8527.29、中轨 8455.1、下轨 8382.91，带宽 1.71%；价格 8534 突破上轨约 6.7 点，属强势突破但短线超买。ADX 32.8 显示趋势强度尚可；需观察能否在 8527 上方站稳，若跌回通道内则突破失败。'}",
-    "{'aspect': '日线布林/均线', 'point': '日线布林中轨 8469（MA20），上轨约 8598，下轨约 8340，带宽约 3.04%，较前一交易日微幅走阔；实时价 8534 位于中轨上方、上轨下方。日线收盘 8541 站上 MA10 8451.7、MA20 8469、MA60 8465.35，RSI 57.26，日线结构偏多但未突破上轨。'}",
-    "{'aspect': '趋势', 'point': '1H EMA20 8482.98、4H EMA20 8470.32，斜率均为正；日线自 8/12 低点 8422 以来连续回升，8/14 收 8541，呈低点上移。多周期短期趋势向上，但 4H 突破布林上轨后存在技术性回抽需求。'}",
-    "{'aspect': '量能与持仓', 'point': '日线 8/14 成交 247475 手，量比 1.15，持仓 547314 手较前日增 7716 手，增仓上行对多头有利；1H 最新 K 线量 418 手、量比 0.04，明显受收盘聚合口径影响，不宜单独使用；夜盘 2H 持仓增 1378 手，延续增仓。'}",
-    "{'aspect': '支撑压力与合约映射', 'point': '短线支撑 8519（夜盘低点）、8483（1H EMA20）、8469（日线中轨）；压力 8543.7（1H 上轨）、8547（8/14 高点）、8598（日线上轨）。Y0 连续合约当前映射主力 Y2701，价格/持仓一致，mapping_verified=true；次主力 Y2705 报 8345，贴水 189 元，持仓占比 29.59%，主力稳定但需防后续换月。'}"
+    "实时价 8534（盘口交易日归属标签 2026-08-17，最新盘口时间 23:00:00（不是未来行情），当前价 8534，涨跌 +0.40%），最新日线收盘 8541，日涨跌 +0.66%。",
+    "MA10/MA20/MA60 分别为 8452/8469/8465。",
+    "20日区间支撑压力为 8368-8644。"
   ],
   "intraday_strategy": {
-    "bias": "偏多（谨慎）",
-    "entry": "回踩 8519-8524 轻仓试多；若直接跌破 8519 则放弃，等 8483 附近再重新评估；高开超过 8547 不追。",
-    "stop": "8500（小时线收盘跌破即离场）",
-    "take_profit": "首目标 8565，第二目标 8580，激进目标 8598（日线布林上轨）",
-    "invalidation": "小时线收盘跌破 8500，或 4小时收盘跌破布林中轨 8455；若实盘确认 Y0 与 Y2701 映射失效或 Y2701 流动性异常，也视为失效。",
-    "notes": "当前为周六凌晨，周五夜盘已收盘，策略适用下周一（8/17）早盘 09:00-11:30，并在夜盘 21:00-23:00 继续跟踪。若周一跳空低开至 8483-8500 企稳，需重算盈亏比后再决定；若直接放量冲破 8547 且无回踩，放弃追多。4H ATR 约 35.5 点，止损 8500 相对 1H ATR 22.8 点偏紧，仓位需相应放轻。"
+    "bias": "等待AI",
+    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
+    "stop": "未给出",
+    "take_profit": "未给出",
+    "invalidation": "未给出",
+    "notes": "当前为规则备用分析"
   },
   "decision_frame": {
-    "confidence": 60,
-    "regime": "短线多头动量延续，但已进入 4H 布林上轨超买区；日线在中轨上方运行，偏多但需防范冲高回落。",
-    "edge": "多周期共振偏多：1H 在中轨上方并贴近上轨，2H/4H 突破上轨，日线站上 MA10/MA20/MA60；日线量比 1.15、持仓增加，增仓上行对短多有利。",
-    "no_trade_condition": "若不能在 8519-8524 区间回踩企稳，或成交价高于 8524 导致首目标 8565 盈亏比低于 1.5，则取消多单；周一高开直接越过 8547 不追；若 model_validation 状态非 positive 或 contract_bridge.mapping_verified=false，不依据该信号交易；若出现跳空缺口超过 30 点，先观望。",
-    "long_case": {
-      "trigger": "1H 回踩 8519-8524 不破，且 15 分钟收盘收复 8524；或 4H 维持在 8527 上轨上方并再次放量上行。",
-      "entry_zone": "8519-8524",
-      "stop": "8500",
-      "targets": [
-        "8565",
-        "8580",
-        "8598"
-      ],
-      "invalidation": "小时线收盘 < 8500，或 4小时收盘 < 8455。",
-      "risk_reward": "以 8522 入场、8500 止损、8565 首目标计算，风险约 22 点、盈利约 43 点，RR≈1.95；若实际成交价高于 8524，RR 下降，须重算后再决定。"
-    },
-    "short_case": {
-      "trigger": "4H 收盘跌回布林通道内（<8527）且 1H 跌破 8519；或反弹至 8543-8547 区域放量滞涨并跌破 8534。",
-      "entry_zone": "8534-8543 反弹试空，或跌破 8519 后反抽 8519-8524 再空。",
-      "stop": "8550（小时线收盘）",
-      "targets": [
-        "8483",
-        "8469",
-        "8442"
-      ],
-      "invalidation": "4小时收盘站稳 8548 上方，或 1小时重新站上 8544。",
-      "risk_reward": "以 8534 试空、8550 止损、8483 首目标计算，风险约 16 点、盈利约 51 点，RR≈3.2；但短线主方向偏多，空单仅作为破位/滞涨后的防守或反转信号。"
-    },
-    "event_risks": [
-      "周末海外美豆、美豆油、原油及宏观消息可能造成周一跳空；大商所交易日归属标签为 2026-08-17，实际盘口时间 23:00:00 为周五夜盘，周一开盘前存在信息空窗；Y2705 远月贴水 189 元，若开始向 Y2705 换月，连续合约与可交易合约价差可能扩大；无新增舆情数据，不排除政策/贸易扰动。"
-    ],
+    "confidence": 0,
+    "regime": "数据不足",
+    "edge": "等待 DeepSeek",
+    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
+    "long_case": {},
+    "short_case": {},
+    "event_risks": [],
     "data_limits": [
-      "realtime 为 live 抓取，但 ticktime 23:00:00 已属周五夜盘收盘时点，距周一早盘远超 10 分钟；小时线/日线数据源更新于 UTC 21:02-21:03，相对本次分析延迟约 19-20 分钟，均为缓存/历史数据。4H 最新K线时间显示 2026-08-17 11:15，同属交易日归属标签，实质为周五夜盘数据，不代表周一日盘已发生。Y0 是连续合约，需通过 Y2701 实际下单并二次确认。model_validation 状态为 unproven，样本外胜率 41.56%、期望 0.045R，仅为历史日线模型结果，不构成未来概率，也不等同于本日内 1H/4H 方案。"
+      "当前为备用规则分析"
     ]
   },
   "news_impact": [],
@@ -61,85 +40,47 @@
     "support": 8368.0,
     "resistance": 8644.0
   },
-  "normalization_warnings": [
-    "support",
-    "resistance"
-  ],
-  "risk_note": "不构成投资建议。连续合约 Y0 与主力 Y2701 映射已验证，但下单前须在交易软件二次确认具体月份、保证金与流动性。4H 已突破布林上轨，短线追高易被回抽；所有盈亏比基于静态价格估算，实际滑点和跳空可能改变结果。model_validation 历史优势未被证实，不预示未来收益。",
-  "source": "DeepSeek API",
-  "model": "deepseek-v4-flash",
-  "thinking_mode": "enabled",
-  "reasoning_effort": "high",
-  "status": "ok",
-  "generated_at_utc": "2026-08-14T21:24:37+00:00",
-  "latest_date": "2026-08-14",
-  "realtime_price": 8534.0,
-  "realtime_note": "盘口交易日归属标签 2026-08-17，最新盘口时间 23:00:00（不是未来行情），当前价 8534，涨跌 +0.40%",
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-08-14T21:22:12+00:00",
-    "market_trading_day": "2026-08-17",
-    "market_tick_time": "23:00:00",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
-  },
-  "news_summary": "",
-  "symbol": "Y0",
-  "instrument_name": "豆油",
-  "api_latency_seconds": 144.4,
-  "token_usage": {
-    "prompt_tokens": 13192,
-    "completion_tokens": 17387,
-    "total_tokens": 30579,
-    "prompt_tokens_details": {
-      "cached_tokens": 640
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 14837
-    },
-    "prompt_cache_hit_tokens": 640,
-    "prompt_cache_miss_tokens": 12552
-  },
   "integrity": {
-    "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-08-14T21:24:37+00:00",
-    "score": 60,
+    "version": "deterministic-integrity-v1",
+    "checked_at_utc": "2026-08-15T01:05:18+00:00",
+    "score": 0,
     "status": "blocked",
     "label": "规则接管",
     "execution_allowed": false,
-    "evidence_confidence": 60,
+    "evidence_confidence": 0,
     "issues": [
       {
-        "code": "invalid_watch_levels",
+        "code": "ai_unavailable",
         "severity": "high",
-        "message": "AI 支撑/压力不是有效数字，已改用确定性区间。"
+        "message": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
       }
     ],
-    "facts": {
-      "realtime_price": 8534.0,
-      "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-08-14T21:22:12+00:00",
-      "realtime_market_tick_time": "23:00:00",
-      "daily_rsi14": 57.26,
-      "one_hour_boll_position": "中轨上方",
-      "four_hour_boll_position": "上轨上方",
-      "realtime_trading_day_label": "2026-08-17",
-      "realtime_label_is_future": true
-    }
+    "facts": {}
   },
+  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "symbol": "Y0",
+  "instrument_name": "豆油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-14T21:22:12+00:00",
+    "realtime_fetched_at_utc": "2026-08-15T01:04:25+00:00",
     "realtime_market_trading_day": "2026-08-17",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-14T21:03:32+00:00",
+    "daily_updated_at_utc": "2026-08-15T00:39:30+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-14T21:02:55+00:00",
-    "news_updated_at_utc": "2026-08-14T21:03:32+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-14T21:02:53+00:00"
+    "intraday_updated_at_utc": "2026-08-15T00:39:30+00:00",
+    "news_updated_at_utc": "2026-08-15T00:39:26+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-15T00:39:27+00:00"
+  },
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-08-15T01:04:25+00:00",
+    "market_trading_day": "2026-08-17",
+    "market_tick_time": "23:00:00",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   }
 }

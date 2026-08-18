@@ -101,9 +101,13 @@ jobs:
           done
           echo "All push retries failed"; exit 1
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
+      # actions/configure-pages 被刻意省略。它只做两件事：把 Pages 源切成
+      # Actions（仓库设置里已经永久是 GitHub Actions），以及导出 base_url 等
+      # output —— 我们一处都没引用。留着它意味着这个每 5 分钟触发的工作流
+      # 每天要从 codeload.github.com 拉 288 次 action 压缩包，2026-08-17 就是
+      # 这样撞上 429 Too Many Requests，在 Set up job 阶段直接失败（早于任何
+      # 我们自己的重试逻辑）。deploy-pages.yml 里保留它即可，那个只在 push
+      # 时触发，频率低得多。
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -198,11 +198,12 @@ def ask_deepseek(api_key: str, symbol: str, name: str, question: str, context: d
         "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
     }
 
-    # Same failure mode as the analysis pipeline: max_tokens covers reasoning
-    # AND content, so a high-effort pass can return content="" with
-    # finish_reason="stop". Raising there put an error in front of the user
-    # instead of an answer. Step down reasoning effort until content appears;
-    # the last rung disables thinking, which cannot starve content.
+    # Same failure mode as the analysis pipeline: v4-flash at effort=high can
+    # end its turn after reasoning and return content="" with
+    # finish_reason="stop" (not a token-budget problem — see the note on
+    # update_data.DEEPSEEK_LADDER). Raising there put an error in front of the
+    # user instead of an answer. Step down effort until content appears; the
+    # last rung disables thinking as a structural backstop.
     last_problem = ""
     for index, rung in enumerate(DEEPSEEK_LADDER, start=1):
         payload = dict(base_payload)

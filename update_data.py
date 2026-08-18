@@ -35,17 +35,24 @@ DEEPSEEK_REASONING_EFFORT = "high"
 DEEPSEEK_MAX_OUTPUT_TOKENS = 32768
 DAILY_FETCH_TIMEOUT_SECONDS = max(10, int(os.getenv("DAILY_FETCH_TIMEOUT_SECONDS", "30")))
 
-# On a thinking model, max_tokens is the budget for reasoning AND content.
-# With reasoning_effort=high and a large prompt, reasoning can consume the
-# entire budget and the API returns content="" with finish_reason="stop" —
-# which used to reach json.loads("") and drop the whole symbol to the
-# rule-based fallback (6 of the last 40 Y0 analyses, 4 of 40 for P0).
+# v4-flash at reasoning_effort=high intermittently ends its turn right after
+# the reasoning phase, emitting content="" with finish_reason="stop". That
+# used to reach json.loads("") and drop the whole symbol to the rule-based
+# fallback (6 of the last 40 Y0 analyses, 4 of 40 for P0).
 #
-# Retrying the identical request does not help when the cause is budget
-# exhaustion, so each rung below strictly frees budget for content. The last
-# rung disables thinking entirely, which cannot starve content by
-# construction. `mode` is recorded in the output so chronic rung-1 failure is
-# visible rather than silent.
+# It is NOT budget exhaustion. Measured on run 32156132736, the failing
+# rung-1 call reported:
+#     reasoning=5023 completion=5023 max=32768
+# — it stopped nowhere near the ceiling. Raising DEEPSEEK_MAX_OUTPUT_TOKENS
+# therefore does not fix it; the Aug 16k->32k bump was treating the wrong
+# cause. Retrying the identical payload mostly reproduces it as well.
+#
+# Lowering reasoning_effort does fix it, and not by freeing budget: the same
+# run's rung-2 call spent MORE reasoning (10954) than the rung-1 call that
+# failed, and still returned 15000 tokens of content. medium simply does not
+# fall into the empty-turn state as often. Rung 3 disables thinking as a
+# structural backstop. `mode` is recorded in the output so chronic rung-1
+# failure stays visible instead of silently degrading quality.
 DEEPSEEK_LADDER = [
     {"mode": "thinking-high",   "thinking": {"type": "enabled"},  "reasoning_effort": "high"},
     {"mode": "thinking-medium", "thinking": {"type": "enabled"},  "reasoning_effort": "medium"},

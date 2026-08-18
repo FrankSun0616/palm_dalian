@@ -2059,47 +2059,68 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         f"\n数据:\n{json.dumps(snapshot, ensure_ascii=False)}"
     )
 
+    request_payload = {
+        "model": DEEPSEEK_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "你是机构级中文油脂期货风险分析助手。先验证数据时效和证据，再讨论方向；"
+                    "不确定时明确观望，不把连续合约当作可直接下单的具体月份合约，"
+                    "不编造新闻、价格、胜率或概率，只基于用户给出的行情和舆情作答。"
+                    "大商所 tradedate 是交易日归属标签；未来日期标签绝不代表未来行情。"
+                ),
+            },
+            {"role": "user", "content": prompt_content},
+        ],
+        "thinking": DEEPSEEK_THINKING,
+        "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
+        "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
+        "response_format": {"type": "json_object"},
+    }
+
+    # V4-Flash runs with thinking enabled, so it can spend its whole output
+    # budget on reasoning and return an EMPTY content string with
+    # finish_reason='stop'. That used to reach json.loads("") and surface as
+    # "JSONDecodeError: Expecting value: line 1 column 1 (char 0)", dropping the
+    # whole symbol to the rule-based fallback — 6 of the last 40 Y0 analyses
+    # died this way. Detect unusable output explicitly and retry once before
+    # giving up, since the failure is non-deterministic.
     api_started = time.monotonic()
-    resp = requests.post(
-        "https://api.deepseek.com/chat/completions",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": DEEPSEEK_MODEL,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": (
-                        "你是机构级中文油脂期货风险分析助手。先验证数据时效和证据，再讨论方向；"
-                        "不确定时明确观望，不把连续合约当作可直接下单的具体月份合约，"
-                        "不编造新闻、价格、胜率或概率，只基于用户给出的行情和舆情作答。"
-                        "大商所 tradedate 是交易日归属标签；未来日期标签绝不代表未来行情。"
-                    ),
-                },
-                {"role": "user", "content": prompt_content},
-            ],
-            "thinking": DEEPSEEK_THINKING,
-            "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
-            "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
-            "response_format": {"type": "json_object"},
-        },
-        timeout=120,
-    )
-    resp.raise_for_status()
-    resp_json = resp.json()
-    api_latency_seconds = round(time.monotonic() - api_started, 1)
-    choice = resp_json["choices"][0]
-    content = choice["message"]["content"]
-    # Defensive: if DeepSeek truncated the response (finish_reason='length'),
-    # json.loads will throw a cryptic 'Unterminated string' error. Surface a
-    # cleaner error so we know to bump max_tokens rather than debug our parser.
-    if choice.get("finish_reason") == "length":
-        raise RuntimeError(
-            f"DeepSeek output truncated at max_tokens (finish_reason=length). "
-            f"Content length: {len(content)} chars. Bump max_tokens."
+    content = ""
+    choice: dict = {}
+    unusable = ""
+    for attempt in (1, 2):
+        resp = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json=request_payload,
+            timeout=120,
         )
+        resp.raise_for_status()
+        choice = resp.json()["choices"][0]
+        content = (choice.get("message", {}).get("content") or "").strip()
+        finish = choice.get("finish_reason")
+
+        if finish == "length":
+            unusable = f"truncated at max_tokens ({len(content)} chars) — consider raising DEEPSEEK_MAX_OUTPUT_TOKENS"
+        elif not content:
+            unusable = f"empty content (finish_reason={finish}) — reasoning likely consumed the output budget"
+        else:
+            unusable = ""
+            break
+
+        print(f"[deepseek] analysis attempt {attempt}/2 unusable: {unusable}")
+        if attempt == 1:
+            time.sleep(3)
+
+    if unusable:
+        raise RuntimeError(f"DeepSeek returned no usable analysis after 2 attempts: {unusable}")
+
+    api_latency_seconds = round(time.monotonic() - api_started, 1)
     parsed = normalize_ai_analysis(json.loads(content), snapshot)
     parsed.update(
         {

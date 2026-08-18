@@ -2136,7 +2136,13 @@ async function autoLoadAccuracy() {
     }
     const pct  = rateRaw <= 1 ? rateRaw * 100 : rateRaw;
     const warn = Boolean(d.warning_low_accuracy);
-    els.aiAccuracy.textContent = `固定 4 根 1H 命中率 ${pct.toFixed(0)}% · 有效样本 ${total}`;
+    // 命中率的分母只含「走出方向」的样本（hit + miss），无方向的 flat 被排除。
+    // 不把 flat 显示出来，100% 会被读成「从没错过」——而它真正的意思是
+    // 「在行情确实走出方向的那些次里没错过」。分母必须自证。
+    const flats = Number(d.neutrals || 0);
+    const flatNote = flats > 0 ? `（另 ${flats} 次无方向）` : "";
+    els.aiAccuracy.textContent =
+      `固定 4 根 1H 命中率 ${pct.toFixed(0)}% · 判定样本 ${total}${flatNote}`;
     els.aiAccuracy.hidden = false;
     els.aiAccuracy.classList.toggle("warn", warn);
     if (state.lastAi) updateAiPanel(state.lastAi);

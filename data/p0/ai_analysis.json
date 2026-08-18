@@ -1,179 +1,188 @@
 {
-  "summary": "当前基准：realtime.price=9934元/吨，盘口ticktime=23:00:00，涨跌幅+0.38%（相对昨结9896）。盘口交易日归属标签为2026-08-19（非未来行情），最新抓取时间UTC 2026-08-18T15:28:38。夜盘冲高10016后回落，连续合约映射主力为P2701，远月升水249点，换月稳定。多周期显示1小时、4小时、日线均位于布林中轨上方，趋势偏多但短线超买，需防范高位回调。",
+  "summary": "当前分析基准为北京时间2026-08-18 23:43（夜盘已收盘）。realtime最新盘口显示P0连续合约价格为9934元/吨，盘口时间23:00:00（交易日归属标签2026-08-19），较前结算上涨0.38%。夜盘冲高至10015后回落，最终收于9934，显示10000上方压力。技术面1小时/4小时均位于布林中轨上方，多头趋势仍占优，但RSI超买且出现长上影，短线有回调需求。策略上建议等待回踩9835-9850做多，避免追高。P0映射主力为P2701，远月升水249点，换月稳定。",
   "bias": "偏多",
   "analysis": [
-    "实时盘口：realtime.price=9934，ticktime=23:00:00，涨跌幅+0.38%；夜盘最高触及10016后回落至9934，留下较长上影线，高位出现获利了结压力。",
-    "1小时布林：上轨9984.49、中轨9839.45、下轨9694.41，最新收盘9937位于中轨上方约0.67倍带宽处，带宽2.95%偏窄；最后一根1小时K线开9984收9937，长上影显示短线承压，有回踩中轨需求。",
-    "4小时布林：上轨10036.63、中轨9713.15、下轨9389.67，最新收盘9934位于中轨上方，带宽6.66%扩张，趋势动能增强；但RSI 72.55已进入超买区，ADX 68.5显示趋势强但钝化风险上升。",
-    "日线布林/均线：估算日线布林上轨约9964、中轨9529、下轨约9094，收盘9946贴近上轨；MA10=9694.4、MA20=9529.1、MA60=9416.3呈多头排列，日线上升趋势完好，但RSI 70.2超买，上方空间受限。",
-    "趋势结构：日线连续上行并于8月18日创20日新高9952，夜盘进一步突破至10016后回落，整体上升趋势未破坏，但短线出现冲高回落信号，需观察是否形成阶段性顶部。",
-    "量能特征：日线成交量478611手，量比1.2，持仓增至541099手，资金流入明显；但夜盘最后一小时K线成交量仅75手（可能为收盘集合竞价），量能参考性有限。",
-    "支撑压力：短期支撑位于9913（夜盘低点）和9900整数关口，更强支撑为9839（1小时布林中轨）；上方压力10015-10016（夜盘/日线高点）及10036（4小时布林上轨）。",
-    "合约映射：P0连续与P2701价格及持仓完全一致（9934元/吨，持仓547337手），主力持仓占比59.07%，次主力P2705升水249点，换月稳定；但P0是连续合约，实际下单必须使用具体月份合约并二次确认。"
+    "实时价9934（盘口23:00:00，标签2026-08-19，+0.38%）高于1小时布林中轨9839，位于中轨上方约65%位置，接近上轨9984；1小时带宽2.95%，价格从上轨附近回落，最新1H K线收于9937，上影明显，短线存在回归中轨需求。",
+    "4小时布林上轨10036.63、中轨9713.15、下轨9389.67，当前价9934位于中轨上方68%，带宽6.66%较宽，趋势未破坏；但夜盘高点10015已接近上轨，压力显著。",
+    "日线均线多头排列（MA10 9694、MA20 9529、MA60 9416），价格在MA20上方4.4%，日线RSI 70.2进入超买区；20日高点9952已被突破（夜盘高10016），日线布林数据未直接提供，走势类似运行于上轨附近，超买明显。",
+    "趋势动能：1H ADX 55.1，4H ADX 68.5，均显示强趋势；但1H RSI 67、2H RSI 74.8、4H RSI 72.5均偏高，价格处于趋势中后段，注意趋势衰减风险。",
+    "量能：日线成交47.9万手（放量1.2倍），持仓增至54.1万手，较前日增加3.8万手，显示资金增仓推动；夜盘成交25.4万手，同样活跃，但高位放量冲高回落，可能形成短线派发。",
+    "支撑压力：1H中轨9839为第一支撑，2H中轨9780为第二支撑，9800整数关口关键；压力看9942（2H上轨）、10000整数、10015夜盘高点、10036（4H上轨）。",
+    "换月结构：P0映射主力P2701（持仓占比59.07%），次主力P2705升水249点（远月升水），表明资金押注远期减产；但近月合约受现货出口偏弱压制，连续合约涨幅可能不及远月。",
+    "风险提示：model_validation状态为rejected，历史样本外胜率仅29.3%、期望收益为负，说明该日线模型无历史优势，不可作为当前交易概率依据；本判断基于实时盘口与多周期技术共振，需自行控制风险。"
   ],
   "intraday_strategy": {
     "bias": "偏多",
-    "entry": "回踩9900-9915区间轻仓做多，条件为1小时或15分钟级别出现止跌阳线",
-    "stop": "9860（小时收盘跌破视为失效）",
-    "take_profit": "第一目标10015，第二目标10036",
-    "invalidation": "小时线收盘跌破9839（1小时布林中轨）或日线收盘跌破9694（MA10）",
-    "notes": "适用下一个交易日早盘09:00-11:30。若早盘高开至10015附近不追多，等待回踩；若开盘直接跌破9860则放弃做多并观望，不满足盈亏比条件时严格空仓。"
+    "entry": "9835-9850区间（等待回踩1H中轨9839附近企稳），当前价9934不建议直接追多",
+    "stop": "9800（跌破1H中轨且跌破整数关口）",
+    "take_profit": "第一目标9940，第二目标10000（若成交量配合），第三目标10036（4H上轨）",
+    "invalidation": "4小时K线收盘跌破9800，则多头结构失效，转为观望或轻仓短空",
+    "notes": "适用于2026年8月19日早盘09:00-11:30。若早盘高开至10000附近则观望；若回踩至9835-9850出现企稳信号（如1H收阳、下影线）可做多；若直接跌破9800则放弃多头。"
   },
   "decision_frame": {
-    "confidence": 60,
-    "regime": "上升趋势中的高位震荡，多周期均线多头排列但短线超买",
-    "edge": "1小时、4小时、日线均位于布林中轨上方，趋势共振向上；但日线RSI 70.2、4小时RSI 72.55超买，且model_validation历史样本外无优势，因此降低仓位并依赖回踩入场",
-    "no_trade_condition": "若小时线收盘跌破9839或日线收盘跌破9694，则取消多头计划；若不能回踩至9915以下，直接追多的盈亏比不足1.5，禁止开仓；P0为连续合约，下单前必须复核具体主力月份P2701，mapping_verified=true但需人工二次确认",
+    "confidence": 55,
+    "regime": "多头趋势中的高位加速期，短线面临回调风险",
+    "edge": "趋势动能强劲+主力合约远月升水，但短线RSI超买和上影线暗示追多性价比不足",
+    "no_trade_condition": "若价格不回踩至9850以下直接上行，首目标盈亏比<1.5，禁止追多；若4H收盘跌破9800，停止做多；若model_validation历史优势未证实，仓位应减半或仅以轻仓试探",
     "long_case": {
-      "trigger": "早盘回踩9900-9915不破且出现15分钟/1小时收阳",
-      "entry_zone": "9900-9915",
-      "stop": "9860",
+      "trigger": "早盘回踩9835-9850且1H/15分钟出现企稳K线（如锤子线、吞没），或跌至9800-9830获得支撑",
+      "entry_zone": "9835-9850",
+      "stop": "9800",
       "targets": [
-        "10015",
+        "9940",
+        "10000",
         "10036"
       ],
-      "invalidation": "跌破9860或小时收盘失守9839",
-      "risk_reward": "按9915入场、止损9860、首目标10015计算，风险55点、盈利100点，盈亏比1.82，满足要求；若在9934直接追多，风险74点、盈利81点，盈亏比1.09低于1.5，不可执行"
+      "invalidation": "跌破9800且4H收盘站稳其下，或跌破1H下轨9694",
+      "risk_reward": "以9840入场、止损9800、第一目标9940计算，盈亏比(9940-9840)/(9840-9800)=2.5，达到要求"
     },
     "short_case": {
-      "trigger": "早盘冲高至10015-10036不破并出现1小时阴线收盘跌破9980",
-      "entry_zone": "9980-10015",
-      "stop": "10045",
+      "trigger": "仅在价格冲高至10000-10015且1H出现明显放量滞涨/看跌吞没时考虑轻仓短空，且必须跌破9940确认",
+      "entry_zone": "9990-10015",
+      "stop": "10040",
       "targets": [
-        "9913",
+        "9940",
         "9839"
       ],
-      "invalidation": "小时线收盘站稳10036上方",
-      "risk_reward": "按10000入场、止损10045、首目标9913计算，风险45点、盈利87点，盈亏比1.93，满足条件；但仅作为备选，需严格止损"
+      "invalidation": "4H收盘站稳10040上方，或出现放量突破10015",
+      "risk_reward": "以10000入场、止损10040、第一目标9940计算，盈亏比(10000-9940)/(10040-10000)=1.5，恰好满足最低要求；但趋势偏多，激进短空需严格控制仓位"
     },
     "event_risks": [
-      "关注MPOB月报数据（注意新闻标题中的月份可能存在时滞）、马棕出口数据、原油价格波动、厄尔尼诺天气炒作以及地缘政治（霍尔木兹海峡）对航运成本的影响"
+      "MPOB月报发布（注意舆情中有5月/7月前瞻，实际发布时点需核实）可能引发波动",
+      "厄尔尼诺天气炒作，远月升水已隐含预期，若预期降温可能引发远月回吐",
+      "印度进口需求变化（7月进口148万吨创11个月新高）",
+      "原油价格波动（霍尔木兹海峡局势）",
+      "马棕出口与库存数据",
+      "国内交易所风控政策调整"
     ],
     "data_limits": [
-      "4小时K线最新时间标签为2026-08-19 11:15，实际数据更新于2026-08-18T15:27:24Z，可能为周期聚合标签；日线数据截至2026-08-18，均为已收盘缓存；realtime为实时抓取。model_validation状态为rejected，历史样本外胜率29.33%、期望R为-0.25，不代表未来收益，不可作为当前策略依据。"
+      "日线布林通道未直接提供，仅以均线/高低点近似判断",
+      "1小时/2小时最新K线为23:00收盘数据，4小时K线时间标签为2026-08-19 11:15（因夜盘归属下一交易日），可能与其他周期存在标签偏差",
+      "model_validation状态为rejected，历史样本外胜率29.33%，期望收益为负，历史优势未被证实，不能用于预测未来",
+      "连续合约与具体月份合约存在换月跳空风险，P0映射P2701虽已验证，但仍需下单软件二次确认",
+      "舆情来源时间跨度较大，部分为前瞻性质，需以官方发布为准"
     ]
   },
   "news_impact": [
-    "[利多] 霍尔木兹海峡局势紧张，欧线集运和乙二醇暴涨，地缘风险推升航运成本，间接影响油脂进口运输成本，对棕榈油形成短期情绪提振，但需观察局势是否持续。",
-    "[中性偏空] 马棕近端出口偏弱，远月升水交易厄尔尼诺：近月出口疲软压制现货价格，但远月因天气预期升水，反映市场分歧，对国内近月合约影响有限，对远月形成支撑。",
-    "[利空] MPOB 5月月报前瞻显示马来西亚库存连续第二个月上升，出口疲软是主因，若实际数据兑现，将加大供应压力，利空棕榈油价格。",
-    "[中性] 棕榈仁油报告影响有限，市场价格拐点将至：报告落地后可能利多出尽，市场关注点转向库存拐点，短期方向不明，需等待更多数据。",
-    "[利多] MPOB 7月月报前瞻提及强厄尔尼诺概率飙升，市场期待的库存拐点可能延后，天气减产预期对远月合约构成支撑，有利于多头氛围。",
-    "[利多] 印度7月食用油进口创11个月新高，达到148万吨，强劲需求为棕榈油提供实质性支撑，尤其是来自主要消费国的买盘。",
-    "[中性偏空] 马来西亚9月维持10%棕油出口税，连续两个月处于高位，可能抑制出口竞争力，对价格上行高度形成限制。",
-    "[中性] 需求利好撞上原油下跌，马棕期货夹在中间，4750点位成为关键参考：需求端印度进口增加与原油下跌的利空相互抵消，短期方向需看原油和需求数据的边际变化。"
+    "[利空] MPOB月报前瞻显示马来西亚棕榈油库存连续第二个月上升，出口疲软是主因。若实际数据符合预期，将压制近月价格，但市场已部分消化，且厄尔尼诺预期可能对冲库存利空。",
+    "[利多] 印度7月食用油进口量达148万吨，创11个月新高。作为全球最大植物油进口国，强劲需求对国际棕榈油价格形成直接支撑，利多出口国报价。",
+    "[利空] 马来西亚9月棕榈油出口税维持10%，连续两个月处于高位。高出口税将提高买方进口成本，可能抑制短期出口需求，但同时也反映价格坚挺。",
+    "[利多] 强厄尔尼诺概率飙升，市场资金押注远期供应收紧，远月升水结构强化。若天气模型进一步确认，将巩固棕榈油中长期上行逻辑。",
+    "[中性] 原油价格因霍尔木兹海峡局势剧烈波动，原油上涨利多生物柴油需求，下跌则削弱。近期原油下跌与需求利好并存，马棕在4750令吉附近徘徊，方向不明。",
+    "[中性] 马棕近端出口偏弱与远月升水并存，基本面近弱远强。连续合约（以近月主力为主）可能受近端拖累，而远月合约更强。"
   ],
   "news_articles": [
-    {
-      "title": "期货午评：霍尔木兹海峡战云密布！欧线集运、乙二醇双双暴涨超5%！",
-      "source": "同花顺",
-      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE9sMlh3QW1GWUV3UmJ0aGxRYlFjNE9icXp6aE42LV91Q1BfejZSSnBXcUFRSGdkcTdGS3BpMlJRcG9BTWxzNW40azRWcUswOUxUTEtVVXBPX1R3Znp1RFE?oc=5",
-      "detail": "地缘政治紧张推动欧线集运和乙二醇暴涨超5%，市场情绪升温，可能通过航运成本传导至油脂进口成本，间接利好棕榈油。",
-      "impact": "利多"
-    },
-    {
-      "title": "马棕榈油近端出口偏弱，远月升水继续交易厄尔尼诺",
-      "source": "汇通网 Fx678",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1MOWRabkhHMmlLRVJ5dHVpcFlCZHdqNTlFMkJabC0wLXZlaWNyNVZMY1JucThlUkdSMGJrX3Z4SEpqR1ZfZWtXSnlZdDJEODhJal9aWGEzS25OaXM?oc=5",
-      "detail": "马棕近月出口表现偏弱，但远月升水反映出市场正在交易厄尔尼诺天气风险，近弱远强结构对国内近月合约影响有限，对远月形成支撑。",
-      "impact": "中性"
-    },
     {
       "title": "【MPOB 5月月报前瞻】马来西亚5月棕榈油库存料连续第二个月上升，出口疲软是主因？-市场参考",
       "source": "xnews.jin10.com",
       "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9jQVhsbnhXcldrSU0tRXE1T3doYU5PU1ZXcFVFakhxOGg2a0FpbGJDUmhXV3BHUDZReEVXY29JSWNCejhmTFFoVnJDYWQtaGc?oc=5",
-      "detail": "机构预期马来西亚5月棕榈油库存连续第二个月上升，主因出口疲软；若数据兑现，库存压力将压制价格，是当前潜在的利空因素。",
+      "detail": "金十市场参考的MPOB 5月月报前瞻显示，马来西亚5月棕榈油库存预计连续第二个月上升，主因是出口疲软。若库存如期增加，将对棕榈油期价形成利空压制。但该报告为前瞻性质，实际数据需待官方发布。",
       "impact": "利空"
     },
     {
-      "title": "棕榈仁油：MPOB报告影响有限，市场价格拐点将至",
-      "source": "finance.sina.cn",
+      "title": "棕榈仁油：MPOB报告影响有限，市场价格拐点将至 - 新浪财经",
+      "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNVENER0drNDg1VUF1X3d5UV9YcXJlWUNMOG9lb25GT0tpaENoalIyd2JsUThORXRpUzNrZnBFeUR1NjRLTVhXcEZtVXVUZEQ4NnJlamNQdTNoSmZhMTJCTFNFNHhJN3RmTlBPRGdMNTQtSjBjSVB5Nm9PWFdIR2hZeFYtUFRFYmxfZVprRHBXLVhFX2VYaUY1b2s1MmdhZmFtMGFSTlMzOHRuRWNGX3NiSg?oc=5",
-      "detail": "报告认为MPOB报告影响有限，市场价格拐点将至，暗示基本面可能从紧张转向宽松，中期可能转为利空。",
+      "detail": "新浪财经文章指出，MPOB报告对棕榈仁油市场影响有限，市场价格拐点将至。意味着经过前期上涨，油脂可能面临调整压力。该观点偏空，但属于市场预期。",
       "impact": "利空"
     },
     {
-      "title": "【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考",
+      "title": "【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？",
       "source": "xnews.jin10.com",
       "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5",
-      "detail": "强厄尔尼诺概率飙升，市场关注库存拐点是否推迟，天气减产预期支撑远月价格，对棕榈油长期逻辑偏多。",
-      "impact": "利多"
+      "detail": "金十前瞻提到强厄尔尼诺概率飙升，市场期待库存拐点。厄尔尼诺通常导致东南亚干旱，棕榈油减产，对远月价格构成利多。但7月库存尚未消化完，库存拐点未现，短期多空交织。",
+      "impact": "中性"
     },
     {
-      "title": "7月狂扫148万吨！印度食用油进口直接创11个月新高",
+      "title": "7月狂扫148万吨！印度食用油进口直接创11个月新高 - 搜狐网",
       "source": "搜狐网",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQNFR0VEw3N0RXdWdSUnJmNi1qWWFVMUVGYmFab0xzS2RQQjRRajNuVlVPNF9Gbm5XOUhDdHE2YnNhMUxmcUVYbjJJNXFUbnVGS3hXNVZXZ2puZ2dsalNpUFUwd0FnTDdVU1dhaXoyeHVHLXNRb1dIT0IzQTlTakRvcTJXMWstTTB0WXpLWQ?oc=5",
-      "detail": "印度7月食用油进口量达到148万吨，创11个月新高，强劲需求为棕榈油价格提供有力支撑。",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQNFR0VEw3N0RXdWdSUnJmNi1qWWFVMUVGYmFab0xzS2RQQjRRajNuVlVPNF9Gbm5XOUhDdHE2YnNhMUxmcUVYbjJJNXFUbnVGS3hXNVZXZ2puZ2dsalNpUFUwd0FnTDdVU1dhaXoyeHVHLXNRb1dQT0IzQTlTakRvcTJXMWstTTB0WXpLWQ?oc=5",
+      "detail": "搜狐网报道称，印度7月食用油进口量达到148万吨，创11个月新高。印度是全球最大植物油进口国，强劲的进口需求对棕榈油价格构成直接利多，尤其是对马来西亚和印尼的出口。",
       "impact": "利多"
     },
     {
-      "title": "9月维持10% 棕油出口税连两月攀顶",
+      "title": "9月维持10% 棕油出口税连两月攀顶 - e南洋",
       "source": "e南洋",
       "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5DMFRaMTdJY21MX3U5R3haaFI2V0QtUEVyOXFrNXhldHlMNERCQ1BIN2NrODFLeE80ZnhydmF0TkFlQXhmVDlHMEZlNmpCOHUzcTBfTEVQSnlBU2NESldObFN5NA?oc=5",
-      "detail": "马来西亚9月维持10%的棕榈油出口税，连续两个月处于高位，可能削弱出口竞争力，对价格上行形成一定压制。",
+      "detail": "据e南洋报道，马来西亚9月棕榈油出口税维持在10%，连续两个月处于高位。高出口税会提高进口成本，可能抑制部分买需，对棕榈油价格构成短期利空，但同时也反映市场对价格水平的接受度。",
       "impact": "利空"
     },
     {
-      "title": "需求利好撞上原油下跌：马棕期货夹在中间，4750这道坎能不能过？",
-      "source": "finance.sina.cn",
+      "title": "期货午评：霍尔木兹海峡战云密布！欧线集运、乙二醇双双暴涨超5%！ - 同花顺",
+      "source": "同花顺",
+      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE9sMlh3QW1GWUV3UmJ0aGxRYlFjNE9icXp6aE42LV91Q1BfejZSSnBXcUFRSGdkcTdGS3BpMlJRcG9BTWxzNW40azRWcUswOUxUTEtVVXBPX1R3Znp1RFE?oc=5",
+      "detail": "同花顺午评提到霍尔木兹海峡局势紧张，欧线集运、乙二醇大涨超5%，暗示原油价格可能受地缘政治推动上涨。原油上涨会提升生物柴油经济效益，间接利好棕榈油作为替代能源的需求。",
+      "impact": "利多"
+    },
+    {
+      "title": "马棕榈油近端出口偏弱，远月升水继续交易厄尔尼诺 - 汇通网 Fx678",
+      "source": "汇通网 Fx678",
+      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1MOWRabkhHMmlLRVJ5dHVpcFlCZHdqNTlFMkJabC0wLXZlaWNyNVZMY1JucThlUkdSMGJrX3Z4SEpqR1ZfZWtXSnlZdDJEODhJal9aWGEzS25OaXM?oc=5",
+      "detail": "汇通网指出，马棕榈油近端出口偏弱，但远月升水继续交易厄尔尼诺。这种结构表明近月合约受现货疲软压制，远月合约则因天气风险溢价走强。对国内P0连续合约（以近月主力为主）影响偏中性，远月合约更受资金关注。",
+      "impact": "中性"
+    },
+    {
+      "title": "需求利好撞上原油下跌：马棕期货夹在中间，4750这道坎能不能过？ - 新浪财经",
+      "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQU09Hb2xSckZVZ2Q0YzdGVVBrV1Y5THVidXpWTy1mTDR5TWotMEVJTjl2d1NSMDlyS28wa0YtYUYyeHd1Znl3ZEowRy1HeW85b1gzSWdhRkV2WFItR2hCb0dNMHJqcGdVUDlZMC1yVXpZZHRNQm13dkQtNkNqbkVLRUVVYURCRmNFUW5jYXJiZmh4VlBYa1RLSjN4VEJyY3hiWTFnMjh1NEJxQ21zamtlMA?oc=5",
-      "detail": "印度需求利好与原油下跌形成多空对冲，马棕期货在4750关口犹豫，方向选择将决定短期走势，需关注原油及需求数据变化。",
+      "detail": "新浪财经文章讨论马棕期货在需求利好与原油下跌之间纠结，4750令吉是关键阻力。该点位若不能突破，可能引发技术性回调。对国内棕榈油价格有联动影响，但方向取决于原油与需求的博弈。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
-    "support": 9900.0,
-    "resistance": 10036.0
+    "support": 9839.0,
+    "resistance": 10015.0
   },
   "normalization_warnings": [],
-  "risk_note": "本报告仅为基于给定数据的市场分析，不构成任何投资建议；P0/Y0为连续合约分析口径，实际下单必须使用具体月份合约并二次确认。期货交易风险较高，请注意仓位管理和止损纪律。",
+  "risk_note": "本分析由AI基于公开数据生成，不构成投资建议。期货交易有风险，入市需谨慎。P0为连续合约，实际下单请以交易所挂牌的具体月份合约为准，并二次确认合约代码、保证金及交易规则。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "enabled",
-  "reasoning_effort": "high",
+  "reasoning_effort": "medium",
+  "deepseek_mode": "thinking-medium",
   "status": "ok",
-  "generated_at_utc": "2026-08-18T15:29:46+00:00",
+  "generated_at_utc": "2026-08-18T15:45:57+00:00",
   "latest_date": "2026-08-18",
   "realtime_price": 9934.0,
   "realtime_note": "盘口交易日归属标签 2026-08-19，最新盘口时间 23:00:00（不是未来行情），当前价 9934，涨跌 +0.38%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-08-18T15:28:38+00:00",
+    "fetched_at_utc": "2026-08-18T15:43:22+00:00",
     "market_trading_day": "2026-08-19",
     "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 期货午评：霍尔木兹海峡战云密布！欧线集运、乙二醇双双暴涨超5%！ - 同花顺\n来源: 同花顺\n发布时间UTC: 2026-08-17T03:37:22+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE9sMlh3QW1GWUV3UmJ0aGxRYlFjNE9icXp6aE42LV91Q1BfejZSSnBXcUFRSGdkcTdGS3BpMlJRcG9BTWxzNW40azRWcUswOUxUTEtVVXBPX1R3Znp1RFE?oc=5\n摘要: 期货午评：霍尔木兹海峡战云密布！欧线集运、乙二醇双双暴涨超5%！ 同花顺\n\n[2] 马棕榈油近端出口偏弱，远月升水继续交易厄尔尼诺 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-08-17T10:29:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE1MOWRabkhHMmlLRVJ5dHVpcFlCZHdqNTlFMkJabC0wLXZlaWNyNVZMY1JucThlUkdSMGJrX3Z4SEpqR1ZfZWtXSnlZdDJEODhJal9aWGEzS25OaXM?oc=5\n摘要: 马棕榈油近端出口偏弱，远月升水继续交易厄尔尼诺 汇通网 Fx678\n\n[3] 【MPOB 5月月报前瞻】马来西亚5月棕榈油库存料连续第二个月上升，出口疲软是主因？-市场参考 - xnews.jin10.com\n来源: xnews.jin10.com\n发布时间UTC: 2026-08-18T00:43:28+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9jQVhsbnhXcldrSU0tRXE1T3doYU5PU1ZXcFVFakhxOGg2a0FpbGJDUmhXV3BHUDZReEVXY29JSWNCejhmTFFoVnJDYWQtaGc?oc=5\n摘要: 【MPOB 5月月报前瞻】马来西亚5月棕榈油库存料连续第二个月上升，出口疲软是主因？-市场参考 xnews.jin10.com\n\n[4] 棕榈仁油：MPOB报告影响有限，市场价格拐点将至 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-08-18T04:18:35+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNVENER0drNDg1VUF1X3d5UV9YcXJlWUNMOG9lb25GT0tpaENoalIyd2JsUThORXRpUzNrZnBFeUR1NjRLTVhXcEZtVXVUZEQ4NnJlamNQdTNoSmZhMTJCTFNFNHhJN3RmTlBPRGdMNTQtSjBjSVB5Nm9PWFdIR2hZeFYtUFRFYmxfZVprRHBXLVhFX2VYaUY1b2s1MmdhZmFtMGFSTlMzOHRuRWNGX3NiSg?oc=5\n摘要: 棕榈仁油：MPOB报告影响有限，市场价格拐点将至 finance.sina.cn\n\n[5] 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 - xnews.jin10.com\n来源: xnews.jin10.com\n发布时间UTC: 2026-08-14T17:57:32+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5\n摘要: 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 xnews.jin10.com\n\n[6] 7月狂扫148万吨！印度食用油进口直接创11个月新高 - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-08-14T03:10:59+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQNFR0VEw3N0RXdWdSUnJmNi1qWWFVMUVGYmFab0xzS2RQQjRRajNuVlVPNF9Gbm5XOUhDdHE2YnNhMUxmcUVYbjJJNXFUbnVGS3hXNVZXZ2puZ2dsalNpUFUwd0FnTDdVU1dhaXoyeHVHLXNRb1dIT0IzQTlTakRvcTJXMWstTTB0WXpLWQ?oc=5\n摘要: 7月狂扫148万吨！印度食用油进口直接创11个月新高 搜狐网\n\n[7] 9月维持10% 棕油出口税连两月攀顶 - e南洋\n来源: e南洋\n发布时间UTC: 2026-08-12T08:35:44+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE5DMFRaMTdJY21MX3U5R3haaFI2V0QtUEVyOXFrNXhldHlMNERCQ1BIN2NrODFLeE80ZnhydmF0TkFlQXhmVDlHMEZlNmpCOHUzcTBfTEVQSnlBU2NESldObFN5NA?oc=5\n摘要: 9月维持10% 棕油出口税连两月攀顶 e南洋\n\n[8] 需求利好撞上原油下跌：马棕期货夹在中间，4750这道坎能不能过？ - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-08-14T02:05:14+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQU09Hb2xSckZVZ2Q0YzdGVVBrV1Y5THVidXpWTy1mTDR5TWotMEVJTjl2d1NSMDlyS28wa0YtYUYyeHd1Znl3ZEowRy1HeW85b1gzSWdhRkV2WFItR2hCb0dNMHJqcGdVUDlZMC1yVXpZZHRNQm13dkQtNkNqbkVLRUVVYURCRmNFUW5jYXJiZmh4VlBYa1RLSjN4VEJyY3hiWTFnMjh1NEJxQ21zamtlMA?oc=5\n摘要: 需求利好撞上原油下跌：马棕期货夹在中间，4750这道坎能不能过？ finance.sina.cn\n\n[9] 光大期货：8月17日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-17T02:08:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQbGY1eWxKbEh0a1lUS2p0cldidzdxa3k5RUpPQWhtdlk1ZVI1c1RoS09zWFpZbXlaSnk2QzNWVWo3Qm5RZ3pHbkh3amFLMGZXNjZ3dGpsRGZhM2V3REpVT3Ywb0xUdkhiTFZBQ055S09Dd1dyQXltV0hfRm1oNFZ2eTQ0T1RvTXE2TlVodw?oc=5\n摘要: 光大期货：8月17日农产品日报 新浪财经\n\n[10] 远月升水近月贴水：马棕油正在给厄尔尼诺定价，但7月库存还没消化完 - 富途牛牛\n来源: 富途牛牛\n发布时间UTC: 2026-08-14T10:42:29+00:00\nURL: https://news.google.com/rss/articles/CBMipgFBVV95cUxNSnpqakwxWlpEMmRlUzAyMDVnUEI0YkxZZFdFcDRfMHV0QXdXLTZQSDE0MkhvTVVLVG0zdmh1cXh0OUtLOTdVbkZnS2drZV9QOWRicC1XdjU4TU9RalF5YlpfdFNzWE1WZzlRWXJ2bzZWTkJTNG1wREs4U09RYUM3VUo5VXVDbV8ycUxJWXFtLVp6SXBwbEdDUjR0S3pUTTY5bmhRU3Fn?oc=5\n摘要: 远月升水近月贴水：马棕油正在给厄尔尼诺定价，但7月库存还没消化完 富途牛牛",
+  "news_summary": "[1] 【MPOB 5月月报前瞻】马来西亚5月棕榈油库存料连续第二个月上升，出口疲软是主因？-市场参考 - xnews.jin10.com\n来源: xnews.jin10.com\n发布时间UTC: 2026-08-18T00:43:28+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9jQVhsbnhXcldrSU0tRXE1T3doYU5PU1ZXcFVFakhxOGg2a0FpbGJDUmhXV3BHUDZReEVXY29JSWNCejhmTFFoVnJDYWQtaGc?oc=5\n摘要: 【MPOB 5月月报前瞻】马来西亚5月棕榈油库存料连续第二个月上升，出口疲软是主因？-市场参考 xnews.jin10.com\n\n[2] 棕榈仁油：MPOB报告影响有限，市场价格拐点将至 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-18T04:18:35+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNVENER0drNDg1VUF1X3d5UV9YcXJlWUNMOG9lb25GT0tpaENoalIyd2JsUThORXRpUzNrZnBFeUR1NjRLTVhXcEZtVXVUZEQ4NnJlamNQdTNoSmZhMTJCTFNFNHhJN3RmTlBPRGdMNTQtSjBjSVB5Nm9PWFdIR2hZeFYtUFRFYmxfZVprRHBXLVhFX2VYaUY1b2s1MmdhZmFtMGFSTlMzOHRuRWNGX3NiSg?oc=5\n摘要: 棕榈仁油：MPOB报告影响有限，市场价格拐点将至 新浪财经\n\n[3] 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 - xnews.jin10.com\n来源: xnews.jin10.com\n发布时间UTC: 2026-08-14T17:57:32+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5\n摘要: 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 xnews.jin10.com\n\n[4] 7月狂扫148万吨！印度食用油进口直接创11个月新高 - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-08-14T03:10:59+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQNFR0VEw3N0RXdWdSUnJmNi1qWWFVMUVGYmFab0xzS2RQQjRRajNuVlVPNF9Gbm5XOUhDdHE2YnNhMUxmcUVYbjJJNXFUbnVGS3hXNVZXZ2puZ2dsalNpUFUwd0FnTDdVU1dhaXoyeHVHLXNRb1dIT0IzQTlTakRvcTJXMWstTTB0WXpLWQ?oc=5\n摘要: 7月狂扫148万吨！印度食用油进口直接创11个月新高 搜狐网\n\n[5] 9月维持10% 棕油出口税连两月攀顶 - e南洋\n来源: e南洋\n发布时间UTC: 2026-08-12T08:35:44+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE5DMFRaMTdJY21MX3U5R3haaFI2V0QtUEVyOXFrNXhldHlMNERCQ1BIN2NrODFLeE80ZnhydmF0TkFlQXhmVDlHMEZlNmpCOHUzcTBfTEVQSnlBU2NESldObFN5NA?oc=5\n摘要: 9月维持10% 棕油出口税连两月攀顶 e南洋\n\n[6] 期货午评：霍尔木兹海峡战云密布！欧线集运、乙二醇双双暴涨超5%！ - 同花顺\n来源: 同花顺\n发布时间UTC: 2026-08-17T03:37:22+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE9sMlh3QW1GWUV3UmJ0aGxRYlFjNE9icXp6aE42LV91Q1BfejZSSnBXcUFRSGdkcTdGS3BpMlJRcG9BTWxzNW40azRWcUswOUxUTEtVVXBPX1R3Znp1RFE?oc=5\n摘要: 期货午评：霍尔木兹海峡战云密布！欧线集运、乙二醇双双暴涨超5%！ 同花顺\n\n[7] 马棕榈油近端出口偏弱，远月升水继续交易厄尔尼诺 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-08-17T10:29:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE1MOWRabkhHMmlLRVJ5dHVpcFlCZHdqNTlFMkJabC0wLXZlaWNyNVZMY1JucThlUkdSMGJrX3Z4SEpqR1ZfZWtXSnlZdDJEODhJal9aWGEzS25OaXM?oc=5\n摘要: 马棕榈油近端出口偏弱，远月升水继续交易厄尔尼诺 汇通网 Fx678\n\n[8] 需求利好撞上原油下跌：马棕期货夹在中间，4750这道坎能不能过？ - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-14T02:05:14+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQU09Hb2xSckZVZ2Q0YzdGVVBrV1Y5THVidXpWTy1mTDR5TWotMEVJTjl2d1NSMDlyS28wa0YtYUYyeHd1Znl3ZEowRy1HeW85b1gzSWdhRkV2WFItR2hCb0dNMHJqcGdVUDlZMC1yVXpZZHRNQm13dkQtNkNqbkVLRUVVYURCRmNFUW5jYXJiZmh4VlBYa1RLSjN4VEJyY3hiWTFnMjh1NEJxQ21zamtlMA?oc=5\n摘要: 需求利好撞上原油下跌：马棕期货夹在中间，4750这道坎能不能过？ 新浪财经\n\n[9] 光大期货：8月17日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-17T02:08:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQbGY1eWxKbEh0a1lUS2p0cldidzdxa3k5RUpPQWhtdlk1ZVI1c1RoS09zWFpZbXlaSnk2QzNWVWo3Qm5RZ3pHbkh3amFLMGZXNjZ3dGpsRGZhM2V3REpVT3Ywb0xUdkhiTFZBQ055S09Dd1dyQXltV0hfRm1oNFZ2eTQ0T1RvTXE2TlVodw?oc=5\n摘要: 光大期货：8月17日农产品日报 新浪财经\n\n[10] 远月升水近月贴水：马棕油正在给厄尔尼诺定价，但7月库存还没消化完 - 富途牛牛\n来源: 富途牛牛\n发布时间UTC: 2026-08-14T10:42:29+00:00\nURL: https://news.google.com/rss/articles/CBMipgFBVV95cUxNSnpqakwxWlpEMmRlUzAyMDVnUEI0YkxZZFdFcDRfMHV0QXdXLTZQSDE0MkhvTVVLVG0zdmh1cXh0OUtLOTdVbkZnS2drZV9QOWRicC1XdjU4TU9RalF5YlpfdFNzWE1WZzlRWXJ2bzZWTkJTNG1wREs4U09RYUM3VUo5VXVDbV8ycUxJWXFtLVp6SXBwbEdDUjR0S3pUTTY5bmhRU3Fn?oc=5\n摘要: 远月升水近月贴水：马棕油正在给厄尔尼诺定价，但7月库存还没消化完 富途牛牛",
   "symbol": "P0",
   "instrument_name": "棕榈油",
-  "api_latency_seconds": 68.3,
+  "api_latency_seconds": 155.1,
   "token_usage": {
-    "prompt_tokens": 15609,
-    "completion_tokens": 9036,
-    "total_tokens": 24645,
+    "prompt_tokens": 15603,
+    "completion_tokens": 15000,
+    "total_tokens": 30603,
     "prompt_tokens_details": {
-      "cached_tokens": 896
+      "cached_tokens": 15488
     },
     "completion_tokens_details": {
-      "reasoning_tokens": 5304
+      "reasoning_tokens": 10954
     },
-    "prompt_cache_hit_tokens": 896,
-    "prompt_cache_miss_tokens": 14713
+    "prompt_cache_hit_tokens": 15488,
+    "prompt_cache_miss_tokens": 115
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-08-18T15:29:46+00:00",
+    "checked_at_utc": "2026-08-18T15:45:57+00:00",
     "score": 100,
     "status": "passed",
     "label": "通过",
     "execution_allowed": true,
-    "evidence_confidence": 60,
+    "evidence_confidence": 55,
     "issues": [],
     "facts": {
       "realtime_price": 9934.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-08-18T15:28:38+00:00",
+      "realtime_fetched_at_utc": "2026-08-18T15:43:22+00:00",
       "realtime_market_tick_time": "23:00:00",
       "daily_rsi14": 70.2,
       "one_hour_boll_position": "中轨上方",
@@ -185,16 +194,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-18T15:28:38+00:00",
+    "realtime_fetched_at_utc": "2026-08-18T15:43:22+00:00",
     "realtime_market_trading_day": "2026-08-19",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-18T15:27:24+00:00",
+    "daily_updated_at_utc": "2026-08-18T15:35:56+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-18T15:27:24+00:00",
-    "news_updated_at_utc": "2026-08-18T15:27:20+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-18T15:27:20+00:00"
+    "intraday_updated_at_utc": "2026-08-18T15:35:56+00:00",
+    "news_updated_at_utc": "2026-08-18T15:35:52+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-18T15:35:53+00:00"
   }
 }

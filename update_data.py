@@ -30,8 +30,12 @@ DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 DEEPSEEK_MODEL = "deepseek-v4-flash"
-DEEPSEEK_THINKING = {"type": "enabled"}
-DEEPSEEK_REASONING_EFFORT = "high"
+# Thinking is OFF by owner decision (2026-08-18). It was the direct cause of
+# the empty-turn failures documented on DEEPSEEK_LADDER below, and it cost
+# real latency (P0 155s vs Y0 89s on run 32156132736) plus billed reasoning
+# tokens. Set {"type": "enabled"} + effort "high"/"medium" to restore it.
+DEEPSEEK_THINKING = {"type": "disabled"}
+DEEPSEEK_REASONING_EFFORT = None
 DEEPSEEK_MAX_OUTPUT_TOKENS = 32768
 DAILY_FETCH_TIMEOUT_SECONDS = max(10, int(os.getenv("DAILY_FETCH_TIMEOUT_SECONDS", "30")))
 
@@ -47,16 +51,18 @@ DAILY_FETCH_TIMEOUT_SECONDS = max(10, int(os.getenv("DAILY_FETCH_TIMEOUT_SECONDS
 # therefore does not fix it; the Aug 16k->32k bump was treating the wrong
 # cause. Retrying the identical payload mostly reproduces it as well.
 #
-# Lowering reasoning_effort does fix it, and not by freeing budget: the same
-# run's rung-2 call spent MORE reasoning (10954) than the rung-1 call that
-# failed, and still returned 15000 tokens of content. medium simply does not
-# fall into the empty-turn state as often. Rung 3 disables thinking as a
-# structural backstop. `mode` is recorded in the output so chronic rung-1
-# failure stays visible instead of silently degrading quality.
+# Since thinking is now disabled outright, the empty-turn trigger is gone and
+# the ladder degenerates to a transient-failure retry: an empty body with
+# thinking off means the API itself hiccuped, and a second identical attempt
+# is the correct response there (unlike the thinking case, where retrying the
+# same payload reproduced the failure).
+#
+# Kept as a ladder rather than collapsed into a bare retry so re-enabling
+# thinking is a one-line change to the rungs, and so `mode` stays in the
+# output for continuity with the analyses already archived under thinking.
 DEEPSEEK_LADDER = [
-    {"mode": "thinking-high",   "thinking": {"type": "enabled"},  "reasoning_effort": "high"},
-    {"mode": "thinking-medium", "thinking": {"type": "enabled"},  "reasoning_effort": "medium"},
-    {"mode": "no-thinking",     "thinking": {"type": "disabled"}, "reasoning_effort": None},
+    {"mode": "no-thinking",       "thinking": {"type": "disabled"}, "reasoning_effort": None},
+    {"mode": "no-thinking-retry", "thinking": {"type": "disabled"}, "reasoning_effort": None},
 ]
 
 

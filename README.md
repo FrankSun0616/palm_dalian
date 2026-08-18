@@ -48,7 +48,9 @@ RUN_AI_ANALYSIS=false python3 update_data.py
 DEEPSEEK_API_KEY
 ```
 
-分析、新闻回退和问答统一固定为 `deepseek-v4-flash`，开启 thinking，并使用 `reasoning_effort=high`。主分析与短问答分别预留 32768 和 8192 个输出 token，避免 Flash 的推理内容挤占最终回答。页面会显示实际返回文件中的模型名称，不用营销文案代替运行证据。
+分析、新闻回退和问答统一固定为 `deepseek-v4-flash`，**thinking 关闭**。主分析与短问答分别预留 32768 和 8192 个输出 token。页面会显示实际返回文件中的模型名称，不用营销文案代替运行证据。
+
+关闭 thinking 的原因：v4-flash 在 `reasoning_effort=high` 下会间歇性地在推理阶段结束后直接收尾，返回空的 `content` 且 `finish_reason=stop`，导致该品种降级为规则分析（最近 40 次里 Y0 中招 6 次、P0 4 次）。这不是 token 预算不足——运行 32156132736 中失败那次记录为 `reasoning=5023 completion=5023 max=32768`，离上限还很远，所以此前把预算从 16k 提到 32k 并没有解决问题。每次分析仍会记录实际使用的模式到 `ai_analysis.json` 的 `deepseek_mode`，空响应时自动重试一次。
 
 手动按钮会直接触发 `Generate DeepSeek AI analysis`，后台线程池为 `P0/Y0` 并行抓取触发时盘口，再结合缓存的日线、小时线、新闻与验证结果生成两份分析。该工作流不重复抓取较慢的 AKShare 历史序列，也不等待 Pages 部署；页面直接读取仓库中的新结果。问答工作流同样先抓实时盘口，且回答必须引用本次价格。为满足本项目所有者要求，公开页面内嵌了可触发 Actions 的 GitHub PAT；任何能查看源码的人都能取得该令牌权限。DeepSeek API Key 仍只保存在 GitHub Actions Secret 中，不会发送到浏览器。
 

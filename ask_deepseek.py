@@ -29,17 +29,19 @@ import requests
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 DEEPSEEK_MODEL = "deepseek-v4-flash"
-DEEPSEEK_THINKING = {"type": "enabled"}
-DEEPSEEK_REASONING_EFFORT = "high"
+# Thinking OFF by owner decision (2026-08-18) — matches update_data.py. Q&A
+# benefits most: this path is synchronous behind a button the owner's father
+# presses, so dropping the reasoning phase cuts perceived wait directly.
+DEEPSEEK_THINKING = {"type": "disabled"}
+DEEPSEEK_REASONING_EFFORT = None
 DEEPSEEK_MAX_OUTPUT_TOKENS = 8192
 
 # Mirrors update_data.DEEPSEEK_LADDER. Duplicated rather than imported so this
 # script keeps its minimal dependency surface (requests + stdlib only) — the
 # ask workflow installs nothing else.
 DEEPSEEK_LADDER = [
-    {"mode": "thinking-high",   "thinking": {"type": "enabled"},  "reasoning_effort": "high"},
-    {"mode": "thinking-medium", "thinking": {"type": "enabled"},  "reasoning_effort": "medium"},
-    {"mode": "no-thinking",     "thinking": {"type": "disabled"}, "reasoning_effort": None},
+    {"mode": "no-thinking",       "thinking": {"type": "disabled"}, "reasoning_effort": None},
+    {"mode": "no-thinking-retry", "thinking": {"type": "disabled"}, "reasoning_effort": None},
 ]
 
 

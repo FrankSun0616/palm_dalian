@@ -239,8 +239,15 @@ def validate_workflow() -> None:
     assert "fetch_daily_once.py" in pipeline, "isolated AKShare helper is missing"
     for path, source in (("update_data.py", pipeline), ("ask_deepseek.py", ask_backend)):
         assert 'DEEPSEEK_MODEL = "deepseek-v4-flash"' in source, f"{path}: V4-Flash is not fixed"
-        assert '"thinking": DEEPSEEK_THINKING' in source, f"{path}: thinking mode is missing"
-        assert '"reasoning_effort": DEEPSEEK_REASONING_EFFORT' in source, f"{path}: high effort is missing"
+        # Thinking is deliberately disabled (2026-08-18): at effort=high
+        # v4-flash intermittently returned an empty turn, and it cost latency
+        # and reasoning tokens without a measured quality gain. These assert
+        # the request still routes through the ladder, which is what actually
+        # controls thinking now — not that thinking is on.
+        assert 'DEEPSEEK_THINKING = {"type": "disabled"}' in source, f"{path}: thinking should stay disabled"
+        assert '"thinking": DEEPSEEK_THINKING' in source, f"{path}: base payload lost its thinking key"
+        assert '"reasoning_effort": DEEPSEEK_REASONING_EFFORT' in source, f"{path}: base payload lost reasoning_effort"
+        assert "DEEPSEEK_LADDER" in source, f"{path}: empty-response ladder is missing"
         assert "deepseek-chat" not in source and "deepseek-reasoner" not in source, f"{path}: legacy model remains"
     assert "DEEPSEEK_MAX_OUTPUT_TOKENS = 32768" in pipeline, "Flash analysis output budget is too small"
     assert "DEEPSEEK_MAX_OUTPUT_TOKENS = 8192" in ask_backend, "Flash Q&A output budget is too small"

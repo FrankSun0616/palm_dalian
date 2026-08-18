@@ -31,9 +31,21 @@ DATA_DIR.mkdir(exist_ok=True)
 
 DEEPSEEK_MODEL = "deepseek-v4-flash"
 # Thinking is OFF by owner decision (2026-08-18). It was the direct cause of
-# the empty-turn failures documented on DEEPSEEK_LADDER below, and it cost
-# real latency (P0 155s vs Y0 89s on run 32156132736) plus billed reasoning
-# tokens. Set {"type": "enabled"} + effort "high"/"medium" to restore it.
+# the empty-turn failures documented on DEEPSEEK_LADDER below.
+#
+# A/B measured, run 32156132736 (thinking) vs 32158234614 (off):
+#   quality  identical — both symbols status=ok, integrity.execution_allowed
+#            true, 0 audit findings, same analysis/news_impact counts,
+#            comparable summary length
+#   empties  gone — thinking run needed rung 2 to rescue P0; off run had no
+#            ladder retries at all
+#   tokens   down 66-78% (P0 15000->3358, Y0 12355->4216)
+#   latency  WORSE, not better — P0 155->199s, Y0 89->191s, with no retries
+#            in the logs. One sample each, so this may be API-side variance
+#            rather than a property of the mode; do not cite thinking-off as
+#            a latency win.
+#
+# Set {"type": "enabled"} + effort "high"/"medium" to restore it.
 DEEPSEEK_THINKING = {"type": "disabled"}
 DEEPSEEK_REASONING_EFFORT = None
 DEEPSEEK_MAX_OUTPUT_TOKENS = 32768

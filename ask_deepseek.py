@@ -33,6 +33,15 @@ DEEPSEEK_THINKING = {"type": "enabled"}
 DEEPSEEK_REASONING_EFFORT = "high"
 DEEPSEEK_MAX_OUTPUT_TOKENS = 8192
 
+# Mirrors update_data.DEEPSEEK_LADDER. Duplicated rather than imported so this
+# script keeps its minimal dependency surface (requests + stdlib only) — the
+# ask workflow installs nothing else.
+DEEPSEEK_LADDER = [
+    {"mode": "thinking-high",   "thinking": {"type": "enabled"},  "reasoning_effort": "high"},
+    {"mode": "thinking-medium", "thinking": {"type": "enabled"},  "reasoning_effort": "medium"},
+    {"mode": "no-thinking",     "thinking": {"type": "disabled"}, "reasoning_effort": None},
+]
+
 
 PROFILES: dict[str, dict] = {
     "P0": {"name": "棕榈油", "dir": "p0", "market_node": "zly_qh"},
@@ -178,31 +187,59 @@ def ask_deepseek(api_key: str, symbol: str, name: str, question: str, context: d
         f"【市场数据】\n{json.dumps(context, ensure_ascii=False, indent=2)}\n\n"
         f"问题: {question}"
     )
-    resp = requests.post(
-        "https://api.deepseek.com/chat/completions",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": DEEPSEEK_MODEL,
-            "messages": [
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": user_msg},
-            ],
-            "thinking": DEEPSEEK_THINKING,
-            "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
-            "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
-        },
-        timeout=120,
-    )
-    resp.raise_for_status()
-    payload = resp.json()
-    choice = payload["choices"][0]
-    content = (choice.get("message") or {}).get("content", "").strip()
-    if not content:
-        raise RuntimeError("DeepSeek returned empty answer")
-    return content
+    base_payload = {
+        "model": DEEPSEEK_MODEL,
+        "messages": [
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": user_msg},
+        ],
+        "thinking": DEEPSEEK_THINKING,
+        "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
+        "max_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
+    }
+
+    # Same failure mode as the analysis pipeline: max_tokens covers reasoning
+    # AND content, so a high-effort pass can return content="" with
+    # finish_reason="stop". Raising there put an error in front of the user
+    # instead of an answer. Step down reasoning effort until content appears;
+    # the last rung disables thinking, which cannot starve content.
+    last_problem = ""
+    for index, rung in enumerate(DEEPSEEK_LADDER, start=1):
+        payload = dict(base_payload)
+        payload["thinking"] = rung["thinking"]
+        if rung["reasoning_effort"]:
+            payload["reasoning_effort"] = rung["reasoning_effort"]
+        else:
+            payload.pop("reasoning_effort", None)
+
+        resp = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=120,
+        )
+        resp.raise_for_status()
+        choice = resp.json()["choices"][0]
+        content = ((choice.get("message") or {}).get("content") or "").strip()
+        finish = choice.get("finish_reason")
+
+        if content and finish != "length":
+            if index > 1:
+                print(f"[ask] recovered on rung {index} ({rung['mode']})")
+            return content
+
+        last_problem = (
+            f"truncated ({len(content)} chars)" if finish == "length"
+            else f"empty content (finish_reason={finish})"
+        )
+        print(f"[ask] rung {index}/{len(DEEPSEEK_LADDER)} ({rung['mode']}) unusable — {last_problem}")
+        if index < len(DEEPSEEK_LADDER):
+            time.sleep(2)
+
+    raise RuntimeError(f"DeepSeek returned no usable answer after {len(DEEPSEEK_LADDER)} rungs: {last_problem}")
 
 
 def main() -> int:

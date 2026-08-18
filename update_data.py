@@ -35,6 +35,91 @@ DEEPSEEK_REASONING_EFFORT = "high"
 DEEPSEEK_MAX_OUTPUT_TOKENS = 32768
 DAILY_FETCH_TIMEOUT_SECONDS = max(10, int(os.getenv("DAILY_FETCH_TIMEOUT_SECONDS", "30")))
 
+# On a thinking model, max_tokens is the budget for reasoning AND content.
+# With reasoning_effort=high and a large prompt, reasoning can consume the
+# entire budget and the API returns content="" with finish_reason="stop" —
+# which used to reach json.loads("") and drop the whole symbol to the
+# rule-based fallback (6 of the last 40 Y0 analyses, 4 of 40 for P0).
+#
+# Retrying the identical request does not help when the cause is budget
+# exhaustion, so each rung below strictly frees budget for content. The last
+# rung disables thinking entirely, which cannot starve content by
+# construction. `mode` is recorded in the output so chronic rung-1 failure is
+# visible rather than silent.
+DEEPSEEK_LADDER = [
+    {"mode": "thinking-high",   "thinking": {"type": "enabled"},  "reasoning_effort": "high"},
+    {"mode": "thinking-medium", "thinking": {"type": "enabled"},  "reasoning_effort": "medium"},
+    {"mode": "no-thinking",     "thinking": {"type": "disabled"}, "reasoning_effort": None},
+]
+
+
+def _deepseek_completion_with_ladder(
+    api_key: str,
+    base_payload: dict,
+    label: str = "request",
+    timeout: int = 120,
+) -> tuple[str, dict, dict, str]:
+    """POST to DeepSeek, stepping down reasoning effort until content comes back.
+
+    Returns (content, choice, resp_json, mode) where mode names the rung that
+    produced the content. Raises RuntimeError if every rung yields unusable
+    output.
+    """
+    last_problem = ""
+    for index, rung in enumerate(DEEPSEEK_LADDER, start=1):
+        payload = dict(base_payload)
+        payload["thinking"] = rung["thinking"]
+        if rung["reasoning_effort"]:
+            payload["reasoning_effort"] = rung["reasoning_effort"]
+        else:
+            payload.pop("reasoning_effort", None)
+
+        resp = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=timeout,
+        )
+        resp.raise_for_status()
+        resp_json = resp.json()
+        choice = resp_json["choices"][0]
+        content = (choice.get("message", {}).get("content") or "").strip()
+        finish = choice.get("finish_reason")
+
+        usage = resp_json.get("usage") or {}
+        detail = usage.get("completion_tokens_details") or {}
+        reasoning_tokens = detail.get("reasoning_tokens")
+        budget_note = (
+            f" [reasoning={reasoning_tokens} completion={usage.get('completion_tokens')}"
+            f" max={payload.get('max_tokens')}]"
+            if reasoning_tokens is not None else ""
+        )
+
+        if content and finish != "length":
+            if index > 1:
+                print(f"[deepseek] {label}: recovered on rung {index} ({rung['mode']}){budget_note}")
+            return content, choice, resp_json, rung["mode"]
+
+        last_problem = (
+            f"truncated at max_tokens ({len(content)} chars)"
+            if finish == "length"
+            else f"empty content (finish_reason={finish})"
+        )
+        print(
+            f"[deepseek] {label}: rung {index}/{len(DEEPSEEK_LADDER)} "
+            f"({rung['mode']}) unusable — {last_problem}{budget_note}"
+        )
+        if index < len(DEEPSEEK_LADDER):
+            time.sleep(2)
+
+    raise RuntimeError(
+        f"DeepSeek returned no usable output after {len(DEEPSEEK_LADDER)} rungs "
+        f"(last: {last_problem}). Raise DEEPSEEK_MAX_OUTPUT_TOKENS or shrink the prompt."
+    )
+
 
 # ── AI history / accuracy helpers ────────────────────────────────────────────
 
@@ -2079,55 +2164,25 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         "response_format": {"type": "json_object"},
     }
 
-    # V4-Flash runs with thinking enabled, so it can spend its whole output
-    # budget on reasoning and return an EMPTY content string with
-    # finish_reason='stop'. That used to reach json.loads("") and surface as
-    # "JSONDecodeError: Expecting value: line 1 column 1 (char 0)", dropping the
-    # whole symbol to the rule-based fallback — 6 of the last 40 Y0 analyses
-    # died this way. Detect unusable output explicitly and retry once before
-    # giving up, since the failure is non-deterministic.
     api_started = time.monotonic()
-    content = ""
-    choice: dict = {}
-    unusable = ""
-    for attempt in (1, 2):
-        resp = requests.post(
-            "https://api.deepseek.com/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            json=request_payload,
-            timeout=120,
-        )
-        resp.raise_for_status()
-        choice = resp.json()["choices"][0]
-        content = (choice.get("message", {}).get("content") or "").strip()
-        finish = choice.get("finish_reason")
-
-        if finish == "length":
-            unusable = f"truncated at max_tokens ({len(content)} chars) — consider raising DEEPSEEK_MAX_OUTPUT_TOKENS"
-        elif not content:
-            unusable = f"empty content (finish_reason={finish}) — reasoning likely consumed the output budget"
-        else:
-            unusable = ""
-            break
-
-        print(f"[deepseek] analysis attempt {attempt}/2 unusable: {unusable}")
-        if attempt == 1:
-            time.sleep(3)
-
-    if unusable:
-        raise RuntimeError(f"DeepSeek returned no usable analysis after 2 attempts: {unusable}")
-
+    content, choice, resp_json, degraded = _deepseek_completion_with_ladder(
+        api_key, request_payload, label=f"{symbol} analysis"
+    )
     api_latency_seconds = round(time.monotonic() - api_started, 1)
     parsed = normalize_ai_analysis(json.loads(content), snapshot)
     parsed.update(
         {
             "source": "DeepSeek API",
             "model": DEEPSEEK_MODEL,
-            "thinking_mode": "enabled",
-            "reasoning_effort": DEEPSEEK_REASONING_EFFORT,
+            # Report the rung that actually produced this analysis, not the
+            # configured default — a run that had to fall back to
+            # thinking-medium or no-thinking is lower-quality and must say so.
+            "thinking_mode": "disabled" if degraded == "no-thinking" else "enabled",
+            "reasoning_effort": (
+                DEEPSEEK_REASONING_EFFORT if degraded == "thinking-high"
+                else ("medium" if degraded == "thinking-medium" else None)
+            ),
+            "deepseek_mode": degraded,
             "status": "ok",
             "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "latest_date": snapshot["latest_date"],

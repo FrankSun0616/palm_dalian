@@ -1944,12 +1944,27 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
             return None, None
         return best[1], best[2]
 
+    # "接近超买" contains "超买" as a substring but asserts the opposite: that
+    # the level has NOT been reached. The prompt explicitly asks for that
+    # wording when daily RSI sits in 60-70, so treating it as a claim made the
+    # firewall punish the model for following instructions.
+    RSI_HEDGES = "接近|临近|逼近|趋近|趋于|即将|快要|将要|有望|恐将|警惕|防范|谨防|留意|注意"
+
     def affirmative_rsi_claim(sentence: str, term: str) -> bool:
         if "RSI" not in sentence.upper() or term not in sentence:
             return False
         negated = re.search(rf"(?:未|无|不|没有|非).{{0,6}}{term}", sentence)
         paired_negation = re.search(r"(?:未|无|不|没有|非).{0,6}(?:超买|超卖).{0,4}(?:或|和|及).{0,4}(?:超买|超卖)", sentence)
-        return not negated and not paired_negation
+        if negated or paired_negation:
+            return False
+        # Every occurrence hedged -> not an assertion. Any bare occurrence ->
+        # assertion, so "1小时RSI 81 超买，日线接近超买" is still judged on the
+        # bare one (and attributed to 1小时 by attributed_rsi).
+        for m in re.finditer(re.escape(term), sentence):
+            before = sentence[max(0, m.start() - 6):m.start()]
+            if not re.search(rf"(?:{RSI_HEDGES})[^，。；]{{0,4}}$", before):
+                return True
+        return False
 
     if rsi_value is not None:
         for sentence in sentences:

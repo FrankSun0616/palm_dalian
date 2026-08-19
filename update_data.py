@@ -1721,11 +1721,35 @@ def normalize_ai_analysis(parsed: dict, snapshot: dict) -> dict:
     normalization_warnings: list[str] = []
 
     def safe_float(value: object, fallback: float, label: str) -> float:
-        try:
+        """Coerce an AI-supplied price level to a float.
+
+        The model reasons in ranges and units — real observed values include
+        "9839-9840", "10015~10037 区间", "9,800", "9800元/吨", "约9800".
+        Plain float() rejected all of those, so the level fell back to the
+        deterministic 20-day extreme (e.g. 9196 when the AI had said 9839) and
+        raised a high-severity issue. That both discarded the better number
+        and blocked execution: 21 P0 + 9 Y0 blocks in the last 80 runs.
+
+        A range collapses to its midpoint, which is what the accompanying
+        prose means by "9839-9840". Anything with no parseable number still
+        falls back and still warns.
+        """
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
             return float(value)
-        except (TypeError, ValueError):
-            normalization_warnings.append(label)
-            return float(fallback)
+        if value is not None:
+            text = str(value)
+            # full-width digits/punctuation -> ASCII, then drop separators
+            text = text.translate(str.maketrans(
+                "０１２３４５６７８９．－～　", "0123456789.-~ "))
+            text = text.replace(",", "").replace("，", "")
+            nums = re.findall(r"\d+(?:\.\d+)?", text)
+            if len(nums) >= 2 and re.search(r"\d\s*(?:-|~|to|至|—|－)\s*\d", text):
+                lo, hi = float(nums[0]), float(nums[1])
+                return (lo + hi) / 2.0
+            if nums:
+                return float(nums[0])
+        normalization_warnings.append(label)
+        return float(fallback)
 
     support = safe_float(watch_levels.get("support"), snapshot["low20"], "support")
     resistance = safe_float(watch_levels.get("resistance"), snapshot["high20"], "resistance")
@@ -1873,20 +1897,80 @@ def audit_ai_analysis(ai_analysis: dict, snapshot: dict) -> dict:
         rsi_value = float(rsi_value)
     except (TypeError, ValueError):
         rsi_value = None
-    if rsi_value is not None:
-        def affirmative_daily_rsi_claim(sentence: str, term: str) -> bool:
-            if "日线" not in sentence or "RSI" not in sentence.upper() or term not in sentence:
-                return False
-            negated = re.search(rf"(?:未|无|不|没有|非).{{0,6}}{term}", sentence)
-            paired_negation = re.search(r"(?:未|无|不|没有|非).{0,6}(?:超买|超卖).{0,4}(?:或|和|及).{0,4}(?:超买|超卖)", sentence)
-            return not negated and not paired_negation
+    # RSI claims must be judged against the timeframe the text actually
+    # attributes them to. The previous version only required "日线" to appear
+    # somewhere in the sentence, so a correct intraday statement like
+    #   "…高于日线收盘…但RSI（1小时80.2，4小时80.9）超买"
+    # was scored against the DAILY RSI (68.2) and blocked as a hallucination.
+    # That single false positive accounted for 11 P0 and 14 Y0 blocks in the
+    # last 80 runs — the firewall was rejecting correct analysis.
+    intraday_meta = snapshot.get("intraday") or {}
 
-        overbought_claim = any(affirmative_daily_rsi_claim(sentence, "超买") for sentence in sentences)
-        oversold_claim = any(affirmative_daily_rsi_claim(sentence, "超卖") for sentence in sentences)
-        if overbought_claim and rsi_value < 70:
-            add_issue("false_rsi_overbought", "high", f"文本声称 RSI 超买，但日线 RSI 为 {rsi_value:.1f}。", 35)
-        if oversold_claim and rsi_value > 30:
-            add_issue("false_rsi_oversold", "high", f"文本声称 RSI 超卖，但日线 RSI 为 {rsi_value:.1f}。", 35)
+    def _tf_rsi(key: str):
+        try:
+            return float(((intraday_meta.get(key) or {}).get("rsi14")))
+        except (TypeError, ValueError):
+            return None
+
+    # token -> (label, rsi). Longer tokens first so "4小时" wins over "小时".
+    rsi_timeframes = [
+        ("4小时", "4小时", _tf_rsi("four_hour")),
+        ("4H",    "4小时", _tf_rsi("four_hour")),
+        ("2小时", "2小时", _tf_rsi("two_hour")),
+        ("2H",    "2小时", _tf_rsi("two_hour")),
+        ("1小时", "1小时", _tf_rsi("one_hour")),
+        ("1H",    "1小时", _tf_rsi("one_hour")),
+        ("小时线", "小时线", _tf_rsi("one_hour")),
+        ("日线",  "日线",  rsi_value),
+    ]
+
+    def attributed_rsi(sentence: str, term: str):
+        """Return (label, rsi) for the timeframe nearest the RSI/term mention."""
+        upper = sentence.upper()
+        anchor = max(upper.find("RSI"), sentence.find(term))
+        best = None
+        for token, label, value in rsi_timeframes:
+            hay = upper if token.isascii() else sentence
+            start = 0
+            while True:
+                idx = hay.find(token.upper() if token.isascii() else token, start)
+                if idx < 0:
+                    break
+                dist = abs(idx - anchor)
+                if best is None or dist < best[0]:
+                    best = (dist, label, value)
+                start = idx + 1
+        if best is None:
+            return None, None
+        return best[1], best[2]
+
+    def affirmative_rsi_claim(sentence: str, term: str) -> bool:
+        if "RSI" not in sentence.upper() or term not in sentence:
+            return False
+        negated = re.search(rf"(?:未|无|不|没有|非).{{0,6}}{term}", sentence)
+        paired_negation = re.search(r"(?:未|无|不|没有|非).{0,6}(?:超买|超卖).{0,4}(?:或|和|及).{0,4}(?:超买|超卖)", sentence)
+        return not negated and not paired_negation
+
+    if rsi_value is not None:
+        for sentence in sentences:
+            for term, code, bad in (
+                ("超买", "false_rsi_overbought", lambda v: v < 70),
+                ("超卖", "false_rsi_oversold",   lambda v: v > 30),
+            ):
+                if not affirmative_rsi_claim(sentence, term):
+                    continue
+                label, value = attributed_rsi(sentence, term)
+                # No timeframe named anywhere -> fall back to the daily series,
+                # which is the series the summary defaults to discussing.
+                if value is None:
+                    label, value = "日线", rsi_value
+                if value is not None and bad(value):
+                    add_issue(
+                        code, "high",
+                        f"文本声称 RSI {term}，但{label} RSI 为 {value:.1f}。",
+                        35,
+                    )
+                    break
 
     trading_day_label = str(snapshot.get("realtime_trading_day_label") or "")
     if snapshot.get("realtime_label_is_future") and trading_day_label:
@@ -2159,7 +2243,13 @@ def generate_ai_analysis(snapshot: dict, news_summary: str = "", profile_name: s
         "3) analysis 数组：6–8 条技术面要点，必须包含 **1小时布林、4小时布林、日线布林/均线、实时价位置、趋势、量能、支撑压力**，每条 2–3 句；\n"
         "4) intraday_strategy 对象：必须包含 bias, entry, stop, take_profit, invalidation, notes 六个字段，给出以 1小时 + 4小时 尺度为主的日内策略，明确说明适用哪个交易时段（早盘 09:00-11:30 / 午盘 13:30-15:00 / 夜盘 21:00-23:00）；\n"
         f"{news_instructions}"
-        "6) watch_levels 包含数字 support 和 resistance；\n"
+        "6) watch_levels.support / watch_levels.resistance 必须是**单个纯数字**"
+        "（如 9839.5），不要写区间、单位、逗号或文字，例如 \"9839-9840\"、"
+        "\"9800元/吨\"、\"约9800\" 都不接受；区间请自己取中值；\n"
+        "6b) 只有当**日线** RSI > 70 才可写「超买」、< 30 才可写「超卖」。"
+        "当前日线 RSI 若为 60-70，应写「接近超买」而非「超买」。"
+        "谈论 1小时/4小时 RSI 时必须在同一句里写明周期，例如"
+        "「1小时 RSI 80.2 超买」，不要只写「RSI 超买」；\n"
         "7) decision_frame 对象必须包含：confidence(0-100，表示证据强度而非胜率)、regime、edge、no_trade_condition、long_case、short_case、event_risks、data_limits。"
         "long_case 和 short_case 都必须包含 trigger, entry_zone, stop, targets, invalidation, risk_reward；如果首目标盈亏比低于1.5，必须明确写入 no_trade_condition，不得硬给方向；\n"
         "8) P0/Y0 是连续合约分析口径，不是可直接下单的具体月份合约。结合 contract_bridge 核对主力月份、换月价差与流动性，但仍提醒下单软件二次确认；\n"

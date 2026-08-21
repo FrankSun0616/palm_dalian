@@ -1,86 +1,219 @@
 {
-  "source": "fallback-rule-analysis",
-  "model": "deepseek-v4-flash",
-  "thinking_mode": "enabled",
-  "reasoning_effort": null,
-  "status": "fallback",
-  "error": "JSONDecodeError: Unterminated string starting at: line 16 column 14 (char 1049)",
-  "generated_at_utc": "2026-08-21T06:41:46+00:00",
-  "latest_date": "2026-08-20",
-  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
-  "bias": "等待AI",
+  "summary": "截至北京时间 2026-08-21 17:33:35（实时盘口 ticktime 15:04:29），豆油 Y0 连续合约最新价 8824 元/吨，较昨结 8809 涨 +0.17%，较昨收 8847 跌 -0.26%。当前 1 小时布林中轨 8780.65、4 小时中轨 8599.5 均位于价格下方，日线 RSI 72.7 接近超买。主力合约为 Y2701，次主力 Y2705 贴水 210 元/吨，换月风险低。短线 1 小时偏多但日线超买，策略建议观望或轻仓顺势，关注 8850 上方压力。",
+  "bias": "震荡偏多",
   "analysis": [
-    "实时价 8808（实时行情截至 2026-08-21 14:40:29，当前价 8808，涨跌 -0.01%），最新日线收盘 8847，日涨跌 +1.14%。",
-    "MA10/MA20/MA60 分别为 8567/8505/8483。",
-    "20日区间支撑压力为 8368-8866。"
+    "1小时布林：最新价 8824 位于中轨 8780.65 上方，上轨 8895.14 附近，带宽 2.61% 较前期收窄。价格正在测试上轨压力，若突破则打开上行空间，若受阻可能回踩中轨。",
+    "4小时布林：价格 8824 位于中轨 8599.5 上方，上轨 8899.87 形成强阻力，带宽 6.99% 扩大，显示趋势动能增强。4小时 RSI 79.67 已进入超买区，警惕回调。",
+    "日线布林：日线 RSI 72.72 接近超买但未超买，价格 8824 收于 5 日均线上方，均线呈多头排列（MA10 8605 < MA20 8515 < MA60 8487），但价格距 MA20 偏离 3.6%，短线有回归需求。",
+    "实时价位置：实时 8824 高于昨日收盘 8847 但低于今日开盘 8899，盘中冲高 8899 后回落，显示上方抛压。当前价位于日内波幅中上沿，多空博弈激烈。",
+    "趋势结构：1小时 EMA20 斜率 0.004 呈多头，4小时 EMA20 斜率 0.0124 多头更强。ADX 1小时 74.7 显示趋势极强，但需警惕超买后的假突破。",
+    "量能：日线成交量 418926 手，为 20 日均量 1.75 倍，持仓 722921 手较前日微降，放量滞涨形态，暗示获利了结。1小时 K 线最新成交量 130 手（15:00 收盘），非真实盘中量。",
+    "支撑压力：下方支撑参考 1小时中轨 8780 及 4小时 EMA20 8648，上方压力 8895 和 8900 整数关口。日线前高 8899 为关键阻力。",
+    "多周期共振：1小时、4小时均在中轨上方，日线也偏多，但 4小时和日线 RSI 均接近超买，短周期无背离，中期可能继续上行，但短线回调风险上升。"
   ],
   "intraday_strategy": {
-    "bias": "等待AI",
-    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
-    "stop": "未给出",
-    "take_profit": "未给出",
-    "invalidation": "未给出",
-    "notes": "当前为规则备用分析"
+    "bias": "震荡偏多",
+    "entry": "8800",
+    "stop": "8745",
+    "take_profit": "8890",
+    "invalidation": "小时线收盘跌破 8780 或日线收盘跌破 MA5（约 8804）",
+    "notes": "适用于今晚夜盘 21:00 开盘后。建议在 8790-8810 区间轻仓做多，止损 8745，目标 8890，盈亏比 1.8。若 1小时 RSI 继续超买且价格无法突破 8895，则放弃多单，观望。若价格直接跌破 8780，则止损并反手做空，目标 8660。"
   },
   "decision_frame": {
-    "confidence": 0,
-    "regime": "数据不足",
-    "edge": "等待 DeepSeek",
-    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
-    "long_case": {},
-    "short_case": {},
-    "event_risks": [],
+    "confidence": 35,
+    "regime": "强势多头但短线超买",
+    "edge": "趋势指标多头但超买，短线回调概率高，缺乏明确入场信号",
+    "no_trade_condition": "若价格无法站稳 8824 或 1小时 RSI 超过 70 且无法突破上轨，则不追多；首目标盈亏比 1.8 大于 1.5，可执行。",
+    "long_case": {
+      "trigger": "价格回踩 1小时中轨 8780 并企稳，或放量突破 8895",
+      "entry_zone": "8780",
+      "stop": "8730",
+      "targets": [
+        "8850",
+        "8895"
+      ],
+      "invalidation": "小时线收盘跌破 8730",
+      "risk_reward": "1.8"
+    },
+    "short_case": {
+      "trigger": "价格跌破 8780 且 1小时 RSI 跌破 60",
+      "entry_zone": "8770",
+      "stop": "8825",
+      "targets": [
+        "8660",
+        "8600"
+      ],
+      "invalidation": "小时线收盘回到 8825 上方",
+      "risk_reward": "1.5"
+    },
+    "event_risks": [
+      "临近 USDA 报告发布，可能引发跳空",
+      "原油价格波动影响生物柴油需求"
+    ],
     "data_limits": [
-      "当前为备用规则分析"
+      "日线 RSI 基于收盘价，实时 RSI 仅 1小时/4小时可用",
+      "连续合约有换月跳空风险",
+      "模型验证未证实，仅作参考"
     ]
   },
-  "news_impact": [],
-  "news_articles": [],
+  "news_impact": [
+    "[中性] 搜索结果中大部分为豆油基础知识，无实际供需数据，对行情影响有限。",
+    "[利多] 芝加哥期货交易所（CBOT）是豆油定价基准，若美盘走强可能带动内盘。近期 CBOT 数据未提供具体价格。",
+    "[中性] 大豆作为豆油原料，其种植和收获信息影响供应预期，但搜索无具体数据。",
+    "[利空] 今日主力合约冲高回落，放量滞涨表明高位获利盘涌出，短线回调压力。",
+    "[中性] 远月合约贴水结构（Y2705 贴水 210）显示市场对远月供应宽松预期，可能压制涨幅。",
+    "[利多] 持仓量升至 72 万手创新高，资金流入明显，趋势可能延续。"
+  ],
+  "news_articles": [
+    {
+      "title": "Tom Cruise - Biography - IMDb",
+      "source": "IMDb",
+      "url": "https://www.imdb.com/name/nm0000129/bio/",
+      "detail": "演员汤姆·克鲁斯的传记，与豆油无关，无任何市场参考价值。",
+      "impact": "中性"
+    },
+    {
+      "title": "Tom Cruise - Age, Bio, Family | Famous Birthdays",
+      "source": "Famous Birthdays",
+      "url": "https://www.famousbirthdays.com/people/tom-cruise.html",
+      "detail": "娱乐网站关于汤姆·克鲁斯的个人资料，与豆油市场无关。",
+      "impact": "中性"
+    },
+    {
+      "title": "Soybean - Wikipedia",
+      "source": "Wikipedia",
+      "url": "https://en.m.wikipedia.org/wiki/Soybean",
+      "detail": "大豆的百科介绍，涵盖品种、种植和用途，但无近期行情数据，仅提供背景知识。",
+      "impact": "中性"
+    },
+    {
+      "title": "Soybeans: Nutrition, 20 Benefits, Side Effects & How to Eat Them",
+      "source": "MyHealthopedia",
+      "url": "https://myhealthopedia.com/soybeans-nutrition-benefits-side-effects-uses/",
+      "detail": "健康网站介绍大豆营养价值，与期货市场关联微弱。",
+      "impact": "中性"
+    },
+    {
+      "title": "Soybeans 101: Nutrition Facts and Health Effects",
+      "source": "Healthline",
+      "url": "https://www.healthline.com/nutrition/soybeans",
+      "detail": "健康网站介绍大豆营养成分和健康效应，不涉及市场供需。",
+      "impact": "中性"
+    },
+    {
+      "title": "Soybean | Description, Cultivation, Products, & Facts | Britannica",
+      "source": "Britannica",
+      "url": "https://www.britannica.com/plant/soybean",
+      "detail": "大英百科介绍大豆植物学特性和种植，无价格信息。",
+      "impact": "中性"
+    },
+    {
+      "title": "Soya Beans (Soybean) - Nutrition Facts, Health Benefits and Recipes",
+      "source": "OnlyFoods",
+      "url": "https://www.onlyfoods.net/soya-beans.html",
+      "detail": "食物网站介绍大豆营养和食谱，非市场新闻。",
+      "impact": "中性"
+    },
+    {
+      "title": "CBOT - CME Group",
+      "source": "CME Group",
+      "url": "https://www.cmegroup.com/company/cbot.html",
+      "detail": "介绍芝加哥期货交易所（CBOT）是 CME 集团的一部分，是豆油期货的参考市场，但无具体报价。",
+      "impact": "中性"
+    },
+    {
+      "title": "Cbot Commodity Prices / Quotes & Commodity Charts - Free",
+      "source": "TradingCharts",
+      "url": "https://futures.tradingcharts.com/marketquotes/index.php3?sectorname=cbot",
+      "detail": "网站提供 CBOT 期货报价和图表，但搜索结果未显示具体数据，仅表明有可持续更新的行情。",
+      "impact": "中性"
+    },
+    {
+      "title": "Licensees - Board of Occupational Therapy - California",
+      "source": "California BOT",
+      "url": "http://www.bot.ca.gov/licensees/index.shtml",
+      "detail": "加利福尼亚职业治疗委员会网站，与豆油无关。",
+      "impact": "中性"
+    }
+  ],
   "watch_levels": {
-    "support": 8368.0,
-    "resistance": 8866.0
+    "support": 8780.0,
+    "resistance": 8895.0
   },
-  "integrity": {
-    "version": "deterministic-integrity-v1",
-    "checked_at_utc": "2026-08-21T06:41:46+00:00",
-    "score": 0,
-    "status": "blocked",
-    "label": "规则接管",
-    "execution_allowed": false,
-    "evidence_confidence": 0,
-    "issues": [
-      {
-        "code": "ai_unavailable",
-        "severity": "high",
-        "message": "JSONDecodeError: Unterminated string starting at: line 16 column 14 (char 1049)"
-      }
-    ],
-    "facts": {}
+  "normalization_warnings": [],
+  "risk_note": "以上分析基于连续合约 Y0，不构成投资建议。实际交易请以具体月份合约（如 Y2701）为准，并注意换月风险、杠杆风险和市场波动。",
+  "source": "DeepSeek API",
+  "model": "deepseek-v4-flash",
+  "thinking_mode": "disabled",
+  "reasoning_effort": null,
+  "deepseek_mode": "no-thinking",
+  "status": "ok",
+  "generated_at_utc": "2026-08-21T09:33:51+00:00",
+  "latest_date": "2026-08-21",
+  "realtime_price": 8824.0,
+  "realtime_note": "实时行情截至 2026-08-21 15:04:29，当前价 8824，涨跌 +0.17%",
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-08-21T09:33:35+00:00",
+    "market_trading_day": "2026-08-21",
+    "market_tick_time": "15:04:29",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   },
-  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "news_summary": "[1] Tom Cruise - Biography - IMDb\n来源: www.imdb.com\n发布时间UTC: \nURL: https://www.imdb.com/name/nm0000129/bio/\n摘要: Nonetheless, this sensitive, deeply religious youngster who was born in 1962 in Syracuse, New York, was destined to …\n\n[2] Tom Cruise - Age, Bio, Family | Famous Birthdays\n来源: www.famousbirthdays.com\n发布时间UTC: \nURL: https://www.famousbirthdays.com/people/tom-cruise.html\n摘要: He has two daughters named Isabella and Suri and a son named Connor. In 2025, he started dating Ana de Armas. He co …\n\n[3] Soybean - Wikipedia\n来源: en.m.wikipedia.org\n发布时间UTC: \nURL: https://en.m.wikipedia.org/wiki/Soybean\n摘要: The soybean, soy bean, or soya bean (Glycine max) [4] is a species of legume native to East Asia, widely grown for its …\n\n[4] Soybeans: Nutrition, 20 Benefits, Side Effects & How to Eat Them\n来源: myhealthopedia.com\n发布时间UTC: \nURL: https://myhealthopedia.com/soybeans-nutrition-benefits-side-effects-uses/\n摘要: Oct 26, 2025 · Is soybean good or bad for you? Soybeans are generally good for you when eaten in moderation. They provide …\n\n[5] Soybeans 101: Nutrition Facts and Health Effects\n来源: www.healthline.com\n发布时间UTC: \nURL: https://www.healthline.com/nutrition/soybeans\n摘要: Mar 20, 2019 · Various soy products are available, including soy flour, soy protein, tofu, soy milk, soy sauce, and soybean oil.\n\n[6] Soybean | Description, Cultivation, Products, & Facts | Britannica\n来源: www.britannica.com\n发布时间UTC: \nURL: https://www.britannica.com/plant/soybean\n摘要: 3 days ago · Soybean, annual legume of the pea family (Fabaceae) and its edible seed. The soybean is economically the most …\n\n[7] Soya Beans (Soybean) - Nutrition Facts, Health Benefits and Recipes\n来源: www.onlyfoods.net\n发布时间UTC: \nURL: https://www.onlyfoods.net/soya-beans.html\n摘要: Jul 25, 2011 · The soybean plant is ready to harvest by mid October and November, as the leaves that have become brown start …\n\n[8] CBOT - CME Group\n来源: www.cmegroup.com\n发布时间UTC: \nURL: https://www.cmegroup.com/company/cbot.html\n摘要: CBOT (Chicago Board of Trade) is a designated contract maker for CME Group, offering products under CBOT rules. …\n\n[9] Cbot Commodity Prices / Quotes & Commodity Charts - Free\n来源: futures.tradingcharts.com\n发布时间UTC: \nURL: https://futures.tradingcharts.com/marketquotes/index.php3?sectorname=cbot\n摘要: Free intra-day cbot commodity futures prices / quotes and market snapshots that are updated continuously during trading …\n\n[10] Licensees - Board of Occupational Therapy - California\n来源: www.bot.ca.gov\n发布时间UTC: \nURL: http://www.bot.ca.gov/licensees/index.shtml\n摘要: You'll receive about 8–12 emails per year with information regarding upcoming Board meetings, upcoming legislative and …",
   "symbol": "Y0",
   "instrument_name": "豆油",
+  "api_latency_seconds": 15.6,
+  "token_usage": {
+    "prompt_tokens": 14156,
+    "completion_tokens": 2345,
+    "total_tokens": 16501,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "prompt_cache_hit_tokens": 512,
+    "prompt_cache_miss_tokens": 13644
+  },
+  "integrity": {
+    "version": "deterministic-integrity-v2",
+    "checked_at_utc": "2026-08-21T09:33:51+00:00",
+    "score": 85,
+    "status": "caution",
+    "label": "仅供参考",
+    "execution_allowed": false,
+    "evidence_confidence": 35,
+    "issues": [
+      {
+        "code": "low_evidence_confidence",
+        "severity": "medium",
+        "message": "AI 自评证据强度仅 35/100。"
+      }
+    ],
+    "facts": {
+      "realtime_price": 8824.0,
+      "realtime_fetch_status": "live",
+      "realtime_fetched_at_utc": "2026-08-21T09:33:35+00:00",
+      "realtime_market_tick_time": "15:04:29",
+      "daily_rsi14": 72.72,
+      "one_hour_boll_position": "中轨上方",
+      "four_hour_boll_position": "中轨上方",
+      "realtime_trading_day_label": "2026-08-21",
+      "realtime_label_is_future": false
+    }
+  },
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-21T06:40:40+00:00",
+    "realtime_fetched_at_utc": "2026-08-21T09:33:35+00:00",
     "realtime_market_trading_day": "2026-08-21",
-    "realtime_market_tick_time": "14:40:29",
+    "realtime_market_tick_time": "15:04:29",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-21T06:02:06+00:00",
+    "daily_updated_at_utc": "2026-08-21T09:21:57+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-21T06:02:06+00:00",
-    "news_updated_at_utc": "2026-08-21T06:02:03+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-21T06:02:04+00:00"
-  },
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-08-21T06:40:40+00:00",
-    "market_trading_day": "2026-08-21",
-    "market_tick_time": "14:40:29",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
+    "intraday_updated_at_utc": "2026-08-21T09:21:39+00:00",
+    "news_updated_at_utc": "2026-08-21T09:21:57+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-21T09:21:36+00:00"
   }
 }

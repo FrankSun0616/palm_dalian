@@ -1,166 +1,169 @@
 {
-  "summary": "当前豆油Y0连续合约在夜盘最新价为8979元/吨（盘口时间23:00:00，涨跌幅+0.80%），主力合约为Y2701，持仓稳定，远月贴水。1小时和4小时布林均显示强势，4小时突破上轨，日线RSI接近超买，但历史模型验证未证实优势。日内短线偏多，但需警惕高位回调风险。",
+  "summary": "当前豆油Y0连续合约实时价8979元/吨（盘口ticktime 23:00:00，交易日归属标签2026-08-31），较昨结上涨0.80%。1小时和4小时K线均位于布林带中轨上方，1小时逼近上轨（8979 vs 9005.69），4小时贴近上轨（8979 vs 8984.01），短期偏强但接近超买。日线连续两日放量上涨，RSI 75.56接近超买，但趋势仍偏多。综合多周期共振，短期偏多，但需警惕高位回调风险。",
   "bias": "偏多",
   "analysis": [
-    "1小时布林：最新价8979位于中轨8847.85上方，接近上轨9005.69，带宽0.0357适中，价格沿上轨运行，趋势偏强，但1小时RSI 66.81未超买。",
-    "4小时布林：最新价8979突破上轨8984.01，带宽0.0435，价格突破上轨表明强势，但ADX 62.2显示趋势强，RSI 75.28接近超买，可能引发回调。",
-    "日线均线：价格站上MA10（8780）、MA20（8615.85）、MA60（8509.75），均线多头排列，但日线RSI 75.56接近超买，连续上涨后需警惕回调。",
-    "实时价位置：实时价8979高于日线收盘8965和昨结算8908，涨幅+0.80%，处于日内高位，逼近前高9017。",
-    "趋势：日线连续多日上涨，8月28日日线放量上涨（成交499122手），近20日量比1.8，趋势延续。但日线RSI接近超买，需注意高位风险。",
-    "量能：1小时最新成交量仅70手（可能为收盘集合竞价），日线放量，4小时未显示量比，但持仓增加（1小时Open Interest +165），表明多头进场，但需警惕量价背离。",
-    "支撑压力：支撑参考日线MA5（约8800）和1小时布林中轨8847，压力前高9017和整数关口9000。",
-    "换月状态：主力Y2701持仓占比55.9%，次主力Y2705贴水172点，远月贴水结构，换月稳定，但流动性集中于主力。"
+    "1小时布林：当前价8979位于中轨8847.85上方，接近上轨9005.69，通道带宽0.0357，近期价格沿上轨运行，未突破上轨，显示短期强势但上行空间受限。1小时RSI 66.81，尚未超买。",
+    "4小时布林：当前价8979位于上轨8984.01下方，紧贴上轨，中轨8792.95，带宽0.0435，价格沿上轨运行，带宽有扩大迹象，显示趋势增强。4小时RSI 75.28，接近超买，警惕回调。",
+    "日线布林（基于20日数据）：当前价8979高于20日均线8615.85，接近20日高点9017，日线RSI 75.56，接近超买，但未进入超买区（>70为超买，此处接近超买）。",
+    "实时价位置：实时价8979位于日线ma10（8780）和ma20（8615.85）上方，处于近期高位，距20日高点9017仅38点，短期压力明显。",
+    "趋势：1小时和4小时EMA20斜率均为正，日线连续三日收阳，趋势整体向上，但4小时ADX 62.2显示趋势强，但RSI接近超买，需注意趋势末端风险。",
+    "量能：日线成交量499122手，为20日均量1.8倍，放量突破，显示资金参与积极；但1小时最新一笔成交量仅70手，为收盘前清淡时段，需结合盘中实际成交判断。",
+    "支撑压力：短期支撑位1小时中轨8847.85，强支撑4小时中轨8792.95；压力位9017（20日高点），突破后看更高目标。",
+    "合约结构：主力合约为Y2701（豆油2701），与Y0价格一致，次主力Y2705贴水172元/吨，远月贴水结构，主力持仓占比55.9%，换月稳定。"
   ],
   "intraday_strategy": {
     "bias": "偏多",
-    "entry": "回调至8950-8960附近做多，止损8930，目标9000/9017",
-    "stop": "8930",
-    "take_profit": "[9000, 9017]",
-    "invalidation": "小时线收盘跌破8930或4小时跌破布林中轨8793",
-    "notes": "策略适用于今晚夜盘21:00-23:00，若开盘跳空高开超过9000则追多需谨慎，等待回调。若突破9017且持仓增加可加仓，否则止盈。"
+    "entry": "8979",
+    "stop": "8938",
+    "take_profit": "9040",
+    "invalidation": "收盘价跌破8930",
+    "notes": "适用于今晚夜盘21:00-23:00及明日早盘09:00-11:30。若价格回踩8940-8960区间企稳可轻仓试多，止损8930下方，目标9040，盈亏比约1.5。若直接突破9017，可追多，止损8990，目标9080。若1小时或4小时RSI进入超买且出现顶背离，则停止追多。"
   },
   "decision_frame": {
     "confidence": 65,
-    "regime": "趋势偏多但接近超买",
-    "edge": "多周期均线多头排列，4小时突破布林上轨，但需注意RSI超买和模型验证未证实",
-    "no_trade_condition": "若小时线收盘跌破8930或4小时RSI高于70且出现顶背离，则不交易",
+    "regime": "趋势偏多，但接近压力位和超买",
+    "edge": "多周期均线多头排列，日线放量突破，情绪偏多；但短期RSI接近超买，上轨压制，追多需谨慎。",
+    "no_trade_condition": "若1小时收盘价跌破8930或日线RSI进入超买（>70）且出现看跌K线形态，则取消做多计划。",
     "long_case": {
-      "trigger": "小时线回踩8950-8960不破且出现阳线，或突破9017",
-      "entry_zone": "8950-8960",
-      "stop": "8930",
+      "trigger": "价格回踩8940-8960区间不破，且1小时RSI回撤至60附近",
+      "entry_zone": "8940-8960",
+      "stop": "8925",
       "targets": [
-        "9000",
         "9017",
-        "9030"
+        "9080"
       ],
-      "invalidation": "跌破8930",
-      "risk_reward": "1.7"
+      "invalidation": "跌破8920",
+      "risk_reward": "1.5"
     },
     "short_case": {
-      "trigger": "小时线跌破8950且4小时RSI跌回70以下，或日线收阴",
-      "entry_zone": "8950-8960",
-      "stop": "8990",
+      "trigger": "价格在9017附近受阻且1小时RSI出现顶背离，或日线RSI进入超买（>70）",
+      "entry_zone": "9000-9017",
+      "stop": "9035",
       "targets": [
-        "8870",
-        "8800"
+        "8940",
+        "8870"
       ],
-      "invalidation": "价格重新站上8990",
+      "invalidation": "突破9035",
       "risk_reward": "1.8"
     },
     "event_risks": [
-      "关注中美贸易摩擦相关新闻，若美对华加税落地可能利空豆油；但若中国增加美豆采购可能利多。"
+      "USDA报告或南美天气变化可能引发跳空",
+      "原油价格波动影响生物柴油需求",
+      "国内抛储政策风险"
     ],
     "data_limits": [
-      "1小时和4小时最新K线可能包含23:00收盘后的数据，日线数据截至8月28日，实时盘口为23:00，数据延迟较小。"
+      "realtime为连续合约，实际下单需对应Y2701",
+      "1小时和4小时数据为缓存，更新时间06:57，已超10分钟，需以实时盘口为准",
+      "模型验证状态为unproven，不构成概率保证"
     ]
   },
   "news_impact": [
-    "[利多] 光大期货8月27日农产品日报：市场关注美豆产区天气及中美贸易磋商，短期成本支撑强劲，豆油或受提振。",
-    "[利空] 中美贸易摩擦再起：美方考虑对华加税，中方已表态反制，可能影响大豆进口成本和豆油供应，需警惕市场情绪波动。",
-    "[利多] 中国大量采购美豆，支撑美豆价格，进而利好豆油成本端。",
-    "[中性] 棕榈油供给风险发酵，可能带动油脂板块整体走强，但豆油自身基本面仍需关注大豆到港和压榨量。",
-    "[利空] 国内油脂库存高位，供应宽松，限制豆油涨幅。",
-    "[中性] 市场关注8月28日大豆期货走强，可能带动豆油联动，但持续性待观察。"
+    "[利多] 光大期货8月27日农产品日报指出油脂市场减产担忧，油脂走强，提振豆油价格。",
+    "[利多] 中信建投期货8月28日早报提到棕榈油和豆油期货中性偏多，市场情绪回暖。",
+    "[利多] 大豆期货8月28日突然走强，关注关键因素，外盘大豆上涨带动国内豆油成本支撑。",
+    "[中性] 厄尔尼诺现象影响巴西大豆产量变数，但具体影响尚未明确，需跟踪天气数据。",
+    "[利空] 中国大量进口美国大豆，增加国内供应，可能压制豆油远期价格。",
+    "[中性] 国内食用油消费数据发布，但未明显改变供需格局。"
   ],
   "news_articles": [
     {
       "title": "豆粕短期成本支撑强劲 棕榈油双重供给风险发酵",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNSXBDZFZ0Q3hQM2N6clNtQ0pwdmZJclMyOTh5bUJGVzdjV2JPZGd5Wm9HM05jcHM2cXVjZUJFd3dTTlBnOVB2dGM3d1ptWndWdHZ1LVdCLTk3SVV0Zmt0LWNKbi1xSk9MQk9aWk1lUXViaFAyQi1ESmM2QzM2bHZ1UmljUTl1R2ZqeUlKdXhSVllScUdHNHZYdS1GQzNfVVl5bDJsZkE5aUlLOHc1a1lqaQ?oc=5",
-      "detail": "报道指出豆粕成本端受美豆走强支撑，棕榈油因供给风险或带动油脂整体上行。豆油作为关联品种，成本端利好但需求端仍受库存压制。",
+      "detail": "文章提到豆粕成本支撑强劲，棕榈油供给风险发酵，影响油脂板块整体情绪，豆油作为关联品种受到提振。具体数据未提及，但市场预期偏多。",
       "impact": "利多"
     },
     {
       "title": "油脂粕类：减产担忧，油脂走强",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOcHdoX3FwYUtmZmJINUFNOGN3aWc2U1FpY3BfRUJjc3pPNUk1ZHJrSURqVGJtSE91MXBYejBDS2lyVVd2azdwQW5URzV2NjNRM1UySmtfTkVzekhTXzhPZC12V182dDVRd1g0MUp3ZUxyQWV1b1A3N2h1M3pTd2lKdUdRUGhLc0JRTS1nT0tCQnZjc1dkbjJRU0ZCTUw0S0JzSlpNZDZhbU9icjhSX3ZISA?oc=5",
-      "detail": "文章提到减产担忧推动油脂走强，豆油作为主要油脂品种，供应端预期收紧提振价格，但需关注实际产需数据。",
+      "detail": "报道称减产担忧推动油脂走强，豆油作为主要油脂品种受益，市场看多情绪升温。",
       "impact": "利多"
     },
     {
       "title": "光大期货：8月27日农产品日报",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxNLXJRMzlPVXk0LXpsRHVRQ1Q2VkRDUHlLM1k1alZCTTNPSnUta2xFYkVtMlJnTV8wMlE4V3hrWFFpWUY2Q0xMdWpIRV9yX1NhNngyUDRvakpqNzVWOTMxS1A2V0s4QTJ2XzJrcDYtRktDalhVX1JUd1ROcXQ5LVk3QzR1eTFRVUt3MjJ6d0ZFMVp6c0p2M01aNy1uRmxRUFM0Wml1ZGRlaEN0WHBrUEFiR0hnSS14UDRfNXNqUzdYbWVsaG9sMHI4MTF4cF8wb2hwLXozUnhzSndTbkJLWVdQbW1JN1Q?oc=5",
-      "detail": "光大期货日报指出美豆走强及棕榈油减产担忧，豆油短期偏强，但需警惕高位风险。",
+      "detail": "光大期货农产品日报分析油脂市场，指出供应端担忧支撑价格，豆油短期偏强。",
       "impact": "利多"
     },
     {
-      "title": "中信建投期货：8月27日农产品早报|棕榈油期货|豆油期货|交易|菜籽|中性",
+      "title": "中信建投期货：8月27日农产品早报",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxONWxVVl9DZkk3bXhBc3JfR09CQ1NMeGdMbjk4ekNuUHdubDFYc2lNc3lmbVRiZ21RcEtWWHcyT2Z3ZENOZ1VVWUdOcmJsSzczQko0eEJtZUduS1lac0tVMXYycTRkQWQzNVlEYm1uanJkTEdxYTgwMldjR3VkVVhuU0xxUlJlekRON1oyaFVQcVg3NGkya0M5NVdzWFZkS3dUX3ZMMlM2bGFXSmg4X3N5Rw?oc=5",
-      "detail": "早报认为油脂板块中性，棕榈油和豆油供需博弈，短期震荡。",
+      "detail": "中信建投期货早报对豆油期货给出中性偏多评级，市场关注棕榈油和豆油联动。",
       "impact": "中性"
     },
     {
       "title": "光大期货农产品类日报8.28",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQMGFrSHZBVmQ0WV9fd21PaXA1eEdzM2EzUHNCeEp0TU9ScEN2c1hFR1d2c0NHYzNMeWpOU2dXV0Rmb1hIcUtuVXlqX2xuVUZOWmczUHBnaHNGWXkzOXl1RzNzOHNKMHlwdXN1S2M2eGtpVjdCRU1YVDRLcHREdE9xbmpXdXFkNHU5VjlQbWh2VGFTbHBoVnQxYVJweWhmdERlcEY2d3RncHJMNHBlQjJLSA?oc=5",
-      "detail": "日报分析豆油跟随美豆及棕榈油走强，但库存压力仍存，建议短线偏多操作。",
+      "detail": "光大期货日报指出豆油库存变化和需求预期，市场情绪偏乐观。",
       "impact": "利多"
     },
     {
-      "title": "中国宁向美国购买大量转基因大豆，都不从俄罗斯购买，这是为何？",
-      "source": "搜狐网",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNdlhQcHF3TjZiVkVyM190emNPX0RtZGM2ZUlLVW1KdmNISHhZOEhQYnF6M1BCVnJOTGdBWmFHa0oxd3NFRFpWUVVpcmVQQ1BOX0RtVGxvOU5WU0FheF9JTm10VEZKVlNNLUZVSGZvUmVGcV9VaVVHQkN6d3JKWlJYYnpoN3RHRVE5X0REbg?oc=5",
-      "detail": "文章分析中国增加美豆采购，可能缓解供应担忧，但中美关系不确定性仍存。",
-      "impact": "中性"
+      "title": "【财经分析】厄尔尼诺增加新季巴西大豆产量变数",
+      "source": "中国金融信息网",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5aTGJkMHZkYk1IdlJ6cjhXZjVmWExRV0Ztd2pfRlJMeVltVzF4NEdwOUdra1cwZVQydkphQ2NYUFpVZFZGYjJGaUdMNGFGSjVUSU05dUtSSnJNMDVnNFo3RWhZdWZ5d3d5SEE?oc=5",
+      "detail": "厄尔尼诺可能影响巴西大豆产量，若减产将减少全球大豆供应，支撑豆油价格，但具体影响需持续跟踪。",
+      "impact": "利多"
     },
     {
-      "title": "大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素",
+      "title": "大豆期货(SOYBEAN-F)8月28日突然走强",
       "source": "FX168财经",
       "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1VenpxQVNqQ0p4SXFuaUM2dU1VU01qN3RkME9rc1pyN2hMZ0dYOGUwOEJaUGczdC00bkVDQ1hMSUR0T0UyQ2ZjbUJSRC1tU180emxN?oc=5",
-      "detail": "大豆期货8月28日走强，因美豆出口需求及天气担忧，成本端支撑豆油。",
+      "detail": "大豆期货突然走强，可能受天气或需求预期影响，外盘上涨通过进口成本传导至国内豆油。",
       "impact": "利多"
     },
     {
-      "title": "中国吃掉4003万吨食用油！可真正离不开的，却是大豆榨剩的那八成",
-      "source": "手机网易网",
-      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE8xanB6d3FKMXgwWHRBQ2ZGQ0Q2RldETHpWQnJzR0J1U2l3U3Zha2xBaHA1MjZfekoxd0RIVjJNVnVHYXhxNTd5LUsxMUUydlR2NnRzaENvWTJVMDBBOXJacXlB?oc=5",
-      "detail": "中国食用油消费庞大，豆油需求稳定，但国内压榨量高，供应充足，限制涨幅。",
-      "impact": "中性"
+      "title": "中国宁向美国购买大量转基因大豆",
+      "source": "搜狐网",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNdlhQcHF3TjZiVkVyM190emNPX0RtZGM2ZUlLVW1KdmNISHhZOEhQYnF6M1BCVnJOTGdBWmFHa0oxd3NFRFpWUVVpcmVQQ1BOX0RtVGxvOU5WU0FheF9JTm10VEZKVlNNLUZVSGZvUmVGcV9VaVVHQkN6d3JKWlJYYnpoN3RHRVE5X0REbg?oc=5",
+      "detail": "中国大量进口美国大豆，增加国内大豆供应，压榨量或提升，豆油产出增加，可能压制豆油价格。",
+      "impact": "利空"
     }
   ],
   "watch_levels": {
-    "support": 8955.0,
+    "support": 8938.0,
     "resistance": 9017.0
   },
   "normalization_warnings": [],
-  "risk_note": "以上分析基于历史数据与市场信息，不构成投资建议。请独立决策，注意风险。",
+  "risk_note": "以上分析基于连续合约Y0，实际交易请以主力合约Y2701盘口为准，并注意换月风险。不构成投资建议。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-08-29T05:36:22+00:00",
+  "generated_at_utc": "2026-08-29T12:16:44+00:00",
   "latest_date": "2026-08-28",
   "realtime_price": 8979.0,
   "realtime_note": "盘口交易日归属标签 2026-08-31，最新盘口时间 23:00:00（不是未来行情），当前价 8979，涨跌 +0.80%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-08-29T05:35:57+00:00",
+    "fetched_at_utc": "2026-08-29T12:16:17+00:00",
     "market_trading_day": "2026-08-31",
     "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 豆粕短期成本支撑强劲 棕榈油双重供给风险发酵 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-24T12:03:36+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNSXBDZFZ0Q3hQM2N6clNtQ0pwdmZJclMyOTh5bUJGVzdjV2JPZGd5Wm9HM05jcHM2cXVjZUJFd3dTTlBnOVB2dGM3d1ptWndWdHZ1LVdCLTk3SVV0Zmt0LWNKbi1xSk9MQk9aWk1lUXViaFAyQi1ESmM2QzM2bHZ1UmljUTl1R2ZqeUlKdXhSVllScUdHNHZYdS1GQzNfVVl5bDJsZkE5aUlLOHc1a1lqaQ?oc=5\n摘要: 豆粕短期成本支撑强劲 棕榈油双重供给风险发酵 finance.sina.com.cn\n\n[2] 油脂粕类：减产担忧，油脂走强 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-24T00:53:31+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOcHdoX3FwYUtmZmJINUFNOGN3aWc2U1FpY3BfRUJjc3pPNUk1ZHJrSURqVGJtSE91MXBYejBDS2lyVVd2azdwQW5URzV2NjNRM1UySmtfTkVzekhTXzhPZC12V182dDVRd1g0MUp3ZUxyQWV1b1A3N2h1M3pTd2lKdUdRUGhLc0JRTS1nT0tCQnZjc1dkbjJRU0ZCTUw0S0JzSlpNZDZhbU9icjhSX3ZISA?oc=5\n摘要: 油脂粕类：减产担忧，油脂走强 finance.sina.com.cn\n\n[3] 光大期货：8月27日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-27T01:57:00+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxNLXJRMzlPVXk0LXpsRHVRQ1Q2VkRDUHlLM1k1alZCTTNPSnUta2xFYkVtMlJnTV8wMlE4V3hrWFFpWUY2Q0xMdWpIRV9yX1NhNngyUDRvakpqNzVWOTMxS1A2V0s4QTJ2XzJrcDYtRktDalhVX1JUd1ROcXQ5LVk3QzR1eTFRVUt3MjJ6d0ZFMVp6c0p2M01aNy1uRmxRUFM0Wml1ZGRlaEN0WHBrUEFiR0hnSS14UDRfNXNqUzdYbWVsaG9sMHI4MTF4cF8wb2hwLXozUnhzSndTbkJLWVdQbW1JN1Q?oc=5\n摘要: 光大期货：8月27日农产品日报 新浪财经\n\n[4] 中信建投期货：8月27日农产品早报|棕榈油期货|豆油期货|交易|菜籽|中性 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-28T12:54:19+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxONWxVVl9DZkk3bXhBc3JfR09CQ1NMeGdMbjk4ekNuUHdubDFYc2lNc3lmbVRiZ21RcEtWWHcyT2Z3ZENOZ1VVWUdOcmJsSzczQko0eEJtZUduS1lac0tVMXYycTRkQWQzNVlEYm1uanJkTEdxYTgwMldjR3VkVVhuU0xxUlJlekRON1oyaFVQcVg3NGkya0M5NVdzWFZkS3dUX3ZMMlM2bGFXSmg4X3N5Rw?oc=5\n摘要: 中信建投期货：8月27日农产品早报|棕榈油期货|豆油期货|交易|菜籽|中性 finance.sina.com.cn\n\n[5] 光大期货农产品类日报8.28 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-28T01:37:40+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQMGFrSHZBVmQ0WV9fd21PaXA1eEdzM2EzUHNCeEp0TU9ScEN2c1hFR1d2c0NHYzNMeWpOU2dXV0Rmb1hIcUtuVXlqX2xuVUZOWmczUHBnaHNGWXkzOXl1RzNzOHNKMHlwdXN1S2M2eGtpVjdCRU1YVDRLcHREdE9xbmpXdXFkNHU5VjlQbWh2VGFTbHBoVnQxYVJweWhmdERlcEY2d3RncHJMNHBlQjJLSA?oc=5\n摘要: 光大期货农产品类日报8.28 finance.sina.com.cn\n\n[6] 中国宁向美国购买大量转基因大豆，都不从俄罗斯购买，这是为何？ - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-08-26T06:49:29+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNdlhQcHF3TjZiVkVyM190emNPX0RtZGM2ZUlLVW1KdmNISHhZOEhQYnF6M1BCVnJOTGdBWmFHa0oxd3NFRFpWUVVpcmVQQ1BOX0RtVGxvOU5WU0FheF9JTm10VEZKVlNNLUZVSGZvUmVGcV9VaVVHQkN6d3JKWlJYYnpoN3RHRVE5X0REbg?oc=5\n摘要: 中国宁向美国购买大量转基因大豆，都不从俄罗斯购买，这是为何？ 搜狐网\n\n[7] 大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素 - FX168财经\n来源: FX168财经\n发布时间UTC: 2026-08-28T06:21:44+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1VenpxQVNqQ0p4SXFuaUM2dU1VU01qN3RkME9rc1pyN2hMZ0dYOGUwOEJaUGczdC00bkVDQ1hMSUR0T0UyQ2ZjbUJSRC1tU180emxN?oc=5\n摘要: 大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素 FX168财经\n\n[8] 中国吃掉4003万吨食用油！可真正离不开的，却是大豆榨剩的那八成 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-08-27T12:59:10+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE8xanB6d3FKMXgwWHRBQ2ZGQ0Q2RldETHpWQnJzR0J1U2l3U3Zha2xBaHA1MjZfekoxd0RIVjJNVnVHYXhxNTd5LUsxTUUydlR2NnRzaENvWTJVMDBBOXJacXlB?oc=5\n摘要: 中国吃掉4003万吨食用油！可真正离不开的，却是大豆榨剩的那八成 手机网易网\n\n[9] 中方刚下单大豆，美国就考虑对华加税，商务部已表态，反制箭在弦上！ - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-08-28T02:20:13+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxPdGdBbE43ZlR1VFJmU3F4LURJZjhwc0l1RUVRdksxa1hyTTl5cms4OXM3LV9COE8xclpDZDY0UENnTDhaUGJjTnJKeHZYVkFUZm9CQW01WGJ0NTlvQmxzVTBaYl95UVNFS29CcjdYRU9Xakd4WjY1RFQ4ajQ1ZmlRbDJkdXNPb1FhRGRMRQ?oc=5\n摘要: 中方刚下单大豆，美国就考虑对华加税，商务部已表态，反制箭在弦上！ 搜狐网\n\n[10] 中方刚下单大豆，美就考虑对华加税，商务部已表态，反制箭在弦上 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-08-27T14:17:12+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE1YRmwxdHpHOHlYSE1Zel9QcmtLcGFPNmxJUlphbG1FR3hRY2J4c21pMmFhR1VlRWU0SkJFQnRlUmZwX2habnFKOS1JaEc2czI1aEQ1UmFpVjk2XzdWMTlIdmdR?oc=5\n摘要: 中方刚下单大豆，美就考虑对华加税，商务部已表态，反制箭在弦上 手机网易网",
+  "news_summary": "[1] 豆粕短期成本支撑强劲 棕榈油双重供给风险发酵 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-24T12:03:36+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNSXBDZFZ0Q3hQM2N6clNtQ0pwdmZJclMyOTh5bUJGVzdjV2JPZGd5Wm9HM05jcHM2cXVjZUJFd3dTTlBnOVB2dGM3d1ptWndWdHZ1LVdCLTk3SVV0Zmt0LWNKbi1xSk9MQk9aWk1lUXViaFAyQi1ESmM2QzM2bHZ1UmljUTl1R2ZqeUlKdXhSVllScUdHNHZYdS1GQzNfVVl5bDJsZkE5aUlLOHc1a1lqaQ?oc=5\n摘要: 豆粕短期成本支撑强劲 棕榈油双重供给风险发酵 finance.sina.com.cn\n\n[2] 油脂粕类：减产担忧，油脂走强 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-24T00:53:31+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOcHdoX3FwYUtmZmJINUFNOGN3aWc2U1FpY3BfRUJjc3pPNUk1ZHJrSURqVGJtSE91MXBYejBDS2lyVVd2azdwQW5URzV2NjNRM1UySmtfTkVzekhTXzhPZC12V182dDVRd1g0MUp3ZUxyQWV1b1A3N2h1M3pTd2lKdUdRUGhLc0JRTS1nT0tCQnZjc1dkbjJRU0ZCTUw0S0JzSlpNZDZhbU9icjhSX3ZISA?oc=5\n摘要: 油脂粕类：减产担忧，油脂走强 finance.sina.com.cn\n\n[3] 光大期货：8月27日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-27T01:57:00+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxNLXJRMzlPVXk0LXpsRHVRQ1Q2VkRDUHlLM1k1alZCTTNPSnUta2xFYkVtMlJnTV8wMlE4V3hrWFFpWUY2Q0xMdWpIRV9yX1NhNngyUDRvakpqNzVWOTMxS1A2V0s4QTJ2XzJrcDYtRktDalhVX1JUd1ROcXQ5LVk3QzR1eTFRVUt3MjJ6d0ZFMVp6c0p2M01aNy1uRmxRUFM0Wml1ZGRlaEN0WHBrUEFiR0hnSS14UDRfNXNqUzdYbWVsaG9sMHI4MTF4cF8wb2hwLXozUnhzSndTbkJLWVdQbW1JN1Q?oc=5\n摘要: 光大期货：8月27日农产品日报 新浪财经\n\n[4] 中信建投期货：8月27日农产品早报|棕榈油期货|豆油期货|交易|菜籽|中性 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-28T12:54:19+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxONWxVVl9DZkk3bXhBc3JfR09CQ1NMeGdMbjk4ekNuUHdubDFYc2lNc3lmbVRiZ21RcEtWWHcyT2Z3ZENOZ1VVWUdOcmJsSzczQko0eEJtZUduS1lac0tVMXYycTRkQWQzNVlEYm1uanJkTEdxYTgwMldjR3VkVVhuU0xxUlJlekRON1oyaFVQcVg3NGkya0M5NVdzWFZkS3dUX3ZMMlM2bGFXSmg4X3N5Rw?oc=5\n摘要: 中信建投期货：8月27日农产品早报|棕榈油期货|豆油期货|交易|菜籽|中性 finance.sina.com.cn\n\n[5] 光大期货农产品类日报8.28 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-28T01:37:40+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQMGFrSHZBVmQ0WV9fd21PaXA1eEdzM2EzUHNCeEp0TU9ScEN2c1hFR1d2c0NHYzNMeWpOU2dXV0Rmb1hIcUtuVXlqX2xuVUZOWmczUHBnaHNGWXkzOXl1RzNzOHNKMHlwdXN1S2M2eGtpVjdCRU1YVDRLcHREdE9xbmpXdXFkNHU5VjlQbWh2VGFTbHBoVnQxYVJweWhmdERlcEY2d3RncHJMNHBlQjJLSA?oc=5\n摘要: 光大期货农产品类日报8.28 finance.sina.com.cn\n\n[6] 【财经分析】厄尔尼诺增加新季巴西大豆产量变数 中国新年度进口影响几何 - 中国金融信息网\n来源: 中国金融信息网\n发布时间UTC: 2026-08-26T07:53:00+00:00\nURL: https://news.google.com/rss/articles/CBMiakFVX3lxTE5aTGJkMHZkYk1IdlJ6cjhXZjVmWExRV0Ztd2pfRlJMeVltVzF4NEdwOUdra1cwZVQydkphQ2NYUFpVZFZGYjJGaUdMNGFGSjVUSU05dUtSSnJNMDVnNFo3RWhZdWZ5d3d5SEE?oc=5\n摘要: 【财经分析】厄尔尼诺增加新季巴西大豆产量变数 中国新年度进口影响几何 中国金融信息网\n\n[7] 【市场聚焦】厄尔尼诺与农产品简析 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-26T00:33:45+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNaWtWak1DTjlqMGEtZi1tT2JNOFRGREpuTzE4eXJGN1AzY29WREVmZGhFTnRfTWFxWUV6ZTZ5Z1lweDVQOGFuQl9DbjhSSWN4MG5RX083RFpDQzc3dlJqVXdmQWpNTXdXREV2bFdyb2NuOU1lc1RWV3dhaGpnRjU2c2lpZ3VpM0YyMlBJMDEwT1BpSVlib3FIMUc0R0VJTWxqOVZfbVdab1B3bU4weUpsWQ?oc=5\n摘要: 【市场聚焦】厄尔尼诺与农产品简析 finance.sina.com.cn\n\n[8] 中国宁向美国购买大量转基因大豆，都不从俄罗斯购买，这是为何？ - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-08-26T06:49:29+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNdlhQcHF3TjZiVkVyM190emNPX0RtZGM2ZUlLVW1KdmNISHhZOEhQYnF6M1BCVnJOTGdBWmFHa0oxd3NFRFpWUVVpcmVQQ1BOX0RtVGxvOU5WU0FheF9JTm10VEZKVlNNLUZVSGZvUmVGcV9VaVVHQkN6d3JKWlJYYnpoN3RHRVE5X0REbg?oc=5\n摘要: 中国宁向美国购买大量转基因大豆，都不从俄罗斯购买，这是为何？ 搜狐网\n\n[9] 大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素 - FX168财经\n来源: FX168财经\n发布时间UTC: 2026-08-28T06:21:44+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1VenpxQVNqQ0p4SXFuaUM2dU1VU01qN3RkME9rc1pyN2hMZ0dYOGUwOEJaUGczdC00bkVDQ1hMSUR0T0UyQ2ZjbUJSRC1tU180emxN?oc=5\n摘要: 大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素 FX168财经\n\n[10] 中国吃掉4003万吨食用油！可真正离不开的，却是大豆榨剩的那八成 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-08-27T12:59:10+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE8xanB6d3FKMXgwWHRBQ2ZGQ0Q2RldETHpWQnJzR0J1U2l3U3Zha2xBaHA1MjZfekoxd0RIVjJNVnVHYXhxNTd5LUsxTUUydlR2NnRzaENvWTJVMDBBOXJacXlB?oc=5\n摘要: 中国吃掉4003万吨食用油！可真正离不开的，却是大豆榨剩的那八成 手机网易网",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 25.5,
+  "api_latency_seconds": 26.5,
   "token_usage": {
-    "prompt_tokens": 15859,
-    "completion_tokens": 3288,
-    "total_tokens": 19147,
+    "prompt_tokens": 15885,
+    "completion_tokens": 3390,
+    "total_tokens": 19275,
     "prompt_tokens_details": {
       "cached_tokens": 1152
     },
     "prompt_cache_hit_tokens": 1152,
-    "prompt_cache_miss_tokens": 14707
+    "prompt_cache_miss_tokens": 14733
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-08-29T05:36:22+00:00",
+    "checked_at_utc": "2026-08-29T12:16:44+00:00",
     "score": 100,
     "status": "passed",
     "label": "通过",
@@ -170,7 +173,7 @@
     "facts": {
       "realtime_price": 8979.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-08-29T05:35:57+00:00",
+      "realtime_fetched_at_utc": "2026-08-29T12:16:17+00:00",
       "realtime_market_tick_time": "23:00:00",
       "daily_rsi14": 75.56,
       "one_hour_boll_position": "中轨上方",
@@ -182,16 +185,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-29T05:35:57+00:00",
+    "realtime_fetched_at_utc": "2026-08-29T12:16:17+00:00",
     "realtime_market_trading_day": "2026-08-31",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-29T00:04:48+00:00",
+    "daily_updated_at_utc": "2026-08-29T06:57:18+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-29T00:04:48+00:00",
-    "news_updated_at_utc": "2026-08-29T00:04:45+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-29T00:04:45+00:00"
+    "intraday_updated_at_utc": "2026-08-29T06:57:18+00:00",
+    "news_updated_at_utc": "2026-08-29T06:57:13+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-29T06:57:14+00:00"
   }
 }

@@ -1,132 +1,86 @@
 {
-  "summary": "截至北京时间2026-08-31 04:32:30，棕榈油连续合约P0实时价格为10232元/吨，较前一交易日结算价上涨+1.42%，盘口时间为23:00:00。当前主力合约为P2701，持仓占比59.64%，次主力P2705升水332元/吨，换月状态稳定。1小时K线突破布林上轨，4小时位于中轨上方，日线接近超买但未确认，短期偏多但需警惕回调风险。",
-  "bias": "偏多",
+  "source": "fallback-rule-analysis",
+  "model": "deepseek-v4-flash",
+  "thinking_mode": "enabled",
+  "reasoning_effort": null,
+  "status": "fallback",
+  "error": "RuntimeError: DeepSeek returned no usable output after 2 rungs (last: truncated at max_tokens (44684 chars)). Raise DEEPSEEK_MAX_OUTPUT_TOKENS or shrink the prompt.",
+  "generated_at_utc": "2026-08-30T23:14:05+00:00",
+  "latest_date": "2026-08-28",
+  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
+  "bias": "等待AI",
   "analysis": [
-    "1小时布林通道：上轨10214.43，中轨10084.25，下轨9954.07，当前价10232突破上轨，带宽0.0258较窄，显示短线强势但可能过度延伸。",
-    "4小时布林通道：上轨10261.01，中轨10063.65，下轨9866.29，当前价10232位于中轨上方但未触上轨，带宽0.0392中等，趋势动能偏多。",
-    "日线布林及均线：日线RSI 70.01接近超买，价格位于MA10(10054)和MA20(9812.6)上方，但未给出布林带具体数值，趋势仍偏多。",
-    "实时价位置：realtime.price=10232元/吨，较日线收盘10171上涨0.6%，盘口时间23:00:00，涨跌幅+1.42%，当前价位于1小时布林上轨上方，短线强势。",
-    "趋势：日线上升趋势，连续多日收阳，但RSI接近超买，且1小时突破上轨可能面临回调压力。",
-    "量能：日线成交量739049手，量比1.65，显示放量上攻；但1小时和4小时最新K线成交量仅3116手，量比0.05，因数据延迟，不足以确认突破有效性。",
-    "支撑压力：近期支撑看10084（1小时中轨）和10063（4小时中轨），压力看10246（近期高点）和10261（4小时上轨）。",
-    "多周期共振：1小时突破上轨偏多，4小时中轨上方偏多，日线上升趋势，但日线RSI接近超买，整体偏多但需警惕回调。"
+    "实时价 10232（实时行情截至 2026-08-31 23:00:00，当前价 10232，涨跌 +1.42%），最新日线收盘 10171，日涨跌 +1.25%。",
+    "MA10/MA20/MA60 分别为 10054/9813/9480。",
+    "20日区间支撑压力为 9228-10292。"
   ],
   "intraday_strategy": {
-    "bias": "偏多",
-    "entry": "10230",
-    "stop": "10180",
-    "take_profit": "10260",
-    "invalidation": "收盘价低于10180或跌破4小时中轨10063",
-    "notes": "适用于今日夜盘21:00-23:00，若价格回落至10180-10200区间企稳可轻仓做多，目标10260-10290，严格止损。"
+    "bias": "等待AI",
+    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
+    "stop": "未给出",
+    "take_profit": "未给出",
+    "invalidation": "未给出",
+    "notes": "当前为规则备用分析"
   },
   "decision_frame": {
-    "confidence": 55,
-    "regime": "上升趋势中的短期超买",
-    "edge": "1小时突破上轨，4小时和日线均偏多，但日线RSI接近超买，且模型验证被拒，优势不明显",
-    "no_trade_condition": "若首目标盈亏比低于1.5则观望；若价格未回踩确认或跌破10180则不交易",
-    "long_case": {
-      "trigger": "1小时K线收盘站上10230并保持，且成交量放大",
-      "entry_zone": "10200-10230",
-      "stop": "10180",
-      "targets": [
-        "10260",
-        "10290"
-      ],
-      "invalidation": "跌破10180",
-      "risk_reward": "1.5"
-    },
-    "short_case": {
-      "trigger": "1小时K线收盘跌破10180，或4小时出现看跌吞没",
-      "entry_zone": "10160-10180",
-      "stop": "10230",
-      "targets": [
-        "10100",
-        "10060"
-      ],
-      "invalidation": "站回10230上方",
-      "risk_reward": "1.5"
-    },
-    "event_risks": [
-      "无明确事件，关注原油价格波动和外盘棕榈油走势"
-    ],
+    "confidence": 0,
+    "regime": "数据不足",
+    "edge": "等待 DeepSeek",
+    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
+    "long_case": {},
+    "short_case": {},
+    "event_risks": [],
     "data_limits": [
-      "1小时和4小时最新K线数据延迟约1小时，可能未包含最新交易；日线数据截至2026-08-28，实时数据仅盘口时间23:00:00。"
+      "当前为备用规则分析"
     ]
   },
   "news_impact": [],
   "news_articles": [],
   "watch_levels": {
-    "support": 10084.0,
-    "resistance": 10246.0
-  },
-  "normalization_warnings": [],
-  "risk_note": "本分析仅供参考，不构成投资建议。P0为连续合约，实际交易请以具体月份合约（如P2701）为准，并二次确认软件合约信息。历史模型验证状态为rejected，历史优势未被证实。",
-  "source": "DeepSeek API",
-  "model": "deepseek-v4-flash",
-  "thinking_mode": "disabled",
-  "reasoning_effort": null,
-  "deepseek_mode": "no-thinking",
-  "status": "ok",
-  "generated_at_utc": "2026-08-30T20:32:40+00:00",
-  "latest_date": "2026-08-28",
-  "realtime_price": 10232.0,
-  "realtime_note": "实时行情截至 2026-08-31 23:00:00，当前价 10232，涨跌 +1.42%",
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-08-30T20:32:30+00:00",
-    "market_trading_day": "2026-08-31",
-    "market_tick_time": "23:00:00",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
-  },
-  "news_summary": "",
-  "symbol": "P0",
-  "instrument_name": "棕榈油",
-  "api_latency_seconds": 9.5,
-  "token_usage": {
-    "prompt_tokens": 13305,
-    "completion_tokens": 1103,
-    "total_tokens": 14408,
-    "prompt_tokens_details": {
-      "cached_tokens": 512
-    },
-    "prompt_cache_hit_tokens": 512,
-    "prompt_cache_miss_tokens": 12793
+    "support": 9228.0,
+    "resistance": 10292.0
   },
   "integrity": {
-    "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-08-30T20:32:40+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
-    "evidence_confidence": 55,
-    "issues": [],
-    "facts": {
-      "realtime_price": 10232.0,
-      "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-08-30T20:32:30+00:00",
-      "realtime_market_tick_time": "23:00:00",
-      "daily_rsi14": 70.01,
-      "one_hour_boll_position": "上轨上方",
-      "four_hour_boll_position": "中轨上方",
-      "realtime_trading_day_label": "2026-08-31",
-      "realtime_label_is_future": false
-    }
+    "version": "deterministic-integrity-v1",
+    "checked_at_utc": "2026-08-30T23:14:05+00:00",
+    "score": 0,
+    "status": "blocked",
+    "label": "规则接管",
+    "execution_allowed": false,
+    "evidence_confidence": 0,
+    "issues": [
+      {
+        "code": "ai_unavailable",
+        "severity": "high",
+        "message": "RuntimeError: DeepSeek returned no usable output after 2 rungs (last: truncated at max_tokens (44684 chars)). Raise DEEPSEEK_MAX_OUTPUT_TOKENS or shrink the prompt."
+      }
+    ],
+    "facts": {}
   },
+  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "symbol": "P0",
+  "instrument_name": "棕榈油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-30T20:32:30+00:00",
+    "realtime_fetched_at_utc": "2026-08-30T23:09:07+00:00",
     "realtime_market_trading_day": "2026-08-31",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-30T19:46:33+00:00",
+    "daily_updated_at_utc": "2026-08-30T22:06:07+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-30T19:45:54+00:00",
-    "news_updated_at_utc": "2026-08-30T19:46:33+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-30T19:45:53+00:00"
+    "intraday_updated_at_utc": "2026-08-30T22:06:07+00:00",
+    "news_updated_at_utc": "2026-08-30T22:06:05+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-30T22:06:05+00:00"
+  },
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-08-30T23:09:07+00:00",
+    "market_trading_day": "2026-08-31",
+    "market_tick_time": "23:00:00",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   }
 }

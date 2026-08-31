@@ -1,86 +1,203 @@
 {
-  "source": "fallback-rule-analysis",
-  "model": "deepseek-v4-flash",
-  "thinking_mode": "enabled",
-  "reasoning_effort": null,
-  "status": "fallback",
-  "error": "RuntimeError: DeepSeek returned no usable output after 2 rungs (last: truncated at max_tokens (44684 chars)). Raise DEEPSEEK_MAX_OUTPUT_TOKENS or shrink the prompt.",
-  "generated_at_utc": "2026-08-30T23:14:05+00:00",
-  "latest_date": "2026-08-28",
-  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
-  "bias": "等待AI",
+  "summary": "当前棕榈油P0连续合约实时价10257元/吨（盘口ticktime 2026-08-31 11:30:00，涨跌幅+1.67%），早盘强势上涨，突破1小时布林上轨，4小时位于中轨上方，日线接近超买。基本面受印尼政策及厄尔尼诺预期支撑，但短期涨幅较大，需警惕回调。策略以偏多震荡为主，建议回调做多，注意仓位管理。",
+  "bias": "偏多",
   "analysis": [
-    "实时价 10232（实时行情截至 2026-08-31 23:00:00，当前价 10232，涨跌 +1.42%），最新日线收盘 10171，日涨跌 +1.25%。",
-    "MA10/MA20/MA60 分别为 10054/9813/9480。",
-    "20日区间支撑压力为 9228-10292。"
+    "1小时布林：最新1小时K线收盘10232，布林上轨10214.43，中轨10084.25，下轨9954.07，价格突破上轨，带宽0.0258，显示短期强势但可能有回归需求。",
+    "4小时布林：最新4小时K线收盘10232，布林上轨10261.01，中轨10063.65，下轨9866.29，价格位于中轨上方，接近上轨，带宽0.0392，显示中期上行趋势。",
+    "日线布林：基于日线数据，当前价10257远高于20日均线9812.6，布林上轨约10292（20日高点），下轨约9228（20日低点），价格接近上轨，带宽扩大，显示趋势强劲但超买风险累积。",
+    "实时价位置：实时价10257位于1小时布林上轨（10214.43）上方，4小时中轨（10063.65）上方，日线ma20（9812.6）上方，整体处于强势区域。",
+    "趋势：日线RSI 70.01接近超买，但未超买；4小时RSI 68.6，1小时RSI 62.94，各周期趋势偏多，但短期动能可能减弱。",
+    "量能：实时成交量454374手，较近期均值放大，持仓量596292手增加，显示资金流入，但1小时和4小时最近K线成交量仅为3116手，可能因数据源问题，需关注后续成交量。",
+    "支撑压力：下方支撑位关注1小时中轨10084和4小时中轨10064，上方压力位关注4小时上轨10261和日线高点10292。",
+    "跨周期共振：1小时和4小时均显示多头结构，日线亦偏多，但日线接近超买，若回调，1小时可能回到中轨，需警惕多周期共振失效。"
   ],
   "intraday_strategy": {
-    "bias": "等待AI",
-    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
-    "stop": "未给出",
-    "take_profit": "未给出",
-    "invalidation": "未给出",
-    "notes": "当前为规则备用分析"
+    "bias": "偏多",
+    "entry": "10257.0",
+    "stop": "10173.0",
+    "take_profit": "10292.0",
+    "invalidation": "10100.0",
+    "notes": "以实时价10257为参考，建议在夜盘21:00开盘后，若价格回踩10200-10230附近且不破10200，可轻仓做多，止损10173（1小时近期低点），目标看至10292（日线20日高点）。若价格直接突破10276（实时高点），可追多但需谨慎。若价格跌破10100，则多头趋势破坏，止损离场。注意仓位控制，避免追高。"
   },
   "decision_frame": {
-    "confidence": 0,
-    "regime": "数据不足",
-    "edge": "等待 DeepSeek",
-    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
-    "long_case": {},
-    "short_case": {},
-    "event_risks": [],
+    "confidence": 60,
+    "regime": "多头趋势，短期可能回调",
+    "edge": "基本面印尼政策及厄尔尼诺预期支撑，技术面多周期共振偏多，但日线超买，短期追高风险大。",
+    "no_trade_condition": "若价格跌破10100或日线RSI突破75，则停止做多，观望或考虑轻仓短空。",
+    "long_case": {
+      "trigger": "价格回踩10200-10230区间企稳，或有效突破10276",
+      "entry_zone": "10200-10230",
+      "stop": "10173.0",
+      "targets": [
+        "10292.0",
+        "10350.0"
+      ],
+      "invalidation": "10100.0",
+      "risk_reward": "2.3"
+    },
+    "short_case": {
+      "trigger": "价格跌破10100，或1小时收盘跌破布林中轨10084",
+      "entry_zone": "10050-10084",
+      "stop": "10200.0",
+      "targets": [
+        "10010.0",
+        "9950.0"
+      ],
+      "invalidation": "10200.0",
+      "risk_reward": "2.1"
+    },
+    "event_risks": [
+      "印尼政策细节公布、厄尔尼诺天气变化、马来西亚现货价格波动。"
+    ],
     "data_limits": [
-      "当前为备用规则分析"
+      "日内K线数据更新至2026-08-28，非实时，可能存在延迟；连续合约映射已验证但需二次确认具体合约。"
     ]
   },
-  "news_impact": [],
-  "news_articles": [],
+  "news_impact": [
+    "[利多] 印尼作为全球最大棕榈油生产国，计划通过交易所控制定价权，可能影响出口政策，供应端预期收紧，支撑价格。",
+    "[利多] 超级厄尔尼诺天气可能影响棕榈油产量，年底降雨量决定干旱程度，市场担忧供应减少，推动价格上涨。",
+    "[中性] 马来西亚现货价格最新汇总（8月24日）未显示明显涨跌，但现货价格对期货有锚定作用，需关注后续变化。",
+    "[利多] 豆粕成本支撑强劲，棕榈油双重供给风险发酵，油脂板块整体偏强，棕榈油受带动。",
+    "[中性] 商品整体高位整理，油脂品种强弱分化，棕榈油相对强势，但宏观情绪可能影响波动。",
+    "[利空] 印尼盾贬值，可能降低印尼出口成本，增加全球供应，但影响有限。"
+  ],
+  "news_articles": [
+    {
+      "title": "产量是邻国两倍半，定价却听人家的？印尼这次不忍了，直接宣战",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE53OXBDekduNzV0LVJZTGFCdFMwX2dWcFRqVllSaUtISzVYeHpaQUJWdFNNQzZYZEhGbkIzaldsLWNDbjEwZGVOeENrSEpTY2hsbkhoR3FucWE4NGlsTEk2NFE2RDlxY3NFR1g1QXA1MG9ENlZ0Y0E?oc=5",
+      "detail": "印尼作为全球最大棕榈油生产国，产量远高于邻国，但定价权长期受制于人。印尼政府宣布采取措施争取定价权，可能影响棕榈油出口政策和市场结构，对全球棕榈油价格产生潜在影响。市场预期供应端可能收紧，对价格形成支撑。",
+      "impact": "利多"
+    },
+    {
+      "title": "印尼 2027 年强制矿产交易所上线，镍煤贸易模式将改写",
+      "source": "ChemNet News",
+      "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE84ck45ZjJBX1JBYnV1V2ZoS2UxT1BQUHFTT1hOM1hnZlhsd1ZlZjAzTEpISXZNbHlwNDFKNzV0MUdJTzM1OWhCSV9mWWFXRWIyeF81ZFIzTnZnenhGNXRJ?oc=5",
+      "detail": "印尼计划2027年强制矿产交易所上线，旨在增强资源定价权，这一举措可能延伸至棕榈油等大宗商品，改变现有贸易模式。虽然直接影响棕榈油市场尚需时间，但政策信号强化了市场对供应管控的预期，对棕榈油价格形成隐性支撑。",
+      "impact": "利多"
+    },
+    {
+      "title": "【现货】8月24日马来西亚棕榈油现货价格汇总",
+      "source": "同花顺财经",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1wYkFja3ZyTWZKaktCSzl3LUJHUWFyVndTUzNlRkNpNENnU1dMekdHZ3FpTktWSVFrVnJTUHNid21DRzNxdFhrWkFPSklEaFpNQjBWVU9VdzlZMk95aTBZQUNB?oc=5",
+      "detail": "8月24日马来西亚棕榈油现货价格汇总显示，现货价格维持震荡，未出现大幅波动。现货市场的相对平稳为期货提供参考，但期货价格已高于现货，基差走强，需关注后续现货能否跟进。",
+      "impact": "中性"
+    },
+    {
+      "title": "豆粕短期成本支撑强劲 棕榈油双重供给风险发酵",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNSXBDZFZ0Q3hQM2N6clNtQ0pwdmZJclMyOTh5bUJGVzdjV2JPZGd5Wm9HM05jcHM2cXVjZUJFd3dTTlBnOVB2dGM3d1ptWndWdHZ1LVdCLTk3SVV0Zmt0LWNKbi1xSk9MQk9aWk1lUXViaFAyQi1ESmM2QzM2bHZ1UmljUTl1R2ZqeUlKdXhSVllScUdHNHZYdS1GQzNfVVl5bDJsZkE5aUlLOHc1a1lqaQ?oc=5",
+      "detail": "豆粕短期成本支撑强劲，带动油脂板块走强，棕榈油面临双重供给风险，包括印尼政策不确定性和厄尔尼诺天气对产量的潜在影响，市场看多情绪升温，资金流入棕榈油期货。",
+      "impact": "利多"
+    },
+    {
+      "title": "油脂：2024年行情的升级？",
+      "source": "搜狐网",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOb2RvSEVtcDRheldfN3dtN1FCZldMRFdXRm0xei14cDE4OHkzc2Ftc09SNE5GU25wZHRGWjFtUXdnRE1UMjZPcHZySWM3TGp2alBoTEViNmJCdVJBV0d3U25Vdml5RWtuSmdoQXRXSmZ5dFBFVkpJbzZQTlVKN3RpbDhyMXRGT3RZTm94YQ?oc=5",
+      "detail": "文章回顾2024年油脂行情，认为当前行情可能升级，上涨幅度可能超过2024年。这反映了市场对棕榈油等油脂品种的乐观情绪，但需注意历史对比并非未来保证。",
+      "impact": "利多"
+    },
+    {
+      "title": "成本与天气题材提振 豆类油脂震荡偏强",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNWS05UkdOTTdPM3hQdTJtV25adDJBVURjTnNzZjBGTFptQ2tMUXB5Q2w4X0Z2TEpuQXU0OWphWUlKVkZFNG1RaVRlYm5wT194eGNjUXV1QmpVT19hS0ZBcG1pQzk2Z1hLeTlZc0hYRjA0ZThuMnZCYW1DV3YzZmRWRWxuOEM0TG53ckNjbnM2Q1RxZWVWUTQ0WnVMYWdOZHFIam5leFdGeVY3R3ZNOUc3Sg?oc=5",
+      "detail": "成本与天气题材共同提振豆类油脂市场，棕榈油作为主要油脂品种，受到整体偏强氛围带动，价格震荡上行。",
+      "impact": "利多"
+    },
+    {
+      "title": "油脂周报：成本与天气驱动拉涨 品种强弱分化",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTE9GaXAxSFdiZ3FMQ3FaaEhVdW5EVjVvWkN2b2JnZDc0ZmpkdU0wZC1JcVJHVWNMQlJ3UHREdnZZaDRCdkRuZUJOdHRJTDBmd1g5V3BWVUY4OHZQX2U4alR1UDFjWHpkVEhkLXNvaUNIb0F2NWNBT3FEOERhd2w5UQ?oc=5",
+      "detail": "油脂周报指出成本与天气驱动拉涨，但品种强弱分化，棕榈油相对偏强，而其他油脂可能较弱。这为棕榈油多头提供依据，但需关注分化带来的回调风险。",
+      "impact": "利多"
+    },
+    {
+      "title": "超级厄尔尼诺料影响棕油产量 棕油理事会：年底降雨量决定干旱度",
+      "source": "诗华日报",
+      "url": "https://news.google.com/rss/articles/CBMiTkFVX3lxTE5sYW9DMlUtSEJ1cV9iQzMxQU5MMFFrMWxZLWxzZGJCY0JaMWJ1QTVLNV81QW1PTFBwZzVMT2h5ZGdVSlY4UkxnY3JOTFNrdw?oc=5",
+      "detail": "棕油理事会表示超级厄尔尼诺可能影响棕油产量，年底降雨量决定干旱程度，市场担忧供应进一步收紧，推动棕榈油期货上涨。",
+      "impact": "利多"
+    },
+    {
+      "title": "Indonesian Rupiah Declines Despite High Rates and Weaker US Dollar",
+      "source": "CryptoRank",
+      "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxOQnJvX0ZFLVc5aEVGd2l3QTdaT2djbXdPcnFIZ3E3ZzhKdXMySWpVLWFjMzFPMENWUU1vMmE2UmUtcHFJNWc3WGJuR1ZIa2ZlcUhScW1Jc3VMM0hEWWszQUFKYzdZR2hraHp1VzVUV2RsYzlLX04yOEt3NHBLMWhyZW5tYW4waHlUajAzbkROcUtTdGlJOTd1dG9zZlZ2UHg0Q2ZFRjdn?oc=5",
+      "detail": "印尼盾贬值，可能降低印尼出口棕榈油的成本，增加出口量，理论上对价格不利，但市场关注焦点在政策与天气，此消息影响有限。",
+      "impact": "中性"
+    }
+  ],
   "watch_levels": {
-    "support": 9228.0,
-    "resistance": 10292.0
+    "support": 10084.0,
+    "resistance": 10261.0
   },
-  "integrity": {
-    "version": "deterministic-integrity-v1",
-    "checked_at_utc": "2026-08-30T23:14:05+00:00",
-    "score": 0,
-    "status": "blocked",
-    "label": "规则接管",
-    "execution_allowed": false,
-    "evidence_confidence": 0,
-    "issues": [
-      {
-        "code": "ai_unavailable",
-        "severity": "high",
-        "message": "RuntimeError: DeepSeek returned no usable output after 2 rungs (last: truncated at max_tokens (44684 chars)). Raise DEEPSEEK_MAX_OUTPUT_TOKENS or shrink the prompt."
-      }
-    ],
-    "facts": {}
+  "normalization_warnings": [],
+  "risk_note": "本分析基于历史数据和实时行情，不构成投资建议，市场有风险，入市需谨慎。",
+  "source": "DeepSeek API",
+  "model": "deepseek-v4-flash",
+  "thinking_mode": "disabled",
+  "reasoning_effort": null,
+  "deepseek_mode": "no-thinking",
+  "status": "ok",
+  "generated_at_utc": "2026-08-31T03:35:14+00:00",
+  "latest_date": "2026-08-28",
+  "realtime_price": 10257.0,
+  "realtime_note": "实时行情截至 2026-08-31 11:30:00，当前价 10257，涨跌 +1.67%",
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-08-31T03:34:47+00:00",
+    "market_trading_day": "2026-08-31",
+    "market_tick_time": "11:30:00",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   },
-  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "news_summary": "[1] 产量是邻国两倍半，定价却听人家的？印尼这次不忍了，直接宣战 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-27T16:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMidkFVX3lxTE53OXBDekduNzV0LVJZTGFCdFMwX2dWcFRqVllSaUtISzVYeHpaQUJWdFNNQzZYZEhGbkIzaldsLWNDbjEwZGVOeENrSEpTY2hsbkhoR3FucWE4NGlsTEk2NFE2RDlxY3NFR1g1QXA1MG9ENlZ0Y0E?oc=5\n摘要: 产量是邻国两倍半，定价却听人家的？印尼这次不忍了，直接宣战 finance.sina.com.cn\n\n[2] 印尼 2027 年强制矿产交易所上线，镍煤贸易模式将改写 - ChemNet News\n来源: ChemNet News\n发布时间UTC: 2026-08-26T01:37:57+00:00\nURL: https://news.google.com/rss/articles/CBMiX0FVX3lxTE84ck45ZjJBX1JBYnV1V2ZoS2UxT1BQUHFTT1hOM1hnZlhsd1ZlZjAzTEpISXZNbHlwNDFKNzV0MUdJTzM1OWhCSV9mWWFXRWIyeF81ZFIzTnZnenhGNXRJ?oc=5\n摘要: 印尼 2027 年强制矿产交易所上线，镍煤贸易模式将改写 ChemNet News\n\n[3] 【现货】8月24日马来西亚棕榈油现货价格汇总 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-08-25T03:41:44+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE1wYkFja3ZyTWZKaktCSzl3LUJHUWFyVndTUzNlRkNpNENnU1dMekdHZ3FpTktWSVFrVnJTUHNid21DRzNxdFhrWkFPSklEaFpNQjBWVU9VdzlZMk95aTBZQUNB?oc=5\n摘要: 【现货】8月24日马来西亚棕榈油现货价格汇总 同花顺财经\n\n[4] 豆粕短期成本支撑强劲 棕榈油双重供给风险发酵 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-24T12:03:36+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNSXBDZFZ0Q3hQM2N6clNtQ0pwdmZJclMyOTh5bUJGVzdjV2JPZGd5Wm9HM05jcHM2cXVjZUJFd3dTTlBnOVB2dGM3d1ptWndWdHZ1LVdCLTk3SVV0Zmt0LWNKbi1xSk9MQk9aWk1lUXViaFAyQi1ESmM2QzM2bHZ1UmljUTl1R2ZqeUlKdXhSVllScUdHNHZYdS1GQzNfVVl5bDJsZkE5aUlLOHc1a1lqaQ?oc=5\n摘要: 豆粕短期成本支撑强劲 棕榈油双重供给风险发酵 finance.sina.com.cn\n\n[5] 油脂：2024年行情的升级？ - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-08-25T09:23:04+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxOb2RvSEVtcDRheldfN3dtN1FCZldMRFdXRm0xei14cDE4OHkzc2Ftc09SNE5GU25wZHRGWjFtUXdnRE1UMjZPcHZySWM3TGp2alBoTEViNm1CdVJBV0d3U25Vdml5RWtuSmdoQXRXSmZ5dFBFVkpJbzZQTlVKN3RpbDhyMXRGT3RZTm94YQ?oc=5\n摘要: 油脂：2024年行情的升级？ 搜狐网\n\n[6] 商品整体高位整理——2026年8月24日申银万国期货每日收盘评论 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-08-24T15:13:21+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE9uYkYzY1JVUzJjTklLd2dCQ1VKVU9MVHVVcFBNVlFhdHVQZmJ3dFNHa1F3SFk1ZVZhdzNkZmRYLXRmNEhkREhUYlp6TDBRRnQ4cVM5eGRvOHlEVVhMUGc?oc=5\n摘要: 商品整体高位整理——2026年8月24日申银万国期货每日收盘评论 同花顺财经\n\n[7] 成本与天气题材提振 豆类油脂震荡偏强 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-27T01:55:37+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNWS05UkdOTTdPM3hQdTJtV25adDJBVURjTnNzZjBGTFptQ2tMUXB5Q2w4X0Z2TEpuQXU0OWphWUlKVkZFNG1RaVRlYm5wT194eGNjUXV1QmpVT19hS0ZBcG1pQzk2Z1hLeTlZc0hYRjA0ZThuMnZCYW1DV3YzZmRWRWxuOEM0TG53ckNjbnM2Q1RxZWVWUTQ0WnVMYWdOZHFIam5leFdGeVY3R3ZNOUc3Sg?oc=5\n摘要: 成本与天气题材提振 豆类油脂震荡偏强 finance.sina.com.cn\n\n[8] 油脂周报：成本与天气驱动拉涨 品种强弱分化 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-08-24T02:09:17+00:00\nURL: https://news.google.com/rss/articles/CBMifkFVX3lxTE9GaXAxSFdiZ3FMQ3FaaEhVdW5EVjVvWkN2b2JnZDc0ZmpkdU0wZC1JcVJHVWNMQlJ3UHREdnZZaDRCdkRuZUJOdHRJTDBmd1g5V3BWVUY4OHZQX2U4alR1UDFjWHpkVEhkLXNvaUNIb0F2NWNBT3FEOERhd2w5UQ?oc=5\n摘要: 油脂周报：成本与天气驱动拉涨 品种强弱分化 finance.sina.com.cn\n\n[9] 超级厄尔尼诺料影响棕油产量 棕油理事会：年底降雨量决定干旱度 - 诗华日报\n来源: 诗华日报\n发布时间UTC: 2026-08-25T02:37:28+00:00\nURL: https://news.google.com/rss/articles/CBMiTkFVX3lxTE5sYW9DMlUtSEJ1cV9iQzMxQU5MMFFrMWxZLWxzZGJCY0JaMWJ1QTVLNV81QW1PTFBwZzVMT2h5ZGdVSlY4UkxnY3JOTFNrdw?oc=5\n摘要: 超级厄尔尼诺料影响棕油产量 棕油理事会：年底降雨量决定干旱度 诗华日报\n\n[10] Indonesian Rupiah Declines Despite High Rates and Weaker US Dollar - CryptoRank\n来源: CryptoRank\n发布时间UTC: 2026-08-24T10:12:01+00:00\nURL: https://news.google.com/rss/articles/CBMipgFBVV95cUxOQnJvX0ZFLVc5aEVGd2l3QTdaT2djbXdPcnFIZ3E3ZzhKdXMySWpVLWFjMzFPMENWUU1vMmE2UmUtcHFJNWc3WGJuR1ZIa2ZlcUhScW1Jc3VMM0hEWWszQUFKYzdZR2hraHp1VzVUV2RsYzlLX04yOEt3NHBLMWhyZW5tYW4waHlUajAzbkROcUtTdGlJOTd1dG9zZlZ2UHg0Q2ZFRjdn?oc=5\n摘要: Indonesian Rupiah Declines Despite High Rates and Weaker US Dollar CryptoRank",
   "symbol": "P0",
   "instrument_name": "棕榈油",
+  "api_latency_seconds": 27.0,
+  "token_usage": {
+    "prompt_tokens": 15614,
+    "completion_tokens": 3537,
+    "total_tokens": 19151,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "prompt_cache_hit_tokens": 512,
+    "prompt_cache_miss_tokens": 15102
+  },
+  "integrity": {
+    "version": "deterministic-integrity-v2",
+    "checked_at_utc": "2026-08-31T03:35:14+00:00",
+    "score": 100,
+    "status": "passed",
+    "label": "通过",
+    "execution_allowed": true,
+    "evidence_confidence": 60,
+    "issues": [],
+    "facts": {
+      "realtime_price": 10257.0,
+      "realtime_fetch_status": "live",
+      "realtime_fetched_at_utc": "2026-08-31T03:34:47+00:00",
+      "realtime_market_tick_time": "11:30:00",
+      "daily_rsi14": 70.01,
+      "one_hour_boll_position": "上轨上方",
+      "four_hour_boll_position": "中轨上方",
+      "realtime_trading_day_label": "2026-08-31",
+      "realtime_label_is_future": false
+    }
+  },
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-08-30T23:09:07+00:00",
+    "realtime_fetched_at_utc": "2026-08-31T03:34:47+00:00",
     "realtime_market_trading_day": "2026-08-31",
-    "realtime_market_tick_time": "23:00:00",
+    "realtime_market_tick_time": "11:30:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-30T22:06:07+00:00",
+    "daily_updated_at_utc": "2026-08-31T00:26:16+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-30T22:06:07+00:00",
-    "news_updated_at_utc": "2026-08-30T22:06:05+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-30T22:06:05+00:00"
-  },
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-08-30T23:09:07+00:00",
-    "market_trading_day": "2026-08-31",
-    "market_tick_time": "23:00:00",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
+    "intraday_updated_at_utc": "2026-08-31T00:26:16+00:00",
+    "news_updated_at_utc": "2026-08-31T00:26:13+00:00",
+    "contract_bridge_updated_at_utc": "2026-08-31T00:26:14+00:00"
   }
 }

@@ -1,178 +1,158 @@
 {
-  "summary": "当前豆油连续合约Y0（映射主力Y2701）实时价8988元/吨（ticktime 23:00:00，涨跌-0.28%），处于1小时布林中轨上方、4小时和日线布林上轨附近。日线RSI 78.32接近超买但未超买，短期有回调压力，但中长期趋势仍偏多。策略上建议夜盘短线观望或轻仓试空，严格止损。",
-  "bias": "震荡偏多",
+  "summary": "豆油Y0连续合约今日（2026-09-01）收于9098，涨跌幅+0.94%，主力合约为Y2701。当前价格运行在1小时、2小时、4小时布林带中轨上方，4小时已突破上轨，短期趋势偏强但超买迹象明显。日线RSI接近超买，需警惕回调风险。建议短期观望或轻仓做多，严格止损。",
+  "bias": "偏多",
   "analysis": [
-    "1小时布林：价格8988位于中轨8928上方，接近上轨9109.55，带宽0.0407显示波动中等。当前价从上轨回落，短期有向中轨回归的可能。",
-    "4小时布林：价格8988紧贴上轨9043.04，带宽0.0467，显示趋势强劲但超买。价格连续多根K线沿上轨运行，存在回调需求。",
-    "日线布林：价格9045（最新日线收盘）接近BOLL上轨（推测约9100），日线RSI 78.32接近超买但未超买，趋势偏多但需警惕高位回落风险。",
-    "实时价位置：实时价8988较日线收盘9045低0.63%，较4小时收盘8988持平，处于4小时布林上轨下方，短线支撑看4小时中轨8836.6。",
-    "趋势：1小时EMA20斜率0.0063上行，4小时EMA20斜率0.0119上行，日线MA10/20/60多头排列，整体趋势偏多，但短期动能减弱。",
-    "量能：日线成交量389306，量比1.34；夜盘实时成交量146120，1小时量比0.78显示缩量，追涨意愿不足，回调风险上升。",
-    "支撑压力：下方支撑看1小时中轨8928和4小时中轨8836.6，上方压力看日线高点9076和1小时布林上轨9109.55。",
-    "持仓变化：主力合约持仓789210，较日间增加，但夜盘1小时持仓减少5206手，显示部分多头离场，警惕回调。"
+    "1小时布林带：上轨9158.37，中轨8970.55，下轨8782.73，当前价9098位于中轨上方，接近上轨。带宽0.0419，较前几日略有收窄，但价格强势推升，短期动量充足。",
+    "4小时布林带：上轨9112.87，中轨8863.95，下轨8615.03，当前价已突破上轨，带宽0.0562，扩张中，显示趋势加速。RSI为80.34超买，短期回调压力增加。",
+    "日线布林带：未直接给出，但根据价格数据计算，上轨约9111，中轨约8743，下轨约8375。当前价9098接近上轨，日线RSI 78.32接近超买，趋势强劲但需注意高位波动。",
+    "实时价位置：realtime.price=9098，ticktime=15:05:02，最新价高于日线收盘价9045，处于日内高位。价格在4小时布林上轨之上，显示强势突破，但追高风险较大。",
+    "趋势：1小时、4小时均呈上升趋势，ADX均大于25，趋势强度较高。日线连续阳线，均线多头排列（MA10>MA20>MA60），长期趋势向上。",
+    "量能：今日成交量459934手，高于20日均量，量比1.34，放量上涨。持仓量805280手，较昨日增加，多头增仓明显，但需注意高位放量可能引发获利回吐。",
+    "支撑压力：下方支撑位关注1小时布林中轨8970和4小时布林中轨8864，上方压力位看前期高点9164及整数关口9200。若突破9164，上行空间打开。",
+    "多周期共振：1小时、4小时均看多，日线趋势偏多，但4小时RSI超买，短期回调风险与趋势并存，建议等待回调后做多或轻仓跟进。"
   ],
   "intraday_strategy": {
-    "bias": "偏空",
-    "entry": "8990",
-    "stop": "9020",
-    "take_profit": "8930",
-    "invalidation": "价格突破9020并站稳，或4小时收盘价高于9040",
-    "notes": "适用于今晚夜盘21:00-23:00，若开盘后价格反弹至8990-9000区间可轻仓试空，止损9020，目标8930。若市场消息面利多，则放弃该策略。"
+    "bias": "偏多",
+    "entry": "回调至9050-9060区间，且1小时布林带不破，可轻仓做多",
+    "stop": "9000",
+    "take_profit": "9160",
+    "invalidation": "收盘跌破9000或1小时布林带下轨",
+    "notes": "适用于今晚夜盘21:00后，若价格回调至支撑区域企稳，可尝试做多；若直接冲高至9160上方，不宜追多，等待回踩。"
   },
   "decision_frame": {
-    "confidence": 55,
-    "regime": "趋势偏多但短期回调风险",
-    "edge": "日线趋势偏多，但短期超买和量能背离提供回调交易机会",
-    "no_trade_condition": "若实时价突破9020或跌破8928且未出现止跌信号，则不入场",
+    "confidence": 65,
+    "regime": "趋势偏强，短期超买",
+    "edge": "多周期趋势向上，量能配合，但超买限制追涨空间",
+    "no_trade_condition": "若首目标盈亏比小于1.5或价格未能站稳9050，则不建议交易",
     "long_case": {
-      "trigger": "价格回踩4小时中轨8836附近企稳，且1小时KDJ金叉",
-      "entry_zone": "8840",
-      "stop": "8790",
+      "trigger": "价格回调至9050-9060且出现企稳信号（如1小时收阳）",
+      "entry_zone": "9050-9060",
+      "stop": "9000",
       "targets": [
-        "8920",
-        "8980"
+        "9160, 9200"
       ],
-      "invalidation": "跌破8790",
-      "risk_reward": "1.6"
+      "invalidation": "跌破9000",
+      "risk_reward": "1.8"
     },
     "short_case": {
-      "trigger": "价格反弹至8990-9000区间受阻，且1小时RSI低于50",
-      "entry_zone": "8995",
-      "stop": "9035",
+      "trigger": "若价格快速冲高至9160上方后回落，或RSI出现背离",
+      "entry_zone": "9160-9180",
+      "stop": "9200",
       "targets": [
-        "8930",
-        "8880"
+        "9080"
       ],
-      "invalidation": "突破9035",
-      "risk_reward": "1.6"
+      "invalidation": "突破9200",
+      "risk_reward": "2.0"
     },
     "event_risks": [
-      "中美贸易摩擦、大豆产区天气、相关报告发布"
+      "近期无重大报告，但需关注美国产区天气和国内油脂库存变化"
     ],
     "data_limits": [
-      "实时数据为Y0连续合约，实际下单需以主力Y2701为准；模型验证状态未证实，历史优势不保证未来表现。"
+      "小时线数据源更新至14:15，日线至8月31日，实时数据为15:05:02，但分析时刻为16:17，存在延迟；连续合约与主力合约价格一致，但下单仍需确认合约月份"
     ]
   },
   "news_impact": [
-    "[利多] 华泰期货指出多重因素共振，豆粕价格偏强运行，作为油脂油料板块的一部分，豆油可能受到情绪提振，支撑价格。",
-    "[利空] 中美贸易摩擦升级，中方刚下单大豆，美方考虑加税，可能影响大豆进口成本和供应预期，增加市场不确定性，短期可能压制豆油价格。",
-    "[中性] 厄尔尼诺现象增加巴西大豆产量变数，对全球大豆供应影响不明，需关注实际天气数据。",
-    "[利多] 美豆期价高涨，国内大豆价格难以独善其身，进口成本上升可能传导至豆油，支撑价格。",
-    "[中性] 强厄尔尼诺来袭，粮食行业景气周期可能开启，但传导至豆油短期影响有限。",
-    "[利空] 国内新年度大豆进口量可能增加，远期供应压力或抑制豆油上涨空间。",
-    "[利多] 光大期货农产品日报显示豆油现货偏强，可能对期货价格形成支撑。",
-    "[中性] 市场关注8月28日大豆期货突然走强，需观察后续持续性，可能影响豆油情绪。"
+    "USDA报告：美国大豆产量预期调整可能影响全球豆油价格，若产量上调则利空，下调则利多。当前市场预期中性，等待实际报告。",
+    "南美天气：巴西和阿根廷大豆产区天气状况，若干旱则利多豆油，若正常则中性。近期天气正常，影响有限。",
+    "国内豆油库存：库存高位压制价格，若库存下降则利多。据最新数据，库存仍偏高，短期压力仍在。",
+    "中美贸易关系：若贸易摩擦升级，影响大豆进口，利多豆油；若缓和则利空。当前关系稳定，中性。"
   ],
   "news_articles": [
     {
-      "title": "华泰期货：多重因素共振，豆粕价格偏强运行",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxOX0M3WF91cTlPQkM5eWNQejRQUkNsU2dDdnl4X0RTR1F1S04wSGFjVTVRQVV4amFLQktqNHc2NVpBcGxvUU1tdG1vSjZra3B6THd5Um9FM3dFYTBMZlVCVHZBY0hIS2l3MGVidlhzUWhvaWdWNHBmRXhXa1c3OHJmd1pyU3BmbzNLZ1NrR1lNYVVacXJNZkZXeGc2dnpGdkNQWVUwSHllaGRXZFBRUFdManB3ckdlRGNhamx5XzFyZHY0Sjl5SjZOUGIyNGpmSUx3V0xiM0tiRWJmc2Y1SXR5a2dmSFE?oc=5",
-      "detail": "华泰期货近期报告指出，多重因素共振下豆粕价格偏强运行，包括供应端天气扰动和中美贸易形势等。豆粕作为豆油加工副产品，其走强可能带动豆油市场情绪，对豆油价格形成间接支撑。但报告主要针对豆粕，豆油自身供需仍需关注库存和消费数据。",
-      "impact": "利多"
-    },
-    {
-      "title": "大豆 美豆期价高涨，国内豆价能独善其身吗？",
-      "source": "搜狐",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQMk9YWC0yYzczNTFwYVBkbzhHVmJIM3ZSdkVRVElGV2Y5Rkx3eGJWSFI3Nl9RMzhTSkRNemo2SFRncGJPLUpfZXdfTWp2MUV6aTZnRGJGSWVSclhwcktjMnBlYjVUek15cy1nQUs2R0NWcTdiLTRyOWk5dEpCa3lpX3pORDgwTldEYXVpXw?oc=5",
-      "detail": "文章讨论美豆期价高涨对国内外大豆价格的影响，分析进口大豆成本上升可能传导至国内豆油。当前美豆受天气和贸易因素推动走高，国内豆油价格同步受到成本支撑，但国内供应充足可能限制涨幅。",
-      "impact": "利多"
-    },
-    {
-      "title": "大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素",
-      "source": "FX168财经",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1VenpxQVNqQ0p4SXFuaUM2dU1VU01qN3RkME9rc1pyN2hMZ0dYOGUwOEJaUGczdC00bkVDQ1hMSUR0T0UyQ2ZjbUJSRC1tU180emxN?oc=5",
-      "detail": "FX168报道大豆期货8月28日突然走强，关键因素包括美豆产区天气、出口需求以及中美贸易进展。大豆走强带动国内豆油等品种上涨，但需警惕短期冲高回落风险。",
-      "impact": "利多"
-    },
-    {
-      "title": "中方刚下单大豆，美就考虑对华加税，商务部已表态，反制箭在弦上",
-      "source": "手机网易网",
-      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5uLWJTejZ2b0pja3JZbXgwcDY1dXoxQXU4TUk5X2ZabnFIdWNvdGZrQ1BtQ21WWXJiTVpjWUU1c0pWUi1YX2MwSWJiQ2xwZ1gxM0lGZ1ZoMUw4dVlDcnVwOVBR?oc=5",
-      "detail": "报道称中方刚下单大豆，美国就考虑对华加税，商务部已表态将反制。中美贸易紧张升级可能影响大豆进口量和关税成本，增加豆油市场不确定性，短期可能压制价格。",
-      "impact": "利空"
-    },
-    {
-      "title": "中方刚下单大豆，美国就考虑对华加税，商务部已表态，反制箭在弦上！",
-      "source": "搜狐",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPdGdBbE43ZlR1VFJmU3F4LURJZjhwc0l1RUVRdksxa1hyTTl5cms4OXM3LV9COE8xclpDZDY0UENnTDhaUGJjTnJKeHZYVkFUZm9CQW01WGJ0NTlvQmxzVTBaYl95UVNFS29CcjdYRU9Xakd4WjY1RFQ4ajQ1ZmlRbDJkdXNPb1FhRGRMRQ?oc=5",
-      "detail": "搜狐文章同样报道中美贸易摩擦升级，中方已采购大豆但美方考虑加税，可能引发反制措施，影响大豆进口。贸易不确定性加大，豆油价格波动风险上升。",
-      "impact": "利空"
-    },
-    {
-      "title": "【财经分析】厄尔尼诺增加新季巴西大豆产量变数 中国新年度进口影响几何",
-      "source": "经济观察网",
-      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE45TmtpQm5RSldWclNHWDZ2LUhUME9QS2ItLTZkb2ZLRWV3OXY4ekRpY3ZVRVFSNExCTVRfVDNYVFZLSnNkU0FNamdBSXNiSVR0Wng4VkhkWnY?oc=5",
-      "detail": "分析厄尔尼诺对新季巴西大豆产量的影响，可能改变全球大豆供应预期。中国进口需求变化将影响豆油成本，但具体影响需观察天气发展。",
+      "title": "Soybean - Wikipedia",
+      "source": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Soybean",
+      "detail": "大豆（Glycine max）是东亚原产的一年生豆科植物，广泛种植用于可食用豆类。文章介绍大豆的基本特征、种植历史及经济重要性。",
       "impact": "中性"
     },
     {
-      "title": "【市场聚焦】厄尔尼诺与农产品简析",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNaWtWak1DTjlqMGEtZi1tT2JNOFRGREpuTzE4eXJGN1AzY29WREVmZGhFTnRfTWFxWUV6ZTZ5Z1lweDVQOGFuQl9DbjhSSWN4MG5RX083RFpDQzc3dlJqVXdmQWpNTXdXREV2bFdyb2NuOU1lc1RWV3dhaGpnRjU2c2lpZ3VpM0YyMlBJMDEwT1BpSVlib3FIMUc0R0VJTWxqOVZfbVdab1B3bU4weUpsWQ?oc=5",
-      "detail": "文章简析厄尔尼诺对农产品的影响，包括大豆、豆油等。天气异常可能导致供应减少，支撑价格，但需看实际影响。",
-      "impact": "利多"
+      "title": "Soybeans: Nutrition, 20 Benefits, Side Effects & How to Eat Them",
+      "source": "myhealthopedia.com",
+      "url": "https://myhealthopedia.com/soybeans-nutrition-benefits-side-effects-uses/",
+      "detail": "大豆营养丰富，富含蛋白质、维生素、矿物质和异黄酮。文章列举大豆的健康益处、副作用及食用方法。",
+      "impact": "中性"
     },
     {
-      "title": "强厄尔尼诺来袭，粮食行业的景气周期刚刚开始？",
-      "source": "财闻网",
-      "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBsTWYzbV83d21seVNJZFU5SW1mR0kxMEgyWFhCQUMwN21PWVZZOU9xd1FqOTZrUXdxX3E2Q1dTRnNlVGtYWW1tcjFSODNkRlRLNWlsTnQ3dG9fWWFr?oc=5",
-      "detail": "强厄尔尼诺可能影响全球粮食生产，粮食行业景气周期或开启，豆油作为农产品可能受益，但短期影响有限。",
+      "title": "Soybean | Description, Cultivation, Products, & Facts | Britannica",
+      "source": "Britannica",
+      "url": "https://www.britannica.com/plant/soybean",
+      "detail": "大豆是豆科一年生植物，其可食用种子经济价值高。文章介绍大豆的种植、产品及全球重要性。",
+      "impact": "中性"
+    },
+    {
+      "title": "Soybeans 101: Nutrition Facts and Health Benefits",
+      "source": "Healthline",
+      "url": "https://www.healthline.com/nutrition/soybeans",
+      "detail": "大豆是亚洲和美国流行的食用豆科植物。文章详细说明大豆的营养成分和健康益处，包括蛋白质和异黄酮。",
+      "impact": "中性"
+    },
+    {
+      "title": "Soya Beans (Soybean) - Nutrition Facts, Health Benefits and Recipes",
+      "source": "onlyfoods.net",
+      "url": "https://www.onlyfoods.net/soya-beans.html",
+      "detail": "美国是全球最大的大豆生产国和出口国，占全球约75%。文章提供大豆营养信息和食谱。",
+      "impact": "中性"
+    },
+    {
+      "title": "USDA",
+      "source": "USDA",
+      "url": "https://www.usda.gov/",
+      "detail": "USDA提供各种补助、贷款和其他财政援助，包括疫情救济给农民、牧场主和农业生产者。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
-    "support": 8928.0,
-    "resistance": 9076.0
+    "support": 8970.0,
+    "resistance": 9164.0
   },
   "normalization_warnings": [],
-  "risk_note": "以上分析不构成投资建议。连续合约Y0与实际可交易合约存在差异，交易时请以Y2701等具体月份合约实时价格为准，并注意交易所规则和市场风险。",
+  "risk_note": "本分析仅基于历史数据和技术指标，不构成投资建议。期货交易风险高，请结合自身风险承受能力谨慎决策。连续合约不可直接下单，交易前请核实具体月份合约。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-09-01T00:22:56+00:00",
+  "generated_at_utc": "2026-09-01T08:17:31+00:00",
   "latest_date": "2026-08-31",
-  "realtime_price": 8988.0,
-  "realtime_note": "实时行情截至 2026-09-01 23:00:00，当前价 8988，涨跌 -0.28%",
+  "realtime_price": 9098.0,
+  "realtime_note": "实时行情截至 2026-09-01 15:05:02，当前价 9098，涨跌 +0.94%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-09-01T00:22:30+00:00",
+    "fetched_at_utc": "2026-09-01T08:17:16+00:00",
     "market_trading_day": "2026-09-01",
-    "market_tick_time": "23:00:00",
+    "market_tick_time": "15:05:02",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 华泰期货：多重因素共振，豆粕价格偏强运行 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-31T02:12:00+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxOX0M3WF91cTlPQkM5eWNQejRQUkNsU2dDdnl4X0RTR1F1S04wSGFjVTVRQVV4amFLQktqNHc2NVpBcGxvUU1tdG1vSjZra3B6THd5Um9FM3dFYTBMZlVCVHZBY0hIS2l3MGVidlhzUWhvaWdWNHBmRXhXa1c3OHJmd1pyU3BmbzNLZ1NrR1lNYVVacXJNZkZXeGc2dnpGdkNQWVUwSHllaGRXZFBRUFdManB3ckdlRGNhamx5XzFyZHY0Sjl5SjZOUGIyNGpmSUx3V0xiM0tiRWJmc2Y1SXR5a2dmSFE?oc=5\n摘要: 华泰期货：多重因素共振，豆粕价格偏强运行 新浪财经\n\n[2] 大豆 美豆期价高涨，国内豆价能独善其身吗？ - Sohu\n来源: Sohu\n发布时间UTC: 2026-08-31T02:07:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQMk9YWC0yYzczNTFwYVBkbzhHVmJIM3ZSdkVRVElGV2Y5Rkx3eGJWSFI3Nl9RMzhTSkRNemo2SFRncGJPLUpfZXdfTWp2MUV6aTZnRGJGSWVSclhwcktjMnBlYjVUek15cy1nQUs2R0NWcTdiLTRyOWk5dEpCa3lpX3pORDgwTldEYXVpXw?oc=5\n摘要: 大豆 美豆期价高涨，国内豆价能独善其身吗？ Sohu\n\n[3] 大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素 - FX168财经\n来源: FX168财经\n发布时间UTC: 2026-08-28T06:21:44+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1VenpxQVNqQ0p4SXFuaUM2dU1VU01qN3RkME9rc1pyN2hMZ0dYOGUwOEJaUGczdC00bkVDQ1hMSUR0T0UyQ2ZjbUJSRC1tU180emxN?oc=5\n摘要: 大豆期货(SOYBEAN-F)8月28日突然走强：关注这些关键因素 FX168财经\n\n[4] 中方刚下单大豆，美就考虑对华加税，商务部已表态，反制箭在弦上 - 手机网易网\n来源: 手机网易网\n发布时间UTC: 2026-08-27T14:17:12+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTE5uLWJTejZ2b0pja3JZbXgwcDY1dXoxQXU4TUk5X2ZabnFIdWNvdGZrQ1BtQ21WWXJiTVpjWUU1c0pWUi1YX2MwSWJiQ2xwZ1gxM0lGZ1ZoMUw4dVlDcnVwOVBR?oc=5\n摘要: 中方刚下单大豆，美就考虑对华加税，商务部已表态，反制箭在弦上 手机网易网\n\n[5] 中方刚下单大豆，美国就考虑对华加税，商务部已表态，反制箭在弦上！ - Sohu\n来源: Sohu\n发布时间UTC: 2026-08-28T02:20:13+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxPdGdBbE43ZlR1VFJmU3F4LURJZjhwc0l1RUVRdksxa1hyTTl5cms4OXM3LV9COE8xclpDZDY0UENnTDhaUGJjTnJKeHZYVkFUZm9CQW01WGJ0NTlvQmxzVTBaYl95UVNFS29CcjdYRU9Xakd4WjY1RFQ4ajQ1ZmlRbDJkdXNPb1FhRGRMRQ?oc=5\n摘要: 中方刚下单大豆，美国就考虑对华加税，商务部已表态，反制箭在弦上！ Sohu\n\n[6] 【财经分析】厄尔尼诺增加新季巴西大豆产量变数 中国新年度进口影响几何 - eeo.com.cn\n来源: eeo.com.cn\n发布时间UTC: 2026-08-26T09:16:31+00:00\nURL: https://news.google.com/rss/articles/CBMiWEFVX3lxTE45TmtpQm5RSldWclNHWDZ2LUhUME9QS2ItLTZkb2ZLRWV3OXY4ekRpY3ZVRVFSNExCTVRfVDNYVFZLSnNkU0FNamdBSXNiSVR0Wng4VkhkWnY?oc=5\n摘要: 【财经分析】厄尔尼诺增加新季巴西大豆产量变数 中国新年度进口影响几何 eeo.com.cn\n\n[7] 【市场聚焦】厄尔尼诺与农产品简析 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-26T00:33:45+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNaWtWak1DTjlqMGEtZi1tT2JNOFRGREpuTzE4eXJGN1AzY29WREVmZGhFTnRfTWFxWUV6ZTZ5Z1lweDVQOGFuQl9DbjhSSWN4MG5RX083RFpDQzc3dlJqVXdmQWpNTXdXREV2bFdyb2NuOU1lc1RWV3dhaGpnRjU2c2lpZ3VpM0YyMlBJMDEwT1BpSVlib3FIMUc0R0VJTWxqOVZfbVdab1B3bU4weUpsWQ?oc=5\n摘要: 【市场聚焦】厄尔尼诺与农产品简析 新浪财经\n\n[8] 强厄尔尼诺来袭，粮食行业的景气周期刚刚开始？ - caiwennews.com\n来源: caiwennews.com\n发布时间UTC: 2026-08-25T06:34:07+00:00\nURL: https://news.google.com/rss/articles/CBMiXEFVX3lxTFBsTWYzbV83d21seVNJZFU5SW1mR0kxMEgyWFhCQUMwN21PWVZZOU9xd1FqOTZrUXdxX3E2Q1dTRnNlVGtYWW1tcjFSODNkRlRLNWlsTnQ3dG9fWWFr?oc=5\n摘要: 强厄尔尼诺来袭，粮食行业的景气周期刚刚开始？ caiwennews.com\n\n[9] 光大期货：8月27日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-27T01:57:00+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxQZVBxTzh4U05qYi1mell5WHZudTZyd0p0d1BRUzlQT092eF8xRFhKQ2YwRnRXZE4zNXpUaDZnSXZCQUhWTklVR1dSQUZaV09TX09tUmVWa0FzNXlkNGdwTDBqNXNjMGM1SF9oX1lxX2h2eUJMTUtBZTdBMmxoZERLTVBXem95Y0UyWV9QY3RjUlZGQ1ZUSjZjQk5ac0JieGFZVkt6N1ZyVHdjeWQ3MDl1LTBPWUZHbW1RbXRVQTdKRjNVLVFwV3N5dll2MjhTYVI4OG5tanFHc1BzOXpqUWFnbG4tX0g?oc=5\n摘要: 光大期货：8月27日农产品日报 新浪财经\n\n[10] 光大期货：8月25日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-08-25T17:48:45+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOc1Z5SWdlY3V0Z1BoQ1NqOU1lNDh6eGpQaTBxbU1jdTAxTEZUT3ZfSEVvTE9xLUpPN1F4Q3d5cng0dTAzMVhQZ2dCRU16VkRQYVBaUWFGdWVHRmFjbEN3R0lCeFBNX1h4RFVmcUt6cWZfYVp1b1NlSnpFakt6a25KU1gtRkFTdExuMmtxTEpaMllxTTl5Nk5ma3NLaXp2a0FTcWxfN0ZJd3Y5U0VMUmwzNw?oc=5\n摘要: 光大期货：8月25日农产品日报 新浪财经",
+  "news_summary": "[1] Soybean - Wikipedia\n来源: en.wikipedia.org\n发布时间UTC: \nURL: https://en.wikipedia.org/wiki/Soybean\n摘要: The soybean, soy bean, or soya bean (Glycine max) [4] is a species of legume native to East Asia, widely grown for its edible bean. …\n\n[2] Soybeans: Nutrition, 20 Benefits, Side Effects & How to Eat Them\n来源: myhealthopedia.com\n发布时间UTC: \nURL: https://myhealthopedia.com/soybeans-nutrition-benefits-side-effects-uses/\n摘要: Oct 26, 2025 · Soybeans are a nutrient-rich legume packed with protein, vitamins, minerals, and isoflavones. Discover their health …\n\n[3] Soybean | Description, Cultivation, Products, & Facts | Britannica\n来源: www.britannica.com\n发布时间UTC: \nURL: https://www.britannica.com/plant/soybean\n摘要: Aug 18, 2026 · Soybean, annual legume of the pea family (Fabaceae) and its edible seed. The soybean is economically the most …\n\n[4] Soybeans 101: Nutrition Facts and Health Effects\n来源: www.healthline.com\n发布时间UTC: \nURL: https://www.healthline.com/nutrition/soybeans\n摘要: Mar 20, 2019 · Soybeans are a type of edible legume that is popular in Asia and the US. This article contains detailed health and …\n\n[5] Soya Beans (Soybean) - Nutrition Facts, Health Benefits and Recipes\n来源: www.onlyfoods.net\n发布时间UTC: \nURL: https://www.onlyfoods.net/soya-beans.html\n摘要: Jul 25, 2011 · However U.S is by far the largest soybean producers and exporters in the world accounting for approximately 75 …\n\n[6] USDA\n来源: www.usda.gov\n发布时间UTC: \nURL: https://www.usda.gov/\n摘要: USDA offers a variety of grants, loans and other financial help, including pandemic relief to farmers, ranchers, agricultural producers, …\n\n[7] General Information - USDA\n来源: www.usda.gov\n发布时间UTC: \nURL: https://www.usda.gov/about-usda/general-information\n摘要: The U.S. Department of Agriculture (USDA) is made up of 29 agencies and offices with nearly 100,000 employees who serve the …\n\n[8] USDA Food and Nutrition Administration | Food and Nutrition ...\n来源: www.fna.usda.gov\n发布时间UTC: \nURL: https://www.fna.usda.gov/\n摘要: USDA’s Food and Nutrition Administration website provides information to the public about nutrition assistance programs and how to …\n\n[9] Eligibility - USDA\n来源: eligibility.sc.egov.usda.gov\n发布时间UTC: \nURL: https://eligibility.sc.egov.usda.gov/eligibility/welcomeAction.do\n摘要: This site is used to evaluate the likelihood that a potential applicant would be eligible for program assistance. In order to be eligible …\n\n[10] U.S. Department of Agriculture (USDA) | USAGov\n来源: www.usa.gov\n发布时间UTC: \nURL: https://www.usa.gov/agencies/u-s-department-of-agriculture\n摘要: The Department of Agriculture (USDA) provides leadership on food, agriculture, natural resources, and related issues.",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 25.9,
+  "api_latency_seconds": 15.3,
   "token_usage": {
-    "prompt_tokens": 15759,
-    "completion_tokens": 3210,
-    "total_tokens": 18969,
+    "prompt_tokens": 14129,
+    "completion_tokens": 1798,
+    "total_tokens": 15927,
     "prompt_tokens_details": {
       "cached_tokens": 512
     },
     "prompt_cache_hit_tokens": 512,
-    "prompt_cache_miss_tokens": 15247
+    "prompt_cache_miss_tokens": 13617
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-09-01T00:22:56+00:00",
+    "checked_at_utc": "2026-09-01T08:17:31+00:00",
     "score": 100,
     "status": "passed",
     "label": "通过",
     "execution_allowed": true,
-    "evidence_confidence": 55,
+    "evidence_confidence": 65,
     "issues": [],
     "facts": {
-      "realtime_price": 8988.0,
+      "realtime_price": 9098.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-09-01T00:22:30+00:00",
-      "realtime_market_tick_time": "23:00:00",
+      "realtime_fetched_at_utc": "2026-09-01T08:17:16+00:00",
+      "realtime_market_tick_time": "15:05:02",
       "daily_rsi14": 78.32,
       "one_hour_boll_position": "中轨上方",
       "four_hour_boll_position": "中轨上方",
@@ -183,16 +163,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-09-01T00:22:30+00:00",
+    "realtime_fetched_at_utc": "2026-09-01T08:17:16+00:00",
     "realtime_market_trading_day": "2026-09-01",
-    "realtime_market_tick_time": "23:00:00",
+    "realtime_market_tick_time": "15:05:02",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-08-31T22:47:30+00:00",
+    "daily_updated_at_utc": "2026-09-01T06:18:29+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-08-31T22:47:30+00:00",
-    "news_updated_at_utc": "2026-08-31T22:47:27+00:00",
-    "contract_bridge_updated_at_utc": "2026-08-31T22:47:27+00:00"
+    "intraday_updated_at_utc": "2026-09-01T06:18:13+00:00",
+    "news_updated_at_utc": "2026-09-01T06:18:29+00:00",
+    "contract_bridge_updated_at_utc": "2026-09-01T06:18:08+00:00"
   }
 }

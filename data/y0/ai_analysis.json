@@ -1,184 +1,202 @@
 {
-  "summary": "豆油Y0实时价9148元/吨（ticktime 23:00:00，涨跌+0.04%），处于1小时布林中轨附近、4小时及日线上轨下方。合约换月稳定，Y2701为主力，远月贴水。日线RSI 82进入超买区域，短线有回调风险，但中期多头趋势未破坏。策略上倾向谨慎偏多，等待回调至支撑位企稳后再介入。",
-  "bias": "震荡偏多",
+  "summary": "以 realtime.price=9148（ticktime 23:00:00，tradedate 2026-09-07，涨跌+0.04%）为基准，豆油连续合约主力为2701，当前处于高位震荡。1小时布林带收窄于中轨附近，4小时仍在上升通道中但动能减弱，日线接近超买。综合建议短线观望或轻仓高抛低吸，重点关注晚间突破方向。",
+  "bias": "震荡",
   "analysis": [
-    "实时价9148元/吨（ticktime 23:00:00，涨跌+0.04%）位于1小时布林带中轨9149.1附近，上下轨为9253.97和9044.23，带宽2.29%偏窄，价格在经历前日回调后重回中轨，短线多空均衡。",
-    "4小时K线显示价格位于布林带中轨8981.95上方，上轨9313.71，下轨8650.19，带宽7.39%扩张，表明中期上升趋势延续，但RSI 67.84未超买，上轨附近或有压力。",
-    "日线布林带（基于近30日数据推算）上轨约9263（20日高点），中轨约8967（MA10），当前价9148位于中轨和上轨之间，多头排列，但RSI 81.95严重超买，且日线接近20日高点9263，警惕冲高回落。",
-    "成交量近期放大（volume_ratio_20d=1.17），持仓量从高点回落，显示部分多头获利离场，价格创新高动力减弱，但未出现大规模抛售。",
-    "MA10（8967）与MA20（8786）持续上行，价格在所有均线之上，中期多头格局未变，但需关注MA10支撑有效性。",
-    "支撑位关注9080（实时低点与1小时下轨附近）及9044（1小时布林下轨），阻力位看9165（实时高点）和9263（20日高点），短线区间震荡可能性大。",
-    "2小时K线RSI 61.07，ADX 59显示强趋势，但价格接近布林上轨，短期内可能进入整理。",
-    "合约换月稳定，Y2701为当前主力（持仓占比54.41%），次主力Y2705远月贴水177点，结构显示现货紧张，但连续合约与实际主力价差小，操作上需注意具体月份合约。"
+    "1小时布林带：价格9148位于中轨9149.1下方附近，带宽0.0229较窄，显示短线波动收敛。价格在上下轨9044-9254区间中部，暂无方向性突破。",
+    "4小时布林带：价格9148位于中轨8981.95上方，带宽0.0739较前期扩大，显示中期趋势仍偏多，但价格自上轨回落，有回归中轨压力。",
+    "日线布林带（依据日线数据）：价格9165（日线收盘）位于20日均线8786上方，RSI 81.95接近超买，且接近20日高点9263，存在回调风险。",
+    "实时价位置（realtime 9148）：相对日线收盘9165微跌0.19%，显示夜盘多头动能不足，盘口买卖价差3个点，流动性正常。",
+    "趋势结构：4小时EMA20斜率0.0111正向，但1小时EMA20斜率0.0013平缓，显示短线动能减弱，而2小时ADX 59表明趋势强度仍高但有钝化迹象。",
+    "量能：1小时最新bar成交450手，较前期缩量；日线成交量420097手，量比1.17，但持仓量自9月2日高点794654降至773475，显示部分多头离场。",
+    "支撑压力：4小时支撑位于1小时中轨9044-9050区域，强支撑9000-9050；压力位9260-9310（4小时上轨），强压力9313。",
+    "跨周期共振：1小时和4小时均在布林中轨上方或附近，日线偏高，多空分歧，方向不明朗。"
   ],
   "intraday_strategy": {
-    "bias": "偏多",
-    "entry": "9100",
-    "stop": "9055",
-    "take_profit": "9200",
-    "invalidation": "跌破9055或4小时收盘于9080下方",
-    "notes": "适用今晚夜盘21:00-23:00。回调至9100附近企稳做多，止损9055，目标9200，盈亏比约1.8。若直接上冲9165-9200则追高风险大，观望为主。"
+    "bias": "震荡偏空",
+    "entry": "逢高在9160-9180区间做空，或跌破9080追空",
+    "stop": "9210",
+    "take_profit": "9080（首目标），若破位看9000",
+    "invalidation": "若价格有效突破9210且站稳，则空头策略失效，需止损并考虑反手",
+    "notes": "适用于今日早盘09:00-11:30或午盘，严格止损。若先突破9210则放弃空头，等待回踩做多。"
   },
   "decision_frame": {
-    "confidence": 55,
-    "regime": "趋势后期高位震荡",
-    "edge": "日线多头趋势延续，但超买和持仓下降降低追多性价比",
-    "no_trade_condition": "若首目标盈亏比低于1.5（即止损空间大于目标/1.5）则不交易，当前空头盈亏比不足。",
+    "confidence": 30,
+    "regime": "高位震荡偏空",
+    "edge": "1小时布林收窄，4小时动能减弱，但日线趋势未破，缺乏明确方向。",
+    "no_trade_condition": "首目标盈亏比低于1.5（风险170点，收益100点，盈亏比0.59），故不建议立即入场，需等待更好点位或突破信号。",
     "long_case": {
-      "trigger": "价格回调至9100附近并企稳，1小时K线收阳",
-      "entry_zone": "9090-9110",
-      "stop": "9055",
+      "trigger": "价格突破9210并放量，或回踩9080附近企稳",
+      "entry_zone": "9210-9230 或 9080-9100",
+      "stop": "因波动较大，止损设置于9170（突破后回踩）或9040",
       "targets": [
-        "9200",
-        "9263"
+        "第一目标9300，第二目标9350"
       ],
-      "invalidation": "跌破9055",
-      "risk_reward": "1.8"
+      "invalidation": "若价格跌破9040则多头逻辑破坏",
+      "risk_reward": "以9080做多，止损9040，目标9250计算，风险40点，收益170点，盈亏比4.25"
     },
     "short_case": {
-      "trigger": "价格在9200-9263区间遇阻且小时线出现反转信号",
-      "entry_zone": "9200-9230",
-      "stop": "9268",
+      "trigger": "价格在9160-9180受阻并出现看跌K线形态",
+      "entry_zone": "9160-9180",
+      "stop": "9210",
       "targets": [
-        "9100",
-        "9044"
+        "第一目标9080，第二目标9000"
       ],
-      "invalidation": "突破9263",
-      "risk_reward": "1.5"
+      "invalidation": "若价格突破9210则空头失效",
+      "risk_reward": "以9160做空，止损9210，目标9080，风险50点，收益80点，盈亏比1.6"
     },
     "event_risks": [
-      "中美贸易谈判不确定、美豆天气炒作、国内大豆到港量变化"
+      "USDA月度报告和宏观数据可能引发跳空，请关注今日晚间20:30数据。"
     ],
     "data_limits": [
-      "小时线更新截至2026-09-04 23:00，日线截至2026-09-04，盘中数据可能延迟；模型验证状态为未证实。"
+      "1小时和4小时数据延迟至9月6日21:30，与实时时间有1小时差异，可能影响判断。"
     ]
   },
   "news_impact": [
-    "[利多] 观察者网报道中美大豆贸易留有空间，可能缓解市场对供应中断的担忧，但实际采购未定，影响有限。",
-    "[中性] 美豆期价高涨，但国内豆价受采购成本和压榨利润影响，进口大豆到港成本上升，支撑豆油，但需求端疲弱限制涨幅。",
-    "[中性] AI+BT育种新闻为长期产业利好，短期不影响供需。",
-    "[利多] 长安期货分析称成本支撑坚挺，豆粕高位运行，间接支撑豆油压榨利润，利好豆油。",
-    "[中性] 双蛋白产业新闻不直接涉及豆油价格。",
-    "[利多] 搜狐报告“豆油利多气氛浓厚，9月或继续走高”指出美豆减产预期和国内库存下降，支撑豆油。",
-    "[利多] 金十数据称美豆优良率三年来最差，天气炒作升温，外盘上涨带动国内豆油。",
-    "[利空] CBOT谷物指数两日涨1.60%后回落，显示短期炒作降温，可能拖累豆油。"
+    "[中性] 长安期货刘琳：成本支撑坚挺，豆粕高位运行，点明大豆成本支撑，但对豆油方向间接利好，因压榨成本传导。",
+    "[利空] CBOT农产品剧烈波动，两日涨1.60%后回落，可能拖累国内豆类市场情绪，但影响有限。",
+    "[利多] 青松8月31日分析关注多空跟进，暗示偏多趋势，但属于第三方观点，无实质数据。",
+    "[利多] 光大期货农产品日报提示豆油市场情绪偏多，基于基本面因素。",
+    "[中性] 大豆期价高涨，国内豆价独善其身，反映内外盘联动不确定。",
+    "[利多] 青松9月2日建议顺势，人气偏多。",
+    "[中性] 大豆给中美留了条缝，可能影响大豆供给。",
+    "[中性] 大豆种业发展对远期供给有益，但短期无影响。",
+    "[中性] 双蛋白产业无关。",
+    "[利多] Sohu油脂有料：豆油利多气氛浓厚，9月或继续走高，直接利好预期。"
   ],
   "news_articles": [
     {
-      "title": "大豆，给中美留了条缝",
-      "source": "观察者网",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5mdVZ0dlJYYk5RNmk2UWZ3ell6SUx0UkdSMEViX3dRLUJDdVhMRms5T3lVSW9QaTR6NTdSa1VKLVhxc09WV2dSN3lyeUdab3FISjFISnFoTDNPWUVLdkpGVUxpUlRUQkdFMDNpbw?oc=5",
-      "detail": "文章指出中美大豆贸易存在缓和空间，中国可能增加美豆采购，缓解供应担忧。但具体细节未披露，实际影响需观望。",
-      "impact": "中性"
-    },
-    {
-      "title": "大豆 美豆期价高涨，国内豆价能独善其身吗？",
-      "source": "Sohu",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQMk9YWC0yYzczNTFwYVBkbzhHVmJIM3ZSdkVRVElGV2Y5Rkx3eGJWSFI3Nl9RMzhTSkRNemo2SFRncGJPLUpfZXdfTWp2MUV6aTZnRGJGSWVSclhwcktjMnBlYjVUek15cy1nQUs2R0NWcTdiLTRyOWk5dEpCa3lpX3pORDgwTldEYXVpXw?oc=5",
-      "detail": "美豆价格高涨推升进口成本，国内豆价受支撑，但国内需求疲软和库存高企限制涨幅，豆油价格跟随成本上行但空间有限。",
-      "impact": "中性"
-    },
-    {
-      "title": "种业大会｜“AI+BT”时代，中国大豆种业未来方向在哪里？",
-      "source": "凤凰网",
-      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE9mQ3IyVUFUSFJiNUdWZ00wUmFzUGRIMWZqcGRnZnpPdkMwU056R0p2OG93N2VrLXFrT05NTHZEVjJZWVp3ZFlpek5ySWI?oc=5",
-      "detail": "探讨大豆育种技术发展，长期或提升单产和自给率，但短期对豆油供需影响微小。",
-      "impact": "中性"
-    },
-    {
       "title": "长安期货刘琳：成本支撑坚挺 豆粕高位运行",
-      "source": "新浪财经",
+      "source": "finance.sina.com.cn",
       "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNMXlHMjJpckpjdzl1TGFobTQzQ3RISUFObFBlaWhiVDQ1OTJCcEY5RDRPNlJxY2NWOU1BZFR3S2hYeDZta1dxaGFhNElETG96bG5LcDE4TFdyTHRITF9WeGUtcXNMYXE1UEJKLWMtSVp3SlVuR0ZpZTVpZXBFVVRVUGdzZw?oc=5",
-      "detail": "分析认为大豆成本支撑坚挺，豆粕价格高位运行，压榨利润良好，豆油供给或增加，但成本端传导支撑豆油价格。",
-      "impact": "利多"
-    },
-    {
-      "title": "刘峰：双蛋白产业发展，需要上下游企业联合把组分功效研究做实",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTE1CRnpheS11OG13ZXMxckpGTkdHV0FrMG8zajd0YVprWG1CNEhVSEoxWnVJYXNvaXYzbFdUTkIyVC1RajdSYms5bWJjb1lZUFp2b2FXNDJiRmN6bVR5bTBkaV8zNVI3UzdVTDBEeG5iOFEwRkJvYzl2UWpUVlc?oc=5",
-      "detail": "双蛋白产业需上下游合作，对大豆需求有长期影响，但短期无直接价格影响。",
-      "impact": "中性"
-    },
-    {
-      "title": "油脂有“料”：豆油利多气氛浓厚，9月或继续走高",
-      "source": "Sohu",
-      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPMkVqTGZpNmFTNHYzMTlGczdSdVBMZ3VDT2Jmb2NsNmg2b2lLbWNpajdjS2RkUzZaS2R2bEdYcmFIM3M3X3FqR1Nvb2tER3lPWHNPei1KeXNNeTFPaEpvSjl2R2xIRm40bzZxRVZDRUNhTF9fck01TjY5S19LdU5KalVnUllrQUFx?oc=5",
-      "detail": "文章指出豆油市场利多因素集中，如美豆减产、国内库存下滑，预计9月价格继续走高。但需警惕高位回调风险。",
-      "impact": "利多"
-    },
-    {
-      "title": "【美国天气炒作攻略】美豆、美玉米优良率双双不及预期，大豆作物状况为三年来最差！",
-      "source": "金十数据",
-      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE1ZczVTNVVOX0toYUMybWM2OTE1WTQyQkJ6LTFqY05OREcybUZlbGs1TFFuNnAyYWFtdV9OeUdFbUlkTmRWZDBuUUk4Y1IzaGM?oc=5",
-      "detail": "美豆优良率不及预期，为三年来最差，天气炒作推升美豆期价，进而支撑国内豆油进口成本，利多豆油。",
+      "detail": "长安期货分析师刘琳指出成本端支撑坚挺，豆粕高位运行。这暗示大豆压榨利润受到支撑，可能对豆油价格形成间接提振。",
       "impact": "利多"
     },
     {
       "title": "CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落",
       "source": "观点网",
       "url": "https://news.google.com/rss/articles/CBMiTkFVX3lxTE93eEdnZG1aTXI0dkN6UGpxODlEay1IZUEwX3NuSUgtVkhVY3A0dG1aRTQ3ak5UVExmMjZmRXRxWWhlaHJMRDFUVHZpQ1pvdw?oc=5",
-      "detail": "CBOT谷物近期波动加剧，短期冲高回落显示炒作降温，可能传导至国内豆油，形成利空压力。",
+      "detail": "CBOT农产品期货近期波动剧烈，谷物指数两日一度上涨1.60%后回落，反映国际市场价格不确定性，可能对国内豆类期货情绪造成扰动。",
       "impact": "利空"
     },
     {
-      "title": "光大期货农产品类日报9.1",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPbUNrZ0FRNXBBUXFuU0N4SmxvTXhYOUJqVzFZZjd0Qm9PN1ZCVm9wNy0xbnBacll6OEU0S1NVeTAxbnJOc1VxVjB1NWVfSF8zaXhoN1dFRnBTNDhvNlFiVnpSX0RHYm53ZUNIVHprZno4MFhrR2g4azBKb3RUUXVDdzM0N2lYUmhCcUhRMkdZa2I?oc=5",
-      "detail": "光大期货日报分析农产品市场，指出豆油受外盘和成本支撑，但需求未明显改善，预计高位震荡。",
+      "title": "青松：8月31日期货十大主力品种分析策略【多空跟进，风控止损】",
+      "source": "中金在线",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBVdUpFRVNLX2Q3X2Z1eFRXcWwweldLZDVEakdBNTB1VlJ2S3AtTGctNU9uQ0NyS09oU1Q5bmRnN0hBRGdZS2xKcWd0bkhqaEdkdy1Ja3NpUU1jNGRWMHRUT2xITUplV1MxTDNCaUdQSQ?oc=5",
+      "detail": "该文章发布于8月31日，提供期货品种分析及风控策略，指出豆油需要多空跟进并设好止损，反映当时市场不确定性。",
       "impact": "中性"
+    },
+    {
+      "title": "光大期货农产品类日报9.1",
+      "source": "finance.sina.cn",
+      "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPbUNrZ0FRNXBBUXFuU0N4SmxvTXhYOUJqVzFZZjd0Qm9PN1ZCVm9wNy0xbnBacll6OEU0S1NVeTAxbnJOc1VxVjB1NWVfSF8zaXhoN1dFRnBTNDhvNlFiVnpSX0RHYm53ZUNIVHprZno4MFhrR2g4azBKb3RUUXVDdzM0N2lYUmhCcUhRMkdZa2I?oc=5",
+      "detail": "光大期货日报分析农产品，豆油可能受益于美豆成本传导，短期情绪偏多。",
+      "impact": "利多"
+    },
+    {
+      "title": "大豆 美豆期价高涨，国内豆价能独善其身吗？",
+      "source": "Sohu",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQMk9YWC0yYzczNTFwYVBkbzhHVmJIM3ZSdkVRVElGV2Y5Rkx3eGJWSFI3Nl9RMzhTSkRNemo2SFRncGJPLUpfZXdfTWp2MUV6aTZnRGJGSWVSclhwcktjMnBlYjVUek15cy1nQUs2R0NWcTdiLTRyOWk5dEpCa3lpX3pORDgwTldEYXVpXw?oc=5",
+      "detail": "讨论美豆高涨对国内大豆的影响，指出国内可能受到成本支撑，但独立走势存疑。",
+      "impact": "中性"
+    },
+    {
+      "title": "青松：9月2日期货十大主力品种分析策略【多空顺势，严禁逆势，风控止损】",
+      "source": "中金在线",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE1IVWxBMHFKX2tkdEFVQUkyY3Yya0NRMHAxRTlHQ1NHNkNQMkxXZmlkaEFpSVJfNEl0cXFlMjg0ZzZFTkZldmx5d29NNTQ4WG10bmxqZTJtMENNdVI0Yzc2bEZ5OUlQejlSbmhBQVpHUQ?oc=5",
+      "detail": "该文发布于9月2日，建议顺势操作，豆油趋势偏多，但需严控风险。",
+      "impact": "利多"
+    },
+    {
+      "title": "大豆，给中美留了条缝",
+      "source": "finance.sina.cn",
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE1RRkRFc1d3M1g1d1lRYkpuMnB1Y0xwLTlNXzRPa0l0TUZLdzg2ZlYxRUNId0k3TnphVkVvMkJaMzk2S1BKcHM0SjBnWXUwODRkMEcxMWIwcUxEalR3LUdweDUyWmFEQ2ZVSWpQcEE3S2ZIZUczaGtmeQ?oc=5",
+      "detail": "文章分析中美大豆贸易关系，可能影响大豆进口预期。",
+      "impact": "中性"
+    },
+    {
+      "title": "种业大会｜AI+BT时代，中国大豆种业未来方向在哪里？",
+      "source": "凤凰网",
+      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE9mQ3IyVUFUSFJiNUdWZ00wUmFzUGRIMWZqcGRnZnpPdkMwU056R0p2OG93N2VrLXFrT05NTHZEVjJZWVp3ZFlpek5ySWI?oc=5",
+      "detail": "讨论大豆种业技术发展，长期提高产量，但短期不直接影响豆油。",
+      "impact": "中性"
+    },
+    {
+      "title": "刘峰：双蛋白产业发展，需要上下游企业联合把组分功效研究做实",
+      "source": "finance.sina.cn",
+      "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTE1CRnpheS11OG13ZXMxckpGTkdHV0FrMG8zajd0YVprWG1CNEhVSEoxWnVJYXNvaXYzbFdUTkIyVC1RajdSYms5bWJjb1lZUFp2b2FXNDJiRmN6bVR5bTBkaV8zNVI3UzdVTDBEeG5iOFEwRkJvYzl2UWpUVlc?oc=5",
+      "detail": "双蛋白产业与大豆需求相关，但非直接价格驱动。",
+      "impact": "中性"
+    },
+    {
+      "title": "油脂有料：豆油利多气氛浓厚，9月或继续走高（Sohu）",
+      "source": "Sohu",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPMkVqTGZpNmFTNHYzMTlGczdSdVBMZ3VDT2Jmb2NsNmg2b2lLbWNpajdjS2RkUzZaS2R2bEdYcmFIM3M3X3FqR1Nvb2tER3lPWHNPei1KeXNNeTFPaEpvSjl2R2xIRm40bzZxRVZDRUNhTF9fck01TjY5S19LdU5KalVnUllrQUFx?oc=5",
+      "detail": "该文章称豆油市场利多气氛浓厚，预计9月或继续走高，基于供需和成本支撑。",
+      "impact": "利多"
     }
   ],
   "watch_levels": {
     "support": 9080.0,
-    "resistance": 9263.0
+    "resistance": 9210.0
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于连续合约Y0，实际交易需核对具体主力合约Y2701及换月风险。日线RSI超买，注意回调。模型验证未证实，不构成收益保证。投资有风险，入市需谨慎。",
+  "risk_note": "本分析基于历史数据和可得信息，不构成投资建议。期货交易有风险，请谨慎决策，并务必严格设置止损。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-09-06T19:59:33+00:00",
+  "generated_at_utc": "2026-09-06T22:40:50+00:00",
   "latest_date": "2026-09-04",
   "realtime_price": 9148.0,
   "realtime_note": "实时行情截至 2026-09-07 23:00:00，当前价 9148，涨跌 +0.04%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-09-06T19:59:11+00:00",
+    "fetched_at_utc": "2026-09-06T22:40:26+00:00",
     "market_trading_day": "2026-09-07",
     "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 大豆，给中美留了条缝-科工力量 - 观察者网\n来源: 观察者网\n发布时间UTC: 2026-09-01T10:57:00+00:00\nURL: https://news.google.com/rss/articles/CBMibEFVX3lxTE5mdVZ0dlJYYk5RNmk2UWZ3ell6SUx0UkdSMEViX3dRLUJDdVhMRms5T3lVSW9QaTR6NTdSa1VKLVhxc09WV2dSN3lyeUdab3FISjFISnFoTDNPWUVLdkpGVUxpUlRUQkdFMDNpbw?oc=5\n摘要: 大豆，给中美留了条缝-科工力量 观察者网\n\n[2] 大豆 美豆期价高涨，国内豆价能独善其身吗？ - Sohu\n来源: Sohu\n发布时间UTC: 2026-08-31T02:07:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQMk9YWC0yYzczNTFwYVBkbzhHVmJIM3ZSdkVRVElGV2Y5Rkx3eGJWSFI3Nl9RMzhTSkRNemo2SFRncGJPLUpfZXdfTWp2MUV6aTZnRGJGSWVSclhwcktjMnBlYjVUek15cy1nQUs2R0NWcTdiLTRyOWk5dEpCa3lpX3pORDgwTldEYXVpXw?oc=5\n摘要: 大豆 美豆期价高涨，国内豆价能独善其身吗？ Sohu\n\n[3] 种业大会｜“AI+BT”时代，中国大豆种业未来方向在哪里？ - 凤凰网\n来源: 凤凰网\n发布时间UTC: 2026-09-01T02:47:51+00:00\nURL: https://news.google.com/rss/articles/CBMiTEFVX3lxTE9mQ3IyVUFUSFJiNUdWZ00wUmFzUGRIMWZqcGRnZnpPdkMwU056R0p2OG93N2VrLXFrT05NTHZEVjJZWVp3ZFlpek5ySWI?oc=5\n摘要: 种业大会｜“AI+BT”时代，中国大豆种业未来方向在哪里？ 凤凰网\n\n[4] 长安期货刘琳：成本支撑坚挺 豆粕高位运行 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-04T07:56:00+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxNMXlHMjJpckpjdzl1TGFobTQzQ3RISUFObFBlaWhiVDQ1OTJCcEY5RDRPNlJxY2NWOU1BZFR3S2hYeDZta1dxaGFhNElETG96bG5LcDE4TFdyTHRITF9WeGUtcXNMYXE1UEJKLWMtSVp3SlVuR0ZpZTVpZXBFVVRVUGdzZw?oc=5\n摘要: 长安期货刘琳：成本支撑坚挺 豆粕高位运行 新浪财经\n\n[5] 刘峰：双蛋白产业发展，需要上下游企业联合把组分功效研究做实，匹配不同人群需求|哈尔滨市|飞鹤|营养|大豆|乳蛋白 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-01T07:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMifEFVX3lxTE1CRnpheS11OG13ZXMxckpGTkdHV0FrMG8zajd0YVprWG1CNEhVSEoxWnVJYXNvaXYzbFdUTkIyVC1RajdSYms5bWJjb1lZUFp2b2FXNDJiRmN6bVR5bTBkaV8zNVI3UzdVTDBEeG5iOFEwRkJvYzl2UWpUVlc?oc=5\n摘要: 刘峰：双蛋白产业发展，需要上下游企业联合把组分功效研究做实，匹配不同人群需求|哈尔滨市|飞鹤|营养|大豆|乳蛋白 新浪财经\n\n[6] 油脂有“料”：豆油利多气氛浓厚，9月或继续走高 - Sohu\n来源: Sohu\n发布时间UTC: 2026-09-04T10:06:55+00:00\nURL: https://news.google.com/rss/articles/CBMiiAFBVV95cUxPMkVqTGZpNmFTNHYzMTlGczdSdVBMZ3VDT2Jmb2NsNmg2b2lLbWNpajdjS2RkUzZaS2R2bEdYcmFIM3M3X3FqR1Nvb2tER3lPWHNPei1KeXNNeTFPaEpvSjl2R2xIRm40bzZxRVZDRUNhTF9fck01TjY5S19LdU5KalVnUllrQUFx?oc=5\n摘要: 油脂有“料”：豆油利多气氛浓厚，9月或继续走高 Sohu\n\n[7] 【美国天气炒作攻略】美豆、美玉米优良率双双不及预期，大豆作物状况为三年来最差！-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-08-30T21:22:59+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE1ZczVTNVVOX0toYUMybWM2OTE1WTQyQkJ6LTFqY05OREcybUZlbGs1TFFuNnAyYWFtdV9OeUdFbUlkTmRWZDBuUUk4Y1IzaGM?oc=5\n摘要: 【美国天气炒作攻略】美豆、美玉米优良率双双不及预期，大豆作物状况为三年来最差！-市场参考 金十数据\n\n[8] CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落 - 观点网\n来源: 观点网\n发布时间UTC: 2026-09-02T05:16:10+00:00\nURL: https://news.google.com/rss/articles/CBMiTkFVX3lxTE93eEdnZG1aTXI0dkN6UGpxODlEay1IZUEwX3NuSUgtVkhVY3A0dG1aRTQ3ak5UVExmMjZmRXRxWWhlaHJMRDFUVHZpQ1pvdw?oc=5\n摘要: CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落 观点网\n\n[9] 青松：8月31日期货十大主力品种分析策略【多空跟进，风控止损】_期货评论 - 中金在线\n来源: 中金在线\n发布时间UTC: 2026-08-31T10:15:26+00:00\nURL: https://news.google.com/rss/articles/CBMib0FVX3lxTFBVdUpFRVNLX2Q3X2Z1eFRXcWwweldLZDVEakdBNTB1VlJ2S3AtTGctNU9uQ0NyS09oU1Q5bmRnN0hBRGdZS2xKcWd0bkhqaEdkdy1Ja3NpUU1jNGRWMHRUT2xITUplV1MxTDNCaUdQSQ?oc=5\n摘要: 青松：8月31日期货十大主力品种分析策略【多空跟进，风控止损】_期货评论 中金在线\n\n[10] 光大期货农产品类日报9.1 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-01T09:39:50+00:00\nURL: https://news.google.com/rss/articles/CBMikAFBVV95cUxPbUNrZ0FRNXBBUXFuU0N4SmxvTXhYOUJqVzFZZjd0Qm9PN1ZCVm9wNy0xbnBacll6OEU0S1NVeTAxbnJOc1VxVjB1NWVfSF8zaXhoN1dFRnBTNDhvNlFiVnpSX0RHYm53ZUNIVHprZno4MFhrR2g4azBKb3RUUXVDdzM0N2lYUmhCcUhRMkdZa2I?oc=5\n摘要: 光大期货农产品类日报9.1 新浪财经",
+  "news_summary": "[1] 长安期货刘琳：成本支撑坚挺 豆粕高位运行 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-09-04T07:56:00+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxNMXlHMjJpckpjdzl1TGFobTQzQ3RISUFObFBlaWhiVDQ1OTJCcEY5RDRPNlJxY2NWOU1BZFR3S2hYeDZta1dxaGFhNElETG96bG5LcDE4TFdyTHRITF9WeGUtcXNMYXE1UEJKLWMtSVp3SlVuR0ZpZTVpZXBFVVRVUGdzZw?oc=5\n摘要: 长安期货刘琳：成本支撑坚挺 豆粕高位运行 finance.sina.com.cn\n\n[2] CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落 - 观点网\n来源: 观点网\n发布时间UTC: 2026-09-02T05:16:10+00:00\nURL: https://news.google.com/rss/articles/CBMiTkFVX3lxTE93eEdnZG1aTXI0dkN6UGpxODlEay1IZUEwX3NuSUgtVkhVY3A0dG1aRTQ3ak5UVExmMjZmRXRxWWhlaHJMRDFUVHZpQ1pvdw?oc=5\n摘要: CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落 观点网\n\n[3] 青松：8月31日期货十大主力品种分析策略【多空跟进，风控止损】_期货评论 - 中金在线\n来源: 中金在线\n发布时间UTC: 2026-08-31T10:15:26+00:00\nURL: https://news.google.com/rss/articles/CBMib0FVX3lxTFBVdUpFRVNLX2Q3X2Z1eFRXcWwweldLZDVEakdBNTB1VlJ2S3AtTGctNU9uQ0NyS09oU1Q5bmRnN0hBRGdZS2xKcWd0bkhqaEdkdy1Ja3NpUU1jNGRWMHRUT2xITUplV1MxTDNCaUdQSQ?oc=5\n摘要: 青松：8月31日期货十大主力品种分析策略【多空跟进，风控止损】_期货评论 中金在线\n\n[4] 光大期货农产品类日报9.1 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-01T09:39:50+00:00\nURL: https://news.google.com/rss/articles/CBMikAFBVV95cUxPbUNrZ0FRNXBBUXFuU0N4SmxvTXhYOUJqVzFZZjd0Qm9PN1ZCVm9wNy0xbnBacll6OEU0S1NVeTAxbnJOc1VxVjB1NWVfSF8zaXhoN1dFRnBTNDhvNlFiVnpSX0RHYm53ZUNIVHprZno4MFhrR2g4azBKb3RUUXVDdzM0N2lYUmhCcUhRMkdZa2I?oc=5\n摘要: 光大期货农产品类日报9.1 finance.sina.cn\n\n[5] 大豆 美豆期价高涨，国内豆价能独善其身吗？ - Sohu\n来源: Sohu\n发布时间UTC: 2026-08-31T02:07:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQMk9YWC0yYzczNTFwYVBkbzhHVmJIM3ZSdkVRVElGV2Y5Rkx3eGJWSFI3Nl9RMzhTSkRNemo2SFRncGJPLUpfZXdfTWp2MUV6aTZnRGJGSWVSclhwcktjMnBlYjVUek15cy1nQUs2R0NWcTdiLTRyOWk5dEpCa3lpX3pORDgwTldEYXVpXw?oc=5\n摘要: 大豆 美豆期价高涨，国内豆价能独善其身吗？ Sohu\n\n[6] 青松：9月2日期货十大主力品种分析策略【多空顺势，严禁逆势，风控止损】_期货评论 - 中金在线\n来源: 中金在线\n发布时间UTC: 2026-09-02T09:04:01+00:00\nURL: https://news.google.com/rss/articles/CBMib0FVX3lxTE1IVWxBMHFKX2tkdEFVQUkyY3Yya0NRMHAxRTlHQ1NHNkNQMkxXZmlkaEFpSVJfNEl0cXFlMjg0ZzZFTkZldmx5d29NNTQ4WG10bmxqZTJtMENNdVI0Yzc2bEZ5OUlQejlSbmhBQVpHUQ?oc=5\n摘要: 青松：9月2日期货十大主力品种分析策略【多空顺势，严禁逆势，风控止损】_期货评论 中金在线\n\n[7] 大豆，给中美留了条缝 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-01T07:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMieEFVX3lxTE1RRkRFc1d3M1g1d1lRYkpuMnB1Y0xwLTlNXzRPa0l0TUZLdzg2ZlYxRUNId0k3TnphVkVvMkJaMzk2S1BKcHM0SjBnWXUwODRkMEcxMWIwcUxEalR3LUdweDUyWmFEQ2ZVSWpQcEE3S2ZIZUczaGtmeQ?oc=5\n摘要: 大豆，给中美留了条缝 finance.sina.cn\n\n[8] 种业大会｜“AI+BT”时代，中国大豆种业未来方向在哪里？ - 凤凰网\n来源: 凤凰网\n发布时间UTC: 2026-09-01T02:47:51+00:00\nURL: https://news.google.com/rss/articles/CBMiTEFVX3lxTE9mQ3IyVUFUSFJiNUdWZ00wUmFzUGRIMWZqcGRnZnpPdkMwU056R0p2OG93N2VrLXFrT05NTHZEVjJZWVp3ZFlpek5ySWI?oc=5\n摘要: 种业大会｜“AI+BT”时代，中国大豆种业未来方向在哪里？ 凤凰网\n\n[9] 刘峰：双蛋白产业发展，需要上下游企业联合把组分功效研究做实，匹配不同人群需求|哈尔滨市|飞鹤|营养|大豆|乳蛋白 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-01T07:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMifEFVX3lxTE1CRnpheS11OG13ZXMxckpGTkdHV0FrMG8zajd0YVprWG1CNEhVSEoxWnVJYXNvaXYzbFdUTkIyVC1RajdSYms5bWJjb1lZUFp2b2FXNDJiRmN6bVR5bTBkaV8zNVI3UzdVTDBEeG5iOFEwRkJvYzl2UWpUVlc?oc=5\n摘要: 刘峰：双蛋白产业发展，需要上下游企业联合把组分功效研究做实，匹配不同人群需求|哈尔滨市|飞鹤|营养|大豆|乳蛋白 finance.sina.cn\n\n[10] 油脂有“料”：豆油利多气氛浓厚，9月或继续走高 - Sohu\n来源: Sohu\n发布时间UTC: 2026-09-04T10:06:55+00:00\nURL: https://news.google.com/rss/articles/CBMiiAFBVV95cUxPMkVqTGZpNmFTNHYzMTlGczdSdVBMZ3VDT2Jmb2NsNmg2b2lLbWNpajdjS2RkUzZaS2R2bEdYcmFIM3M3X3FqR1Nvb2tER3lPWHNPei1KeXNNeTFPaEpvSjl2R2xIRm40bzZxRVZDRUNhTF9fck01TjY5S19LdU5KalVnUllrQUFx?oc=5\n摘要: 油脂有“料”：豆油利多气氛浓厚，9月或继续走高 Sohu",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 22.8,
+  "api_latency_seconds": 23.7,
   "token_usage": {
-    "prompt_tokens": 15459,
-    "completion_tokens": 3201,
-    "total_tokens": 18660,
+    "prompt_tokens": 15512,
+    "completion_tokens": 3439,
+    "total_tokens": 18951,
     "prompt_tokens_details": {
       "cached_tokens": 512
     },
     "prompt_cache_hit_tokens": 512,
-    "prompt_cache_miss_tokens": 14947
+    "prompt_cache_miss_tokens": 15000
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-09-06T19:59:33+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
-    "evidence_confidence": 55,
-    "issues": [],
+    "checked_at_utc": "2026-09-06T22:40:50+00:00",
+    "score": 55,
+    "status": "blocked",
+    "label": "规则接管",
+    "execution_allowed": false,
+    "evidence_confidence": 30,
+    "issues": [
+      {
+        "code": "1小时_boll_mismatch",
+        "severity": "high",
+        "message": "文本的1小时布林位置与确定性计算不一致，当前应为中轨下方。"
+      },
+      {
+        "code": "low_evidence_confidence",
+        "severity": "medium",
+        "message": "AI 自评证据强度仅 30/100。"
+      }
+    ],
     "facts": {
       "realtime_price": 9148.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-09-06T19:59:11+00:00",
+      "realtime_fetched_at_utc": "2026-09-06T22:40:26+00:00",
       "realtime_market_tick_time": "23:00:00",
       "daily_rsi14": 81.95,
       "one_hour_boll_position": "中轨下方",
@@ -190,16 +208,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-09-06T19:59:11+00:00",
+    "realtime_fetched_at_utc": "2026-09-06T22:40:26+00:00",
     "realtime_market_trading_day": "2026-09-07",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-09-06T19:28:26+00:00",
+    "daily_updated_at_utc": "2026-09-06T21:30:43+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-09-06T19:28:26+00:00",
-    "news_updated_at_utc": "2026-09-06T19:28:23+00:00",
-    "contract_bridge_updated_at_utc": "2026-09-06T19:28:23+00:00"
+    "intraday_updated_at_utc": "2026-09-06T21:30:43+00:00",
+    "news_updated_at_utc": "2026-09-06T21:30:41+00:00",
+    "contract_bridge_updated_at_utc": "2026-09-06T21:30:41+00:00"
   }
 }

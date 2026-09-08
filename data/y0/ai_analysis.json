@@ -1,200 +1,220 @@
 {
-  "summary": "当前豆油Y0连续合约实时价格为9130.0元/吨，较昨结9210下跌0.87%，盘口时间为23:00:00（交易日归属标签2026-09-09）。1小时K线显示价格跌破中轨，4小时维持中轨上方，日线超买后回调，多周期共振偏空。日内建议观望或轻仓偏空，关注9080支撑和9160压力。",
-  "bias": "震荡偏空",
+  "summary": "豆油夜盘回落至9130，较前一交易日20:42:43实时价9203跌0.79%，当前交易时段为夜盘21:00-23:00。1小时布林中轨下方，4小时布林中轨上方，日线强势但RSI接近超买。短期震荡偏空，建议观望或轻仓试空。",
+  "bias": "偏空",
   "analysis": [
-    "1小时布林通道：上轨9260.42，中轨9165.65，下轨9070.88，当前价9130位于中轨下方，带宽0.0207，价格自上轨回落跌破中轨，短期动能转弱。",
-    "4小时布林通道：上轨9323.58，中轨9063.55，下轨8803.52，当前价9130位于中轨上方，带宽0.0574，仍处多头结构，但价格向中轨回落。",
-    "日线布林（基于日线数据）：当前日线RSI 82.7超买，价格9189高于MA10(9046)和MA20(8859)，趋势偏多但超买严重，有回调需求。",
-    "实时价9130低于日线收盘9189和1小时中轨9165.65，位于1小时中轨下方，4小时中轨上方，处于多空分界区域。",
-    "趋势：日线上升趋势未破，但1小时和2小时均线拐头向下，2小时ADX 38.5显示趋势强度中等，4小时ADX 49.0显示强趋势，但短期回调压力大。",
-    "量能：日线成交量465004，量比1.21，持仓增加；1小时最新K线成交量136手，极度萎缩，夜盘流动性差，注意虚假突破。",
-    "支撑位：9080（1小时下轨及近期低点），9010（4小时中轨）。压力位：9160（1小时中轨），9200（日内高点）。",
-    "合约映射：Y0与主力Y2701价格一致，持仓占比53.26%，次主力Y2705贴水120元/吨，主力稳定，无换月风险。"
+    "1小时布林：当前价9130位于中轨9167.6下方，上下轨9258.4/9076.8，带宽0.0198偏窄，价格自上方回落，可能回归下轨。",
+    "4小时布林：当前价9130位于中轨9065.1上方，上下轨9326.3/8803.9，带宽0.0576走阔，趋势偏多但价格距中轨有距离，回调风险。",
+    "日线布林/均线：日线收盘9189，布林上轨约9286，中轨约8858，价格接近上轨，均线多头排列，但RSI 82.7超买，回调压力大。",
+    "实时价位置：realtime.price 9130，低于日线收盘9189，低于1小时中轨，表明短线承压。",
+    "趋势：日线上升趋势，4小时上升趋势，1小时回调，多周期冲突。",
+    "量能：夜盘成交量153951，较日间缩量，持仓减少14438，多头离场迹象。",
+    "支撑：1小时下轨9076.8，4小时中轨9065.1，日线10日均线9046。",
+    "压力：1小时中轨9167.6，4小时上轨9326，日线布林上轨9286。"
   ],
   "intraday_strategy": {
     "bias": "偏空",
     "entry": "9130",
-    "stop": "9186",
-    "take_profit": "9080",
-    "invalidation": "小时收盘价站上9165或突破9186",
-    "notes": "适用于今晚夜盘剩余时段（21:00-23:00已接近收盘）及明日早盘09:00-11:30。若价格反弹至9160-9180区间可轻仓做空，止损9186，目标9080，盈亏比约1.4，若风险偏好低可放弃。"
+    "stop": "9168",
+    "take_profit": "9065",
+    "invalidation": "9175",
+    "notes": "适用夜盘21:00-23:00后半段，若价格无法回归9167以上，可轻仓试空，目标9065，止损9168。跌破9065可加仓看至9000。若价格突破9175则止损并反手。"
   },
   "decision_frame": {
-    "confidence": 55,
-    "regime": "日线上升趋势中的短期回调",
-    "edge": "1小时跌破中轨，4小时接近中轨，日线超买回调，技术面共振偏空",
-    "no_trade_condition": "若价格无法跌破9080且重新站上9165，则不追空；盈亏比不满足1.5时放弃",
+    "confidence": 35,
+    "regime": "震荡偏空",
+    "edge": "短期回调压力，但趋势支撑，无明显优势。",
+    "no_trade_condition": "若价格未能有效突破或跌破关键位，避免频繁交易。",
     "long_case": {
-      "trigger": "1小时收盘价重新站上9165且回调不破9080",
-      "entry_zone": "9080",
-      "stop": "9030",
+      "trigger": "价格站稳9168上方",
+      "entry_zone": "9168-9180",
+      "stop": "9130",
       "targets": [
-        "9165",
-        "9200"
+        "9250",
+        "9280"
       ],
-      "invalidation": "跌破9030",
-      "risk_reward": "1.7"
+      "invalidation": "9120",
+      "risk_reward": "1.5"
     },
     "short_case": {
-      "trigger": "反弹至9160-9180受阻且1小时RSI<50",
-      "entry_zone": "9165",
-      "stop": "9210",
+      "trigger": "价格跌破9100",
+      "entry_zone": "9100-9110",
+      "stop": "9150",
       "targets": [
-        "9080",
-        "9010"
+        "9065",
+        "9000"
       ],
-      "invalidation": "站上9210",
-      "risk_reward": "1.9"
+      "invalidation": "9160",
+      "risk_reward": "1.2"
     },
     "event_risks": [
-      "CBOT农产品波动",
-      "国内油脂库存变化",
-      "厄尔尼诺天气影响"
+      "中美贸易摩擦升级",
+      "大豆进口政策变化",
+      "原油价格波动"
     ],
     "data_limits": [
-      "1小时和日线数据更新于UTC 13:22，距今约2.6小时，存在延迟",
-      "夜盘成交量小，价格波动可能被放大",
-      "连续合约非主力，需关注换月风险"
+      "模型验证未证实优势",
+      "小时线数据延迟",
+      "连续合约与主力合约差异"
     ]
   },
   "news_impact": [
-    "[利空] CBOT农产品期货剧烈波动，谷物指数两日涨1.60%又回落，显示市场情绪不稳，可能压制国内油脂价格。",
-    "[中性] 青松分析文章称顺势多空，但未提供具体数据，仅供情绪参考。",
-    "[利多] 菜油和棕榈油日内分别上涨1.15%和1.39%，机构称油脂整体震荡偏强，但今日豆油下跌形成反差。",
-    "[利多] 市场关注厄尔尼诺对全球粮价的影响，可能支撑油脂价格长期。",
-    "[中性] 国内大豆进口下降，但豆粕供应旺盛，对豆油影响复杂。",
-    "[中性] 8月大豆进口同比下降，但全年料持平或减少，对豆油成本端有一定支撑。"
+    "[利多]豆粕内外共振偏强运行，可能带动豆油情绪，但影响有限。",
+    "[利空]国内大豆供应旺盛，豆粕上方有压力，间接利空豆油。",
+    "[利多]菜油棕榈油上涨，油脂板块整体偏强，但菜籽油上涨1.15%显示油脂有支撑。",
+    "[中性]厄尔尼诺可能影响大豆产量，但市场已有预期，需观察实际影响。",
+    "[中性]8月大豆进口同比下降，可能影响供应，但全年预计持平或减少，供应担忧支撑价格。",
+    "[利空]中美关系不确定性，大豆进口或受干扰，但对豆油影响复杂。"
   ],
   "news_articles": [
     {
-      "title": "CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落",
-      "source": "guandian.cn",
-      "url": "https://news.google.com/rss/articles/CBMiTkFVX3lxTE93eEdnZG1aTXI0dkN6UGpxODlEay1IZUEwX3NuSUgtVkhVY3A0dG1aRTQ3ak5UVExmMjZmRXRxWWhlaHJMRDFUVHZpQ1pvdw?oc=5",
-      "detail": "CBOT农产品期货出现剧烈波动，谷物指数两日累计上涨1.60%后回落，显示市场情绪不稳，可能影响国内油脂价格。",
+      "title": "豆粕内外共振偏强运行 棕榈油短期受库存拖累",
+      "source": "finance.sina.cn",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQaWlrUGU2SVhEdlg0N1dlQUR3d2VpenBDZ0swUEt1cVRvTGI5YlJ3alRwTEVWdkNzMzl0S0xBYzBMaEM5T19jS2FYUThyclhuQUVMRmZlMG5zeURZaWJiMUpfY0lOMEFlQVdEN2ZtZ0xRU2FhdHRXQ0FxeWxNbWFtYkxCTTN5SjA1MVVDb25qUUFYNW5fNFZVYUxlZmowMlRMTzZrSE94bVY2NWRhR0E0cQ?oc=5",
+      "detail": "豆粕内外共振偏强，棕榈油受库存拖累，油脂板块分化，豆油或受豆粕带动。",
+      "impact": "利多"
+    },
+    {
+      "title": "【收评】豆粕日内上涨0.18% 机构称国内大豆及豆粕供应旺盛，上方存在压力",
+      "source": "同花顺",
+      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE1nSXE1YUltNHFoLXRvbDZHUVVRcUV0R3EwNDRFdF93TFNocWhtLXNKa3ZQTjNILUstRDhOcmlMZmxpOWFtbmdzOWJMZ1J2ejZzZUlwTi1zZkpTN3hHeHc?oc=5",
+      "detail": "豆粕上涨但供应压力大，可能限制豆油上涨。",
       "impact": "利空"
     },
     {
       "title": "青松：9月7日期货十大主力品种分析策略【顺势多空，亏小赚大，风控止损】",
       "source": "中金在线",
       "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9aaGFQOUZ1T2c2bjIxWkhlRHBiMmJFUzFJRmNCUndrbFBJZ2NqcVZpWm00cWRRdTRXNWFraXp1X0lOWHVyNDAtSDVoTVREX2F1RU9PWHlRaXYxLW1HX2l6UDFsUy1HLUdhdE4xVVRmVQ?oc=5",
-      "detail": "分析文章提供期货品种策略，强调顺势交易和风控止损，但未给出具体豆油数据，仅供参考。",
+      "detail": "期货策略分析，未提豆油具体走势，但提到顺势多空。",
       "impact": "中性"
     },
     {
       "title": "【收评】菜油日内上涨1.15% 机构称内盘油脂止涨调整，整体延续震荡偏强走势",
-      "source": "同花顺财经",
+      "source": "同花顺",
       "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE8ybVg5SWFlOTk3MnRxd0hJR1NCUnFRTUZzQU1xTFBVNXVnS3JkR2xxZjBldjNjWVJxbzZOY1NCVWhSRkxSQnBqeHRfQ1hFOTFocF9uNlhFaFJhc01ONkE?oc=5",
-      "detail": "菜油日内上涨1.15%，机构指出内盘油脂止涨调整，整体震荡偏强，但豆油今日下跌，板块分化。",
-      "impact": "中性"
-    },
-    {
-      "title": "厄尔尼诺引爆全球粮价，A股农业板块“强预期弱现实”博弈",
-      "source": "finance.sina.cn",
-      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPb05mQWYzM1B3S3NMdGhqa3JMNFJ0RGNFWGw1WGVDNkxWVmlpLVF2c29qeEg2M3VBQVRaOXNmcHhDZWF2djdwTllQeFIwSU1EY29lY0xCNDhuME5jaWN2M1B0R0dwYkVEakJ4OTExcXFVSm1mcEFjUVBxZElkQU1uU256dDhtMjdVZUlVdFpRMWhqZUxhSGxBWQ?oc=5",
-      "detail": "厄尔尼诺现象可能影响全球粮食产量，市场预期农业板块上涨，但现实基本面仍弱，对豆油价格有支撑但有限。",
+      "detail": "菜油上涨，油脂整体震荡偏强，豆油可能跟随。",
       "impact": "利多"
     },
     {
+      "title": "厄尔尼诺引爆全球粮价，A股农业板块“强预期弱现实”博弈",
+      "source": "凤凰网财经",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBzbjAtNUpyM001RmRaREthVWtmZUxGVG9Nbm96bFBmWU9aWVMtdVRfRTRRcmdLd2J1NkJ2V1RTbDdCb2NIVngwLTFwOW1BRVVM?oc=5",
+      "detail": "厄尔尼诺可能影响全球大豆产量，但市场已炒作，实际影响待观察。",
+      "impact": "中性"
+    },
+    {
       "title": "【收评】棕榈油日内上涨1.39% 机构称内盘油脂止涨调整，整体延续震荡偏强走势",
-      "source": "同花顺财经",
+      "source": "同花顺",
       "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTFBkX19PWjNjdF94Y0dzLTM0Q1ZkZjNBeFBYUlFWREpGdnQ0LVk1SjlmaEIyaWt2UC1CN0FkS2FoS1RmVHBsc1Fkem53OVJFVWRROTVvQjh6MzR3SjVZZFE?oc=5",
-      "detail": "棕榈油日内上涨1.39%，同样机构称止涨调整，震荡偏强，但豆油今日跌，油脂板块分化。",
+      "detail": "棕榈油涨1.39%，油脂板块偏强，但豆油涨幅有限。",
       "impact": "中性"
-    },
-    {
-      "title": "豆粕内外共振偏强运行 棕榈油短期受库存拖累",
-      "source": "finance.sina.cn",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQaWlrUGU2SVhEdlg0N1dlQUR3d2VpenBDZ0swUEt1cVRvTGI5YlJ3alRwTEVWdkNzMzl0S0xBYzBMaEM5T19jS2FYUThyclhuQUVMRmZlMG5zeURZaWJiMUpfY0lOMEFlQVdEN2ZtZ0xRU2FhdHRXQ0FxeWxNbWFtYkxCTTN5SjA1MVVDb25qUUFYNW5fNFZVYUxlZmowMlRMTzZrSE94bVY2NWRhOEE0cQ?oc=5",
-      "detail": "豆粕内外盘走强，棕榈油受库存拖累，但豆油无明显行情驱动，整体油脂区间震荡。",
-      "impact": "中性"
-    },
-    {
-      "title": "【收评】豆粕日内上涨0.18% 机构称国内大豆及豆粕供应旺盛，上方存在压力",
-      "source": "同花顺财经",
-      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE1nSXE1YUltNHFoLXRvbDZHUVVRcUV0R3EwNDRFdF93TFNocWhtLXNKa3ZQTjNILUstRDhOcmlMZmxpOWFtbmdzOWJMZ1J2ejZzZUlwTi1zZkpTN3hHeHc?oc=5",
-      "detail": "豆粕供应旺盛，上方有压力，可能拖累整个豆类板块，包括豆油。",
-      "impact": "利空"
     },
     {
       "title": "中国8月大豆进口量同比下降 全年料持平或减少",
       "source": "联合早报",
       "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9lbzZGaER5ZGtsTEthNVBNbVdrN3B4M0pLSENsNUhrMWJ2QW5yUldjNmZkSEVFbXQwN1V0dWd4RzFjOXlEeHNvWFhrQ1BXR3RuNXZsV1RGdWFiZlNmN0gzd0lNNVFjMzc5Nnc?oc=5",
-      "detail": "中国8月大豆进口同比下降，可能减少供应，对豆油成本端有支撑，但全年影响不明确。",
+      "detail": "8月大豆进口下降，可能减少供应，但全年预期持平或减少，支撑豆油价格。",
       "impact": "利多"
+    },
+    {
+      "title": "中国8月原油进口量环比增长6.2%，精铜与铜精矿进口量同比下降10%，集成电路出口金额同比飙升130%",
+      "source": "华尔街见闻",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5yX3Ffc0RZUHdibkRiWVdYeldZcGtFYlo1TUtnVjNqVUJCWEhfR3ZkOE9Jc3B0UnQ0TEhEMWpObXhLenplR1BlemJ5QW5pQUlnM29j?oc=5",
+      "detail": "原油进口增长可能影响生物柴油需求，但间接影响豆油。",
+      "impact": "中性"
+    },
+    {
+      "title": "大豆，给中美留了条缝",
+      "source": "电子工程专辑",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1jOTlETmFkUVZEVTFmNFpXRFFkTlhzanQ1enMtS2R1OE1SMW1Ob3pnaTBsLS1lZjBoLUZyNEhhWFdLRW9maUxKaFdrOU11T09YbWww?oc=5",
+      "detail": "中美大豆贸易或存空间，可能影响进口预期。",
+      "impact": "中性"
+    },
+    {
+      "title": "习特会前夕，中国大豆产业面临双重压力",
+      "source": "IDNFinancials",
+      "url": "https://news.google.com/rss/articles/CBMiowJBVV95cUxPOGRWQmZabmV3Mk1KUDlnRjktaUt2MnJCbzJEeXJTVkdqR2s0ZDJSSi1BNjhIQWJHMS0tSHF0c2NKdXFlUFRpSi1YSnB6Rkp4TnU0WDRIck9UWFVHVzVSZlYweU84ZlFZWEdxc2UwaWxWb2E1SDJGTllOMGRfU1JCczFOUU93YjBKOGVfMFRqa2REUkFoYUNnN1ZZWHl1bFp5eklvN1lVWXg4Y1pQMGRKckhmQ3RWU2ozcEpCT05QeXM1dFlJZmVCN2h5ZVZDcDlVZXVBbHIxZEtRZmo5TjRYTDhLcjNxX0kyRktQenlQWDlxVE5MT1JxWWhzTGdRUkRTU0RHeVZtUmRwNnQ2RWhJRFlEcXBPOTdyQXZNT1UtaC1HX1E?oc=5",
+      "detail": "中美会晤前大豆产业压力，贸易不确定性或影响豆油。",
+      "impact": "利空"
     }
   ],
   "watch_levels": {
-    "support": 9080.0,
-    "resistance": 9165.0
+    "support": 9065.0,
+    "resistance": 9168.0
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于连续合约，实际交易请以主力Y2701为准，注意换月风险。以上不构成投资建议。",
+  "risk_note": "以上分析基于当前数据和技术指标，不构成投资建议。市场有风险，入市需谨慎。连续合约与具体月份合约不同，请通过下单软件二次确认。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-09-08T15:58:37+00:00",
+  "generated_at_utc": "2026-09-08T20:43:03+00:00",
   "latest_date": "2026-09-08",
   "realtime_price": 9130.0,
-  "realtime_note": "盘口交易日归属标签 2026-09-09，最新盘口时间 23:00:00（不是未来行情），当前价 9130，涨跌 -0.87%",
+  "realtime_note": "实时行情截至 2026-09-09 23:00:00，当前价 9130，涨跌 -0.87%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-09-08T15:58:16+00:00",
+    "fetched_at_utc": "2026-09-08T20:42:43+00:00",
     "market_trading_day": "2026-09-09",
     "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落 - guandian.cn\n来源: guandian.cn\n发布时间UTC: 2026-09-02T05:16:10+00:00\nURL: https://news.google.com/rss/articles/CBMiTkFVX3lxTE93eEdnZG1aTXI0dkN6UGpxODlEay1IZUEwX3NuSUgtVkhVY3A0dG1aRTQ3ak5UVExmMjZmRXRxWWhlaHJMRDFUVHZpQ1pvdw?oc=5\n摘要: CBOT农产品期货剧烈波动 谷物指数两日涨1.60%又回落 guandian.cn\n\n[2] 青松：9月7日期货十大主力品种分析策略【顺势多空，亏小赚大，风控止损】_期货评论 - 中金在线\n来源: 中金在线\n发布时间UTC: 2026-09-07T09:47:01+00:00\nURL: https://news.google.com/rss/articles/CBMib0FVX3lxTE9aaGFQOUZ1T2c2bjIxWkhlRHBiMmJFUzFJRmNCUndrbFBJZ2NqcVZpWm00cWRRdTRXNWFraXp1X0lOWHVyNDAtSDVoTVREX2F1RU9PWHlRaXYxLW1HX2l6UDFsUy1HLUdhdE4xVVRmVQ?oc=5\n摘要: 青松：9月7日期货十大主力品种分析策略【顺势多空，亏小赚大，风控止损】_期货评论 中金在线\n\n[3] 【收评】菜油日内上涨1.15% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-09-07T07:21:01+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE8ybVg5SWFlOTk3MnRxd0hJR1NCUnFRTUZzQU1xTFBVNXVnS3JkR2xxZjBldjNjWVJxbzZOY1NCVWhSRkxSQnBqeHRfQ1hFOTFocF9uNlhFaFJhc01ONkE?oc=5\n摘要: 【收评】菜油日内上涨1.15% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 同花顺财经\n\n[4] 厄尔尼诺引爆全球粮价，A股农业板块“强预期弱现实”博弈 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-08T12:51:28+00:00\nURL: https://news.google.com/rss/articles/CBMimAFBVV95cUxPb05mQWYzM1B3S3NMdGhqa3JMNFJ0RGNFWGw1WGVDNkxWVmlpLVF2c29qeEg2M3VBQVRaOXNmcHhDZWF2djdwTllQeFIwSU1EY29lY0xCNDhuME5jaWN2M1BlR0dwYkVEakJ4OTExcXFVSm1mcEFjUVBxZElkQU1uU256dDhtMjdVZUlVdFpRMWhqZUxhSGxBWQ?oc=5\n摘要: 厄尔尼诺引爆全球粮价，A股农业板块“强预期弱现实”博弈 finance.sina.cn\n\n[5] 【收评】棕榈油日内上涨1.39% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-09-07T07:32:56+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTFBkX19PWjNjdF94Y0dzLTM0Q1ZkZjNBeFBYUlFWREpGdnQ0LVk1SjlmaEIyaWt2UC1CN0FkS2FoS1RmVHBsc1Fkem53OVJFVWRROTVvQjh6MzR3SjVZZFE?oc=5\n摘要: 【收评】棕榈油日内上涨1.39% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 同花顺财经\n\n[6] 豆粕内外共振偏强运行 棕榈油短期受库存拖累 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-04T02:45:44+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQaWlrUGU2SVhEdlg0N1dlQUR3d2VpenBDZ0swUEt1cVRvTGI5YlJ3alRwTEVWdkNzMzl0S0xBYzBMaEM5T19jS2FYUThyclhuQUVMRmZlMG5zeURZaWJiMUpfY0lOMEFlQVdEN2ZtZ0xRU2FhdHRXQ0FxeWxNbWFtYkxCTTN5SjA1MVVDb25qUUFYNW5fNFZVYUxlZmowMlRMTzZrSE94bVY2NWRhOEE0cQ?oc=5\n摘要: 豆粕内外共振偏强运行 棕榈油短期受库存拖累 finance.sina.cn\n\n[7] 【收评】豆粕日内上涨0.18% 机构称国内大豆及豆粕供应旺盛，上方存在压力 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-09-07T07:39:01+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE1nSXE1YUltNHFoLXRvbDZHUVVRcUV0R3EwNDRFdF93TFNocWhtLXNKa3ZQTjNILUstRDhOcmlMZmxpOWFtbmdzOWJMZ1J2ejZzZUlwTi1zZkpTN3hHeHc?oc=5\n摘要: 【收评】豆粕日内上涨0.18% 机构称国内大豆及豆粕供应旺盛，上方存在压力 同花顺财经\n\n[8] 中国8月大豆进口量同比下降 全年料持平或减少 - 联合早报\n来源: 联合早报\n发布时间UTC: 2026-09-08T06:01:50+00:00\nURL: https://news.google.com/rss/articles/CBMiakFVX3lxTE9lbzZGaER5ZGtsTEthNVBNbVdrN3B4M0pLSENsNUhrMWJ2QW5yUldjNmZkSEVFbXQwN1V0dWd4RzFjOXlEeHNvWFhrQ1BXR3RuNXZsV1RGdWFiZlNmN0gzd0lNNVFjMzc5Nnc?oc=5\n摘要: 中国8月大豆进口量同比下降 全年料持平或减少 联合早报\n\n[9] 中国8月原油进口量环比增长6.2%，精铜与铜精矿进口量同比下降10%，集成电路出口金额同比飙升130% - 华尔街见闻\n来源: 华尔街见闻\n发布时间UTC: 2026-09-08T07:33:39+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE5yX3Ffc0RZUHdibkRiWVdYeldZcGtFYlo1TUtnVjNqVUJCWEhfR3ZkOE9Jc3B0UnQ0TEhEMWpObXhLenplR1BlemJ5QW5pQUlnM29j?oc=5\n摘要: 中国8月原油进口量环比增长6.2%，精铜与铜精矿进口量同比下降10%，集成电路出口金额同比飙升130% 华尔街见闻\n\n[10] 大豆，给中美留了条缝 - 电子工程专辑\n来源: 电子工程专辑\n发布时间UTC: 2026-09-02T11:10:00+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1jOTlETmFkUVZEVTFmNFpXRFFkTlhzanQ1enMtS2R1OE1SMW1Ob3pnaTBsLS1lZjBoLUZyNEhhWFdLRW9maUxKaFdrOU11T09YbWww?oc=5\n摘要: 大豆，给中美留了条缝 电子工程专辑",
+  "news_summary": "[1] 豆粕内外共振偏强运行 棕榈油短期受库存拖累 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-04T02:45:44+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQaWlrUGU2SVhEdlg0N1dlQUR3d2VpenBDZ0swUEt1cVRvTGI5YlJ3alRwTEVWdkNzMzl0S0xBYzBMaEM5T19jS2FYUThyclhuQUVMRmZlMG5zeURZaWJiMUpfY0lOMEFlQVdEN2ZtZ0xRU2FhdHRXQ0FxeWxNbWFtYkxCTTN5SjA1MVVDb25qUUFYNW5fNFZVYUxlZmowMlRMTzZrSE94bVY2NWRhOEE0cQ?oc=5\n摘要: 豆粕内外共振偏强运行 棕榈油短期受库存拖累 finance.sina.cn\n\n[2] 【收评】豆粕日内上涨0.18% 机构称国内大豆及豆粕供应旺盛，上方存在压力 - 同花顺\n来源: 同花顺\n发布时间UTC: 2026-09-07T07:39:01+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE1nSXE1YUltNHFoLXRvbDZHUVVRcUV0R3EwNDRFdF93TFNocWhtLXNKa3ZQTjNILUstRDhOcmlMZmxpOWFtbmdzOWJMZ1J2ejZzZUlwTi1zZkpTN3hHeHc?oc=5\n摘要: 【收评】豆粕日内上涨0.18% 机构称国内大豆及豆粕供应旺盛，上方存在压力 同花顺\n\n[3] 青松：9月7日期货十大主力品种分析策略【顺势多空，亏小赚大，风控止损】_期货评论 - 中金在线\n来源: 中金在线\n发布时间UTC: 2026-09-07T09:47:01+00:00\nURL: https://news.google.com/rss/articles/CBMib0FVX3lxTE9aaGFQOUZ1T2c2bjIxWkhlRHBiMmJFUzFJRmNCUndrbFBJZ2NqcVZpWm00cWRRdTRXNWFraXp1X0lOWHVyNDAtSDVoTVREX2F1RU9PWHlRaXYxLW1HX2l6UDFsUy1HLUdhdE4xVVRmVQ?oc=5\n摘要: 青松：9月7日期货十大主力品种分析策略【顺势多空，亏小赚大，风控止损】_期货评论 中金在线\n\n[4] 【收评】菜油日内上涨1.15% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 - 同花顺\n来源: 同花顺\n发布时间UTC: 2026-09-07T07:21:01+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE8ybVg5SWFlOTk3MnRxd0hJR1NCUnFRTUZzQU1xTFBVNXVnS3JkR2xxZjBldjNjWVJxbzZOY1NCVWhSRkxSQnBqeHRfQ1hFOTFocF9uNlhFaFJhc01ONkE?oc=5\n摘要: 【收评】菜油日内上涨1.15% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 同花顺\n\n[5] 厄尔尼诺引爆全球粮价，A股农业板块“强预期弱现实”博弈 - 凤凰网财经\n来源: 凤凰网财经\n发布时间UTC: 2026-09-08T12:30:06+00:00\nURL: https://news.google.com/rss/articles/CBMiUEFVX3lxTFBzbjAtNUpyM001RmRaREthVWtmZUxGVG9Nbm96bFBmWU9aWVMtdVRfRTRRcmdLd2J1NkJ2V1RTbDdCb2NIVngwLTFwOW1BRVVM?oc=5\n摘要: 厄尔尼诺引爆全球粮价，A股农业板块“强预期弱现实”博弈 凤凰网财经\n\n[6] 【收评】棕榈油日内上涨1.39% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 - 同花顺\n来源: 同花顺\n发布时间UTC: 2026-09-07T07:32:56+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTFBkX19PWjNjdF94Y0dzLTM0Q1ZkZjNBeFBYUlFWREpGdnQ0LVk1SjlmaEIyaWt2UC1CN0FkS2FoS1RmVHBsc1Fkem53OVJFVWRROTVvQjh6MzR3SjVZZFE?oc=5\n摘要: 【收评】棕榈油日内上涨1.39% 机构称内盘油脂止涨调整，整体延续震荡偏强走势 同花顺\n\n[7] 中国8月大豆进口量同比下降 全年料持平或减少 - 联合早报\n来源: 联合早报\n发布时间UTC: 2026-09-08T06:01:50+00:00\nURL: https://news.google.com/rss/articles/CBMiakFVX3lxTE9lbzZGaER5ZGtsTEthNVBNbVdrN3B4M0pLSENsNUhrMWJ2QW5yUldjNmZkSEVFbXQwN1V0dWd4RzFjOXlEeHNvWFhrQ1BXR3RuNXZsV1RGdWFiZlNmN0gzd0lNNVFjMzc5Nnc?oc=5\n摘要: 中国8月大豆进口量同比下降 全年料持平或减少 联合早报\n\n[8] 中国8月原油进口量环比增长6.2%，精铜与铜精矿进口量同比下降10%，集成电路出口金额同比飙升130% - 华尔街见闻\n来源: 华尔街见闻\n发布时间UTC: 2026-09-08T07:33:39+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE5yX3Ffc0RZUHdibkRiWVdYeldZcGtFYlo1TUtnVjNqVUJCWEhfR3ZkOE9Jc3B0UnQ0TEhEMWpObXhLenplR1BlemJ5QW5pQUlnM29j?oc=5\n摘要: 中国8月原油进口量环比增长6.2%，精铜与铜精矿进口量同比下降10%，集成电路出口金额同比飙升130% 华尔街见闻\n\n[9] 大豆，给中美留了条缝 - 电子工程专辑\n来源: 电子工程专辑\n发布时间UTC: 2026-09-02T11:10:00+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1jOTlETmFkUVZEVTFmNFpXRFFkTlhzanQ1enMtS2R1OE1SMW1Ob3pnaTBsLS1lZjBoLUZyNEhhWFdLRW9maUxKaFdrOU11T09YbWww?oc=5\n摘要: 大豆，给中美留了条缝 电子工程专辑\n\n[10] 习特会前夕，中国大豆产业面临双重压力 - IDNFinancials\n来源: IDNFinancials\n发布时间UTC: 2026-09-08T10:20:00+00:00\nURL: https://news.google.com/rss/articles/CBMiowJBVV95cUxPOGRWQmZabmV3Mk1KUDlnRjktaUt2MnJCbzJEeXJTVkdqR2s0ZDJSSi1BNjhIQWJHMS0tSHF0c2NKdXFlUFRpSi1YSnB6Rkp4TnU0WDRIck9UWFVHVzVSZlYweU84ZlFZWEdxc2UwaWxWb2E1SDJGTllOMGRfU1JCczFOUU93YjBKOGVfMFRqa2REUkFoYUNnN1ZZWHl1bFp5eklvN1lVWXg4Y1pQMGRKckhmQ3RWU2ozcEpCT05QeXM1dFlJZmVCN2h5ZVZDcDlVZXVBbHIxZEtRZmo5TjRYTDhLcjNxX0kyRktQenlQWDlxVE5MT1JxWWhzTGdRUkRTU0RHeVZtUmRwNnQ2RWhJRFlEcXBPOTdyQXZNT1UtaC1HX1E?oc=5\n摘要: 习特会前夕，中国大豆产业面临双重压力 IDNFinancials",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 20.9,
+  "api_latency_seconds": 20.8,
   "token_usage": {
-    "prompt_tokens": 15502,
-    "completion_tokens": 2925,
-    "total_tokens": 18427,
+    "prompt_tokens": 15608,
+    "completion_tokens": 3068,
+    "total_tokens": 18676,
     "prompt_tokens_details": {
-      "cached_tokens": 768
+      "cached_tokens": 640
     },
-    "prompt_cache_hit_tokens": 768,
-    "prompt_cache_miss_tokens": 14734
+    "prompt_cache_hit_tokens": 640,
+    "prompt_cache_miss_tokens": 14968
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-09-08T15:58:37+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
-    "evidence_confidence": 55,
-    "issues": [],
+    "checked_at_utc": "2026-09-08T20:43:03+00:00",
+    "score": 85,
+    "status": "caution",
+    "label": "仅供参考",
+    "execution_allowed": false,
+    "evidence_confidence": 35,
+    "issues": [
+      {
+        "code": "low_evidence_confidence",
+        "severity": "medium",
+        "message": "AI 自评证据强度仅 35/100。"
+      }
+    ],
     "facts": {
       "realtime_price": 9130.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-09-08T15:58:16+00:00",
+      "realtime_fetched_at_utc": "2026-09-08T20:42:43+00:00",
       "realtime_market_tick_time": "23:00:00",
       "daily_rsi14": 82.7,
       "one_hour_boll_position": "中轨下方",
       "four_hour_boll_position": "中轨上方",
       "realtime_trading_day_label": "2026-09-09",
-      "realtime_label_is_future": true
+      "realtime_label_is_future": false
     }
   },
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-09-08T15:58:16+00:00",
+    "realtime_fetched_at_utc": "2026-09-08T20:42:43+00:00",
     "realtime_market_trading_day": "2026-09-09",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-09-08T13:22:29+00:00",
+    "daily_updated_at_utc": "2026-09-08T19:55:52+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-09-08T13:22:29+00:00",
-    "news_updated_at_utc": "2026-09-08T13:22:26+00:00",
-    "contract_bridge_updated_at_utc": "2026-09-08T13:22:26+00:00"
+    "intraday_updated_at_utc": "2026-09-08T19:55:52+00:00",
+    "news_updated_at_utc": "2026-09-08T19:55:49+00:00",
+    "contract_bridge_updated_at_utc": "2026-09-08T19:55:50+00:00"
   }
 }

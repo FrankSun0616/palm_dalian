@@ -1,214 +1,205 @@
 {
-  "summary": "本次分析基准时刻为北京时间2026-09-18T18:33:26+08:00。实时输入源自 Sina Market Center 实时抓取（input_status=live），realtime.price=9855.0，盘口 ticktime=15:04:37，涨跌幅=-2.14%（相对前结算价10070，change=-215）。该 ticktime 已落在当日午盘 13:30-15:00 收盘后，即今日日盘已结束，下一交易时段为今晚夜盘 21:00-23:00。P0 连续合约映射到实际主力 P2701（mapping_verified=true），次主力 P2705 报 10283，呈现远月升水结构，价差约428元/吨，持仓比约50.5%，换月状态为 watch（监控移仓）。综合 1小时、4小时与日线三个尺度：1小时价格9855位于布林中轨10006.95之下、贴近下轨9837.46；4小时价格9855位于中轨10130.0之下、逼近下轨9808.59；日线价格低于ma10(10119.2)、ma20(10142.35)，高于ma60(9689.65)，日线RSI14=42.6，尚未进入超卖区。日线基准模型 model_validation.status=rejected（样本外无优势），历史优势未被证实，不得据其推断未来概率。方向上以偏空震荡为主，但需注意1小时与4小时均处于布林下轨附近，存在技术性反抽风险。本内容不构成投资建议。",
-  "bias": "偏空",
+  "summary": "本次分析基准为 UTC 2026-09-18T15:48:29+00:00（北京时间 2026-09-18 23:48:29）。实时盘口 realtime 为 live 输入：棕榈油连续 P0 最新价 realtime.price=9862.0，ticktime=23:00:00，涨跌幅 change_pct=-0.45%（相对前结算 9907），realtime.tradedate=2026-09-21 仅是大商所交易日归属标签，realtime_label_is_future=true，不是未来行情、也不代表未来价格，下文一律以该 9862 作为入场区间、止损、目标位与布林位置判断的当前基准，不用日线或小时线 close 替代。当前 P0 连续价格与 P2701 一致，contract_bridge.mapping_verified=true，主力映射为棕榈油2701、次主力 P2705、次主力价差 447、远月升水、roll_state=watch（监控移仓，主力持仓占比约 0.5559），但连续合约均不可直接下单，须在交易软件二次确认具体月份。综合 1小时/4小时/日线三尺度：均为中轨下方、趋势偏空但已进入超卖/低位区，成交量与量比萎缩，属于下跌后的低位震荡而非放量趋势破位。日线 RSI14=42.6、未超卖也未超买；1小时 RSI 31.35、4小时 RSI 35.53 均处弱势，但 2小时 ADX 37.85 显示下行趋势强度仍在，短期反弹力度受限。固定日线基准模型 model_validation.status=rejected（样本外无优势，胜率 29.33%、期望 -0.2394R），其历史结果不得包装为未来概率，也不适用于本次日内方案。",
+  "bias": "震荡",
   "analysis": [
-    "1小时尺度：最新1小时K线收9855，布林通道上轨10176.44、中轨10006.95、下轨9837.46，实时价9855.0位于中轨下方且贴近下轨，带宽约3.39%处于较低水平；盘口ticktime 15:04:37已收盘，涨跌幅-2.14%，1小时RSI14=28.5显示短线已进入超卖区，存在下轨附近的技术性修复可能。",
-    "4小时尺度：4小时布林上轨10451.41、中轨10130.0、下轨9808.59，实时价9855.0位于中轨下方，尚未跌破下轨但距离仅约46点，带宽约6.35%；4小时RSI14=34.17偏弱但未超卖，ADX14=17.81显示趋势强度有限，属于弱势下行而非加速崩跌。",
-    "日线尺度：日线布林与均线系统显示实时价9855.0低于ma10(10119.2)与ma20(10142.35)，但仍高于ma60(9689.65)，日线RSI14=42.6未到超卖阈值(<30)，属于中期上行结构中的回调；今日日线开9942、高9979、低9836、收9855，全天基本收在低位，跌幅-1.04%（日线口径）与实时-2.14%（结算价口径）差异需注意基准不同。",
-    "实时价位置与支撑压力：realtime.price=9855.0，盘口bid/ask为9854/9855，买量2手、卖量51手，卖压明显；下方第一支撑为今日低点9836及1小时下轨9837.46构成的9836-9838密集区，上方压力为1小时中轨10006.95与今日开盘9942附近。",
-    "趋势结构：1小时EMA20为9985.17且斜率-0.63%（向下），4小时EMA20为10068.98且斜率-0.67%，日线自9月8日高点10489持续回落，多周期均线呈空头排列压制，反弹首先需要收复1小时中轨10006.95才能缓解短线下行压力。",
-    "量能观察：日线成交529225手，volume_ratio_20d=0.83，属温和缩量下跌；1小时volume_ratio20仅0.07、4小时volume_ratio20仅0.05，反映日内增量资金有限，价格下行更多由减仓推动——1小时持仓变动-4865、4小时持仓变动-5308，属于多头离场型下跌而非空头大举建仓。",
-    "多周期共振：1小时（中轨下方、贴下轨、RSI超卖）、4小时（中轨下方、近下轨、RSI偏弱）、日线（均线下方、RSI42.6中性偏弱）三者方向一致向下，但不处于同一超卖极值，共振偏向“弱势寻底”而非“全线极端超卖反抽”，操作上宜以反弹沽空为主、抄底为辅且控制仓位。",
-    "合约与流动性：P0 当前映射主力 P2701（9855，持仓576548），次主力 P2705（10283，持仓291208），远月升水、roll_state=watch，P2611报9533、P2612报9717，近远月价差结构合理；下单时须在交易软件二次确认具体月份与实时价，连续合约P0不可直接作为下单标的。"
+    "【实时价与盘口】realtime.price=9862.0、ticktime=23:00:00、change_pct=-0.45%，是本次 live 基准价；相对前结算 9907 下跌 45 点，盘口 bid 9862/ask 9863、买卖量 61/54，属于夜盘临近收盘的窄幅弱势整理。注意 tradedate=2026-09-21 是交易日归属标签（realtime_label_is_future=true），不是未来行情也不应表述为‘该未来日期收盘’。",
+    "【1小时布林】1小时 close 参考最新 bar 9870、上轨 10180.71、中轨 10001.1、下轨 9821.49、带宽 0.0359，current≈9862 位于中轨下方、贴近下轨；EMA20=9974.2 且斜率 -0.006 向下，说明短线仍受中轨与均线压制，回归中轨需先站上 9900–9970 区间。",
+    "【4小时布林】4小时上轨 10442.44、中轨 10109.6、下轨 9776.76、带宽 0.0658，current≈9862 位于中轨下方、距下轨约 85 点；4小时 RSI14=35.53 偏弱但未极端超卖，band 未见明显扩张，尚未有效跌破下轨，属于下沿附近的区间震荡。",
+    "【日线布林与均线】日线 close 9855、change_pct=-1.04%、量比 20 日 0.83，MA10=10119.2、MA20=10142.35、MA60=9689.65，current 9862 位于 MA10/MA20 下方、MA60 上方；20 日高 10489、低 9836，说明中期多头结构已被削弱但仍守在 60 日均线上方，属回撤而非趋势逆转。",
+    "【实时价位置与趋势】以 realtime.price=9862 为准，价格同时低于 1小时、4小时、日线中轨（10001/10110/约10142），且接近 4小时与日内低点 9837–9852 支撑带；2小时 ADX=37.85 表明中期下行趋势动能仍在，趋势偏空但短线进入低位钝化。",
+    "【量能与持仓】日线成交量 529225、量比 0.83 属缩量，夜盘 realtime volume=128828、open_interest=577655，1小时/4小时 volume_ratio20 显示成交量明显萎缩；缩量下跌意味着抛压释放但仍缺乏承接，突破需要量能配合才能确认方向。",
+    "【支撑压力】下方支撑 9852/9837/9836（实时低点与 20 日低点），再下看 9776.76（4小时下轨）；上方压力 9900–9914、9970（1小时 EMA20）、10001（1小时中轨）、10109.6（4小时中轨），反弹需逐级收复。",
+    "【三周期共振与模型约束】1小时偏弱贴下轨、4小时中轨下方、日线跌破 MA10/MA20 但仍守 MA60，三尺度未形成同向空头放量或同向多头共振，属偏空震荡；model_validation.status=rejected（样本外无优势），日线基准模型不能作为本次日内方向依据。",
+    "【合约桥接】contract_bridge 显示 P0 与 P2701 价格持仓一致、mapping_verified=true，主力 P2701，次主力 P2705 价差 447（远月升水，比率约 4.53%），roll_state=watch、主力持仓占比约 55.59%，仍在移仓监控期；P0/P2701 非可直接下单的月份，下单前须在交易软件核对具体月份与流动性。"
   ],
   "intraday_strategy": {
-    "bias": "偏空（反弹沽空为主，超卖反抽为辅）",
-    "entry": "今晚夜盘21:00开盘后，若价格反抽至9942-10007区间（今日开盘价至1小时中轨）遇阻，可分批沽空，参考入场区中值约9970；若夜盘直接低开并有效跌破9836，则等反抽9900-9920轻仓追空。",
-    "stop": "空单止损参考10095（约1小时中轨上方90点、接近4小时EMA20下沿），若1小时收盘站上10095则空头逻辑失效；有效跌破9836的追空单止损参考9910。",
-    "take_profit": "第一目标9808（4小时下轨），第二目标9700，第三目标9689.65（日线ma60），到达第一目标可减仓一半。",
-    "invalidation": "若1小时收盘价重新站上10006.95（1小时中轨）并伴随放量增仓，或4小时收盘收复10130（4小时中轨），则看空判断失效，转为观望。",
-    "notes": "适用时段：今晚夜盘21:00-23:00为主，明日早盘09:00-11:30为验证时段。当前1小时RSI14=28.5、2小时RSI14=32.69、4小时RSI14=34.17均偏弱，追空需防超卖反抽，建议轻仓、分批。data_limits：1小时/4小时K线updated_at_utc为09:33:55，实时ticktime 15:04:37均为日盘收盘数据，夜盘开盘后需重新核对最新盘口。不构成投资建议。"
+    "bias": "震荡",
+    "entry": "9862–9875（以 realtime.price=9862、ticktime=23:00:00 为基准，仅在 9852 支撑不破时轻仓试多；或在反抽 9900–9914 遇阻时轻仓试空）",
+    "stop": "试多止损 9828（跌破 9837/9836 日内与 20 日低点）；试空止损 9928（站上 9914 并逼近 9970 失败无效）",
+    "take_profit": "试多首目标 9970（1小时 EMA20），第二目标 10001（1小时中轨）；试空首目标 9837，第二目标 9777（4小时下轨附近）",
+    "invalidation": "若价格有效跌破 9836（放量且收盘低于该位），多头思路作废；若有效站上并收于 10001 之上，空头思路作废；无论多空，若 mapping_verified 变为 false 或需人工复核主力映射，则停止交易。",
+    "notes": "适用时段：下一交易日夜盘 21:00–23:00 开盘后观察（注意本次基准为 2026-09-18 23:48:29，北京时间，已过当晚 23:00 收盘，故‘今晚夜盘’已结束，应以下一交易日早盘 09:00–11:30 作为首选观察窗口，夜盘 21:00–23:00 为次选）。1小时+4小时均处中轨下方、量能萎缩，属低位震荡，建议轻仓、等待 9852 支撑确认或 9900–9970 压力确认后再动手，切忌追单；连续合约需在软件二次确认具体月份后下单。"
   },
   "decision_frame": {
-    "confidence": 62,
-    "regime": "多周期弱势下行/日线级回调，日内处于布林下轨附近的超卖寻底结构",
-    "edge": "主要优势在于1小时与4小时方向一致向下且日线跌破ma10/ma20，反弹沽空的顺大周期交易；劣势在于三周期RSI均偏低，短期继续下探空间受限于9836-9808支撑带，盈亏比一般。",
-    "no_trade_condition": "1）若首目标盈亏比低于1.5则不交易；2）contract_bridge.mapping_verified=true已确认，但若下单软件无法核实主力月份则列为不交易条件；3）若夜盘开盘直接跳空跌破9800或直接高开收复10095，均视为不交易条件。",
+    "confidence": 45,
+    "regime": "偏空震荡（三周期中轨下方、低位缩量）",
+    "edge": "短线在 9837–9970 区间内的高抛低吸优于追单；缺乏量能与三周期共振，方向性 edge 弱",
+    "no_trade_condition": "1）model_validation.status=rejected，历史优势未被证实，不得据此放大仓位；2）contract_bridge.mapping_verified 若变为 false 或无法在交易软件确认主力月份，禁止交易；3）若价格有效跌破 9836 或站上 10001，区间震荡逻辑失效应离场观望；4）首目标盈亏比低于 1.5 时不强行给方向。",
     "long_case": {
-      "trigger": "价格在9836-9808区间出现1小时级别的下影线止跌并伴随放量收复9900",
-      "entry_zone": "9840-9870",
-      "stop": "9795（跌破4小时下轨9808.59下方并确认失效）",
+      "trigger": "在 9852–9837 支撑带企稳并出现 1小时收盘回到 9870 上方",
+      "entry_zone": "9862–9875",
+      "stop": "9828",
       "targets": [
-        "9942",
-        "10007"
+        "9970",
+        "10001"
       ],
-      "invalidation": "1小时收盘跌破9795并站稳",
-      "risk_reward": "首目标(9942)相对入场9870、止损9795，风险75点、收益72点，盈亏比约0.96，低于1.5，按规则列为不交易条件。"
+      "invalidation": "有效跌破 9836",
+      "risk_reward": "约 1.6（以 9970 首目标、9865 入场中值、9828 止损估算）"
     },
     "short_case": {
-      "trigger": "夜盘反抽9942-10007遇阻回落，或有效跌破9836后反抽9900-9920",
-      "entry_zone": "9942-10007（中值约9970）",
-      "stop": "10095",
+      "trigger": "反抽 9900–9914 遇阻并出现 1小时收盘跌回 9870 下方",
+      "entry_zone": "9900–9914",
+      "stop": "9928",
       "targets": [
-        "9808",
-        "9700",
-        "9689.65"
+        "9837",
+        "9777"
       ],
-      "invalidation": "1小时收盘站上10006.95或4小时收盘站上10130",
-      "risk_reward": "入场9970、止损10095（风险125点）、首目标9808（收益162点），盈亏比约1.30；若取第二目标9700则约2.16，需结合分批入场提高整体盈亏比。"
+      "invalidation": "有效站上 10001",
+      "risk_reward": "约 1.5（以 9837 首目标、9907 入场中值、9928 止损估算）"
     },
     "event_risks": [
-      "原油价格波动对生物柴油需求及棕榈油能源属性的传导（舆情涉及油价100-107美元区间讨论）",
-      "马来西亚棕榈油出口税与上半月出口数据分化，影响外盘马棕走势",
-      "厄尔尼诺/天气题材对远期供应的扰动预期",
-      "国内油脂库存约300万吨的压顶讨论带来的情绪压制",
-      "夜盘美豆油、BMD马棕的联动跳空风险"
+      "原油大幅波动（WTI/布伦特，近期一度破 100 及 107 美元后回落）通过生物燃料需求传导至棕榈油；马来出口税与出口数据分化；厄尔尼诺天气预期；美元与宏观情绪扰动。"
     ],
     "data_limits": [
-      "realtime_fetch_status=live，但ticktime=15:04:37为日盘收盘时刻，夜盘21:00后需重新抓取实时行情",
-      "1小时/4小时/日线K线updated_at_utc为09:33:55，成交量在收盘集合阶段偏小，量能信号参考价值下降",
-      "P0为连续合约口径，不能直接下单，须映射至P2701并二次确认",
-      "model_validation.status=rejected，日线基准模型样本外无优势，禁止将其胜率或期望值当作未来概率",
-      "舆情最新两条发布于2026-09-17与2026-09-18，其余为9月14-16日，存在一定时滞"
+      "realtime 为 live 但 ticktime=23:00:00 已属夜盘尾段，流动性低；1小时/2小时/4小时最新 bar 成交量极小（volume_ratio20 为 0），部分 bar 为收盘/低量样本，不能代表活跃成交区间；日线与 intraday 更新于 2026-09-18T13:45:58+00:00 存在延迟；连续合约含换月跳空，回测与实盘存在差异。"
     ]
   },
   "news_impact": [
-    "[利空] 汇通网2026-09-17报道“100美元油价托底，300万吨库存压顶，棕榈油站上十字路口”，指出国内棕榈油库存约300万吨形成明显压力，虽油价高企托底生物柴油需求，但库存压制主导近月情绪，对P2701构成下行压力。",
-    "[利空] oilcn.com 2026-09-17报道“棕榈油跳水、豆菜油滑坡”，反映当日油脂板块集体走弱，与本次实时价9855、涨跌幅-2.14%的弱势表现方向一致，说明下跌具有板块性而非单一品种异动。",
-    "[利多] Sohu 2026-09-14报道原油上涨提振生物燃料吸引力、棕榈油价格走高，klsescreener 2026-09-15亦报道油价冲破107美元、马棕连涨逼近4900，能源端通过生柴掺混利润对棕榈油形成中期托底逻辑。",
-    "[中性] 汇通网2026-09-15报道马棕出口税维持10%、上半月出口数据分化，政策端未变而需求端信号不一，短期难以给出单一方向指引，需跟踪后续出口与产量数据。",
-    "[利空] 新浪2026-09-14晚评标题“宏观与供需双重施压，油脂板块承压运行”，指出宏观与供需两端同时施压，是近期油脂连续回调的情绪背景之一。",
-    "[中性] 潮起网2026-09-16以厄尔尼诺为线索讨论天气对农产品与商品的连锁影响，属于远期供应预期题材，短期对近月合约影响偏情绪化、方向不确定。",
-    "[中性] 新浪2026-09-14“油脂季报：天气定义未来，能源决定当下”强调天气与能源双主线，提示后续行情可能由原油与外盘马棕主导，单边判断需谨慎。",
-    "[中性] 光大期货9月14日与9月18日农产品日报均为机构例行观点汇总，涉及油脂基本面跟踪，可作为背景参考但不等同于交易信号，需结合实时盘口判断。"
+    "[中性]汇通网 2026-09-17 报道称棕榈油同时面临约 100 美元油价托底与约 300 万吨库存压顶，多空逻辑并存；该报道发布于本次基准时刻之前，属已发生信息，方向上不支持单边追多或追空，更偏向区间震荡。",
+    "[利空]同花顺财经 2026-09-18 收评显示棕榈油日内下跌 2.14%，机构称国内油脂小幅走高但油粕比走弱；价格已在此后进一步走弱至 realtime.price=9862，印证短期需求预期偏弱与油脂间强弱分化。",
+    "[利多]Sohu 2026-09-14 报道原油上涨提振生物燃料吸引力并推升棕榈油；油价高位通过生柴掺混需求传导，是当前 9862 附近的主要成本/需求支撑逻辑，但 9 月中旬油价回落削弱该支撑力度。",
+    "[中性偏空]汇通网 2026-09-15 称马棕出口税维持 10%、上半月出口数据分化拖累盘面；出口分化意味着外需不足以形成持续买盘，对连棕形成温和压制。",
+    "[中性]潮起网 2026-09-16 讨论厄尔尼诺对餐桌、矿山、资本市场的连锁影响；天气预期属市场情绪与前瞻题材，尚未兑现在当期供需数据中，对短期价格影响偏预期层面。",
+    "[利多]KLSE Screener 2026-09-15 报道油价冲破 107 美元、棕油连涨逼近 4900；此为 9 月中旬外部市场偏强信息，但随后的油价回落与连棕走弱表明该利多已部分消化。",
+    "[中性]新浪财经 2026-09-15 报道布伦特上涨受沙特输油管道停运及利比亚油田停产供应风险推动；供应端地缘扰动为油价与生柴题材提供波动来源，间接放大棕榈油波动但方向不明。",
+    "[利空]Mitrade 2026-09-17 报道美伊局势迎转机、WTI 原油失守 100 美元；油价回落直接削弱棕榈油的生物燃料替代需求逻辑，是 9 月中下旬连棕走弱的重要外部压力之一。"
   ],
   "news_articles": [
     {
       "title": "100美元油价托底，300万吨库存压顶，棕榈油站上十字路口",
       "source": "汇通网 Fx678",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBQNnNubTRGOWUzQWZSNkhJSnF4UjU1VHpseFlQUnFTV2JwT1VGLUlERUM2OGJiN3F2d2dwbWxLay0yczZCZHZJRnZxOFMzb0FsQWM2aEZlR2V5YW8?oc=5",
-      "detail": "文章以“100美元油价托底、300万吨库存压顶”为核心，指出原油价格高企通过生物柴油途径对棕榈油形成成本与需求端支撑，但国内棕榈油库存量约300万吨对近月盘面构成明显压制。发布时点为2026-09-17，与本次P2701持续走弱方向一致。综合看，短期库存压力盖过能源托底，对期价偏空，但油价若持续高位将限制下方空间。",
-      "impact": "利空"
+      "detail": "文章指出棕榈油同时受到约 100 美元油价的需求托底和约 300 万吨库存的供应压制，处于多空交织状态。高油价通过生柴掺混需求支撑油脂，而高库存限制上行空间。该报道发布于 2026-09-17，在本次 2026-09-18 基准之前，属已发生信息。结论偏区间震荡。",
+      "impact": "中性"
     },
     {
-      "title": "Mhy20260914油脂晚评：宏观与供需双重施压，油脂板块承压运行",
-      "source": "cj.sina.cn",
-      "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTE5Tdi12U0xCM29KUW9naW0yZkFqZzBFSzI3NThtekRROVBXWG1XejZHVDlPRDZoMWtJWTRfbjlSVFVNcHhCT1g5QjFMNHFOUXJtTGY5bVpMVGhwQk1HSFZ5OGJ6R1I2Y0ZRQllJYWVCblVwWC1JckJjN0FWUDNrZw?oc=5",
-      "detail": "该晚评将油脂板块承压归因于宏观环境与供需面的双重压制，发布于2026-09-14，是本周油脂回调初期的机构观点。其逻辑链条在于宏观风险偏好下降叠加供应宽松预期，压制油脂估值。对棕榈油而言属于方向性偏空的情绪佐证，但具体数据细节需结合其他来源交叉验证。",
+      "title": "【收评】棕榈油日内下跌2.14% 机构称国内油脂小幅走高，油粕比走弱",
+      "source": "同花顺财经",
+      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE1lTHNpQU9LZS0teVhfcDVIQm5xR1FnQjNwdjFmVmEzWklhb3Rnd0V6NTM3Rjg0VHIxdGE2dlZDWVBLWFBRMjRvcTE5QldSSjl0NnRmbXBnVG1WSE12Vnc?oc=5",
+      "detail": "收评显示棕榈油日内下跌 2.14%，机构提及国内油脂小幅走高但油粕比走弱。下跌与油粕比走弱共同指向油脂相对强势不足、粕类分流资金。该信息与随后 realtime.price=9862、change_pct=-0.45% 的弱势一致。整体偏空。",
       "impact": "利空"
     },
     {
       "title": "原油上涨提振生物燃料吸引力，棕榈油价格走高",
       "source": "Sohu",
       "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQZlNVX2xrSkwybFdTRWNtXzhtX05Idy14QzFLRzd6WVhxTDlMWUlTNUVoc3Q0VG9BWmlqZmNLWExiUjhvZ2poYVFyT1VKclRmOWdQcXFsNWE0YTI2dmN5ZjRmUzB4cV9yamk2YVdWLWpraWdITVVpSF84QmRPRGpvWVcwcjBFdUtiN0JYTg?oc=5",
-      "detail": "该报道发布于2026-09-14，核心逻辑是原油上涨提升生物燃料的经济性，从而带动棕榈油作为生柴原料的边际需求，推升棕榈油价格。这一能源传导链条是棕榈油中长期的重要多头逻辑。但需注意其为9月14日信息，本周后期盘面已明显回落，能源托底尚未能扭转近期弱势。",
+      "detail": "报道称原油上涨提升生物燃料吸引力，从而带动棕榈油价格走高。核心逻辑是油价—生柴掺混利润—植物油需求的传导链条。该逻辑是棕榈油的主要成本端支撑，但若油价回落则支撑减弱。属需求端利多。",
       "impact": "利多"
     },
     {
       "title": "马棕出口税维持10%，上半月出口数据分化拖累盘面",
       "source": "汇通网 Fx678",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBPcl9JSDNHOXAxOE5QV1VZTWRMNHg0aENPRkcyMTZzX3VmdnlkemhfZnlGOUdaVlJPbTF6R1c1Y0ZOU2xoQ2lfMlExT0FUVzhqVVBocVVCQm5xV0U?oc=5",
-      "detail": "报道发布于2026-09-15，指出马来西亚棕榈油出口税维持在10%不变，而9月上半月出口数据出现分化，未能给予盘面明确的需求支撑，从而拖累马棕及相关油脂价格。出口税政策稳定意味着成本端无新增扰动，出口分化则导致需求预期偏弱，对棕榈油价格总体中性偏空。",
-      "impact": "中性"
-    },
-    {
-      "title": "油价冲破107美元 棕油连涨逼近4900",
-      "source": "klsescreener.com",
-      "url": "https://news.google.com/rss/articles/CBMi-gFBVV95cUxNdl80cXdwTHNaeWltQUVvM1N4TlBLM2ZJSTE4Rm5acTYzOUZHRDNldko3bnF2MUxEWGdyNHlqTnNNaFB0WUZBbmo2U1Nud1dHM2JNZzV4Q2RnT1o2WW4xSzItLW9Ub3QyY3VkR2p3VmdkUFdSWUp3aFd1VGhrMlcwSVhBRTRrRUJ4MzduZlp2MkNCTWU5dlRpWFhEeEExVDRUVno3UVFqUVpOcXVsVk4wZ2RNNG9reVhuSEhzX3FZcWszVklha19uSF9ZQ0N6VnQ1c1AyRnY5TjVheEpBODhraGM1bGpRanhGdk1qUkVPeVh1dGZBNjY4cEVn?oc=5",
-      "detail": "该信息发布于2026-09-15，报道国际油价突破107美元、马来西亚棕油连续上涨逼近4900林吉特/吨。油价与马棕同步走强强化了生柴需求与成本传导逻辑，是本周前期棕榈油上行的重要外盘驱动。但国内P2701随后回落，显示内外盘节奏出现分化，外盘支撑对国内提振有限。",
-      "impact": "利多"
-    },
-    {
-      "title": "棕榈油“跳水” 豆菜油“滑坡”",
-      "source": "oilcn.com",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE43WmR4Y2tGRGUtTW1NRzczeFJzT1Vva0J6dVBid3R5cGs0akJCYjRrR19TX3ZoaVBtTmNfc3MwVGpUQktmUHJVRWFmWE9rRENEOVI3NHV0ZGhjUnR1MEFXTg?oc=5",
-      "detail": "报道发布于2026-09-17，标题明确指向棕榈油跳水、豆菜油滑坡，说明当日油脂板块出现集体性下挫。该现象与本次实时输入中P2701报9855、涨跌幅-2.14%、日线收9855一致。板块联动下跌通常意味着情绪与资金面的集中离场，短期对棕榈油构成偏空压力。",
+      "detail": "马来西亚棕榈油出口税维持 10%，上半月出口数据出现分化。出口税不变意味着成本端稳定，但出口分化意味着外需不足以形成稳定买盘。该组合对盘面形成温和拖累。方向上偏空。",
       "impact": "利空"
-    },
-    {
-      "title": "【油脂季报】天气定义未来，能源决定当下",
-      "source": "finance.sina.cn",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOWjdma3pmSmQwNy12dTVQSGlYNW9SSlFHQ3JyMDIzTDNNQW5fYWJkTnF3aUEwN0RUekNpSjE1WHN1alNZTUNZZ2JNU3h2SDBsQ0Znb2RLR3FXSXFIdkp3VHFBM3A0SnRNdV9KWE5lN3RXdnVpazdZaFNsUHFSa2dTQ1NSQVhDSlRjT0t0aTJoQzFGUUxSckVhXzdCTmJpQ05DM1phVkJCQ1ZWX2VrRGxBNQ?oc=5",
-      "detail": "该季报发布于2026-09-14，提出天气决定中期供应预期、能源价格决定当下估值的双主线框架。对棕榈油而言，意味着短期价格更受原油与生柴利润驱动，而厄尔尼诺等天气题材影响的是远月供应。该框架提示单边判断需区分短期能源扰动与中期供需，方向性不明确。",
-      "impact": "中性"
     },
     {
       "title": "餐桌、矿山、资本市场，厄尔尼诺搅动连锁风云",
       "source": "潮起网",
       "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE9JX3M1S184S1JnSGdITlVfS0xjN1I1YTYtWGtkM1kzR3ZZTmdtLTJNYUlKRUsyeVdyUlhCX2gzSUxZVDlXclVkb0ktcXRxUjJHRG4wcGJ3dGtDMF92TlhnRVdOOA?oc=5",
-      "detail": "文章发布于2026-09-16，讨论厄尔尼诺对农产品、矿业及资本市场的连锁影响，属于天气题材类综述。对棕榈油而言，厄尔尼诺可能影响东南亚产区降水与远期产量，属于远月供应预期扰动。但该类信息多为预期推演，短期对近月合约方向影响偏情绪化，不宜直接作为交易依据。",
+      "detail": "文章讨论厄尔尼诺对食品、矿产与资本市场的连锁影响，植物油供给预期是其中一环。天气题材通常影响远期供给预期而非当期现货。对短期棕榈油价格影响属预期层面。方向中性。",
       "impact": "中性"
     },
     {
-      "title": "光大期货：9月18日农产品日报",
-      "source": "finance.sina.com.cn",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPbmk4RnJFYlR0UUZITDdjZVk5UzBWS3JxcG1lV3pZU1JITnEtU2ZydG0xRG9tbS11MmZfR0xlNnlQcW5aQnZxTDlrRkxtc2IyVHBIb1BnSmFEemVKQUNZYW0zcDhuczRYTWFtQmRta1JHU3UzZFhsbVFUakhMSHJwcXRhUTBVbFlFd0NiSw?oc=5",
-      "detail": "该农产品日报发布于2026-09-18，属机构例行跟踪观点汇总，通常涵盖油脂基本面与外盘动态。作为当日最新机构声音，可作为背景参考，但日报类内容不等同于实时交易信号。需结合P2701实时9855及布林位置自行判断，不宜直接照搬结论。",
+      "title": "油价冲破107美元 棕油连涨逼近4900",
+      "source": "KLSE Screener",
+      "url": "https://news.google.com/rss/articles/CBMi-gFBVV95cUxNdl80cXdwTHNaeWltQUVvM1N4TlBLM2ZJSTE4Rm5acTYzOUZHRDNldko3bnF2MUxEWGdyNHlqTnNNaFB0WUZBbmo2U1Nud1dHM2JNZzV4Q2RnT1o2WW4xSzItLW9Ub3QyY3VkR2p3VmdkUFdSWUp3aFd1VGhrMlcwSVhBRTRrRUJ4MzduZlp2MkNCTWU5dlRpWFhEeEExVDRUVno3UVFqUVpOcXVsVk4wZ2RNNG9reVhuSEhzX3FZcWszVklha19uSF9ZQ0N6VnQ1c1AyRnY5TjVheEpBODhraGM1bGpRanhGdk1qUkVPeVh1dGZBNjY4cEVn?oc=5",
+      "detail": "报道称油价冲破 107 美元，马来棕油连续上涨并逼近 4900。外盘油脂强势通过进口成本与情绪传导至国内连棕。但该利多在 9 月中旬后随油价回落而部分消化。属成本端利多。",
+      "impact": "利多"
+    },
+    {
+      "title": "原油：布伦特上涨 沙特输油管道停运及利比亚油田停产带来供应风险",
+      "source": "新浪财经_金融信息服务商",
+      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxQU2VCOW92RjRBVmlPN05nUENyZUl4M0E2cGNTemJxZkdMM3dvaG90UnVtNFlmb0VuSUhMMEVoRlBvVjRIbjUxckFxRDRDd0pOSFZXREVRVlh6QXMwOWtwdkw1V0ZSRlBmdHRKQ1pKeWxUTVpMSVlXU3dyVFlMRTlseE9qem5QYWhxc1E?oc=5",
+      "detail": "报道布伦特上涨，因沙特输油管道停运与利比亚油田停产带来供应风险。原油供应端扰动提高能化与生柴链条的波动性。对棕榈油而言属间接、波动放大型信息。方向中性。",
       "impact": "中性"
+    },
+    {
+      "title": "美伊局势迎转机？WTI原油失守100美元！未来走势如何？",
+      "source": "Mitrade",
+      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOaDFzVDVGTWd6VWxPcWlfVFl1R1FpcVB2MlRNS3JPanBRRVMwdlNrMENodkhFM3JqMXI0QzVJYlltaE84YkVnRXctdzlOaG9la2FtZnNpNmtVUnZWRjUzcWpwYVRsMFozcThabllnVUluVV9ER1VwZ1JrcmZYUTIteVBZYw?oc=5",
+      "detail": "报道美伊局势出现转机预期，WTI 原油失守 100 美元。油价回落削弱棕榈油生物燃料替代需求的经济性。该信息与连棕 9 月中下旬走弱方向一致。对棕榈油偏空。",
+      "impact": "利空"
     }
   ],
   "watch_levels": {
-    "support": 9808.0,
-    "resistance": 10007.0
+    "support": 9836.0,
+    "resistance": 10001.0
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于用户提供的实时行情、分钟K线、日线与指定舆情搜索结果，实时输入realtime_fetch_status=live、ticktime=15:04:37，但该时点为今日日盘收盘，今晚夜盘21:00开盘后行情可能显著变化，务必重新抓取盘口。P0为连续合约分析口径，实际映射主力P2701（mapping_verified=true、roll_state=watch），下单前请在交易软件二次确认具体月份、价差与流动性。model_validation.status=rejected，日线基准模型样本外无优势，文中任何历史结果均不代表未来胜率或概率。当前1小时RSI14=28.5、2小时RSI14=32.69、4小时RSI14=34.17偏弱，日线RSI14=42.6属中性偏弱而非超卖，追空需防技术性反抽。舆情信息存在1-4日的时滞，方向性结论仅供参考。本内容不构成投资建议，投资者应自行承担交易风险。",
+  "risk_note": "本分析基于用户给定数据与舆情，不构成投资建议，不保证任何收益或方向正确。P0/Y0 为连续合约分析口径，不能直接下单；P0 当前映射 P2701（mapping_verified=true、主力持仓占比约 0.5559），但合约随主力换月会变化，roll_state=watch，下单前必须在交易软件二次确认具体月份、价差与流动性。realtime.tradedate=2026-09-21 仅为大商所交易日归属标签，realtime_label_is_future=true，绝非未来行情。realtime 虽为 live，但 ticktime=23:00:00 为夜盘尾段、流动性低；1小时/4小时/2小时最新 bar 成交量极小、volume_ratio20 为 0，日线与 intraday 更新存在延迟，不宜作为活跃量能依据。model_validation.status=rejected 表示日线基准模型样本外无优势（胜率 29.33%、期望 -0.2394R），其历史结果不得当作未来胜率或概率。舆情仅来自给定搜索结果，已区分事实、市场预期与推断；请控制仓位并独立复核。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-09-18T10:33:54+00:00",
+  "generated_at_utc": "2026-09-18T15:48:54+00:00",
   "latest_date": "2026-09-18",
-  "realtime_price": 9855.0,
-  "realtime_note": "实时行情截至 2026-09-18 15:04:37，当前价 9855，涨跌 -2.14%",
+  "realtime_price": 9862.0,
+  "realtime_note": "盘口交易日归属标签 2026-09-21，最新盘口时间 23:00:00（不是未来行情），当前价 9862，涨跌 -0.45%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-09-18T10:33:26+00:00",
-    "market_trading_day": "2026-09-18",
-    "market_tick_time": "15:04:37",
+    "fetched_at_utc": "2026-09-18T15:48:29+00:00",
+    "market_trading_day": "2026-09-21",
+    "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 100美元油价托底，300万吨库存压顶，棕榈油站上十字路口 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-17T11:49:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTFBQNnNubTRGOWUzQWZSNkhJSnF4UjU1VHpseFlQUnFTV2JwT1VGLUlERUM2OGJiN3F2d2dwbWxLay0yczZCZHZJRnZxOFMzb0FsQWM2aEZlR2V5YW8?oc=5\n摘要: 100美元油价托底，300万吨库存压顶，棕榈油站上十字路口 汇通网 Fx678\n\n[2] Mhy20260914油脂晚评：宏观与供需双重施压，油脂板块承压运行 - cj.sina.cn\n来源: cj.sina.cn\n发布时间UTC: 2026-09-14T11:40:03+00:00\nURL: https://news.google.com/rss/articles/CBMifkFVX3lxTE5Tdi12U0xCM29KUW9naW0yZkFqZzBFSzI3NThtekRROVBXWG1XejZHVDlPRDZoMWtJWTRfbjlSVFVNcHhCT1g5QjFMNHFOUXJtTGY5bVpMVGhwQk1HSFZ5OGJ6R1I2Y0ZRQllJYWVCblVwWC1JckJjN0FWUDNrZw?oc=5\n摘要: Mhy20260914油脂晚评：宏观与供需双重施压，油脂板块承压运行 cj.sina.cn\n\n[3] 原油上涨提振生物燃料吸引力，棕榈油价格走高 - Sohu\n来源: Sohu\n发布时间UTC: 2026-09-14T06:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQZlNVX2xrSkwybFdTRWNtXzhtX05Idy14QzFLRzd6WVhxTDlMWUlTNUVoc3Q0VG9BWmlqZmNLWExiUjhvZ2poYVFyT1VKclRmOWdQcXFsNWE0YTI2dmN5ZjRmUzB4cV9yamk2YVdWLWpraWdITVVpSF84QmRPRGpvWVcwcjBFdUtiN0JYTg?oc=5\n摘要: 原油上涨提振生物燃料吸引力，棕榈油价格走高 Sohu\n\n[4] 马棕出口税维持10%，上半月出口数据分化拖累盘面 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-15T10:13:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTFBPcl9JSDNHOXAxOE5QV1VZTWRMNHg0aENPRkcyMTZzX3VmdnlkemhfZnlGOUdaVlJPbTF6R1c1Y0ZOU2xoQ2lfMlExT0FUVzhqVVBocVVCQm5xV0U?oc=5\n摘要: 马棕出口税维持10%，上半月出口数据分化拖累盘面 汇通网 Fx678\n\n[5] 餐桌、矿山、资本市场，厄尔尼诺搅动连锁风云 - 潮起网\n来源: 潮起网\n发布时间UTC: 2026-09-16T01:10:54+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE9JX3M1S184S1JnSGdITlVfS0xjN1I1YTYtWGtkM1kzR3ZZTmdtLTJNYUlKRUsyeVdyUlhCX2gzSUxZVDlXclVkb0ktcXRxUjJHRG4wcGJ3dGtDMF92TlhnRVdOOA?oc=5\n摘要: 餐桌、矿山、资本市场，厄尔尼诺搅动连锁风云 潮起网\n\n[6] 油价冲破107美元 棕油连涨逼近4900 - klsescreener.com\n来源: klsescreener.com\n发布时间UTC: 2026-09-15T07:37:43+00:00\nURL: https://news.google.com/rss/articles/CBMi-gFBVV95cUxNdl80cXdwTHNaeWltQUVvM1N4TlBLM2ZJSTE4Rm5acTYzOUZHRDNldko3bnF2MUxEWGdyNHlqTnNNaFB0WUZBbmo2U1Nud1dHM2JNZzV4Q2RnT1o2WW4xSzItLW9Ub3QyY3VkR2p3VmdkUFdSWUp3aFd1VGhrMlcwSVhBRTRrRUJ4MzduZlp2MkNCTWU5dlRpWFhEeEExVDRUVno3UVFqUVpOcXVsVk4wZ2RNNG9reVhuSEhzX3FZcWszVklha19uSF9ZQ0N6VnQ1c1AyRnY5TjVheEpBODhraGM1bGpRanhGdk1qUkVPeVh1dGZBNjY4cEVn?oc=5\n摘要: 油价冲破107美元 棕油连涨逼近4900 klsescreener.com\n\n[7] 光大期货：9月14日农产品日报 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-14T02:05:07+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxPbnVPakw0c2JSbjJIczB0VUZVcDhMak5OVzQ0bFVvUlpSNS1wa3hfRU5ZQjZFaW5tbldMakpPb2hXOFhjdDM4U2lqcXdBQWZsc21Nb3dDMWtmY3gzMFhfVEh0NTVMNkUzd1JoNVdRMlh1M01VSXJEYjc5aXFmbFZoY2kwTmxnLVJ2cWo3QTNqbzE5dnBCQ0NFblZxaEVGelFuR1RJTWFJWk1adVJtQ180Yw?oc=5\n摘要: 光大期货：9月14日农产品日报 finance.sina.cn\n\n[8] 光大期货：9月18日农产品日报 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-09-18T01:53:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxPbmk4RnJFYlR0UUZITDdjZVk5UzBWS3JxcG1lV3pZU1JITnEtU2ZydG0xRG9tbS11MmZfR0xlNnlQcW5aQnZxTDlrRkxtc2IyVHBIb1BnSmFEemVKQUNZYW0zcDhuczRYTWFtQmRta1JHU3UzZFhsbVFUakhMSHJwcXRhUTBVbFlFd0NiSw?oc=5\n摘要: 光大期货：9月18日农产品日报 finance.sina.com.cn\n\n[9] 棕榈油“跳水” 豆菜油“滑坡” - oilcn.com\n来源: oilcn.com\n发布时间UTC: 2026-09-17T08:21:57+00:00\nURL: https://news.google.com/rss/articles/CBMiYEFVX3lxTE43WmR4Y2tGRGUtTW1NRzczeFJzT1Vva0J6dVBid3R5cGs0akJCYjRrR19TX3ZoaVBtTmNfc3MwVGpUQktmUHJVRWFmWE9rRENEOVI3NHV0ZGhjUnR1MEFXTg?oc=5\n摘要: 棕榈油“跳水” 豆菜油“滑坡” oilcn.com\n\n[10] 【油脂季报】天气定义未来，能源决定当下 - finance.sina.cn\n来源: finance.sina.cn\n发布时间UTC: 2026-09-14T09:21:42+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOWjdma3pmSmQwNy12dTVQSGlYNW9SSlFHQ3JyMDIzTDNNQW5fYWJkTnF3aUEwN0RUekNpSjE1WHN1alNZTUNZZ2JNU3h2SDBsQ0Znb2RLR3FXSXFIdkp3VHFBM3A0SnRNdV9KWE5lN3RXdnVpazdZaFNsUHFSa2dTQ1NSQVhDSlRjT0t0aTJoQzFGUUxSckVhXzdCTmJpQ05DM1phVkJCQ1ZWX2VrRGxBNQ?oc=5\n摘要: 【油脂季报】天气定义未来，能源决定当下 finance.sina.cn",
+  "news_summary": "[1] 100美元油价托底，300万吨库存压顶，棕榈油站上十字路口 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-17T11:49:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTFBQNnNubTRGOWUzQWZSNkhJSnF4UjU1VHpseFlQUnFTV2JwT1VGLUlERUM2OGJiN3F2d2dwbWxLay0yczZCZHZJRnZxOFMzb0FsQWM2aEZlR2V5YW8?oc=5\n摘要: 100美元油价托底，300万吨库存压顶，棕榈油站上十字路口 汇通网 Fx678\n\n[2] 【收评】棕榈油日内下跌2.14% 机构称国内油脂小幅走高，油粕比走弱 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-09-18T07:37:20+00:00\nURL: https://news.google.com/rss/articles/CBMiXkFVX3lxTE1lTHNpQU9LZS0teVhfcDVIQm5xR1FnQjNwdjFmVmEzWklhb3Rnd0V6NTM3Rjg0VHIxdGE2dlZDWVBLWFBRMjRvcTE5QldSSjl0NnRmbXBnVG1WSE12Vnc?oc=5\n摘要: 【收评】棕榈油日内下跌2.14% 机构称国内油脂小幅走高，油粕比走弱 同花顺财经\n\n[3] 原油上涨提振生物燃料吸引力，棕榈油价格走高 - Sohu\n来源: Sohu\n发布时间UTC: 2026-09-14T06:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxQZlNVX2xrSkwybFdTRWNtXzhtX05Idy14QzFLRzd6WVhxTDlMWUlTNUVoc3Q0VG9BWmlqZmNLWExiUjhvZ2poYVFyT1VKclRmOWdQcXFsNWE0YTI2dmN5ZjRmUzB4cV9yamk2YVdWLWpraWdITVVpSF84QmRPRGpvWVcwcjBFdUtiN0JYTg?oc=5\n摘要: 原油上涨提振生物燃料吸引力，棕榈油价格走高 Sohu\n\n[4] 马棕出口税维持10%，上半月出口数据分化拖累盘面 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-15T10:13:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTFBPcl9JSDNHOXAxOE5QV1VZTWRMNHg0aENPRkcyMTZzX3VmdnlkemhfZnlGOUdaVlJPbTF6R1c1Y0ZOU2xoQ2lfMlExT0FUVzhqVVBocVVCQm5xV0U?oc=5\n摘要: 马棕出口税维持10%，上半月出口数据分化拖累盘面 汇通网 Fx678\n\n[5] 餐桌、矿山、资本市场，厄尔尼诺搅动连锁风云 - 潮起网\n来源: 潮起网\n发布时间UTC: 2026-09-16T01:10:54+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE9JX3M1S184S1JnSGdITlVfS0xjN1I1YTYtWGtkM1kzR3ZZTmdtLTJNYUlKRUsyeVdyUlhCX2gzSUxZVDlXclVkb0ktcXRxUjJHRG4wcGJ3dGtDMF92TlhnRVdOOA?oc=5\n摘要: 餐桌、矿山、资本市场，厄尔尼诺搅动连锁风云 潮起网\n\n[6] 油价冲破107美元 棕油连涨逼近4900 - KLSE Screener\n来源: KLSE Screener\n发布时间UTC: 2026-09-15T07:37:43+00:00\nURL: https://news.google.com/rss/articles/CBMi-gFBVV95cUxNdl80cXdwTHNaeWltQUVvM1N4TlBLM2ZJSTE4Rm5acTYzOUZHRDNldko3bnF2MUxEWGdyNHlqTnNNaFB0WUZBbmo2U1Nud1dHM2JNZzV4Q2RnT1o2WW4xSzItLW9Ub3QyY3VkR2p3VmdkUFdSWUp3aFd1VGhrMlcwSVhBRTRrRUJ4MzduZlp2MkNCTWU5dlRpWFhEeEExVDRUVno3UVFqUVpOcXVsVk4wZ2RNNG9reVhuSEhzX3FZcWszVklha19uSF9ZQ0N6VnQ1c1AyRnY5TjVheEpBODhraGM1bGpRanhGdk1qUkVPeVh1dGZBNjY4cEVn?oc=5\n摘要: 油价冲破107美元 棕油连涨逼近4900 KLSE Screener\n\n[7] 4月1日技术分析报告：现货黄金、WTI原油期货-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-09-13T11:26:01+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE5wY01SUjhGWGR6THRKeUo2OU9ZaGE0WHB5YkJoSFdxN0xYdWNaTk4ycGRONmFwajd5bmhhNnp4QTNUY0J4U1EzNnNzaWhLaG8?oc=5\n摘要: 4月1日技术分析报告：现货黄金、WTI原油期货-市场参考 金十数据\n\n[8] 原油：布伦特上涨 沙特输油管道停运及利比亚油田停产带来供应风险 - 新浪财经_金融信息服务商\n来源: 新浪财经_金融信息服务商\n发布时间UTC: 2026-09-15T23:31:39+00:00\nURL: https://news.google.com/rss/articles/CBMiigFBVV95cUxQU2VCOW92RjRBVmlPN05nUENyZUl4M0E2cGNTemJxZkdMM3dvaG90UnVtNFlmb0VuSUhMMEVoRlBvVjRIbjUxckFxRDRDd0pOSFZXREVRVlh6QXMwOWtwdkw1V0ZSRlBmdHRKQ1pKeWxUTVpMSVlXU3dyVFlMRTlseE9qem5QYWhxc1E?oc=5\n摘要: 原油：布伦特上涨 沙特输油管道停运及利比亚油田停产带来供应风险 新浪财经_金融信息服务商\n\n[9] 史上首次升破900元/桶！原油期货飙涨 - 证券时报\n来源: 证券时报\n发布时间UTC: 2026-09-14T03:24:00+00:00\nURL: https://news.google.com/rss/articles/CBMiXEFVX3lxTE1Rc2MtV3R3cWRQTGZrY2lyZ0dJbDFIOHZINTlXZHQxbFY4c2F1MU44NktxRzE3ZjJ5dGwyTGVSYmNUcUlYanhHYTlfRjJQMVF0WFpmQXZYVV9wT2tW?oc=5\n摘要: 史上首次升破900元/桶！原油期货飙涨 证券时报\n\n[10] 美伊局势迎转机？WTI原油失守100美元！未来走势如何？ - Mitrade\n来源: Mitrade\n发布时间UTC: 2026-09-17T16:51:00+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxOaDFzVDVGTWd6VWxPcWlfVFl1R1FpcVB2MlRNS3JPanBRUVMwdlNrMENodkhFM3JqMXI0QzVJYlltaE84YkVnRXctdzlOaG9la2FtZnNpNmtVUnZWRjUzcWpwYVRsMFozcThabllnVUluVV9ER1VwZ1JrcmZYUTIteVBZYw?oc=5\n摘要: 美伊局势迎转机？WTI原油失守100美元！未来走势如何？ Mitrade",
   "symbol": "P0",
   "instrument_name": "棕榈油",
-  "api_latency_seconds": 28.0,
+  "api_latency_seconds": 25.0,
   "token_usage": {
-    "prompt_tokens": 15721,
-    "completion_tokens": 5653,
-    "total_tokens": 21374,
+    "prompt_tokens": 15622,
+    "completion_tokens": 4922,
+    "total_tokens": 20544,
     "prompt_tokens_details": {
       "cached_tokens": 640
     },
     "prompt_cache_hit_tokens": 640,
-    "prompt_cache_miss_tokens": 15081
+    "prompt_cache_miss_tokens": 14982
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-09-18T10:33:54+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
-    "evidence_confidence": 62,
-    "issues": [],
+    "checked_at_utc": "2026-09-18T15:48:54+00:00",
+    "score": 85,
+    "status": "caution",
+    "label": "仅供参考",
+    "execution_allowed": false,
+    "evidence_confidence": 45,
+    "issues": [
+      {
+        "code": "low_evidence_confidence",
+        "severity": "medium",
+        "message": "AI 自评证据强度仅 45/100。"
+      }
+    ],
     "facts": {
-      "realtime_price": 9855.0,
+      "realtime_price": 9862.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-09-18T10:33:26+00:00",
-      "realtime_market_tick_time": "15:04:37",
+      "realtime_fetched_at_utc": "2026-09-18T15:48:29+00:00",
+      "realtime_market_tick_time": "23:00:00",
       "daily_rsi14": 42.6,
       "one_hour_boll_position": "中轨下方",
       "four_hour_boll_position": "中轨下方",
-      "realtime_trading_day_label": "2026-09-18",
-      "realtime_label_is_future": false
+      "realtime_trading_day_label": "2026-09-21",
+      "realtime_label_is_future": true
     }
   },
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-09-18T10:33:26+00:00",
-    "realtime_market_trading_day": "2026-09-18",
-    "realtime_market_tick_time": "15:04:37",
+    "realtime_fetched_at_utc": "2026-09-18T15:48:29+00:00",
+    "realtime_market_trading_day": "2026-09-21",
+    "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-09-18T09:33:55+00:00",
+    "daily_updated_at_utc": "2026-09-18T13:45:58+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-09-18T09:33:55+00:00",
-    "news_updated_at_utc": "2026-09-18T09:33:51+00:00",
-    "contract_bridge_updated_at_utc": "2026-09-18T09:33:52+00:00"
+    "intraday_updated_at_utc": "2026-09-18T13:45:58+00:00",
+    "news_updated_at_utc": "2026-09-18T13:45:56+00:00",
+    "contract_bridge_updated_at_utc": "2026-09-18T13:45:56+00:00"
   }
 }

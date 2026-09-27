@@ -2170,9 +2170,7 @@ function renderAskResponse(data, fresh) {
     ? `V4-Flash 暂时无法回答：${data.error || "未知错误"}`
     : data.answer || "(无回复)";
   const time = data.asked_at_utc ? formatDateTime(data.asked_at_utc) : "";
-  const model = data.model === "deepseek-v4-flash"
-    ? "V4-Flash · 深度思考"
-    : data.model || "模型未知";
+  const model = deepseekModelLabel(data);
   const live = data.realtime_input && data.realtime_input.status === "live"
     ? data.realtime_input : null;
   const liveLabel = live
@@ -3053,13 +3051,30 @@ function updateNewsPanel() {
 
 // Click the small card to expand/collapse the full ticker section
 if (els.newsTickerToggle && els.newsTickerSection) {
-  els.newsTickerToggle.addEventListener("click", () => {
+  const toggleTicker = () => {
     const willShow = els.newsTickerSection.hidden;
     els.newsTickerSection.hidden = !willShow;
+    els.newsTickerToggle.setAttribute("aria-expanded", String(willShow));
+    const hint = els.newsTickerToggle.querySelector(".ticker-hint");
+    if (hint) hint.textContent = willShow ? "点击收起 ▴" : "点击展开 ▾";
     if (willShow) {
       els.newsTickerSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
+  };
+  els.newsTickerToggle.addEventListener("click", toggleTicker);
+  // The card is an <article role="button">, so Enter/Space must be wired by hand.
+  els.newsTickerToggle.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    toggleTicker();
   });
+}
+
+// The label reports the mode the run actually used (thinking_mode is written by
+// update_data.py / ask_deepseek.py), not a fixed marketing string.
+function deepseekModelLabel(payload) {
+  if (payload.model !== "deepseek-v4-flash") return payload.model || "模型未知";
+  return payload.thinking_mode === "enabled" ? "V4-Flash · 深度思考" : "V4-Flash · 非思考模式";
 }
 
 function biasClass(text) {
@@ -3136,7 +3151,7 @@ function updateAiPanel(ai) {
   els.aiBias.textContent = ai.bias || "--";
   els.aiBias.className = `bias-pill ${biasClass(ai.bias || "")}`;
   const status = ai.status === "ok" ? "DeepSeek" : "规则备用";
-  const modelLabel = ai.model === "deepseek-v4-flash" ? "V4-Flash · 深度思考" : (ai.model || "模型未知");
+  const modelLabel = deepseekModelLabel(ai);
   const generated = ai.generated_at_utc ? formatDateTime(ai.generated_at_utc) : "--";
   const live = ai.realtime_input && ai.realtime_input.status === "live"
     ? ai.realtime_input : null;
@@ -3352,7 +3367,10 @@ function updateDistanceLine() {
 document.querySelectorAll(".ai-tab").forEach((btn) => {
   btn.addEventListener("click", () => {
     const target = btn.dataset.tab;
-    document.querySelectorAll(".ai-tab").forEach((b) => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".ai-tab").forEach((b) => {
+      b.classList.toggle("active", b === btn);
+      b.setAttribute("aria-selected", String(b === btn));
+    });
     document.querySelectorAll(".ai-tab-content").forEach((c) => {
       c.hidden = c.dataset.tab !== target;
     });

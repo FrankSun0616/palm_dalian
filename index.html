@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="pragma" content="no-cache">
+  <meta name="color-scheme" content="light dark">
   <title>大连棕榈油 P0 连续短线分析</title>
-  <link rel="stylesheet" href="styles.css?v=20260818-2">
+  <link rel="stylesheet" href="styles.css?v=20260927-1">
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar">
+  <header class="topbar">
+    <div class="topbar-inner">
       <div class="topbar-main">
-        <section>
+        <section class="brand">
           <p class="eyebrow">
             <span id="eyebrowText">DCE Palm Oil Continuous</span>
             <span class="live-indicator" title="交易时段内每 5 秒尝试读取实时报价；后台数据按 GitHub Actions 实际运行时间更新">
@@ -22,8 +23,8 @@
           <h1 id="topbarTitle">大连棕榈油 P0 连续短线分析</h1>
         </section>
         <nav class="symbol-switcher" aria-label="切换品种">
-          <button class="sym-btn" data-sym="P0">P0 棕榈油</button>
-          <button class="sym-btn" data-sym="Y0">Y0 豆油</button>
+          <button class="sym-btn" data-sym="P0" type="button">P0 棕榈油</button>
+          <button class="sym-btn" data-sym="Y0" type="button">Y0 豆油</button>
           <script>
             (function() {
               var sym = localStorage.getItem("activeSymbol") || "P0";
@@ -36,8 +37,13 @@
       <div class="topbar-status">
         <div class="session-clock" id="sessionClock">北京时间 --:--</div>
         <div class="contract-pill" id="contractPill">DCE P0 1H / 4H / 日线</div>
+        <button id="themeToggleBtn" type="button" title="切换暗色/亮色" aria-label="切换暗色/亮色">🌙</button>
       </div>
-    </header>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section id="marketBanner" class="market-banner" role="status" hidden></section>
 
     <section class="market-context-row" aria-label="合约与联动行情">
       <details class="contract-bridge">
@@ -99,62 +105,64 @@
       </section>
     </section>
 
-    <section id="marketBanner" class="market-banner" hidden></section>
+    <section class="overview" aria-label="交易决策总览">
+      <div class="overview-hero">
+        <article class="metric quote-card">
+          <span>最新价</span>
+          <strong id="lastPrice">--</strong>
+          <small id="lastChange">--</small>
+          <small id="lastDistance">--</small>
+        </article>
 
-    <section class="decision-cockpit" aria-label="交易决策总览">
-      <article class="cockpit-cell gate-cell">
-        <span class="cockpit-label">交易许可</span>
-        <strong id="tradeGate" class="gate-pill neutral">等待数据</strong>
-        <p id="tradeGateReason">正在检查周期共振、净盈亏比、主力映射与策略证据。</p>
-        <div class="factor-row" id="tradeGateFactors"></div>
-      </article>
-      <article class="cockpit-cell">
-        <span class="cockpit-label">市场状态</span>
-        <strong id="marketRegime">--</strong>
-        <p id="regimeDetail">等待波动率与趋势强度。</p>
-      </article>
-      <article class="cockpit-cell">
-        <span class="cockpit-label">最近关键位</span>
-        <div class="level-pair">
-          <div><small>支撑</small><strong id="nearestSupport">--</strong></div>
-          <div><small>压力</small><strong id="nearestResistance">--</strong></div>
-        </div>
-        <p id="levelContext">等待关键价位计算。</p>
-      </article>
-      <article class="cockpit-cell">
-        <span class="cockpit-label">数据可信度</span>
-        <strong id="dataConfidence">--</strong>
-        <p id="dataConfidenceDetail">正在核对行情、AI 与舆情时间。</p>
-      </article>
-    </section>
+        <article class="cockpit-cell gate-cell">
+          <span class="cockpit-label">交易许可</span>
+          <strong id="tradeGate" class="gate-pill neutral">等待数据</strong>
+          <p id="tradeGateReason">正在检查周期共振、净盈亏比、主力映射与策略证据。</p>
+          <div class="factor-row" id="tradeGateFactors"></div>
+        </article>
 
-    <section class="summary-grid" aria-label="关键指标">
-      <article class="metric">
-        <span>最新价</span>
-        <strong id="lastPrice">--</strong>
-        <small id="lastChange">--</small>
-        <small id="lastDistance">--</small>
-      </article>
-      <article class="metric">
-        <span>趋势信号</span>
-        <strong id="signalText">--</strong>
-        <small id="signalDetail">--</small>
-      </article>
-      <article class="metric">
-        <span>20日上涨率</span>
-        <strong id="upDays">--</strong>
-        <small id="winRate">--</small>
-      </article>
-      <article class="metric">
-        <span>波动率</span>
-        <strong id="volatility">--</strong>
-        <small>近 20 日年化估算</small>
-      </article>
-      <article class="metric">
-        <span>数据状态</span>
-        <strong id="dataStatus">--</strong>
-        <small id="dataFreshness">--</small>
-      </article>
+        <article class="cockpit-cell levels-cell">
+          <span class="cockpit-label">最近关键位</span>
+          <div class="level-pair">
+            <div><small>支撑</small><strong id="nearestSupport">--</strong></div>
+            <div><small>压力</small><strong id="nearestResistance">--</strong></div>
+          </div>
+          <p id="levelContext">等待关键价位计算。</p>
+        </article>
+      </div>
+
+      <div class="kpi-strip" role="group" aria-label="关键指标">
+        <article class="cockpit-cell">
+          <span class="cockpit-label">市场状态</span>
+          <strong id="marketRegime">--</strong>
+          <p id="regimeDetail">等待波动率与趋势强度。</p>
+        </article>
+        <article class="cockpit-cell">
+          <span class="cockpit-label">数据可信度</span>
+          <strong id="dataConfidence">--</strong>
+          <p id="dataConfidenceDetail">正在核对行情、AI 与舆情时间。</p>
+        </article>
+        <article class="metric">
+          <span>趋势信号</span>
+          <strong id="signalText">--</strong>
+          <small id="signalDetail">--</small>
+        </article>
+        <article class="metric">
+          <span>20日上涨率</span>
+          <strong id="upDays">--</strong>
+          <small id="winRate">--</small>
+        </article>
+        <article class="metric">
+          <span>波动率</span>
+          <strong id="volatility">--</strong>
+          <small>近 20 日年化估算</small>
+        </article>
+        <article class="metric">
+          <span>数据状态</span>
+          <strong id="dataStatus">--</strong>
+          <small id="dataFreshness">--</small>
+        </article>
+      </div>
     </section>
 
     <section class="execution-playbook" aria-label="双向执行计划">
@@ -210,128 +218,74 @@
           </dl>
         </article>
       </div>
-    </section>
 
-    <details class="model-validation" aria-label="固定规则样本外检验">
-      <summary class="validation-summary">
-        <div>
-          <span>策略证据</span>
-          <strong>固定规则样本外检验</strong>
-          <small id="modelMethod">信号收盘确认，下一交易日开盘执行</small>
-        </div>
-        <strong id="modelStatus" class="model-status neutral">等待检验结果</strong>
-      </summary>
-      <div class="model-validation-body">
-        <div class="validation-grid">
-          <div><span>样本外交易</span><strong id="modelTrades">--</strong><small id="modelSplitDate">--</small></div>
-          <div><span>单笔期望</span><strong id="modelExpectancy">--</strong><small>扣除成本后 R</small></div>
-          <div><span>盈利因子</span><strong id="modelProfitFactor">--</strong><small>总盈利 / 总亏损</small></div>
-          <div><span>最大回撤</span><strong id="modelDrawdown">--</strong><small>按累计 R 计算</small></div>
-          <div><span>胜率</span><strong id="modelWinRate">--</strong><small id="modelDirectionCount">--</small></div>
-        </div>
-        <div class="validation-verdict">
-          <p id="modelVerdict">正在读取固定参数基准模型的历史样本外表现。</p>
-          <small id="modelLimitations">日线基准模型与 1H/4H 日内方案不同，结果不代表未来收益。</small>
-        </div>
-      </div>
-    </details>
-
-    <section class="intraday-board" aria-label="短线布林与舆情">
-      <article class="board-card">
-        <span>1小时布林通道</span>
-        <strong id="boll1hStatus">--</strong>
-        <p id="boll1hDetail">等待短线数据...</p>
-      </article>
-      <article class="board-card">
-        <span>2小时布林通道</span>
-        <strong id="boll2hStatus">--</strong>
-        <p id="boll2hDetail">等待短线数据...</p>
-      </article>
-      <article class="board-card">
-        <span>4小时布林通道</span>
-        <strong id="boll4hStatus">--</strong>
-        <p id="boll4hDetail">等待短线数据...</p>
-      </article>
-      <article class="board-card">
-        <span>2日布林通道</span>
-        <strong id="boll2dStatus">--</strong>
-        <p id="boll2dDetail">等待日线聚合...</p>
-      </article>
-      <article class="board-card">
-        <span>日内策略提示</span>
-        <strong id="intradayStrategyBias">--</strong>
-        <p id="intradayStrategyText">等待 1H/4H/日线数据...</p>
-      </article>
-      <article class="board-card news-ticker-card" id="newsTickerToggle" title="点击展开/收起实时新闻列表">
-        <span>实时舆情更新 <small class="ticker-hint">点击展开 ▾</small></span>
-        <strong id="newsRealtimeStatus">--</strong>
-        <p id="newsRealtimeText">等待舆情数据...</p>
-      </article>
-    </section>
-
-    <section class="overseas-panel">
-      <div class="section-head">
-        <h2>隔夜市场</h2>
-        <small id="overseasMeta">页面每 60 秒检查 · 关键领先指标</small>
-      </div>
-      <div class="overseas-grid" id="overseasGrid"></div>
-    </section>
-
-    <section class="multi-strategy">
-      <div class="section-head">
-        <h2>多周期状态</h2>
-        <small>用于确认结构，不替代上方执行计划</small>
-      </div>
-      <div class="strategy-cards" id="multiStrategyCards"></div>
-    </section>
-
-    <section id="newsTickerSection" class="news-ticker" hidden>
-      <div class="section-head">
-        <h2>实时新闻流</h2>
-        <small id="newsTickerMeta">页面每 60 秒检查最新快照</small>
-      </div>
-      <div id="newsTickerList"></div>
-    </section>
-
-    <section class="toolbar" aria-label="图表与数据控制">
-      <label>
-        周期
-        <select id="periodSelect">
-          <option value="120">近 120 日</option>
-          <option value="180" selected>近 180 日</option>
-          <option value="260">近 260 日</option>
-        </select>
-      </label>
-      <label>
-        均线
-        <select id="maSelect">
-          <option value="5,10,20">MA5 / MA10 / MA20</option>
-          <option value="10,20,60" selected>MA10 / MA20 / MA60</option>
-          <option value="20,60,120">MA20 / MA60 / MA120</option>
-        </select>
-      </label>
-      <label class="file-label">
-        导入 CSV
-        <input id="csvInput" type="file" accept=".csv,text/csv">
-      </label>
-      <button id="reloadBtn" title="从数据目录重新加载真实数据">重新加载真实数据</button>
-      <button id="demoBtn" title="切换到内置示例数据">显示示例</button>
-      <button id="themeToggleBtn" title="切换暗色/亮色">🌙</button>
-    </section>
-
-    <section class="workspace">
-      <section class="chart-panel" aria-label="K 线图">
-        <div class="chart-head">
+      <details class="model-validation" aria-label="固定规则样本外检验">
+        <summary class="validation-summary">
           <div>
-            <h2 id="chartTitle">P0 棕榈油连续日线</h2>
-            <p id="chartSubhead">示例数据，可通过 CSV 替换为真实行情</p>
+            <span>策略证据</span>
+            <strong>固定规则样本外检验</strong>
+            <small id="modelMethod">信号收盘确认，下一交易日开盘执行</small>
           </div>
-          <div class="legend" id="legend"></div>
+          <strong id="modelStatus" class="model-status neutral">等待检验结果</strong>
+        </summary>
+        <div class="model-validation-body">
+          <div class="validation-grid">
+            <div><span>样本外交易</span><strong id="modelTrades">--</strong><small id="modelSplitDate">--</small></div>
+            <div><span>单笔期望</span><strong id="modelExpectancy">--</strong><small>扣除成本后 R</small></div>
+            <div><span>盈利因子</span><strong id="modelProfitFactor">--</strong><small>总盈利 / 总亏损</small></div>
+            <div><span>最大回撤</span><strong id="modelDrawdown">--</strong><small>按累计 R 计算</small></div>
+            <div><span>胜率</span><strong id="modelWinRate">--</strong><small id="modelDirectionCount">--</small></div>
+          </div>
+          <div class="validation-verdict">
+            <p id="modelVerdict">正在读取固定参数基准模型的历史样本外表现。</p>
+            <small id="modelLimitations">日线基准模型与 1H/4H 日内方案不同，结果不代表未来收益。</small>
+          </div>
         </div>
-        <canvas id="priceCanvas" width="1200" height="620" aria-label="价格 K 线图"></canvas>
-        <div class="tooltip" id="chartTooltip" hidden></div>
-        <canvas id="volumeCanvas" width="1200" height="180" aria-label="成交量图"></canvas>
-      </section>
+      </details>
+    </section>
+
+    <section class="workspace" aria-label="行情图表与分析">
+      <div class="chart-module">
+        <section class="toolbar" aria-label="图表与数据控制">
+          <label>
+            周期
+            <select id="periodSelect">
+              <option value="120">近 120 日</option>
+              <option value="180" selected>近 180 日</option>
+              <option value="260">近 260 日</option>
+            </select>
+          </label>
+          <label>
+            均线
+            <select id="maSelect">
+              <option value="5,10,20">MA5 / MA10 / MA20</option>
+              <option value="10,20,60" selected>MA10 / MA20 / MA60</option>
+              <option value="20,60,120">MA20 / MA60 / MA120</option>
+            </select>
+          </label>
+          <div class="toolbar-secondary">
+            <label class="file-label">
+              导入 CSV
+              <input id="csvInput" type="file" accept=".csv,text/csv">
+            </label>
+            <button id="reloadBtn" type="button" title="从数据目录重新加载真实数据">重新加载真实数据</button>
+            <button id="demoBtn" type="button" title="切换到内置示例数据">显示示例</button>
+          </div>
+        </section>
+
+        <section class="chart-panel" aria-label="K 线图">
+          <div class="chart-head">
+            <div>
+              <h2 id="chartTitle">P0 棕榈油连续日线</h2>
+              <p id="chartSubhead">示例数据，可通过 CSV 替换为真实行情</p>
+            </div>
+            <div class="legend" id="legend"></div>
+          </div>
+          <canvas id="priceCanvas" width="1200" height="620" aria-label="价格 K 线图"></canvas>
+          <div class="tooltip" id="chartTooltip" hidden></div>
+          <canvas id="volumeCanvas" width="1200" height="180" aria-label="成交量图"></canvas>
+        </section>
+      </div>
 
       <aside class="analysis-panel" aria-label="DeepSeek 分析">
         <section class="ai-panel">
@@ -358,17 +312,17 @@
           </div>
           <div class="ai-actions">
             <button id="generateAiBtn" type="button">触发 V4-Flash P0/Y0 分析</button>
-            <p id="aiStatus" class="ai-status"></p>
+            <p id="aiStatus" class="ai-status" role="status"></p>
           </div>
 
-          <div class="ai-tabs">
-            <button class="ai-tab active" data-tab="tech" type="button">技术面</button>
-            <button class="ai-tab" data-tab="news" type="button">舆情</button>
-            <button class="ai-tab" data-tab="strategy" type="button">策略</button>
-            <button class="ai-tab" data-tab="ask" type="button">问答</button>
+          <div class="ai-tabs" role="tablist" aria-label="DeepSeek 分析视图">
+            <button class="ai-tab active" data-tab="tech" type="button" role="tab" aria-selected="true">技术面</button>
+            <button class="ai-tab" data-tab="news" type="button" role="tab" aria-selected="false">舆情</button>
+            <button class="ai-tab" data-tab="strategy" type="button" role="tab" aria-selected="false">策略</button>
+            <button class="ai-tab" data-tab="ask" type="button" role="tab" aria-selected="false">问答</button>
           </div>
 
-          <div class="ai-tab-content" data-tab="tech">
+          <div class="ai-tab-content" data-tab="tech" role="tabpanel">
             <p id="aiSummary">正在读取 AI 分析...</p>
             <ul id="aiList"></ul>
             <div class="levels">
@@ -384,7 +338,7 @@
             <small id="aiRisk">AI 分析仅供行情研究。</small>
           </div>
 
-          <div class="ai-tab-content" data-tab="news" hidden>
+          <div class="ai-tab-content" data-tab="news" role="tabpanel" hidden>
             <section id="aiNewsSection" class="ai-news-inner" hidden>
               <div class="news-layout">
                 <div>
@@ -400,7 +354,7 @@
             <p id="aiNewsEmpty" class="ai-tab-empty">暂无舆情数据。</p>
           </div>
 
-          <div class="ai-tab-content" data-tab="strategy" hidden>
+          <div class="ai-tab-content" data-tab="strategy" role="tabpanel" hidden>
             <div class="ai-strategy" id="aiStrategy" hidden>
               <h3>1H/4H 日内策略</h3>
               <div class="strategy-grid" id="aiStrategyGrid"></div>
@@ -441,11 +395,11 @@
             </details>
           </div>
 
-          <div class="ai-tab-content" data-tab="ask" hidden>
+          <div class="ai-tab-content" data-tab="ask" role="tabpanel" hidden>
             <div class="ask-box">
-              <textarea id="askInput" placeholder="问点什么？例如：有空单怎么处理？什么时候可能反弹？现在能追多吗？" rows="3" maxlength="500"></textarea>
+              <textarea id="askInput" aria-label="向 V4-Flash 提问" placeholder="问点什么？例如：有空单怎么处理？什么时候可能反弹？现在能追多吗？" rows="3" maxlength="500"></textarea>
               <button id="askBtn" type="button">直接问 V4-Flash</button>
-              <p id="askStatus" class="ai-status"></p>
+              <p id="askStatus" class="ai-status" role="status"></p>
               <div id="askResponse" class="ask-response" hidden>
                 <small id="askResponseMeta"></small>
                 <p id="askResponseText"></p>
@@ -454,9 +408,73 @@
           </div>
         </section>
       </aside>
+
+      <div class="tech-context">
+        <section class="intraday-module" aria-label="短线布林与舆情">
+          <div class="section-head">
+            <h2>短线布林与舆情</h2>
+          </div>
+          <div class="intraday-board">
+            <article class="board-card">
+              <span>1小时布林通道</span>
+              <strong id="boll1hStatus">--</strong>
+              <p id="boll1hDetail">等待短线数据...</p>
+            </article>
+            <article class="board-card">
+              <span>2小时布林通道</span>
+              <strong id="boll2hStatus">--</strong>
+              <p id="boll2hDetail">等待短线数据...</p>
+            </article>
+            <article class="board-card">
+              <span>4小时布林通道</span>
+              <strong id="boll4hStatus">--</strong>
+              <p id="boll4hDetail">等待短线数据...</p>
+            </article>
+            <article class="board-card">
+              <span>2日布林通道</span>
+              <strong id="boll2dStatus">--</strong>
+              <p id="boll2dDetail">等待日线聚合...</p>
+            </article>
+            <article class="board-card">
+              <span>日内策略提示</span>
+              <strong id="intradayStrategyBias">--</strong>
+              <p id="intradayStrategyText">等待 1H/4H/日线数据...</p>
+            </article>
+            <article class="board-card news-ticker-card" id="newsTickerToggle" title="点击展开/收起实时新闻列表" role="button" tabindex="0" aria-controls="newsTickerSection" aria-expanded="false">
+              <span>实时舆情更新 <small class="ticker-hint">点击展开 ▾</small></span>
+              <strong id="newsRealtimeStatus">--</strong>
+              <p id="newsRealtimeText">等待舆情数据...</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="newsTickerSection" class="news-ticker" hidden>
+          <div class="section-head">
+            <h2>实时新闻流</h2>
+            <small id="newsTickerMeta">页面每 60 秒检查最新快照</small>
+          </div>
+          <div id="newsTickerList"></div>
+        </section>
+
+        <section class="multi-strategy">
+          <div class="section-head">
+            <h2>多周期状态</h2>
+            <small>用于确认结构，不替代上方执行计划</small>
+          </div>
+          <div class="strategy-cards" id="multiStrategyCards"></div>
+        </section>
+
+        <section class="overseas-panel">
+          <div class="section-head">
+            <h2>隔夜市场</h2>
+            <small id="overseasMeta">页面每 60 秒检查 · 关键领先指标</small>
+          </div>
+          <div class="overseas-grid" id="overseasGrid"></div>
+        </section>
+      </div>
     </section>
 
-    <section class="analysis-grid">
+    <section class="analysis-grid" aria-label="日线研判">
       <article class="analysis-card">
         <h3>涨跌研判</h3>
         <p id="analysisText">正在计算...</p>
@@ -470,14 +488,14 @@
             <strong id="support" class="up">--</strong>
           </div>
         </div>
-        <h3 style="margin-top:14px;">结构观察</h3>
+        <h3 class="sub-head">结构观察</h3>
         <ul id="observationList"></ul>
       </article>
 
       <article class="analysis-card">
         <h3>技术指标</h3>
         <div class="indicator-grid" id="indicatorGrid"></div>
-        <h3 style="margin-top:14px;">信号评分</h3>
+        <h3 class="sub-head">信号评分</h3>
         <div class="scorebar"><span id="scoreFill"></span></div>
         <ul class="signal-list" id="signalList"></ul>
       </article>
@@ -485,7 +503,7 @@
       <article class="analysis-card">
         <h3>交易情景</h3>
         <div class="scenario-list" id="scenarioList"></div>
-        <h3 style="margin-top:14px;">风险位</h3>
+        <h3 class="sub-head">风险位</h3>
         <div class="risk-table" id="riskTable"></div>
       </article>
     </section>
@@ -493,7 +511,7 @@
     <p class="risk-note">本页面只用于行情学习和技术分析演示，不构成投资建议；期货交易具有高风险。</p>
   </main>
 
-  <script src="execution_logic.js?v=20260818-2"></script>
-  <script src="app.js?v=20260818-2"></script>
+  <script src="execution_logic.js?v=20260927-1"></script>
+  <script src="app.js?v=20260927-1"></script>
 </body>
 </html>

@@ -1,89 +1,80 @@
 /* ==========================================================================
-   DCE P0 / Y0 短线交易终端 — 视觉系统
+   DCE P0 / Y0 短线交易终端 — 视觉系统 v3
    --------------------------------------------------------------------------
-   专业交易终端：信息密集但在红色数字下保持冷静。页面永不跳动，视线永远落在
-   同一个槽位。结构来自 1px 平边框、一套 4px 间距刻度、以及在每 5 秒刷新中
-   保持列宽的等宽数字。没有渐变、没有玻璃拟态、没有装饰性动效；层次 = 边框 +
-   一层极细阴影。每个数字都配一个方向字形和一条时效说明，颜色只做强化而非
-   唯一含义；机器观点（DeepSeek）被视觉隔离在交易所数据之外。
+   扫读顺序 = 决策顺序：
+     ① 顶栏（品种锚点，桌面端吸顶）
+     ② 决策总览：最新价 · 交易许可 · 最近关键位 + 六项关键指标
+     ③ 双向执行计划（附策略证据）
+     ④ 图表 + DeepSeek 双栏；左栏下方接技术背景（布林 / 多周期 / 隔夜）
+     ⑤ 日线研判（解释层）
+   规则：颜色只做强化，每个状态都有文字或字形；数字一律等宽步进（tnum）；
+   13px 是全站字号下限；触控目标 ≥ 44px；没有装饰性渐变与玻璃拟态。
 
-   顺序：Tokens → Base → Layout → Components → Responsive
-   HTML 与 JS 已冻结；本文件是唯一的视觉来源。
+   顺序：Tokens → Base → Shell → 顶栏 → 各模块 → Responsive
    ========================================================================== */
 
 
 /* ==========================================================================
    1. TOKENS
    --up / --down / --line / --muted 必须保持为字面 hex：
-   app.js readColors() 会把它们直接喂给 ctx.fillStyle（color-mix 会让 K 线空白）。
+   app.js readColors() 会把它们直接喂给 canvas 的 fillStyle / strokeStyle。
    ========================================================================== */
 
 :root {
   color-scheme: light;
 
-  /* 底色与表面 */
-  --bg: #f2f4f7;
+  /* 表面 */
+  --bg: #eef1f5;
   --panel: #ffffff;
-  --surface-raised: #f7f9fb;
-  --surface-sunken: #eaeef3;
-  --bg-ai: #fbf7ef;
-  --canvas-bg: #fbfcfd;
+  --surface-raised: #f6f8fa;
+  --surface-sunken: #e8ecf1;
+  --control-active: #ffffff;
+  --bg-ai: #fffcf6;
+  --canvas-bg: #ffffff;
 
   /* 文字 */
-  --ink: #12181f;
-  --ink-2: #3c4653;
-  --muted: #5a6572;          /* literal — readColors() */
-  --flat: #5a6572;
+  --ink: #0e141b;
+  --ink-2: #36414d;
+  --muted: #5a6573;          /* literal — readColors() */
 
-  /* 分隔线 */
-  --line: #d2d9e2;           /* literal — readColors() */
-  --border-subtle: #e5eaf0;
-  --border-strong: #7e8894;
+  /* 分隔 */
+  --line: #d9dfe6;           /* literal — readColors()，同时是图表网格线 */
+  --border-subtle: #e8ecf1;
+  --border-strong: #8a95a3;  /* 输入框边框：对白底 ≥ 3:1 */
 
-  /* 方向色 — 中国习惯：涨=红 / 跌=绿 */
-  --up: #c9302a;             /* literal — readColors() */
-  --up-strong: #a3231e;
-  --up-bg: #fdeceb;
-  --up-border: #f0bfbc;
-  --down: #0b7a52;           /* literal — readColors() */
-  --down-strong: #075e3e;
-  --down-bg: #e2f5ec;
-  --down-border: #a6dcc2;
+  /* 方向色 — 中国习惯：涨 = 红 / 跌 = 绿 */
+  --up: #cf2e2e;             /* literal — readColors() */
+  --up-bg: #fdeeee;
+  --up-border: #f3c2c0;
+  --down: #077a4e;           /* literal — readColors() */
+  --down-bg: #e5f5ee;
+  --down-border: #a9dcc5;
 
-  /* 中性 / 警示 / 导航 */
+  /* 状态 */
   --neutral-bg: #eef1f5;
-  --neutral-border: #dde3ea;
-  --warn: #8a5c0a;
-  --warn-bg: #fff4e0;
-  --warn-border: #e8cf9a;
-  --info: #2563b0;
-  --info-bg: #eaf1fa;
+  --neutral-border: #d9dfe6;
+  --warn: #8f5b00;
+  --warn-bg: #fff5e1;
+  --warn-border: #eccf94;
+  --info: #1f5fbf;
+  --info-bg: #e9f0fb;
+  --info-border: #b9cdef;
 
   /* 操作 */
-  --action: #12181f;
+  --action: #1f5fbf;
+  --action-hover: #184f9f;
   --action-ink: #ffffff;
-  --action-hover: #2a333f;
   --focus: #1f66c9;
 
-  /* 图表叠加线（与 app.js 中硬编码的 MA 颜色视觉对齐） */
-  --accent: #c18c2d;
-  --gold: #c18c2d;
-  --blue: #2563b0;
-  --violet: #6b4f9e;
+  /* 字体：数字与正文同一族，靠 tabular-nums 对齐 —— 等宽字体只会让价格显得松散。 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+               "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei",
+               "Noto Sans SC", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-num: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+              Roboto, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei",
+              "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
 
-  /* 字体 */
-  --font-sans: Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont,
-               "Segoe UI", "PingFang SC", "HarmonyOS Sans SC",
-               "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
-  /* 数字栈末尾必须带中文字面：.indicator strong / .bridge-metric strong 这类
-     槽位是「多头排列」「55万 手」的混排，缺了 CJK 会掉进系统 fallback，
-     同一行里出现两种中文字形。 */
-  --font-num: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono",
-              "DIN Alternate", Menlo, Consolas,
-              "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei",
-              "Noto Sans SC", monospace;
-
-  /* 间距刻度 */
+  /* 间距（4px 刻度） */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -91,149 +82,130 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-7: 32px;
-  --space-8: 40px;
 
   /* 圆角 */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-pill: 999px;
 
-  /* 层次 */
-  --shadow-xs: 0 1px 1px rgba(16, 24, 32, .04);
-  --shadow-sm: 0 1px 2px rgba(16, 24, 32, .06);
-  --shadow-md: 0 1px 2px rgba(16, 24, 32, .06), 0 6px 16px rgba(16, 24, 32, .05);
-  --shadow-lg: 0 2px 4px rgba(16, 24, 32, .06), 0 16px 32px rgba(16, 24, 32, .08);
-  --shadow: var(--shadow-md);
+  /* 层次：亮色一层极细阴影，暗色靠表面明度 */
+  --shadow-card: 0 1px 2px rgba(15, 23, 33, .05);
+  --shadow-pop: 0 2px 6px rgba(15, 23, 33, .08), 0 12px 28px rgba(15, 23, 33, .12);
 
-  /* 动效 */
-  --motion-fast: 150ms cubic-bezier(0.2, 0, 0.38, 0.9);
-  --motion-base: 200ms cubic-bezier(0.2, 0, 0.38, 0.9);
-  --motion-slow: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* 布局 */
+  --shell-max: 1480px;
+  --gutter: 24px;
+  --module-gap: 20px;
+  --topbar-h: 72px;
+
+  --motion-fast: 140ms cubic-bezier(.2, 0, .38, .9);
 }
 
 /* 主题是一次 token 重映射，绝不是组件分叉。 */
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* 地面比面板再暗一档，卡片才浮得起来（原本 --bg/--panel 只有 1.09:1）。 */
-  --bg: #0a0e13;
-  --panel: #171d25;
-  --surface-raised: #232c3a;
-  --surface-sunken: #10161d;
-  --bg-ai: #1d2130;
-  --canvas-bg: #10161d;
+  --bg: #090c10;
+  --panel: #121820;
+  --surface-raised: #182029;
+  --surface-sunken: #0d1218;
+  --control-active: #243040;
+  --bg-ai: #14171d;
+  --canvas-bg: #0e131a;
 
-  --ink: #e8eef4;
-  --ink-2: #c2ccd8;
-  --muted: #a3aebc;          /* literal — readColors() */
-  --flat: #a3aebc;
+  --ink: #e7ecf2;
+  --ink-2: #c3ccd6;
+  --muted: #97a3b1;          /* literal — readColors() */
 
-  /* 卡片描边要在暗色下真的看得见：#2f3947 对 --panel 只有 1.45:1。 */
-  --line: #3a4657;           /* literal — readColors() */
-  --border-subtle: #2a3340;
-  --border-strong: #6b7a90;
+  --line: #2c3745;           /* literal — readColors() */
+  --border-subtle: #1f2833;
+  --border-strong: #5d6b7c;
 
-  --up: #ff6a5c;             /* literal — readColors() */
-  --up-strong: #ff8b80;
-  --up-bg: #3a1c19;
-  --up-border: #6b2f28;
-  --down: #35d08a;           /* literal — readColors() */
-  --down-strong: #5ce0a5;
-  --down-bg: #0e3226;
-  --down-border: #1d5f45;
+  --up: #ff5b4f;             /* literal — readColors() */
+  --up-bg: #361613;
+  --up-border: #6e2a24;
+  --down: #2ec98a;           /* literal — readColors() */
+  --down-bg: #0c2c21;
+  --down-border: #1b5a42;
 
-  --neutral-bg: #262e3a;
-  --neutral-border: #333c4a;
-  --warn: #f0b74f;
-  --warn-bg: #3a2a10;
-  --warn-border: #6b5220;
-  --info: #6ea8f0;
-  --info-bg: #16263c;
+  --neutral-bg: #1b232d;
+  --neutral-border: #2c3745;
+  --warn: #f2b84b;
+  --warn-bg: #30230b;
+  --warn-border: #6a4f1c;
+  --info: #6aa6f5;
+  --info-bg: #132238;
+  --info-border: #2b4a78;
 
-  --action: #2f6fd0;
+  --action: #2f6fd6;
+  --action-hover: #3d7fe6;
   --action-ink: #ffffff;
-  --action-hover: #3f80e2;
   --focus: #6aa8ff;
 
-  --accent: #e0a63e;
-  --gold: #e0a63e;
-  --blue: #6ea8f0;
-  --violet: #b08bdd;
-
-  --shadow-xs: 0 1px 1px rgba(0, 0, 0, .35);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5);
-  --shadow-md: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .35);
-  --shadow-lg: 0 2px 6px rgba(0, 0, 0, .5), 0 18px 36px rgba(0, 0, 0, .45);
-  --shadow: var(--shadow-md);
+  --shadow-card: 0 0 0 transparent;   /* 不能写 none：它要和 inset 色条拼成阴影列表 */
+  --shadow-pop: 0 2px 6px rgba(0, 0, 0, .5), 0 16px 32px rgba(0, 0, 0, .45);
 }
 
-/* 系统偏好只在用户没有显式选择「亮色」时生效；
-   applyTheme() 总会盖章 data-theme，所以这里必须加护栏。 */
+/* 系统偏好只在未显式选择亮色时生效；applyTheme() 总会盖章 data-theme，
+   这一段只负责 JS 执行前的首帧，避免暗色用户看到一次白闪。 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --bg: #0a0e13;
-    --panel: #171d25;
-    --surface-raised: #232c3a;
-    --surface-sunken: #10161d;
-    --bg-ai: #1d2130;
-    --canvas-bg: #10161d;
+    --bg: #090c10;
+    --panel: #121820;
+    --surface-raised: #182029;
+    --surface-sunken: #0d1218;
+    --control-active: #243040;
+    --bg-ai: #14171d;
+    --canvas-bg: #0e131a;
 
-    --ink: #e8eef4;
-    --ink-2: #c2ccd8;
-    --muted: #a3aebc;
-    --flat: #a3aebc;
+    --ink: #e7ecf2;
+    --ink-2: #c3ccd6;
+    --muted: #97a3b1;
 
-    --line: #3a4657;
-    --border-subtle: #2a3340;
-    --border-strong: #6b7a90;
+    --line: #2c3745;
+    --border-subtle: #1f2833;
+    --border-strong: #5d6b7c;
 
-    --up: #ff6a5c;
-    --up-strong: #ff8b80;
-    --up-bg: #3a1c19;
-    --up-border: #6b2f28;
-    --down: #35d08a;
-    --down-strong: #5ce0a5;
-    --down-bg: #0e3226;
-    --down-border: #1d5f45;
+    --up: #ff5b4f;
+    --up-bg: #361613;
+    --up-border: #6e2a24;
+    --down: #2ec98a;
+    --down-bg: #0c2c21;
+    --down-border: #1b5a42;
 
-    --neutral-bg: #262e3a;
-    --neutral-border: #333c4a;
-    --warn: #f0b74f;
-    --warn-bg: #3a2a10;
-    --warn-border: #6b5220;
-    --info: #6ea8f0;
-    --info-bg: #16263c;
+    --neutral-bg: #1b232d;
+    --neutral-border: #2c3745;
+    --warn: #f2b84b;
+    --warn-bg: #30230b;
+    --warn-border: #6a4f1c;
+    --info: #6aa6f5;
+    --info-bg: #132238;
+    --info-border: #2b4a78;
 
-    --action: #2f6fd0;
+    --action: #2f6fd6;
+    --action-hover: #3d7fe6;
     --action-ink: #ffffff;
-    --action-hover: #3f80e2;
     --focus: #6aa8ff;
 
-    --accent: #e0a63e;
-    --gold: #e0a63e;
-    --blue: #6ea8f0;
-    --violet: #b08bdd;
-
-    --shadow-xs: 0 1px 1px rgba(0, 0, 0, .35);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5);
-    --shadow-md: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .35);
-    --shadow-lg: 0 2px 6px rgba(0, 0, 0, .5), 0 18px 36px rgba(0, 0, 0, .45);
-    --shadow: var(--shadow-md);
+    --shadow-card: 0 0 0 transparent;   /* 不能写 none：它要和 inset 色条拼成阴影列表 */
+    --shadow-pop: 0 2px 6px rgba(0, 0, 0, .5), 0 16px 32px rgba(0, 0, 0, .45);
   }
 }
 
 
 /* ==========================================================================
    2. BASE
-   13px 是全站字号绝对下限（父亲每天要读这一页）。
    ========================================================================== */
 
 * { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var(--space-4);
+}
 
 body {
   margin: 0;
@@ -241,54 +213,33 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-button, select, input, textarea { font: inherit; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
 
 h1, h2, h3, p { margin-top: 0; }
-
-h1 {
-  margin-bottom: 0;
-  font-size: 28px;
-  line-height: 1.18;
-  font-weight: 800;
-  letter-spacing: -.01em;
-}
-
-h2 {
-  margin-bottom: var(--space-2);
-  font-size: 20px;
-  line-height: 1.35;
-  font-weight: 800;
-}
-
-h3 {
-  margin-bottom: var(--space-2);
-  font-size: 18px;
-  line-height: 1.35;
-  font-weight: 800;
-}
+h1 { margin-bottom: 0; font-size: 19px; line-height: 1.3; font-weight: 700; letter-spacing: -.005em; }
+h2 { margin-bottom: 0; font-size: 16px; line-height: 1.4; font-weight: 700; }
+h3 { margin-bottom: var(--space-2); font-size: 15px; line-height: 1.4; font-weight: 700; }
 
 a { color: var(--info); }
 
 /* JS 会整串重写 className，`hidden` 必须永远赢。 */
 [hidden] { display: none !important; }
 
-/* 键盘可达性：原文件里一条 focus 规则都没有。 */
 :where(button, a, select, input, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-  border-radius: inherit;
 }
 
-/* 深色 / 实心按钮上，2px 环需要一圈光晕才找得到。 */
+/* 实心按钮上的焦点环需要一圈光晕才找得到。 */
 .ai-actions button:focus-visible,
 .ask-box button:focus-visible,
-.sym-btn.active:focus-visible,
-.contract-pill:focus-visible {
-  outline-color: var(--focus);
+.sym-btn.active:focus-visible {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 30%, transparent);
 }
 
@@ -300,7 +251,6 @@ a { color: var(--info); }
     scroll-behavior: auto !important;
   }
   .live-pulse, .live-dot { animation: none; opacity: 1; }
-  .is-loading { background: var(--surface-sunken); }
 }
 
 @keyframes live-pulse {
@@ -308,18 +258,22 @@ a { color: var(--info); }
   50%      { opacity: .35; transform: scale(.7); }
 }
 
-/* 可选的加载骨架钩子：按最终布局尺寸渲染，加上它不会产生任何位移。
-   目前没有 JS 会输出它，属于纯预留。 */
-.is-loading {
-  background: linear-gradient(90deg,
-              var(--surface-sunken) 0%, var(--neutral-bg) 50%, var(--surface-sunken) 100%);
-  border-radius: var(--radius-sm);
-  color: transparent !important;
-  min-height: 1em;
+/* 数字统一步进：价格在 5 秒刷新里不能左右抖动。 */
+.num,
+#lastPrice, #lastChange, #lastDistance, .session-clock,
+.level-pair strong, .setup-price, .no-trade-zone, .setup-rows dd,
+.plan-quality strong, .bridge-live-price, .bridge-metric > strong,
+#siblingPrice, .pct, .validation-grid strong, .overseas-price,
+.tf-price, .tf-rows .row > span:last-child, .alignment-score strong,
+.levels strong, .indicator strong, .risk-row strong, .scenario strong,
+.pos-calc-grid input, .pos-calc-out strong, .factor-row span,
+.ticker-card-meta, .tooltip, .kpi-strip strong {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 /* 方向色工具类 —— !important 必须保留：
-   JS 在 ~15 个节点上整串重写 className，去掉后组件规则会赢，方向色消失。 */
+   JS 在十几个节点上整串重写 className，去掉后组件规则会盖掉方向色。 */
 .up   { color: var(--up)   !important; }
 .down { color: var(--down) !important; }
 .quality-good { color: var(--down) !important; }
@@ -327,98 +281,155 @@ a { color: var(--info); }
 
 
 /* ==========================================================================
-   3. LAYOUT SHELL
-   DOM 顺序就是阅读优先级，除下面这一段既有 order 外不得再重排。
+   3. SHELL
    ========================================================================== */
+
+.topbar-inner,
+.app-shell {
+  width: min(var(--shell-max), calc(100% - 2 * var(--gutter)));
+  margin-inline: auto;
+}
 
 .app-shell {
   display: flex;
   flex-direction: column;
-  width: min(1480px, calc(100% - 28px));
-  margin: 0 auto;
-  padding: var(--space-3) 0 var(--space-5);
+  gap: var(--module-gap);
+  padding: var(--space-5) 0 var(--space-7);
 }
 
-.topbar          { order: 1; }
-.market-context-row { order: 2; }
-.market-banner   { order: 3; }
-.decision-cockpit { order: 4; }
-.summary-grid    { order: 5; }
-.execution-playbook { order: 6; }
-.toolbar         { order: 7; }
-.workspace       { order: 8; }
-.intraday-board  { order: 9; }
-.overseas-panel  { order: 10; }
-.multi-strategy  { order: 11; }
-.model-validation { order: 12; }
-.news-ticker     { order: 13; }
-.analysis-grid   { order: 14; }
-.risk-note       { order: 15; }
+/* 模块头：标题 + 时效/口径说明。全站只有这一种写法。 */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin-bottom: var(--space-3);
+}
 
-.topbar, .summary-grid, .workspace, .analysis-grid, .intraday-board {
-  display: grid;
-  gap: var(--space-3);
+.section-head > div { display: grid; gap: 2px; min-width: 0; }
+
+.section-head h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* 标题前的一小段竖条 = 模块锚点，扫读时视线沿它往下走。 */
+.section-head h2::before {
+  content: "";
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--info);
+  flex: 0 0 auto;
+}
+
+.section-head small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* 通用卡片外观 */
+.metric, .cockpit-cell, .board-card, .setup-card, .analysis-card,
+.tf-card, .overseas-card, .ticker-card, .contract-bridge, .sibling-link,
+.model-validation, .chart-module, .ai-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+}
+
+/* 卡片内的次级标签，统一口径 */
+.cockpit-label,
+.metric > span,
+.board-card > span,
+.levels span,
+.bridge-metric > span,
+.validation-grid span,
+.strategy-item > span,
+.pos-calc-out span,
+.indicator > span,
+.risk-row > div > span,
+.scenario > span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 
 /* ==========================================================================
-   4. TOPBAR
+   4. TOPBAR — 品种锚点
    ========================================================================== */
 
 .topbar {
-  grid-template-columns: minmax(0, 1fr) auto;
+  position: relative;
+  z-index: 30;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.topbar-inner {
+  display: flex;
   align-items: center;
-  gap: var(--space-5);
-  margin-bottom: var(--space-3);
-  padding-bottom: var(--space-3);
-  border-bottom: 2px solid var(--line);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  min-height: var(--topbar-h);
+  padding: var(--space-2) 0;
 }
 
 .topbar-main {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  min-width: 0;
+  align-items: center;
   gap: var(--space-6);
+  min-width: 0;
+  flex: 1 1 auto;
 }
+
+.brand { min-width: 0; }
 
 .eyebrow {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin: 0 0 var(--space-1);
+  margin: 0 0 2px;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .06em;
+  font-weight: 600;
+  letter-spacing: .04em;
   text-transform: uppercase;
 }
 
-/* 行情状态芯片：是一个状态，不是装饰 —— 给它边框和 13px 下限。 */
+#eyebrowText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 行情状态芯片：绿 = 交易中，琥珀 = 收盘，灰 = 周末。 */
 .live-indicator {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 26px;
-  padding: 3px 10px;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 1px 9px;
   border: 1px solid var(--down-border);
   border-radius: var(--radius-pill);
   background: var(--down-bg);
   color: var(--down);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   text-transform: none;
 }
 
-/* 收盘 = 琥珀色，绝不复用「涨红」，避免把休市误读成上涨。 */
 .live-indicator.market-closed {
   border-color: var(--warn-border);
   background: var(--warn-bg);
   color: var(--warn);
 }
 
-/* 周末 = 无数据，灰色专门留给这个状态。 */
 .live-indicator.market-weekend {
   border-color: var(--neutral-border);
   background: var(--neutral-bg);
@@ -426,22 +437,22 @@ a { color: var(--info); }
 }
 
 .live-pulse {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: currentColor;   /* 跟随芯片状态，省掉三条分支覆盖 */
+  background: currentColor;
   animation: live-pulse 1.4s ease-in-out infinite;
 }
 
 .live-indicator.market-closed .live-pulse,
 .live-indicator.market-weekend .live-pulse { animation: none; }
 
-/* JS 把 .live-dot 注入 .metric 的标签 <span> 内部，必须保持 inline-block。 */
+/* JS 把 .live-dot 注入「最新价」标签 span 内部，必须保持 inline-block。 */
 .live-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   margin-left: var(--space-2);
   border-radius: 50%;
   background: var(--down);
@@ -449,139 +460,172 @@ a { color: var(--info); }
   animation: live-pulse 1.4s ease-in-out infinite;
 }
 
-/* P0 ↔ Y0 是全页使用最频繁的控件 —— 分段控件要有可见的轨道。 */
+/* P0 ↔ Y0：全页最常用的控件。分段轨道 + 抬起的选中块 + 字重 + 底部色条。 */
 .symbol-switcher {
-  flex: 0 0 auto;
   display: inline-flex;
-  gap: var(--space-1);
-  margin: 0;
+  flex: 0 0 auto;
+  gap: 2px;
   padding: 3px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-md) + 3px);
   background: var(--surface-sunken);
 }
 
 .sym-btn {
-  flex: 0 0 auto;
   min-width: 112px;
   min-height: 44px;
-  padding: 8px 14px;
+  padding: 0 var(--space-4);
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--muted);
   font-size: 15px;
   font-weight: 600;
-  cursor: pointer;
   transition: background var(--motion-fast), color var(--motion-fast);
 }
 
-.sym-btn:hover { color: var(--ink); background: var(--neutral-bg); }
+.sym-btn:hover { color: var(--ink); }
 
-/* 三重线索：实心底、字重 600→800、内嵌下划条。 */
 .sym-btn.active {
-  background: var(--action);
-  color: var(--action-ink);
+  background: var(--control-active);
+  color: var(--ink);
   font-weight: 800;
-  box-shadow: inset 0 -3px 0 0 color-mix(in srgb, var(--action-ink) 55%, transparent);
+  box-shadow: 0 1px 2px rgba(15, 23, 33, .12), inset 0 -2px 0 var(--action);
 }
 
 .topbar-status {
-  display: grid;
-  justify-items: end;
-  gap: var(--space-2);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
 .session-clock {
-  color: var(--muted);
+  color: var(--ink-2);
+  font-family: var(--font-num);
   font-size: 14px;
   font-weight: 600;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  white-space: nowrap;
 }
 
-/* 这是合约身份标识，不是可点的操作 —— 所以给它边框而不是实心强调色，
-   让整个 topbar 里只有 P0/Y0 切换器读起来像控件。 */
+/* 合约身份标识，不是按钮：描边而非实心。 */
 .contract-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 36px;
+  min-height: 32px;
   padding: 0 var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
   background: var(--surface-raised);
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 800;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
+
+#themeToggleBtn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  font-size: 18px;
+  line-height: 1;
+  transition: border-color var(--motion-fast);
+}
+
+#themeToggleBtn:hover { border-color: var(--border-strong); }
 
 
 /* ==========================================================================
-   5. MARKET CONTEXT ROW — 合约桥接 + 联动品种
+   5. MARKET BANNER — 数字为什么是旧的
+   ========================================================================== */
+
+.market-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--warn-border);
+  border-left: 4px solid var(--warn);
+  border-radius: var(--radius-md);
+  background: var(--warn-bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.market-banner::before { content: "⏸"; color: var(--warn); font-size: 14px; }
+
+.market-banner.weekend {
+  border-color: var(--neutral-border);
+  border-left-color: var(--border-strong);
+  background: var(--neutral-bg);
+  color: var(--ink-2);
+}
+
+.market-banner.weekend::before { color: var(--muted); }
+
+
+/* ==========================================================================
+   6. CONTEXT ROW — 可交易合约 + 联动品种
    ========================================================================== */
 
 .market-context-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(310px, .55fr);
+  grid-template-columns: minmax(0, 1fr) minmax(340px, .5fr);
   gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  align-items: stretch;
 }
 
 .section-kicker {
   display: block;
-  margin-bottom: 3px;
   color: var(--info);
   font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  font-weight: 700;
 }
 
-/* <details> —— overflow:hidden 让内部 border-left/top 分隔在圆角处干净裁切。 */
 .contract-bridge {
   min-width: 0;
-  margin: 0;
-  padding: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--panel);
 }
 
 .bridge-summary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: var(--space-4);
-  min-height: 58px;
-  padding: var(--space-2) var(--space-3);
+  gap: var(--space-5);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   list-style: none;
 }
 
 .bridge-summary::-webkit-details-marker { display: none; }
 
+/* ::-webkit-details-marker 已隐藏 —— 这是唯一的展开/收起提示，不可删。 */
 .bridge-summary::after {
-  content: "展开";
+  content: "展开 ▾";
   color: var(--muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.contract-bridge[open] .bridge-summary::after { content: "收起"; }
+.contract-bridge[open] .bridge-summary::after { content: "收起 ▴"; }
+.bridge-summary:hover::after { color: var(--ink); }
 
-.bridge-summary-main {
-  display: grid;
-  min-width: 0;
-  gap: 2px;
-}
+.bridge-summary-main { display: grid; gap: 1px; min-width: 0; }
 
 .bridge-summary-main > strong {
   overflow: hidden;
   color: var(--ink);
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -590,122 +634,97 @@ a { color: var(--info); }
   display: grid;
   grid-template-columns: auto auto;
   align-items: baseline;
-  gap: 2px var(--space-2);
+  column-gap: var(--space-2);
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
 }
 
 .bridge-live-price > small:first-child {
   grid-column: 1 / -1;
   color: var(--muted);
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
-  font-family: var(--font-sans);
 }
 
-.bridge-live-price > strong { color: var(--ink); font-size: 20px; font-weight: 800; }
+.bridge-live-price > strong { font-size: 20px; font-weight: 700; }
 .bridge-live-price #mainContractChange { color: var(--muted); font-size: 13px; font-weight: 600; }
 
-/* 状态徽章 —— 类名全部来自 app.js 的 statusKind / status，一个都不能改。 */
+/* 状态徽章 —— 类名全部来自 app.js（statusKind / model status），一个都不能改。 */
 .bridge-status,
 .model-status {
   flex: 0 0 auto;
-  padding: 5px 10px;
+  padding: 4px 10px;
   border: 1px solid var(--neutral-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: var(--neutral-bg);
   color: var(--muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .bridge-status.verified,
-.model-status.positive {
-  border-color: var(--down-border);
-  background: var(--down-bg);
-  color: var(--down);
-}
+.model-status.positive { border-color: var(--down-border); background: var(--down-bg); color: var(--down); }
 
-/* 「观察 / 未验证」是琥珀色，把金色作为品牌色挡在状态词汇之外。 */
 .bridge-status.watch,
-.model-status.unproven {
-  border-color: var(--warn-border);
-  background: var(--warn-bg);
-  color: var(--warn);
-}
+.model-status.unproven { border-color: var(--warn-border); background: var(--warn-bg); color: var(--warn); }
 
 .bridge-status.urgent,
 .bridge-status.mismatch,
-.model-status.rejected {
-  border-color: var(--up-border);
-  background: var(--up-bg);
-  color: var(--up);
-}
+.model-status.rejected { border-color: var(--up-border); background: var(--up-bg); color: var(--up); }
 
 .bridge-expanded {
-  padding: var(--space-3);
+  padding: var(--space-4);
   border-top: 1px solid var(--line);
+  background: var(--surface-raised);
 }
 
 .contract-disclaimer {
   margin: 0 0 var(--space-3);
   padding: var(--space-2) var(--space-3);
-  border-left: 3px solid var(--warn-border);
+  border-left: 3px solid var(--warn);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: var(--warn-bg);
   color: var(--ink-2);
   font-size: 14px;
   line-height: 1.6;
 }
 
-/* 这是全站两张「表格」之一：外框到位、内部分隔线细，整体读作一个对象。 */
+/* 一张表：外框完整、内部 1px 缝隙当分隔线，行列变化时分隔线自动跟随。 */
 .contract-bridge-grid {
   display: grid;
-  grid-template-columns: 1.35fr repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr));
+  gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--panel);
+  background: var(--line);
 }
 
 .bridge-metric {
   min-width: 0;
-  min-height: 96px;
-  padding: 10px;
-  border-left: 1px solid var(--border-subtle);
-  border-top: 0;
+  padding: var(--space-3);
+  background: var(--panel);
 }
 
-.bridge-metric:first-child { border-left: 0; }
-
-.bridge-metric > span,
-.validation-grid span {
-  display: block;
-  margin-bottom: var(--space-2);
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-}
+.bridge-metric > span { margin-bottom: var(--space-1); }
 
 .bridge-metric > strong {
   display: block;
-  min-height: 27px;
   overflow-wrap: anywhere;
   color: var(--ink);
-  font-size: 21px;
-  line-height: 1.25;
-  font-weight: 800;
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 700;
 }
 
-/* 这一格是中文句子，不是数字 —— 绝不套等宽/tnum，会毁掉汉字节奏。 */
+/* 这一格是中文句子，不是数字。 */
 .mapping-metric > strong {
+  font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.55;
-  font-family: var(--font-sans);
-  font-variant-numeric: normal;
+  font-weight: 600;
 }
 
 .bridge-metric > small {
@@ -718,25 +737,21 @@ a { color: var(--info); }
 }
 
 .bridge-freshness {
-  margin: var(--space-2) 0 0;
+  margin: var(--space-3) 0 0;
   color: var(--muted);
   font-size: 13px;
-  line-height: 1.5;
 }
 
-/* ── 联动品种（跨品种导航） ───────────────────────────────── */
-.sibling-widget { min-width: 0; margin: 0; }
+/* ── 联动品种 ── */
+.sibling-widget { min-width: 0; }
 
 .sibling-link {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 64px;
+  gap: var(--space-3);
   height: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--panel);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-4);
   color: inherit;
   text-decoration: none;
   transition: border-color var(--motion-fast);
@@ -746,40 +761,28 @@ a { color: var(--info); }
 
 .sibling-emoji { display: none; }
 
-/* 蓝 = 导航，把红/绿完全留给方向。 */
+/* 蓝 = 导航；红/绿只留给方向。 */
 .sibling-tag {
   flex: 0 0 auto;
-  display: inline-block;
-  padding: 3px var(--space-2);
+  padding: 2px var(--space-2);
   border-radius: var(--radius-sm);
   background: var(--info-bg);
   color: var(--info);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
-.sibling-link > strong { white-space: nowrap; font-size: 15px; font-weight: 800; }
+.sibling-link > strong { white-space: nowrap; font-size: 15px; font-weight: 700; }
 
 .sibling-link #siblingPrice {
-  font-size: 21px;
-  font-weight: 800;
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: 20px;
+  font-weight: 700;
 }
 
-.sibling-link .pct {
-  font-size: 15px;
-  font-weight: 800;
-  white-space: nowrap;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
+.sibling-link .pct { font-size: 14px; white-space: nowrap; }
 
-/* AI 观点是这条的正文 —— flex:1 让它吃掉行内剩余宽度（原本是
-   flex:0 1 auto，只能缩不能长，被压到 57px）。min-width:0 必须保留：
-   给硬下限会把整行顶出视口，产生横向滚动。 */
+/* flex:1 吃掉剩余宽度；min-width:0 必须保留，否则整行顶出视口产生横向滚动。 */
 .sibling-link #siblingBias {
   flex: 1 1 auto;
   min-width: 0;
@@ -794,145 +797,173 @@ a { color: var(--info); }
   margin-left: auto;
   color: var(--info);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-
-/* ==========================================================================
-   6. MARKET BANNER — 数字为什么是旧的，这句话要读得清
-   ========================================================================== */
-
-.market-banner {
-  margin-bottom: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--warn-border);
-  border-radius: var(--radius-md);
-  background: var(--warn-bg);
-  color: var(--warn);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.6;
-}
-
-.market-banner.weekend {
-  border-color: var(--neutral-border);
-  background: var(--neutral-bg);
-  color: var(--muted);
-}
+.sibling-cta::after { content: " →"; }
 
 
 /* ==========================================================================
-   7. DECISION COCKPIT — 扫读第 1 步
+   7. OVERVIEW — 决策总览（扫读第 1 步）
+   一整块面板：上排三格是「价格 / 能不能做 / 离关键位多远」，
+   下排六格是解释这三件事的关键指标。1px 缝隙当分隔线。
    ========================================================================== */
 
-.decision-cockpit {
+.overview {
   display: grid;
-  grid-template-columns: minmax(300px, 1.45fr) repeat(3, minmax(190px, 1fr));
-  margin-bottom: var(--space-3);
+  gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--panel);
-  box-shadow: var(--shadow-sm);
+  background: var(--line);
+  box-shadow: var(--shadow-card);
 }
 
-.cockpit-cell {
+.overview-hero,
+.kpi-strip {
+  display: grid;
+  gap: 1px;
+}
+
+.overview-hero {
+  grid-template-columns: minmax(250px, .95fr) minmax(0, 1.75fr) minmax(250px, 1fr);
+}
+
+.kpi-strip {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* 面板内的格子去掉独立卡片外观 */
+.overview .metric,
+.overview .cockpit-cell {
   min-width: 0;
-  min-height: 148px;
-  padding: var(--space-4);
-  border-left: 1px solid var(--line);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-.cockpit-cell:first-child { border-left: 0; }
+.overview-hero > * { padding: var(--space-5) var(--space-6); background: var(--panel); }
+.kpi-strip > *     { padding: var(--space-3) var(--space-4) var(--space-4); background: var(--surface-raised); }
 
-.gate-cell { border-top: 3px solid var(--info); }
+.cockpit-label,
+.overview .metric > span { margin-bottom: var(--space-2); }
 
-.cockpit-label {
+/* ── 最新价 ── */
+.quote-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.overview .quote-card > span { margin-bottom: var(--space-1); }
+
+#lastPrice {
   display: block;
-  margin-bottom: var(--space-2);
+  font-family: var(--font-num);
+  font-size: clamp(40px, 3.4vw, 54px);
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+
+#lastChange {
+  display: block;
+  margin-top: var(--space-2);
+  min-height: 24px;
+  font-family: var(--font-num);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+#lastDistance {
+  display: block;
+  margin-top: 2px;
+  min-height: 20px;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: uppercase;
+  line-height: 1.5;
 }
 
-.cockpit-cell > strong:not(.gate-pill) {
-  display: block;
-  margin-bottom: var(--space-2);
-  color: var(--ink);
-  font-size: 20px;
-  line-height: 1.2;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+#lastDistance span { display: inline; }
+
+/* ── 交易许可：全页后果最重的判定 ──
+   左侧 4px 色条跟随判定结果；药丸文字本身就是结论，颜色只做强化。 */
+.overview .gate-cell {
+  --gate-accent: var(--border-strong);
+  box-shadow: inset 4px 0 0 var(--gate-accent);
 }
 
-.cockpit-cell > p {
-  margin: 0;
-  min-height: 44px;
-  max-width: 34em;
-  color: var(--ink-2);
-  font-size: 14px;
-  line-height: 1.6;
-}
+.gate-cell:has(.gate-pill.up)      { --gate-accent: var(--up); }
+.gate-cell:has(.gate-pill.down)    { --gate-accent: var(--down); }
+.gate-cell:has(.gate-pill.blocked) { --gate-accent: var(--warn); }
 
-/* 交易许可是全页后果最重的判定：最大的药丸，自己的边框。 */
 .gate-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
-  margin-bottom: var(--space-2);
-  padding: 6px 14px;
+  min-height: 44px;
+  padding: 2px var(--space-4);
   border: 1px solid var(--neutral-border);
   border-radius: var(--radius-md);
   background: var(--neutral-bg);
   color: var(--ink);
-  /* 交易许可是全页最终结论 —— 必须压过它下面的入场价（26px）。 */
-  font-size: 26px;
+  font-size: 24px;
+  line-height: 1.2;
   font-weight: 800;
+  letter-spacing: .02em;
 }
 
-.gate-pill.up   { background: var(--up-bg);   border-color: var(--up-border);   color: var(--up); }
-.gate-pill.down { background: var(--down-bg); border-color: var(--down-border); color: var(--down); }
+.gate-pill.up      { background: var(--up-bg);   border-color: var(--up-border);   color: var(--up); }
+.gate-pill.down    { background: var(--down-bg); border-color: var(--down-border); color: var(--down); }
+/* 「暂停交易」走琥珀色，不会被误读成看涨的红。 */
+.gate-pill.blocked { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn); }
+.gate-pill.neutral { background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--ink); }
 
-/* 「禁止交易」走琥珀色，一眼就不会被误读成看涨的红。 */
-.gate-pill.blocked {
-  background: var(--warn-bg);
-  border-color: var(--warn-border);
-  color: var(--warn);
+#tradeGateReason {
+  margin: var(--space-3) 0 0;
+  max-width: 46em;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.65;
 }
 
-.gate-pill.neutral {
-  background: var(--neutral-bg);
-  border-color: var(--neutral-border);
-  color: var(--ink);
-}
-
+/* 证据芯片：✓ / ! 字形是颜色之外的第二条通道。 */
 .factor-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-top: var(--space-2);
+  gap: 6px;
+  margin-top: var(--space-3);
 }
+
+.factor-row:empty { display: none; }
 
 .factor-row span {
-  padding: 4px var(--space-2);
+  padding: 2px var(--space-2);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  color: var(--muted);
+  background: var(--surface-raised);
+  color: var(--ink-2);
   font-size: 13px;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  line-height: 1.6;
+  white-space: nowrap;
 }
 
+.factor-row .quality-good { border-color: var(--down-border); background: var(--down-bg); }
+.factor-row .quality-bad  { border-color: var(--up-border);   background: var(--up-bg); }
+.factor-row .quality-good::before { content: "✓ "; }
+.factor-row .quality-bad::before  { content: "! "; }
+
+/* ── 最近关键位 ── */
 .level-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  margin-bottom: var(--space-2);
+  gap: var(--space-4);
+}
+
+.level-pair > div {
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--line);
 }
 
 .level-pair small {
@@ -942,219 +973,114 @@ a { color: var(--info); }
   font-weight: 600;
 }
 
-/* 支撑/压力并排 —— 相同的数字步进让价差一眼可读。 */
 .level-pair strong {
   display: block;
-  margin-top: 3px;
+  font-family: var(--font-num);
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+#levelContext {
+  margin: var(--space-3) 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ── 关键指标条 ── */
+.kpi-strip strong {
+  display: block;
+  margin-bottom: 2px;
   color: var(--ink);
-  font-size: 21px;
-  font-weight: 800;
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: 19px;
+  line-height: 1.3;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.kpi-strip p,
+.kpi-strip small {
+  display: block;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 
 /* ==========================================================================
-   8. SUMMARY GRID — 最新价与四张关键指标卡
+   8. EXECUTION PLAYBOOK — 多 / 观望 / 空
    ========================================================================== */
-
-.summary-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
-/* .analysis-panel 故意不在这里 —— 它只是 .ai-panel 的透明容器，
-   之前先赋卡片样式再整段重置，是无效声明。 */
-.metric, .board-card, .chart-panel, .analysis-card, .news-block {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--panel);
-}
-
-.metric, .board-card {
-  padding: var(--space-3);
-  box-shadow: none;
-}
-
-/* 桌面端把卡片内边距放到 16px —— 密度靠留白控制，不靠缩字号。 */
-@media (min-width: 640px) {
-  .metric, .board-card { padding: var(--space-4); }
-}
-
-.metric { min-height: 116px; }
-
-/* 子选择器：JS 会把 .live-dot 塞进标签 span 内部，
-   用 > 才不会把 display:block 传染给那个圆点。 */
-.metric > span,
-.board-card > span,
-.levels span {
-  display: block;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .02em;
-  margin-bottom: var(--space-2);
-}
-
-.metric strong {
-  display: block;
-  min-height: 27px;
-  margin: 0 0 var(--space-1);
-  font-size: 21px;
-  line-height: 1.25;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-/* 全页最大的两个字形之一。按 ID 定位 —— JS 会重写这些节点的 class。 */
-#lastPrice {
-  display: block;
-  font-size: clamp(28px, 7vw, 40px);
-  line-height: 1.05;
-  font-weight: 800;
-  letter-spacing: -.02em;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.metric small {
-  display: block;
-  min-height: 19px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-/* 对比槽位在每张卡里都停在同一个 y 偏移，永远不会移动。 */
-#lastChange {
-  display: block;
-  min-height: 22px;
-  font-size: 16px;
-  font-weight: 800;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-/* 非颜色的方向线索由 app.js 输出的 +/- 符号承担（formatSigned）。
-   这里不再叠加 ▲/▼ —— 会渲染成「▲ +51」这种重复陈述。 */
-
-#lastDistance span { display: inline; }
-
-
-/* ==========================================================================
-   9. EXECUTION PLAYBOOK — 多 / 观望 / 空
-   ========================================================================== */
-
-.execution-playbook { margin-bottom: var(--space-3); }
-
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 2px solid var(--line);
-}
-
-.section-head h2 { margin: 0; font-size: 20px; line-height: 1.35; font-weight: 800; }
-
-/* 这个槽位几乎每节都装着「更新于 / 检查频率」。 */
-.section-head small,
-.section-head > div > small {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.section-head > div > h2 { margin-bottom: 3px; }
 
 .execution-grid {
   display: grid;
-  grid-template-columns: 1fr minmax(250px, .78fr) 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .85fr) minmax(0, 1fr);
   gap: var(--space-3);
 }
 
 .setup-card {
   min-width: 0;
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--panel);
-  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-5) var(--space-3);
 }
 
-/* 3px 方向导轨 = 多/空/观望的第二条（非颜色词）通道。 */
-.long-setup   { border-top: 3px solid var(--up); }
-.short-setup  { border-top: 3px solid var(--down); }
-.no-trade-card { border-top: 3px solid var(--warn); }
+/* 顶部 3px 色条 = 多/空/观望的第二条（非文字）通道。 */
+.long-setup    { box-shadow: inset 0 3px 0 var(--up),   var(--shadow-card); }
+.short-setup   { box-shadow: inset 0 3px 0 var(--down), var(--shadow-card); }
+.no-trade-card { box-shadow: inset 0 3px 0 var(--warn), var(--shadow-card); }
 
 .setup-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
-.setup-head > span { color: var(--ink); font-size: 15px; font-weight: 800; }
+.setup-head > span { color: var(--ink-2); font-size: 14px; font-weight: 700; }
 
 .setup-status {
-  padding: 4px 9px;
+  padding: 2px 10px;
   border: 1px solid var(--neutral-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: var(--neutral-bg);
   color: var(--muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .setup-status.up   { background: var(--up-bg);   border-color: var(--up-border);   color: var(--up); }
 .setup-status.down { background: var(--down-bg); border-color: var(--down-border); color: var(--down); }
 
-/* 用户真正照着下单的数字。预留高度让三张卡在数据到达前就齐平。 */
+/* 真正照着下单的数字。预留高度，三张卡在数据到达前就齐平。 */
 .setup-price,
 .no-trade-zone {
-  min-height: 34px;
+  min-height: 38px;
   margin-bottom: var(--space-3);
   color: var(--ink);
-  /* 落到刻度上的 26px：入场价重要，但不能盖过 .gate-pill 的许可结论。 */
-  font-size: 26px;
-  line-height: 1.1;
-  font-weight: 800;
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -.01em;
 }
 
-.setup-rows {
-  display: grid;
-  gap: 0;
-  margin: 0;
-}
+.setup-rows { margin: 0; }
 
-/* 共享标签栏 —— 触发/止损/目标一/目标二/净盈亏比 在多空之间逐行可比。 */
+/* 共享标签栏：触发 / 止损 / 目标一 / 目标二 / 净盈亏比 在多空之间逐行可比。 */
 .setup-rows > div {
   display: grid;
   grid-template-columns: 72px minmax(0, 1fr);
-  gap: var(--space-2);
+  gap: var(--space-3);
+  align-items: baseline;
   padding: 9px 0;
   border-top: 1px solid var(--border-subtle);
-  align-items: baseline;
 }
 
-.setup-rows dt {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-}
+.setup-rows dt { color: var(--muted); font-size: 14px; font-weight: 600; }
 
 .setup-rows dd {
   margin: 0;
@@ -1163,52 +1089,40 @@ a { color: var(--info); }
   line-height: 1.5;
   font-weight: 600;
   text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
   overflow-wrap: anywhere;
 }
 
+/* 止损价加粗：最不能看错的数字。 */
+.setup-rows > div:nth-child(2) dd { font-weight: 700; }
+.setup-rows > div:last-child { padding-bottom: var(--space-1); }
+
+.no-trade-card { display: flex; flex-direction: column; }
+
 .no-trade-card > p {
-  min-height: 52px;
-  margin: 0 0 var(--space-3);
-  max-width: 34em;
+  margin: 0 0 var(--space-4);
   color: var(--ink-2);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .plan-quality {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 3px var(--space-3);
+  gap: 2px var(--space-3);
+  align-items: baseline;
+  margin-top: auto;
   padding-top: var(--space-3);
   border-top: 1px solid var(--border-subtle);
-  align-items: baseline;
 }
 
-.plan-quality span,
-.plan-quality small { color: var(--muted); font-size: 13px; }
-.plan-quality small { grid-column: 1 / -1; }
+.plan-quality span { color: var(--muted); font-size: 13px; font-weight: 600; }
+.plan-quality small { grid-column: 1 / -1; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.plan-quality strong { font-family: var(--font-num); font-size: 20px; font-weight: 700; }
 
-.plan-quality strong {
-  font-size: 20px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-
-/* ==========================================================================
-   10. MODEL VALIDATION — 固定规则样本外检验（<details>）
-   ========================================================================== */
-
+/* ── 策略证据（折叠） ── */
 .model-validation {
-  margin-bottom: var(--space-3);
-  padding: 0;
+  margin-top: var(--space-3);
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--panel);
 }
 
 .validation-summary {
@@ -1216,66 +1130,73 @@ a { color: var(--info); }
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  min-height: 58px;
-  padding: var(--space-2) var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   list-style: none;
 }
 
 .validation-summary::-webkit-details-marker { display: none; }
-.validation-summary > div { display: grid; gap: 2px; min-width: 0; }
 
-.validation-summary > div > span {
-  color: var(--info);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+.validation-summary > div {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px var(--space-3);
+  min-width: 0;
 }
 
-.validation-summary > div > strong { font-size: 16px; font-weight: 800; }
+.validation-summary > div > span { color: var(--info); font-size: 13px; font-weight: 700; }
+.validation-summary > div > strong { font-size: 15px; font-weight: 700; }
 .validation-summary > div > small { color: var(--muted); font-size: 13px; line-height: 1.5; }
 
-.model-validation-body {
-  padding: var(--space-3);
-  border-top: 1px solid var(--line);
+/* 展开提示：放在状态徽章之后，▾ / ▴ 字形随状态切换。 */
+.validation-summary::after {
+  content: "▾";
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 14px;
 }
 
-.validation-head { margin-bottom: var(--space-3); }
+.model-validation[open] .validation-summary::after { content: "▴"; }
+.validation-summary > .model-status { margin-left: auto; }
+
+.model-validation-body {
+  padding: var(--space-4);
+  border-top: 1px solid var(--line);
+  background: var(--surface-raised);
+}
 
 .validation-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--panel);
+  background: var(--line);
 }
 
 .validation-grid > div {
   min-width: 0;
-  min-height: 100px;
   padding: var(--space-3);
-  border-left: 1px solid var(--border-subtle);
+  background: var(--panel);
 }
 
-.validation-grid > div:first-child { border-left: 0; }
+.validation-grid span { margin-bottom: var(--space-1); }
 
 .validation-grid strong {
   display: block;
-  min-height: 27px;
   color: var(--ink);
-  font-size: 21px;
-  line-height: 1.25;
-  font-weight: 800;
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 700;
 }
 
 .validation-grid small {
   display: block;
-  margin-top: var(--space-1);
+  margin-top: 2px;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
@@ -1283,405 +1204,127 @@ a { color: var(--info); }
 
 .validation-verdict {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, .75fr);
-  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) minmax(260px, .7fr);
+  gap: var(--space-4);
   padding-top: var(--space-3);
 }
 
 .validation-verdict p,
 .validation-verdict small {
   margin: 0;
-  max-width: 40em;
   color: var(--ink-2);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
+
+.validation-verdict small { color: var(--muted); font-size: 13px; }
 
 
 /* ==========================================================================
-   11. INTRADAY BOARD — 布林 + 舆情短线板
+   9. WORKSPACE — 图表 + DeepSeek；技术背景填入图表下方
+   桌面：「chart ai / tech ai」；窄屏按 DOM 顺序 图表 → AI → 技术背景 堆叠。
    ========================================================================== */
 
-.intraday-board {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
-.board-card { min-height: 152px; }
-
-/* 卡片提问标签，要在一臂距离外读得清。 */
-.board-card > span { font-size: 14px; }
-
-/* 加上 1px 边框，状态药丸不再依赖一层浅淡的底色才能被发现。 */
-.board-card strong {
-  display: inline-block;
-  min-height: 26px;
-  margin: 0 0 var(--space-2);
-  padding: 4px var(--space-3);
-  border: 1px solid var(--neutral-border);
-  border-radius: var(--radius-pill);
-  background: var(--neutral-bg);
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1.25;
-}
-
-.board-card strong.up   { background: var(--up-bg);   border-color: var(--up-border);   color: var(--up); }
-.board-card strong.down { background: var(--down-bg); border-color: var(--down-border); color: var(--down); }
-
-/* 中文需要 1.65–1.75 行距。不截断：布林明细/策略提示是决策内容，
-   看不全等于没有。min-height 已经稳住了卡片的基准高度。 */
-.board-card p {
-  margin: 0;
-  max-width: 34em;
-  color: var(--ink-2);
-  font-size: 14px;
-  line-height: 1.7;
-}
-
-/* 这张卡是新闻流的展开控件 —— 要读得像控件、量得像控件。 */
-.news-ticker-card {
-  min-height: 44px;
-  cursor: pointer;
-  transition: border-color var(--motion-fast);
-}
-
-.news-ticker-card:hover { border-color: var(--border-strong); }
-
-.ticker-hint {
-  margin-left: var(--space-1);
-  color: var(--info);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-
-/* ==========================================================================
-   12. OVERSEAS PANEL — 隔夜市场
-   ========================================================================== */
-
-.overseas-panel {
-  margin-bottom: var(--space-3);
-  padding: 0;
-}
-
-.overseas-grid {
+.workspace {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) minmax(400px, .56fr);
+  grid-template-areas:
+    "chart ai"
+    "tech  ai";
+  grid-template-rows: auto 1fr;
+  gap: var(--module-gap) var(--space-4);
+  align-items: start;
 }
 
-.overseas-card {
-  display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  min-height: 96px;
-  min-width: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-}
+.chart-module  { grid-area: chart; min-width: 0; overflow: hidden; }
+.analysis-panel { grid-area: ai; min-width: 0; }
+.tech-context  { grid-area: tech; min-width: 0; display: grid; gap: var(--module-gap); }
 
-.overseas-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-2);
-}
-
-.overseas-head strong { color: var(--ink); font-size: 15px; font-weight: 800; }
-
-.overseas-sym { color: var(--muted); font-size: 13px; font-weight: 600; }
-
-.overseas-body {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
-.overseas-price {
-  color: var(--ink);
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: -.01em;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-/* 灰是「无数据」默认值；.up/.down 才重新上色。 */
-.pct {
-  color: var(--muted);
-  font-weight: 800;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.overseas-body .pct { font-size: 16px; }
-
-/* .pct 的两个消费者（#siblingChange 与隔夜卡）写入的已经是带号字符串
-   （app.js: `${change > 0 ? "+" : ""}…%`），符号本身就是非颜色通道，
-   再叠箭头会渲染成「▲ +1.23%」。 */
-
-
-/* ==========================================================================
-   13. MULTI-TIMEFRAME — 多周期状态
-   ========================================================================== */
-
-.multi-strategy {
-  margin-bottom: var(--space-3);
-  padding: 0;
-}
-
-.strategy-cards {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-
-.tf-card {
-  display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  min-width: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--neutral-border);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-}
-
-/* 看多/看空由：文字标签 → 药丸 → 左侧导轨，三层依次表达。纯 CSS，不动 JS。 */
-.tf-card:has(.tf-bias.up)   { border-left-color: var(--up); }
-.tf-card:has(.tf-bias.down) { border-left-color: var(--down); }
-
-.tf-card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.tf-label { color: var(--ink); font-size: 15px; font-weight: 800; }
-
-/* 药丸里已经写着 看多/看空/观望 —— 颜色只做强化，所以这里不加箭头。 */
-.tf-bias {
-  display: inline-block;
-  padding: 4px 10px;
-  border: 1px solid var(--neutral-border);
-  border-radius: var(--radius-pill);
-  background: var(--neutral-bg);
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.tf-bias.up   { background: var(--up-bg);   border-color: var(--up-border);   color: var(--up); }
-.tf-bias.down { background: var(--down-bg); border-color: var(--down-border); color: var(--down); }
-
-.tf-price {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.tf-rows {
-  display: grid;
-  gap: 0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-/* 固定 76px 标签栏，让五张周期卡逐行对齐、可以竖着扫。 */
-.tf-rows .row {
-  display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
-  gap: var(--space-2);
-  padding: 3px 0;
-}
-
-.tf-rows .row > span:first-child {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* 数值共享一条右边缘，跨卡比较变成竖向扫读。
-   「纪律」那一行是整句中文，所以这里只用 tnum，不套等宽栈。 */
-.tf-rows .row > span:last-child {
-  color: var(--ink);
-  text-align: right;
-  justify-self: end;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-  overflow-wrap: anywhere;
-}
-
-
-/* ==========================================================================
-   14. NEWS TICKER — 扫读第 5 步（上下文），独立滚动
-   ========================================================================== */
-
-.news-ticker {
-  margin-bottom: var(--space-3);
-  padding: 0;
-}
-
-/* 独立滚动，永远不能把决策层顶出屏幕。 */
-#newsTickerList {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-3);
-  max-height: 380px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-right: var(--space-1);
-}
-
-.ticker-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-height: 44px;
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-  color: var(--ink);
-  text-decoration: none;
-  transition: border-color var(--motion-fast);
-}
-
-/* 实时刷新的列表上做位移动画只是扫读噪音。 */
-.ticker-card:hover { border-color: var(--border-strong); }
-
-.ticker-card-title { color: var(--ink); font-size: 15px; font-weight: 600; line-height: 1.55; }
-
-.ticker-card-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
-  color: var(--muted);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-.ticker-card-meta .source { font-weight: 600; }
-
-
-/* ==========================================================================
-   15. TOOLBAR — 图表与数据控制
-   ========================================================================== */
-
+/* ── 工具条：图表模块的头部 ── */
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--panel);
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-raised);
 }
-
-.toolbar button {
-  min-height: 44px;
-  min-width: 132px;
-  padding: 10px 14px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: var(--panel);
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--motion-fast), border-color var(--motion-fast);
-}
-
-.toolbar button:hover { background: var(--surface-raised); }
 
 .toolbar label {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
+}
+
+.toolbar-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
 }
 
 select,
 .file-label input::file-selector-button {
   min-height: 44px;
-  padding: 10px 12px;
+  padding: 0 var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--panel);
   color: var(--ink);
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.file-label input { max-width: 210px; color: var(--muted); font-size: 14px; }
+.file-label input {
+  max-width: 220px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .file-label input::file-selector-button { margin-right: var(--space-2); cursor: pointer; }
 
-/* 图标按钮：title 仍是它的可访问名称，这里只给它一个真正 44px 的目标。
-   !important 必须保留，否则上面通用的 button 规则会把它拉到 132px。 */
-#themeToggleBtn {
-  min-width: 44px !important;
+.toolbar button {
   min-height: 44px;
-  padding: 8px !important;
-  font-size: 18px;
-  margin-left: auto;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 600;
+  transition: border-color var(--motion-fast), color var(--motion-fast);
 }
 
+.toolbar button:hover { border-color: var(--border-strong); color: var(--ink); }
 
-/* ==========================================================================
-   16. WORKSPACE — K 线图 + AI 面板
-   ========================================================================== */
-
-.workspace {
-  grid-template-columns: minmax(0, 1.55fr) minmax(380px, 1fr);
-  align-items: start;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
+/* ── K 线 ── */
 .chart-panel {
-  position: relative;
-  overflow: hidden;
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
+  position: relative;       /* 提示框的定位上下文：app.js 用 priceCanvas.parentElement 计算 */
+  padding: var(--space-4) var(--space-5) var(--space-5);
 }
 
 .chart-head {
   display: flex;
   justify-content: space-between;
-  gap: var(--space-3);
+  align-items: flex-start;
+  gap: var(--space-4);
   margin-bottom: var(--space-3);
 }
 
-.chart-head h2 { font-size: 20px; margin-bottom: var(--space-1); }
-
-/* #chartSubhead 是图表的时效行：最新日期 + 来源。 */
-.chart-head p { margin-bottom: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.chart-head h2 { font-size: 17px; }
+.chart-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 
 .legend {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  align-items: center;
-  gap: var(--space-2);
-  max-width: 430px;
+  gap: var(--space-1) var(--space-3);
+  max-width: 440px;
 }
 
 .legend span {
@@ -1689,16 +1332,12 @@ select,
   align-items: center;
   gap: 6px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 /* 色块由 app.js 用 readColors() 内联填色。 */
-.legend i {
-  width: 20px;
-  height: 3px;
-  border-radius: var(--radius-pill);
-}
+.legend i { width: 16px; height: 3px; border-radius: var(--radius-pill); }
 
 canvas {
   display: block;
@@ -1707,7 +1346,7 @@ canvas {
   background: var(--canvas-bg);
 }
 
-/* 固定 aspect-ratio 盒子 = 数据到达前图表区已经预留好，开盘时不会跳动。
+/* aspect-ratio 预留图表区，开盘时不跳动。
    绝不设 height：app.js 按布局尺寸做 DPR 变换，写死高度会二次缩放。 */
 #priceCanvas  { aspect-ratio: 1200 / 620; height: auto; }
 #volumeCanvas { aspect-ratio: 1200 / 180; height: auto; margin-top: var(--space-2); }
@@ -1717,116 +1356,102 @@ canvas {
   z-index: 5;
   min-width: 190px;
   padding: var(--space-3);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--panel);
   color: var(--ink);
-  box-shadow: var(--shadow-md);
-  font-size: 14px;
+  box-shadow: var(--shadow-pop);
+  font-size: 13px;
   line-height: 1.6;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
   pointer-events: none;
 }
 
-.tooltip strong { display: block; margin-bottom: var(--space-1); font-size: 15px; }
+.tooltip strong { display: block; margin-bottom: var(--space-1); font-size: 14px; }
 
 
 /* ==========================================================================
-   17. AI PANEL — 扫读第 4 步。机器观点被围栏隔离在交易所数据之外。
+   10. AI PANEL — 机器观点：顶部琥珀色条 + 徽章，和交易所数据视觉隔离
    ========================================================================== */
 
-.analysis-panel { padding: 0; }
-
-/* 独立的暖色底 —— 让机器意见永远不会被误当成白色的交易所数据卡。 */
 .ai-panel {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid var(--warn-border);
-  border-radius: var(--radius-lg);
+  padding: var(--space-5);
   background: var(--bg-ai);
-  box-shadow: var(--shadow-sm);
+  box-shadow: inset 0 3px 0 var(--warn), var(--shadow-card);
 }
 
-.ai-panel.ai-stale { border-color: var(--warn); }
+.ai-panel.ai-stale     { border-color: var(--warn-border); }
 .ai-panel.ai-untrusted { border-color: var(--up-border); }
-
-/* 过期状态由边框 + .ai-freshness 徽章表达。不降低正文对比度 ——
-   过期的分析仍然要读得清，不然用户只能猜它说了什么。 */
 
 .ai-head {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: var(--space-3);
-  align-items: start;
 }
 
-.ai-head-main { flex: 1; min-width: 0; }
+.ai-head-main { flex: 1 1 auto; min-width: 0; }
 
-/* 必需的来源徽章，纯 CSS 即可，不用碰 HTML。 */
+.ai-head h2 {
+  margin-bottom: var(--space-2);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+/* 必需的来源徽章。 */
 .ai-head h2::after {
   content: "AI 生成 · 仅供参考";
   display: inline-block;
   margin-left: var(--space-2);
-  padding: 2px var(--space-2);
+  padding: 0 var(--space-2);
   border: 1px solid var(--warn-border);
   border-radius: var(--radius-sm);
   background: var(--warn-bg);
   color: var(--warn);
   font-size: 13px;
-  font-weight: 800;
-  vertical-align: middle;
+  font-weight: 700;
+  line-height: 1.7;
+  vertical-align: 2px;
+  white-space: nowrap;
 }
 
-/* #aiMeta 携带「更新于」时间戳。 */
-.ai-head p { margin-bottom: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+#aiMeta { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
 
 .ai-head-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-2);
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
-.ai-accuracy { margin: var(--space-1) 0 0; color: var(--muted); font-size: 14px; font-weight: 600; }
-.ai-accuracy.warn { color: var(--up); }
-
-/* !important 保留 —— JS 会整串重写 className，去掉后芯片会失去颜色。
-   过期永远被标注，绝不隐藏。 */
+/* !important 保留 —— JS 整串重写 className。过期永远被标注，绝不隐藏。 */
 .ai-freshness {
   display: inline-flex;
   width: fit-content;
-  margin: var(--space-1) 0 0 !important;
-  padding: 3px 9px;
+  margin: var(--space-2) 0 0 !important;
+  padding: 1px 9px;
   border: 1px solid var(--neutral-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: var(--neutral-bg);
   color: var(--muted) !important;
   font-size: 13px !important;
-  font-weight: 800;
+  font-weight: 700;
 }
 
-.ai-freshness.fresh {
-  background: var(--down-bg);
-  border-color: var(--down-border);
-  color: var(--down) !important;
-}
+.ai-freshness.fresh { background: var(--down-bg); border-color: var(--down-border); color: var(--down) !important; }
+.ai-freshness.stale { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn) !important; }
 
-.ai-freshness.stale {
-  background: var(--warn-bg);
-  border-color: var(--warn-border);
-  color: var(--warn) !important;
-}
+.ai-accuracy { margin: var(--space-2) 0 0; color: var(--ink-2); font-size: 13px; font-weight: 600; }
+.ai-accuracy.warn { color: var(--up); }
 
-/* 大方向药丸：文字（看多/看空/观望）本身就是非颜色通道，所以不加箭头。 */
 .bias-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 34px;
-  padding: 6px 14px;
+  padding: 0 var(--space-4);
   border: 1px solid var(--neutral-border);
   border-radius: var(--radius-pill);
   background: var(--neutral-bg);
@@ -1834,91 +1459,65 @@ canvas {
   font-size: 15px;
   font-weight: 800;
   white-space: nowrap;
-  letter-spacing: .02em;
 }
 
 .bias-pill.bullish, .bias-pill.up   { background: var(--up-bg);   border-color: var(--up-border);   color: var(--up); }
 .bias-pill.bearish, .bias-pill.down { background: var(--down-bg); border-color: var(--down-border); color: var(--down); }
-.bias-pill.neutral { background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--muted); }
+.bias-pill.neutral { background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--ink-2); }
 
 .alignment-score {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  padding: var(--space-1) var(--space-3);
+  padding: 2px var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--panel);
+  white-space: nowrap;
 }
 
-.alignment-score span { color: var(--muted); font-size: 13px; font-weight: 600; }
-
-.alignment-score strong {
-  color: var(--ink);
-  font-size: 21px;
-  font-weight: 800;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
+.alignment-score span,
 .alignment-score small { color: var(--muted); font-size: 13px; font-weight: 600; }
+.alignment-score strong { font-family: var(--font-num); font-size: 20px; font-weight: 700; }
 
-/* AI 决策防火墙：这是执行层的闸门，理由必须能读完（不再省略号截断）。 */
+/* AI 决策防火墙：执行层的闸门，理由必须能读完。字形 + 文字 + 颜色三条通道。 */
 .ai-integrity {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-2) var(--space-3);
+  gap: var(--space-1) var(--space-3);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--neutral-bg);
 }
 
-.ai-integrity > span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-
-.ai-integrity > strong { font-size: 15px; font-weight: 800; }
-
-.ai-integrity > small {
-  min-width: 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: normal;
-}
+.ai-integrity > span { color: var(--muted); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.ai-integrity > strong { font-size: 15px; font-weight: 800; white-space: nowrap; }
+.ai-integrity > small { min-width: 0; color: var(--ink-2); font-size: 13px; line-height: 1.5; }
 
 .ai-integrity.passed  { border-color: var(--down-border); background: var(--down-bg); }
-.ai-integrity.passed > strong  { color: var(--down); }
 .ai-integrity.caution { border-color: var(--warn-border); background: var(--warn-bg); }
+.ai-integrity.blocked { border-color: var(--up-border);   background: var(--up-bg); }
+.ai-integrity.passed  > strong { color: var(--down); }
 .ai-integrity.caution > strong { color: var(--warn); }
-.ai-integrity.blocked { border-color: var(--up-border);  background: var(--up-bg); }
 .ai-integrity.blocked > strong { color: var(--up); }
-
-/* 字形 + 文字 + 颜色 = 三条通道，色盲也能读出拦截状态。 */
-.ai-integrity.blocked > strong::before { content: "⛔ "; }
 .ai-integrity.passed  > strong::before { content: "✓ "; }
 .ai-integrity.caution > strong::before { content: "⚠ "; }
+.ai-integrity.blocked > strong::before { content: "⛔ "; }
 
-.ai-actions { display: grid; grid-template-columns: 1fr; gap: var(--space-2); }
+.ai-actions { display: grid; gap: var(--space-2); }
 
 .ai-actions button,
 .ask-box button {
   min-height: 48px;
-  padding: 12px var(--space-4);
+  padding: 0 var(--space-4);
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: var(--action);
   color: var(--action-ink);
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
   transition: background var(--motion-fast);
 }
 
@@ -1930,35 +1529,31 @@ canvas {
 
 /* 预留高度，面板不会在 分析中… / 成功 / 失败 之间跳动。 */
 .ai-status {
+  min-height: 20px;
   margin: 0;
-  min-height: 21px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
+.ai-status:empty { min-height: 0; }
 .ai-status.loading { color: var(--warn); }
 .ai-status.success { color: var(--down); }
 .ai-status.error   { color: var(--up); }
 
-/* 等待态也需要一个可见的非文字信号 —— 复用既有关键帧，不新增动画。 */
 .ai-status.loading::before {
   content: "◐ ";
   display: inline-block;
   animation: live-pulse 1.4s ease-in-out infinite;
 }
 
-/* ── AI tabs ─────────────────────────────────────────────── */
-/* 标签页始终可见、可横向滚动，绝不折叠进手势或汉堡菜单。 */
+/* ── 标签页：下划线 + 字重，两条非颜色线索 ── */
 .ai-tabs {
   display: flex;
   gap: var(--space-1);
-  margin-bottom: var(--space-1);
-  padding-bottom: 0;
-  border-bottom: 1px solid var(--border-strong);
+  margin-bottom: calc(-1 * var(--space-1));
+  border-bottom: 1px solid var(--line);
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -1967,76 +1562,68 @@ canvas {
 .ai-tab {
   flex: 1 0 auto;
   min-height: 44px;
-  padding: 10px 14px;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
   background: transparent;
   color: var(--muted);
   font-size: 15px;
   font-weight: 600;
-  cursor: pointer;
-  scroll-snap-align: start;
-  transition: color var(--motion-fast), background var(--motion-fast);
+  transition: color var(--motion-fast), border-color var(--motion-fast);
 }
 
 .ai-tab:hover { color: var(--ink); }
 
-/* 三重线索：实心底、字重 600→800、3px 顶部强调条。绝不只靠颜色。 */
 .ai-tab.active {
+  border-bottom-color: var(--action);
   color: var(--ink);
   font-weight: 800;
-  background: var(--panel);
-  border-color: var(--line);
-  box-shadow: inset 0 3px 0 0 var(--info);
 }
 
 .ai-tab-content { display: grid; gap: var(--space-3); }
 .ai-tab-content[hidden] { display: none; }
 
-/* 空态预留与加载态相同的高度，切换标签不会让面板跳动。 */
 .ai-tab-empty {
-  margin: 0;
   min-height: 72px;
+  margin: 0;
   padding: var(--space-4) 0;
   color: var(--muted);
   font-size: 14px;
-  line-height: 1.6;
 }
-
-.ai-news-inner .news-layout { grid-template-columns: 1fr; }
 
 #aiSummary {
   margin: 0;
-  max-width: 34em;
-  color: var(--ink-2);
-  font-size: 16px;
-  line-height: 1.7;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 #aiList {
   display: grid;
   gap: var(--space-2);
+  max-height: 520px;
   margin: 0;
-  padding-left: 0;
-  list-style: none;
-  max-height: 420px;
+  padding: 0 3px 0 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: 3px;
+  list-style: none;
 }
 
 #aiList li {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--line);
+  border-radius: var(--radius-sm);
   background: var(--panel);
   color: var(--ink-2);
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.75;
 }
 
-#aiRisk { color: var(--muted); font-size: 13px; line-height: 1.5; }
+#aiRisk { color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+.ai-news-inner .news-layout { grid-template-columns: 1fr; }
 
 .ai-strategy {
   padding: var(--space-3);
@@ -2045,35 +1632,31 @@ canvas {
   background: var(--panel);
 }
 
-.strategy-grid { display: grid; gap: var(--space-2); }
+.strategy-grid { display: grid; gap: 1px; overflow: hidden; border-radius: var(--radius-sm); background: var(--border-subtle); }
 
 .strategy-item {
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-1);
+  background: var(--panel);
 }
-
-.strategy-item span { display: block; color: var(--muted); font-size: 13px; font-weight: 600; }
 
 .strategy-item strong {
-  display: block;
-  margin-top: var(--space-1);
   color: var(--ink);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
-  font-weight: 800;
+  font-weight: 600;
 }
 
-.strategy-source-note { color: var(--warn); font-size: 13px; font-weight: 800; }
+.strategy-source-note { color: var(--warn); font-size: 13px; font-weight: 700; }
 .strategy-source-note.fresh { color: var(--down); }
 
-/* ── 仓位与盈亏比控制 ─────────────────────────────────────── */
-/* 坐在 AI 面板内部，但算的是硬数字 —— 白底把它和机器观点分开。 */
+/* ── 仓位与盈亏比控制：在 AI 面板里，但算的是硬数字 → 白底 ── */
 .pos-calc {
-  margin-top: var(--space-2);
-  padding: var(--space-3);
-  border: 1px solid var(--warn-border);
+  padding: 0 var(--space-3) var(--space-3);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--panel);
 }
@@ -2081,41 +1664,38 @@ canvas {
 .pos-calc > summary {
   display: flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 48px;
   color: var(--ink);
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   list-style: none;
 }
 
 .pos-calc > summary::-webkit-details-marker { display: none; }
-
-/* 折叠三角是「开/关」的第二条非颜色线索。 */
-.pos-calc > summary::before { content: "▸ "; color: var(--muted); font-weight: 800; }
-.pos-calc[open] > summary::before { content: "▾ "; }
+.pos-calc > summary::before { content: "▸"; width: 18px; color: var(--muted); }
+.pos-calc[open] > summary::before { content: "▾"; }
 
 .pos-calc-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin-top: var(--space-3);
+  gap: var(--space-3) var(--space-2);
 }
 
 .pos-calc-grid label {
   display: grid;
-  grid-template-columns: 1fr;
   gap: var(--space-1);
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
-/* 数字录入：右对齐 + 等宽，16px 防止 iOS 聚焦缩放，边框可见。 */
+/* 数字录入：右对齐 + tnum，16px 防止 iOS 聚焦缩放。 */
 .pos-calc-grid input,
 .pos-calc-grid select {
+  width: 100%;
   min-height: 44px;
-  padding: 10px 12px;
+  padding: 0 var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--panel);
@@ -2123,65 +1703,44 @@ canvas {
   font-size: 16px;
   font-weight: 600;
   text-align: right;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
 }
 
-.pos-calc-grid select { text-align: left; font-family: var(--font-sans); }
-
-.pos-calc-grid label small {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
-}
+.pos-calc-grid select { text-align: left; }
+.pos-calc-grid label small { color: var(--muted); font-size: 13px; font-weight: 500; }
 
 .pos-calc-out {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px dashed var(--line);
+  gap: 1px;
+  margin-top: var(--space-4);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--line);
 }
 
 .pos-calc-out div {
   display: grid;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
   background: var(--surface-raised);
 }
 
-/* 最终手数是唯一一个他真正照着做的数字 —— 唯一拿强调色的格子。 */
+/* 最终手数是他真正照着做的数字 —— 唯一拿强调色的格子。 */
 .pos-calc-out .primary-out {
-  border: 2px solid var(--info);
   background: var(--info-bg);
+  box-shadow: inset 3px 0 0 var(--info);
 }
 
-.pos-calc-out span { color: var(--muted); font-size: 13px; font-weight: 600; }
-
-.pos-calc-out strong {
-  color: var(--ink);
-  font-size: 20px;
-  font-weight: 800;
-  text-align: right;
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
+.pos-calc-out strong { color: var(--ink); font-family: var(--font-num); font-size: 19px; font-weight: 700; }
+.pos-calc-out .primary-out strong { color: var(--info); font-size: 22px; }
 .pos-calc-out small { color: var(--muted); font-size: 13px; }
 
-/* 预留高度：校验信息出现时不会推动整块面板。 */
 .pos-warning {
-  min-height: 21px;
+  min-height: 20px;
   margin: var(--space-2) 0 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.55;
 }
 
@@ -2189,34 +1748,32 @@ canvas {
 .pos-warning.warn    { color: var(--warn); }
 .pos-warning.error   { color: var(--up); }
 
-/* ── 问答 ─────────────────────────────────────────────────── */
+/* ── 问答 ── */
 .ask-box { display: grid; gap: var(--space-2); }
 
-/* 16px 阻止 iOS 聚焦缩放；强边框让输入框找得到。 */
 .ask-box textarea {
   width: 100%;
-  min-height: 88px;
-  padding: 12px;
+  min-height: 96px;
+  padding: var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--panel);
   color: var(--ink);
-  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.7;
   resize: vertical;
 }
 
 .ask-response {
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  background: var(--panel);
 }
 
-/* 虚线边框，让「过期」不只靠透明度传达。 */
-.ask-response.stale { opacity: .6; border-style: dashed; }
-.ask-response.error { border-color: var(--up); background: var(--up-bg); }
+/* 虚线边框：「过期」不只靠透明度传达。 */
+.ask-response.stale { opacity: .65; border-style: dashed; }
+.ask-response.error { border-color: var(--up-border); background: var(--up-bg); }
 
 .ask-response small {
   display: block;
@@ -2228,47 +1785,37 @@ canvas {
 
 .ask-response p {
   margin: 0;
-  max-width: 34em;
   color: var(--ink);
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.8;
   white-space: pre-wrap;
 }
 
-
-/* ==========================================================================
-   18. NEWS BLOCK / CARDS
-   ========================================================================== */
-
-.news-block {
-  margin-bottom: var(--space-3);
-  padding: var(--space-5);
-}
-
+/* ── 舆情标签页 ── */
 .news-layout {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   gap: var(--space-5);
 }
 
-.news-layout h3 { margin: 0 0 var(--space-3); color: var(--ink); font-size: 18px; }
+.news-layout h3 { margin: 0 0 var(--space-2); }
 
 #aiNewsList {
   display: grid;
   gap: var(--space-2);
   margin: 0;
-  padding-left: 0;
+  padding: 0;
   list-style: none;
 }
 
 #aiNewsList li {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
   color: var(--ink-2);
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.75;
 }
 
 #aiNewsList li .news-badge { margin-right: 6px; vertical-align: 1px; }
@@ -2277,135 +1824,318 @@ canvas {
   display: grid;
   gap: var(--space-2);
   max-height: 480px;
+  padding-right: var(--space-1);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: var(--space-1);
 }
 
-/* 平的，hover 不做位移 —— 除了标题链接，这些行不该看起来可点。 */
 .news-card {
   padding: var(--space-3);
-  border: 1px solid var(--line);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--panel);
-  transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+  transition: border-color var(--motion-fast);
 }
 
-.news-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.news-card:hover { border-color: var(--border-strong); }
 
 .news-card-head {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
   flex-wrap: wrap;
+  gap: var(--space-2);
   margin-bottom: var(--space-1);
 }
 
-/* 利多/利空 徽章自带汉字；加边框后灰度打印也能分辨。 */
+/* 利多/利空 徽章自带汉字，灰度下也能分辨。 */
 .news-badge {
-  flex-shrink: 0;
   display: inline-block;
-  padding: 3px 9px;
+  flex-shrink: 0;
+  padding: 0 var(--space-2);
   border: 1px solid var(--neutral-border);
   border-radius: var(--radius-pill);
   background: var(--neutral-bg);
   color: var(--muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
+  line-height: 1.7;
 }
 
 .news-badge.up      { background: var(--up-bg);      border-color: var(--up-border);      color: var(--up); }
 .news-badge.down    { background: var(--down-bg);    border-color: var(--down-border);    color: var(--down); }
 .news-badge.neutral { background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--muted); }
 
-/* 2 行截断让卡片高度恒定。 */
 .news-title {
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--ink);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.6;
   text-decoration: none;
-  display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
-/* 下划线让「这是链接」在灰度下依然成立。 */
 a.news-title:hover { color: var(--info); text-decoration: underline; }
 
-.news-source {
-  display: block;
-  margin-bottom: var(--space-1);
+.news-source { display: block; margin-bottom: var(--space-1); color: var(--muted); font-size: 13px; }
+.news-detail { margin: var(--space-1) 0 0; color: var(--ink-2); font-size: 14px; line-height: 1.65; }
+
+
+/* ==========================================================================
+   11. TECH CONTEXT — 短线布林 / 新闻流 / 多周期 / 隔夜
+   ========================================================================== */
+
+.intraday-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.board-card {
+  min-width: 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.board-card > span { margin-bottom: var(--space-2); }
+
+/* 状态药丸：边框 + 底色 + 文字。 */
+.board-card > strong {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  padding: 1px var(--space-3);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-pill);
+  background: var(--neutral-bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.board-card > strong.up   { background: var(--up-bg);   border-color: var(--up-border); }
+.board-card > strong.down { background: var(--down-bg); border-color: var(--down-border); }
+
+/* 布林明细/策略提示是决策内容，不截断。 */
+.board-card p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* 这张卡是新闻流的展开控件 —— 读得像控件。 */
+.news-ticker-card {
+  cursor: pointer;
+  transition: border-color var(--motion-fast);
+}
+
+.news-ticker-card:hover { border-color: var(--border-strong); }
+.news-ticker-card[aria-expanded="true"] { border-color: var(--info-border); box-shadow: inset 0 3px 0 var(--info), var(--shadow-card); }
+
+.ticker-hint {
+  margin-left: var(--space-1);
+  color: var(--info);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── 新闻流 ── */
+#newsTickerList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-2);
+  max-height: 400px;
+  padding-right: var(--space-1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ticker-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: none;
+  transition: border-color var(--motion-fast);
+}
+
+.ticker-card:hover { border-color: var(--border-strong); }
+.ticker-card-title { color: var(--ink); font-size: 14px; font-weight: 600; line-height: 1.6; }
+
+.ticker-card-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
   color: var(--muted);
   font-size: 13px;
 }
 
-.news-detail {
-  margin: var(--space-1) 0 0;
-  max-width: 34em;
-  color: var(--ink-2);
-  font-size: 14px;
-  line-height: 1.65;
+.ticker-card-meta .source { font-weight: 600; }
+
+/* ── 多周期状态 ── */
+.strategy-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
 }
+
+.tf-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  box-shadow: inset 3px 0 0 var(--neutral-border), var(--shadow-card);
+}
+
+/* 看多/看空：文字 → 药丸 → 左侧色条，三层表达。 */
+.tf-card:has(.tf-bias.up)   { box-shadow: inset 3px 0 0 var(--up),   var(--shadow-card); }
+.tf-card:has(.tf-bias.down) { box-shadow: inset 3px 0 0 var(--down), var(--shadow-card); }
+
+.tf-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tf-label { color: var(--ink); font-size: 15px; font-weight: 700; }
+
+.tf-bias {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-pill);
+  background: var(--neutral-bg);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+
+.tf-bias.up   { background: var(--up-bg);   border-color: var(--up-border); }
+.tf-bias.down { background: var(--down-bg); border-color: var(--down-border); }
+
+.tf-price { color: var(--ink-2); font-size: 13px; font-weight: 600; }
+
+.tf-rows { display: grid; font-size: 14px; line-height: 1.6; }
+
+/* 固定标签栏：五张周期卡逐行对齐，可竖着扫。 */
+.tf-rows .row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: 5px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.tf-rows .row > span:first-child { color: var(--muted); font-size: 13px; font-weight: 600; }
+
+.tf-rows .row > span:last-child {
+  color: var(--ink);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* ── 隔夜市场 ── */
+.overseas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--space-3);
+}
+
+.overseas-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.overseas-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.overseas-head strong { color: var(--ink); font-size: 14px; font-weight: 700; }
+.overseas-sym { color: var(--muted); font-size: 13px; font-weight: 600; }
+
+.overseas-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.overseas-price { color: var(--ink); font-family: var(--font-num); font-size: 22px; font-weight: 700; }
+
+/* 灰 = 无数据；.up / .down 才重新上色。带号字符串本身就是非颜色通道。 */
+.pct { color: var(--muted); font-family: var(--font-num); font-weight: 700; }
+.overseas-body .pct { font-size: 15px; }
 
 
 /* ==========================================================================
-   19. ANALYSIS GRID — 扫读第 3 步（解释）
+   12. ANALYSIS GRID — 日线研判（解释层）
    ========================================================================== */
 
 .analysis-grid {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
-  margin-bottom: var(--space-3);
 }
 
 .analysis-card {
   display: grid;
-  gap: var(--space-3);
   align-content: start;
-  padding: var(--space-4);
-  box-shadow: var(--shadow-sm);
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5) var(--space-5);
 }
 
-/* 中文正文测量上限 ~36 字/行，行距 1.7。 */
-.analysis-card p, .analysis-card li {
-  max-width: 34em;
+.analysis-card > h3 { margin: 0; font-size: 16px; }
+.analysis-card > .sub-head { margin-top: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--border-subtle); font-size: 15px; }
+
+.analysis-card p,
+.analysis-card li {
   color: var(--ink-2);
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.75;
 }
 
+.analysis-card p { margin: 0; }
 .analysis-card ul { margin: 0; padding-left: 20px; }
 
 .levels {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .levels div {
-  padding: var(--space-3);
-  border: 1px solid var(--line);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
 }
 
-.levels.small div { padding: var(--space-3); }
-
-/* 支撑/压力在 2 列网格里 —— 相同数字步进让两者的差距可读。
-   注意：#aiSupport 带 .up、#resistance 带 .down，那是「价位色」而不是涨跌，
-   所以这里刻意不加 ▲/▼ 字形。 */
+/* #aiSupport 带 .up、#resistance 带 .down，那是「价位色」而不是涨跌，所以不加箭头。 */
 .levels strong {
   display: block;
-  min-height: 30px;
-  margin-top: var(--space-2);
-  font-size: 24px;
-  font-weight: 800;
+  margin-top: 2px;
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 700;
 }
 
 .indicator-grid {
@@ -2415,33 +2145,25 @@ a.news-title:hover { color: var(--info); text-decoration: underline; }
 }
 
 .indicator, .scenario, .risk-row {
-  border: 1px solid var(--line);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
 }
 
-.indicator { min-height: 88px; padding: var(--space-3); }
+.indicator { min-width: 0; padding: var(--space-2) var(--space-3); }
 
-.indicator span, .risk-row span, .scenario span {
+.indicator > strong {
   display: block;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.indicator strong {
-  display: block;
-  min-height: 26px;
-  margin: var(--space-1) 0 2px;
-  font-size: 21px;
-  line-height: 1.2;
-  font-weight: 800;
+  margin: 2px 0;
   font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: 19px;
+  line-height: 1.3;
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .indicator small, .risk-row small, .scenario small {
+  display: block;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
@@ -2449,231 +2171,212 @@ a.news-title:hover { color: var(--info); text-decoration: underline; }
 
 .scenario-list, .risk-table { display: grid; gap: var(--space-2); }
 
-.scenario, .risk-row { padding: var(--space-3); }
+.scenario { padding: var(--space-2) var(--space-3); }
 
-.scenario strong, .risk-row strong {
+.scenario > strong {
   display: block;
-  margin: var(--space-1) 0;
-  font-size: 17px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  margin: 2px 0;
+  font-size: 16px;
+  font-weight: 700;
 }
 
-/* 情景标题是「9114 下方收盘」这类中英混排的句子 —— 保持无衬线，
-   只靠 tnum 固定数字步进；纯数字的风险位才走等宽栈。 */
-.risk-row strong { font-family: var(--font-num); }
-
-/* 右对齐的数值列，让风险表读作表格而不是散文。 */
+/* 风险表：右对齐的数值列，读作表格而不是散文。 */
 .risk-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: var(--space-3);
   align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
 }
 
-.risk-row strong { text-align: right; margin: 0; }
+.risk-row > strong {
+  margin: 0;
+  font-family: var(--font-num);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: right;
+}
 
-/* 轨道需要边框才能在两种底色上都可见；12px 对年长的眼睛更友好。 */
+/* 条的长度就是数据，色相不再编码方向。绝不在这里声明 width：app.js 内联写入。 */
 .scorebar {
-  height: 12px;
+  height: 10px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
   background: var(--surface-sunken);
-  margin-bottom: var(--space-2);
 }
 
-/* 条的「长度」就是数据 —— 色相不能再编码一次方向。
-   绝不在这里声明 width：app.js 用 style.width 内联写入。 */
 .scorebar span {
   display: block;
   height: 100%;
   background: var(--info);
-  transition: width var(--motion-base);
+  transition: width 200ms ease;
 }
 
-.signal-list {
-  margin: 0;
-  padding-left: 20px;
-  list-style: disc;
-}
-
-/* 条只是强化，这份清单才是真正的解释。 */
-.signal-list li { color: var(--ink-2); font-size: 14px; line-height: 1.7; }
-
-.csv-help {
-  margin-top: var(--space-3);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-}
-
-.csv-help h3 { margin-bottom: var(--space-1); }
-.csv-help p { margin: 0; font-size: 14px; }
+.signal-list { margin: 0; padding-left: 20px; }
+.signal-list li { font-size: 14px; }
 
 .risk-note {
-  margin: var(--space-3) 0 0;
+  margin: 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.6;
   text-align: center;
 }
 
 
 /* ==========================================================================
-   20. RESPONSIVE — 断点保持 1280 / 1050 / 720 / 480
-   密度靠 4px 刻度上的 padding 回收，绝不靠缩小字号。
+   13. RESPONSIVE
+   断点由内容决定：
+     ≥1200  顶栏吸顶（一行放得下时才吸顶，两行的顶栏会吃掉太多视口）
+     <1240  图表与 AI 改为上下堆叠（AI 栏低于 400px 读不动）
+     <1100  决策总览指标条 6 → 3 列
+     <960   决策总览上排三格堆叠；执行计划 3 → 2 列
+     <720   手机：全部单列，指标条 2 列
+     <480   小屏：收紧留白，字号不再下调
    ========================================================================== */
 
-@media (max-width: 1280px) {
-  .workspace { grid-template-columns: minmax(0, 1.4fr) minmax(360px, 1fr); }
-  .analysis-grid { grid-template-columns: 1fr 1fr; }
-  .decision-cockpit { grid-template-columns: 1.35fr 1fr; }
-  .contract-bridge-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .bridge-metric:nth-child(4) { border-left: 0; border-top: 1px solid var(--border-subtle); }
-  .bridge-metric:nth-child(5),
-  .bridge-metric:nth-child(6) { border-top: 1px solid var(--border-subtle); }
-  .cockpit-cell:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
-  .cockpit-cell:nth-child(4) { border-top: 1px solid var(--line); }
-
-  .intraday-board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .strategy-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 1200px) {
+  .topbar { position: sticky; top: 0; }
+  html { scroll-padding-top: calc(var(--topbar-h) + var(--space-4)); }
 }
 
-@media (max-width: 1050px) {
-  .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .validation-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .validation-grid > div:nth-child(4) { border-left: 0; border-top: 1px solid var(--border-subtle); }
-  .validation-grid > div:nth-child(5) { border-top: 1px solid var(--border-subtle); }
-  .intraday-board { grid-template-columns: 1fr 1fr; }
-  .strategy-cards { grid-template-columns: 1fr 1fr; }
-  .workspace { grid-template-columns: 1fr; }
+@media (max-width: 1239px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "chart" "ai" "tech";
+    grid-template-rows: none;
+  }
+
+  .news-layout { grid-template-columns: 1fr 1fr; }
+  .ai-news-inner .news-layout { grid-template-columns: 1fr 1fr; }
+  #aiArticlesList { max-height: 560px; }
+}
+
+@media (max-width: 1099px) {
+  .kpi-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .market-context-row { grid-template-columns: 1fr; }
+  .contract-bridge-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .contract-bridge-grid .mapping-metric { grid-column: 1 / -1; }
+  .analysis-grid { grid-template-columns: 1fr 1fr; }
+  .analysis-grid > :last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 959px) {
+  .overview-hero { grid-template-columns: 1fr 1fr; }
+  .overview-hero > .gate-cell { grid-column: 1 / -1; grid-row: 1; }
+
   .execution-grid { grid-template-columns: 1fr 1fr; }
   .no-trade-card { grid-column: 1 / -1; grid-row: 2; }
-  .news-layout { grid-template-columns: 1fr; }
-  #aiArticlesList { max-height: none; }
 
-  .topbar-main { align-items: flex-start; flex-direction: column; gap: var(--space-3); }
-  .market-context-row { grid-template-columns: 1fr; }
-  .sibling-link #siblingBias { max-width: none; }
+  .validation-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .validation-verdict { grid-template-columns: 1fr; }
+
+  .intraday-board { grid-template-columns: 1fr 1fr; }
+  .toolbar-secondary { margin-left: 0; }
 }
 
-@media (max-width: 720px) {
-  .app-shell {
-    width: min(100% - 16px, 1480px);
-    padding-top: var(--space-2);
+@media (max-width: 719px) {
+  :root {
+    --gutter: 12px;
+    --module-gap: 16px;
   }
 
-  .topbar, .summary-grid, .intraday-board, .analysis-grid,
-  .decision-cockpit, .execution-grid,
-  .validation-grid, .validation-verdict {
-    grid-template-columns: 1fr;
-  }
+  body { font-size: 15px; }
 
-  .topbar { gap: var(--space-2); padding-bottom: var(--space-2); }
-  .topbar-main { width: 100%; }
-  .topbar-main h1 { font-size: 26px; line-height: 1.18; }
-  .eyebrow { width: 100%; flex-wrap: wrap; }
-  #eyebrowText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 顶栏：标题一行，切换器占满宽，状态行在下。 */
+  .topbar-inner { padding: var(--space-3) 0; }
+  .topbar-main { flex-direction: column; align-items: stretch; gap: var(--space-3); width: 100%; }
+  h1 { font-size: 20px; white-space: normal; }
   .symbol-switcher { width: 100%; }
-  .sym-btn { flex: 1; min-width: 0; }
-  .topbar-status { width: 100%; grid-template-columns: 1fr; justify-items: start; }
-  .contract-pill { width: 100%; justify-content: flex-start; }
+  .sym-btn { flex: 1 1 0; min-width: 0; }
+  .topbar-status { width: 100%; justify-content: space-between; }
+  .contract-pill { order: 3; }
+  #themeToggleBtn { margin-left: auto; }
 
-  .bridge-head { align-items: flex-start; flex-direction: column; gap: var(--space-2); }
-  .bridge-summary { grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-2); }
-  /* 窄屏收成箭头，但不能整个拿掉 —— ::-webkit-details-marker 已被隐藏，
-     这是唯一的展开/收起提示。 */
-  .bridge-summary::after { content: "▸"; font-size: 15px; }
-  .contract-bridge[open] .bridge-summary::after { content: "▾"; }
+  /* 决策总览：价格一整行横排，许可与关键位各一行 */
+  .overview-hero { grid-template-columns: 1fr; }
+  .overview-hero > .gate-cell { grid-row: auto; }
+  .overview-hero > * { padding: var(--space-4); }
+  .kpi-strip { grid-template-columns: 1fr 1fr; }
+  .kpi-strip > * { padding: var(--space-3); }
 
-  .contract-bridge-grid { grid-template-columns: 1fr 1fr; }
-  .contract-bridge-grid .bridge-metric {
-    min-height: 96px;
-    border-top: 1px solid var(--border-subtle);
-    border-left: 0;
+  .quote-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: var(--space-4);
   }
-  .contract-bridge-grid .mapping-metric { grid-column: 1 / -1; border-top: 0; }
-  .contract-bridge-grid .bridge-metric:nth-child(3),
-  .contract-bridge-grid .bridge-metric:nth-child(5) { border-left: 1px solid var(--border-subtle); }
+  .quote-card > span { grid-column: 1 / -1; }
+  .quote-card #lastPrice { grid-row: 2 / span 2; font-size: 44px; }
+  .quote-card #lastChange { margin-top: 0; }
 
-  .validation-grid > div,
-  .validation-grid > div:nth-child(4),
-  .validation-grid > div:nth-child(5) { border-left: 0; border-top: 1px solid var(--border-subtle); }
-  .validation-grid > div:first-child { border-top: 0; }
+  .gate-pill { font-size: 22px; }
+  .level-pair strong { font-size: 24px; }
 
-  .cockpit-cell,
-  .cockpit-cell:nth-child(3),
-  .cockpit-cell:nth-child(4) { border-left: 0; border-top: 1px solid var(--line); }
-  .cockpit-cell:first-child { border-top: 3px solid var(--info); }
-  .cockpit-cell { min-height: 0; }
+  .bridge-summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-3);
+  }
+  .bridge-summary { position: relative; }
+  .bridge-summary-main { grid-column: 1 / -1; padding-right: 64px; }
+  /* 展开提示挪到标题行右上角，不再单独占一行。 */
+  .bridge-summary::after { position: absolute; top: var(--space-3); right: var(--space-3); }
+  .contract-bridge-grid { grid-template-columns: 1fr 1fr; }
+  .bridge-expanded { padding: var(--space-3); }
+
+  .sibling-link { flex-wrap: wrap; row-gap: var(--space-1); padding: var(--space-3); }
+  .sibling-link #siblingBias { flex-basis: 100%; order: 10; white-space: normal; }
+
+  .execution-grid { grid-template-columns: 1fr; }
   .no-trade-card { grid-column: auto; grid-row: auto; }
+  .setup-card { padding: var(--space-4); }
 
-  .toolbar { align-items: stretch; }
-  .toolbar label, .toolbar button { width: 100%; }
-  .indicator-grid { grid-template-columns: 1fr; }
-  .chart-head { display: grid; }
+  .validation-summary { align-items: flex-start; padding: var(--space-3); }
+  .validation-summary > div { display: grid; }
+  .validation-grid { grid-template-columns: 1fr 1fr; }
+  .validation-grid > div:first-child { grid-column: 1 / -1; }
+
+  .toolbar { padding: var(--space-3); }
+  .toolbar label { flex: 1 1 100%; white-space: nowrap; }
+  .toolbar select { flex: 1 1 auto; }
+  .toolbar-secondary { flex: 1 1 100%; }
+  .toolbar-secondary .file-label { flex: 1 1 100%; }
+  /* 文件框自带固有宽度，width:0 + flex 才能让它随行宽收缩，不被卡片裁掉。 */
+  .toolbar-secondary, .toolbar label { min-width: 0; }
+  .file-label input { width: 0; max-width: none; min-width: 0; flex: 1 1 auto; }
+  .toolbar-secondary button { flex: 1 1 0; }
+
+  .chart-panel { padding: var(--space-3); }
+  .chart-head { flex-direction: column; gap: var(--space-2); }
   .legend { justify-content: flex-start; }
-  .section-head { flex-direction: column; gap: var(--space-1); align-items: flex-start; }
 
-  /* 别在小屏上藏信息 —— 让它换行，而不是消失。
-     看不到主力价的涨跌，这张卡就失去了存在意义。 */
-  .ai-integrity { grid-template-columns: 1fr auto; }
+  .ai-panel { padding: var(--space-4); }
+  .ai-head { flex-direction: column; }
+  .ai-head-right { flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .ai-integrity { grid-template-columns: auto minmax(0, 1fr); }
   .ai-integrity > small { grid-column: 1 / -1; }
-  .sibling-link { flex-wrap: wrap; }
+  .news-layout,
+  .ai-news-inner .news-layout { grid-template-columns: 1fr; }
+  #aiList { max-height: none; }
+
+  .intraday-board { grid-template-columns: 1fr; }
+  .analysis-grid { grid-template-columns: 1fr; }
+  .analysis-grid > :last-child { grid-column: auto; }
+  .analysis-card { padding: var(--space-4); }
+
+  .section-head { flex-direction: column; align-items: flex-start; }
 }
 
-@media (max-width: 480px) {
-  body { font-size: 17px; }
-
-  .app-shell { width: min(100% - 16px, 1480px); }
-
-  /* 图表盒子由 aspect-ratio 全宽度预留，这里只收 padding。 */
-  .chart-panel { padding: var(--space-3); }
-
-  h1, .topbar-main h1 { font-size: 24px; line-height: 1.2; }
-  .eyebrow { font-size: 13px; gap: var(--space-2); }
-  .topbar { margin-bottom: var(--space-3); }
-
-  .section-head h2 { font-size: 18px; }
-  .section-head { margin-bottom: var(--space-2); padding-bottom: var(--space-2); }
-  .multi-strategy, .news-ticker, .news-block { padding: var(--space-3); }
-
-  /* 单列，且严格保持 DOM 顺序。 */
-  .strategy-cards { grid-template-columns: 1fr; }
-  .overseas-grid { grid-template-columns: 1fr; }
-  .pos-calc-grid { grid-template-columns: 1fr; }
-  #newsTickerList { grid-template-columns: 1fr; gap: var(--space-2); }
-
-  /* 并排比较正是它们存在的理由，保持 2 列。 */
-  .pos-calc-out { grid-template-columns: 1fr 1fr; }
-  .levels { grid-template-columns: 1fr 1fr; }
-
-  .toolbar label { flex-direction: column; align-items: stretch; gap: var(--space-1); }
-  .toolbar select { width: 100%; }
-  .file-label input { max-width: 100%; width: 100%; min-height: 44px; padding: var(--space-2); }
-  .file-label input::file-selector-button { min-height: 40px; padding: 10px 12px; }
-
-  .ai-head { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
-  .ai-head h2 { font-size: 18px; }
-  .bias-pill { align-self: flex-start; }
-  .ai-head-right { flex-direction: row; align-items: center; align-self: flex-start; flex-wrap: wrap; }
-
+@media (max-width: 479px) {
+  .kpi-strip strong { font-size: 18px; }
+  .setup-price, .no-trade-zone { font-size: 26px; }
+  .indicator-grid { grid-template-columns: 1fr 1fr; }
+  .pos-calc-grid { grid-template-columns: 1fr 1fr; }
+  .strategy-item { grid-template-columns: 76px minmax(0, 1fr); }
   .ticker-card-meta { flex-direction: column; gap: 2px; }
-
-  /* 合约摘要行：标题独占一行，主力价与状态换到第二行，
-     13px 下限下不再把「可交易合约」挤成两行。 */
-  .bridge-summary { grid-template-columns: minmax(0, 1fr) auto; row-gap: var(--space-2); }
-  .bridge-summary-main { grid-column: 1 / -1; }
-
-  /* 密度靠 padding 回收，字号一律不再下调。 */
-  .metric { min-height: 108px; padding: var(--space-3); }
-  .board-card { min-height: 0; padding: var(--space-3); }
-  .cockpit-cell { padding: var(--space-3); }
-  .bridge-metric { padding: var(--space-2); }
-  .levels div, .levels.small div { padding: var(--space-3); }
-  .analysis-card { padding: var(--space-3); }
-  .analysis-card ul, .signal-list { padding-left: 18px; }
-  .intraday-board { gap: var(--space-2); }
+  .contract-pill { white-space: normal; }
 }

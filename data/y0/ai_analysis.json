@@ -1,186 +1,201 @@
 {
-  "summary": "本次分析基准为大连商品交易所豆油连续合约 Y0（映射主力 Y2701）在 2026-09-28 交易日 13:51:32（盘口 ticktime）的实时价 8867.0 元/吨，涨跌幅 -0.85%（相对前收盘 8962），realtime_fetch_status=live，属于本次实时输入。当前正处午盘 13:30–15:00 交易时段内，实时价已明显跌破 1 小时布林下轨（8875.47），并处于 4 小时布林中轨下方、日线 MA10 与 MA20 下方，多周期共振偏空，但 1 小时 RSI 36.51 已接近弱势区、4 小时 RSI 41.2 中性偏弱，短线存在技术性修复可能。日线级别仍属 8776–9286 区间内的高位回落，尚未破坏 8 月以来的中期上行结构（MA60 8716.75）。操作上，今晚夜盘 21:00 开盘后建议以反弹承压沽空或跌破日线低点顺势跟随为主，若价格在 8850–8860 区间获得有效支撑并放量收复 1 小时中轨 8932.55，则空头思路暂缓。历史日线基准模型 model_validation 状态为 unproven（优势尚未证实），不得将其胜率当作未来概率。",
+  "summary": "本次分析基准时刻为北京时间 2026-09-28 20:53:26（UTC 2026-09-28T12:53:26）。实时输入为 live，最新盘口取 2026-09-28 15:04:24 ticktime，Y0 连续合约 realtime.price = 8868.0，当日涨跌幅 -0.84%（相对前结算 8943.0），日线口径收盘跌 -1.05%。该价已跌破 1 小时布林中轨 8928.05、2 小时中轨 8930.95、4 小时中轨 8946.55 与日线 MA10 8940.4，仅贴近 1 小时布林下轨 8864.66（现价 8868.0 几乎贴轨），三个尺度呈现空头排列共振。日线 RSI14 为 46.68，属中性偏弱，不构成超卖；1 小时 RSI 35.9、4 小时 RSI 40.87，均为弱势但未极端。整体偏空，但现价紧贴短周期下轨、成交量显著萎缩（volume_ratio_20d 0.59，日内量比近 0），追空性价比差，倾向反弹后做空或等待下轨有效破位确认。今晚夜盘 21:00 开盘后应以 realtime.price 8868.0 为基准观察能否收复 1 小时中轨 8928。",
   "bias": "偏空",
   "analysis": [
-    "实时基准：realtime.price=8867.0，盘口 ticktime 为 13:51:32，涨跌幅 -0.85%（前收盘 8962.0，前结算 8943.0），当前正处于午盘 13:30–15:00 时段，该价格为本次所有入场、止损、目标与布林位置的唯一基准，未用任何日线 close 或小时线 close 替代。",
-    "1 小时布林：带宽 0.0128，上轨 8989.63 / 中轨 8932.55 / 下轨 8875.47，实时价 8867.0 已跌破下轨，属通道下沿之外的弱势位置，1 小时 RSI 36.51 偏弱、ADX 18.13 显示趋势强度不足，偏向弱势震荡而非单边趋势，若无法快速回归中轨则下轨可能继续下移。",
-    "4 小时布林：带宽 0.0259（较 1 小时略宽），上轨 9062.58 / 中轨 8946.75 / 下轨 8830.92，实时价 8867.0 位于中轨下方、靠近下轨，4 小时 RSI 41.2 中性偏弱，EMA20 8947.76 且斜率 -0.0023 向下，说明中期动能仍偏空，但价格距下轨 8830.92 尚有约 36 点空间，未到极端超卖。",
-    "日线布林/均线背景：日线 latest_date 为 2026-09-24（相对本次基准已延迟，需标注为历史日线收盘而非当前盘口），close 8962、RSI14 53.66 属中性区间（既未超买也未超卖），MA10 8956.2、MA20 9031.95 均高于当前实时价 8867.0，价格已回落至 MA10/MA20 下方，仅 MA60 8716.75 仍构成中期支撑，日线 20 日区间 high20 9286 / low20 8776。",
-    "趋势与量能：日线 volume_ratio_20d 仅 0.54，显示 9 月中旬以来量能持续萎缩，1 小时 volume_ratio20 显示为 0.0（分钟数据量能列口径异常，不宜据此判断放量），持仓方面连续合约 open_interest 由 9 月 24 日约 628824 降至实时 625811，盘中 1 小时 open_interest_change 为 -2054，减仓下跌暗示多头离场而非空头大幅增仓。",
-    "支撑压力：上方近端压力为 1 小时中轨 8932.55 与前收盘 8962.0，其次为 4 小时中轨 8946.75 与日线 MA10 8956.2；下方近端支撑为 4 小时下轨 8830.92 与今日低点 8852.0，其次为日线 low20 8776.0 及 MA60 8716.75，若失守 8776 则日线区间下沿被打破。",
-    "合约结构：contract_bridge 显示 Y0 当前映射主力 Y2701（价格、持仓与连续一致，mapping_verified=true），主力持仓占比 0.4883，次主力 Y2705 价差 -186（远月贴水结构），roll_state=stable、roll_label=主力稳定，换月信号不强，但 Y0 为连续合约分析口径，不是可直接下单的具体月份合约。",
-    "模型与证据强度：model_validation 状态为 unproven（优势尚未证实），样本外 77 笔交易胜率 0.4026、盈亏比 1.0198，属统计上无优势的日线基准，且该模型不等同于当前 1H/4H 日内方案，本分析多空判断仅基于价格结构与情绪，可信度有限，故 confidence 不宜给高。"
+    "实时价与定位：realtime.price = 8868.0，盘口 ticktime 为 2026-09-28 15:04:24，涨跌幅 -0.84%（前收 8962.0、前结算 8943.0）。该实时价为本次全部入场、止损、目标及布林位置判断的唯一基准，不用日线 close 或其他小时 close 替代。",
+    "1 小时布林：上轨 8991.44 / 中轨 8928.05 / 下轨 8864.66，带宽 0.0142。现价 8868.0 位于中轨下方、几乎贴住下轨，属空头弱势运行但已接近超短线下沿，布林带宽偏窄显示短线动能不足。1 小时 RSI 35.9 弱势未超卖，EMA20 8919.78 且斜率 -0.0021 向下，反弹先看中轨 8928 压力。",
+    "4 小时布林：上轨 9062.91 / 中轨 8946.55 / 下轨 8830.19，带宽 0.026 较 1 小时宽。现价 8868.0 位于中轨下方、距下轨 8830.19 尚有约 38 点空间，4 小时 RSI 40.87、ADX 22.27 显示下行趋势中等强度。若夜盘有效跌破 8830-8852（对应 4 小时下轨与日线 low20），将打开向更低区间运行空间。",
+    "2 小时过渡参考：中轨 8930.95、下轨 8843.77，现价 8868.0 在中轨下方、逼近下轨，RSI 39.8，方向与 1 小时、4 小时一致，强化短周期偏空共振，但未给出额外方向增量。",
+    "日线布林/均线：MA10 8940.4、MA20 9027.1、MA60 8724.45，现价 8868.0 位于 MA10 与 MA20 之下、MA60 之上，均线中短期空头、长期仍偏多的混合结构。日线 RSI14 = 46.68 属中性偏弱区（未超卖），high20 9286.0、low20 8852.0，现价贴近 20 日低点，构成关键多空分水岭。日线收 8868.0 跌 -1.05%，量能 218339 为 20 日均量 0.59 倍，属缩量下跌。",
+    "趋势与量能：小时线出现 15:00 收盘量 23 的极端低量，且 updated_at_utc 为 10:52:29（早于实时抓取），需标注为延迟 K 线，不能当作刚刚成交的实时盘口；combined 看日内 open_interest 由 628666 降至 621228，减仓下跌暗示多头离场为主，而非空头强力增仓打压，追空需谨慎。",
+    "支撑与压力：下方支撑依次为 8852（日线 low20 / 日内低点）→ 8830.19（4 小时下轨）；上方压力依次为 8864.66-8868（1 小时下轨现价区）→ 8928-8946（1/4 小时中轨）→ 8940-9027（日线 MA10/MA20）。现价处于贴近支撑、远离压力的位置，短线呈弱反弹再回落概率结构。",
+    "连续合约映射：contract_bridge mapping_verified = true，Y0 现价 8868.0 与主力 Y2701 一致（持仓 620910，占主力份额 0.4863），次主力 Y2705 价 8680.0、价差 -188（-2.12%），呈远月贴水、roll_state = stable 主力稳定，无高强度换月信号。但 Y0 为连续合约口径，不可直接下单，实盘须在软件二次确认 Y2701 具体月份与盘口。"
   ],
   "intraday_strategy": {
-    "bias": "偏空",
-    "entry": "反弹至 8932–8962 区间承压沽空（以 1 小时中轨 8932.55 与实时前收盘 8962.0 为参考上沿）；若价格不反弹而直接跌破今日低点 8852.0，可在 8850 下方顺势轻仓跟随空单",
-    "stop": "沽空止损参考 8975（重回 1 小时中轨上方并逼近 4 小时中轨 8946.75 之上意味着日内空头结构被破坏）；跌破跟随空单止损参考 8885",
-    "take_profit": "第一目标 8830（4 小时布林下轨 8830.92 附近），第二目标 8776（日线 low20）",
-    "invalidation": "若 1 小时收盘重新站上 1 小时中轨 8932.55 且放量，或价格在 8850–8860 出现明显下影并快速收复 8875，则空头逻辑失效，应转为观望或等待方向明朗",
-    "notes": "适用时段：今晚夜盘 21:00–23:00 开盘后关注 8932–8962 的反弹承压表现，以及 8852/8830 的支撑争夺；若夜盘跳空低开于 8830 下方，不追空、等反抽确认。午盘 13:30–15:00 剩余时段若价格维持 8852–8884 窄幅缩量，属于震荡不宜进场。Y0 为连续合约，下单前务必在交易软件二次确认真实月份（当前主力 Y2701）的报价、流动性与换月价差，本策略不构成投资建议。"
+    "bias": "偏空（反弹至中轨附近择机空，或跌破日内低点确认后顺势空；不追贴下轨低点）",
+    "entry": "反弹空：夜盘 21:00-23:00 若反抽至 8918-8928（1 小时 EMA20 8919.78 与中轨 8928.05 汇合区）承压不过，可背靠该区空，参考入场 8920 附近；破位空：夜盘或明日早盘 09:00-11:30 有效跌破 8852（现价下沿、日线 low20）并回抽不站稳，可顺势入场，参考入场 8848。",
+    "stop": "反弹空止损设 8948（4 小时中轨 8946.55 上方）；破位空止损设 8888（跌破后重回日内中枢上方）。所有止损以 realtime.price 8868.0 为基准换算。",
+    "take_profit": "第一目标 8830.19（4 小时布林下轨），第二目标 8780（前低延伸区）；到达第一目标可减半仓、余仓移动止损。",
+    "invalidation": "若夜盘 1 小时收盘重新站上 8928（1 小时中轨）并放量站稳，空头结构失败，反弹空逻辑作废，转为观望或等待 4 小时中轨 8946.55 二次确认。",
+    "notes": "本轮实时输入 live 但小时 K 线为 15:00 收盘、数据更新于 10:52 UTC，属延迟参考，不能当作实时成交。日线模型 model_validation 状态为 unproven（样本外胜率 40.26%、盈亏比约 1.02），历史优势未被证实，其胜率不得作为未来概率。若 contract_bridge.mapping_verified 被人工复核为否，则不交易。今晚夜盘 21:00 开盘后重点关注能否收复 8928；若直接低开贴近 8830 则观望，不追空贴轨弱价。"
   },
   "decision_frame": {
-    "confidence": 48,
-    "regime": "高位回落后的弱势震荡，1 小时跌破下轨、4 小时中轨下方，日线 8776–9286 区间内运行，多周期共振偏空但动能不强",
-    "edge": "实时价 8867 位于 1 小时下轨之外且低于日线 MA10/MA20，反弹到 8932–8962 区间的沽空具备一定位置优势；但 1 小时 RSI 36.51 与 ADX 18.13 显示弱势震荡而非趋势，边缘有限",
-    "no_trade_condition": "1) 若反弹空单首目标仅到 8830、相对 8975 止损的盈亏比低于 1.5，则不满足交易条件；2) contract_bridge 的 mapping_verified=false 时禁止交易（当前为 true，但仍需软件二次确认）；3) 分钟量能列 volume_ratio20=0.0 属口径异常，无法确认放量突破时禁止追单；4) model_validation 状态 unproven，不得据其胜率下单",
+    "confidence": 58,
+    "regime": "日线中性偏弱、小时级空头共振的震荡下行结构（缩量减仓下跌）",
+    "edge": "多周期价格位于各自布林中轨下方，方向一致偏空；但现价紧贴 1 小时下轨且缩量，短线做空赔率被压缩，边缘优势中等偏弱，倾向压力区做空而非中枢追空。",
+    "no_trade_condition": "1）contract_bridge.mapping_verified = false 需人工复核时禁止交易；2）夜盘直接低开至 8830 以下或缩量贴轨，追空首目标盈亏比低于 1.5，观望；3）日线模型 unproven，不得以其胜率下单；4）重大宏观事件（中美相关消息）公布前后 30 分钟内不新开仓。",
     "long_case": {
-      "trigger": "实时价 8867 在 8850–8860 获得支撑，1 小时放量收复 1 小时中轨 8932.55",
-      "entry_zone": "8860–8880（回踩不破 8852 后企稳）",
-      "stop": "8830（跌破 4 小时下轨 8830.92 下方）",
+      "trigger": "夜盘在 8852-8868 区间放量止跌，1 小时收盘重回 8928（中轨）上方",
+      "entry_zone": "8870-8890",
+      "stop": "8848",
       "targets": [
-        "8932",
-        "8962"
+        "8928",
+        "8946.55"
       ],
-      "invalidation": "1 小时收盘跌破 8830 或持仓持续大幅减少",
-      "risk_reward": "约 1.6（以 8870 入场、8830 止损、8932 首目标估算），属勉强达标，需配合放量确认"
+      "invalidation": "1 小时收盘跌破 8852 且不能快速收回",
+      "risk_reward": "约 1.6（自 8870 入场，止损 8848、首目标 8928）"
     },
     "short_case": {
-      "trigger": "反弹至 8932.55（1 小时中轨）—8962.0（前收盘）区间承压回落，或直接跌破今日低点 8852.0",
-      "entry_zone": "8932–8962（反弹沽空）；或 8850 下方（破位跟随）",
-      "stop": "8975；破位跟随单止损 8885",
+      "trigger": "夜盘反弹至 8918-8928 承压不过，或有效跌破 8852 后回抽不站稳 8852",
+      "entry_zone": "8848-8920（区间两端分别对应破位空与反弹空）",
+      "stop": "反弹空 8948 / 破位空 8888",
       "targets": [
-        "8830",
-        "8776"
+        "8830.19",
+        "8780"
       ],
-      "invalidation": "1 小时放量收复 8932.55 并站稳 4 小时中轨 8946.75 上方",
-      "risk_reward": "约 1.8（以 8945 入场、8975 止损、8830 首目标估算），为首选方向"
+      "invalidation": "1 小时收盘重新站上 8928 并放量",
+      "risk_reward": "反弹空约 1.8（8920 入场、8948 止损、首目标 8830.19）；破位空约 1.5（8848 入场、8888 止损、首目标 8830.19）"
     },
     "event_risks": [
-      "1) 马盘棕榈油与大连豆油联动的油脂板块情绪，近期马棕止跌企稳与累库压力并存（来源：汇通网 2026-09-24，已属过去信息）；2) 中美峰会前景与美豆出口（来源：Investing.com 2026-09-22、IndexBox 2026-09-22、ua.news 2026-09-21，均为历史报道）对美豆与豆油成本端的扰动；3) 阿根廷 2026/27 产量创纪录预期（IndexBox 2026-09-23）与美豆优良率低于预期（金十数据 2026-09-27）方向相反，需警惕消息面反复；4) 今晚夜盘外盘油脂与原油波动"
+      "中美峰会前景及相关共识消息（英为财情 2026-09-22、国泰君安 2026-09-28）可能阶段性扰动大豆与油脂情绪",
+      "美豆跌破 13 美元/蒲式耳、聚焦中国采购需求（证券之星 2026-09-28），弱化成本端支撑",
+      "马来西亚棕榈油累库压力与大连托底角力、马棕早盘一度跌 2%（汇通网 2026-09-24、KLSE Screener 2026-09-25），油脂板块整体承压",
+      "阿根廷 2026/27 年度产量预计创 1.579 亿吨纪录（IndexBox 2026-09-23），全球供应宽松预期利空远月"
     ],
     "data_limits": [
-      "日线 latest_date=2026-09-24，相对本次基准 UTC 2026-09-28T05:51:58 已延迟逾两个交易日，日线结论应按历史收盘对待；1 小时/4 小时 K 线 updated_at_utc=2026-09-28T04:13:48，最新 bar 标签 2026-09-28 14:15/15:00，与实时 ticktime 13:51:32 存在若干分钟不同步，且 1H/4H 量能列显示为 0.0 属异常口径；舆情新闻发布时间均早于本次基准，不能当作届时或即将发生的事件；model_validation 为 unproven，连续合约回测含换月跳空，均不构成未来收益保证"
+      "小时 K 线 updated_at_utc 为 2026-09-28T10:52:29，早于实时抓取 12:53:26，属延迟参考，非实时成交",
+      "15:00 收盘量仅 23，盘口代表性有限，短周期量能信号弱",
+      "Y0 为连续合约，历史含换月跳空，不能直接作为 Y2701 具体月份下单依据",
+      "model_validation 状态 unproven，样本外一次切分且未模拟滑点、涨跌停与费用，不构成未来收益保证",
+      "舆情来源为搜索结果，部分发布时间早于本次分析数日，其影响可能已被价格部分消化"
     ]
   },
   "news_impact": [
-    "[中性偏多] 汇通网 2026-09-24 报道马盘棕榈油止跌企稳，逻辑为大连市场托底与产地累库压力角力，方向待明；该信息发布于本次基准之前，属已消化信息。若马棕持续企稳，将通过油脂板块联动对豆油形成一定托底，但累库压力限制反弹高度，故整体偏中性。",
-    "[利空] KLSE Screener 2026-09-25 报道棕油期货早盘跌2%并料本周转跌，反映产地油脂价格走弱预期。棕榈油与豆油在油脂板块内高度联动，马棕走弱会通过替代效应与板块情绪压制大连豆油，是本次偏空判断的外部情绪支撑之一，但该报道时间早于基准日。",
-    "[中性偏多] Investing.com 2026-09-22 报道中美峰会前景支撑市场情绪、大豆期货维持稳定。中美关系预期改善有利于美豆出口与中国采购情绪，对豆油成本端构成潜在支撑，但报道已属过去，且尚未有新的峰会进展消息，对当前实时价影响有限。",
-    "[中性偏多] IndexBox 2026-09-22 报道中国大豆采购回暖提振美国 2026-27 市场年度出口前景；ua.news 2026-09-21 援引《日本时报》称中国已完成购买美国大豆承诺的一半以上。采购回暖意味着进口大豆到港预期增加，短中期利多美豆价格、抬升豆油成本，但同时也可能增加国内豆油供应，多空影响需结合压榨节奏判断，方向偏中性。",
-    "[利空] IndexBox 2026-09-23 报道阿根廷 2026/27 年度粮食产量预计创 1.579 亿吨纪录，南美供应前景宽松。全球大豆供应预期增加将压制远期大豆与豆油价格，尤其对远月合约形成压力，这与 contract_bridge 显示的 Y2705 等远月贴水结构（次主力价差 -186、远月贴水）方向一致。",
-    "[利多] 金十数据 2026-09-27 报道美国大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启。美豆优良率偏低可能下调单产预期、抬升美豆价格，从而通过进口成本传导利多国内豆油；但该报道为过去信息，需关注后续优良率更新对盘面的持续影响。",
-    "[中性] 新浪财经 2026-09-23 的“期货APP哪个能看外盘行情和夜盘”与 2026-09-22 华泰期货花生现货区域分化，均与豆油基本面关联度低，仅反映油脂油料板块信息面活跃度，对豆油价格方向无直接指引。",
-    "[中性偏多] 新浪财经 2026-09-28 光大期货农产品日报（发布于本次基准当日更早的 UTC 02:32）属当日机构观点，通常涵盖油脂油料供需与操作建议，可作为当日市场情绪的参考，但未提供具体数据，不改变本分析基于盘面结构的偏空判断。"
+    "[利空] 棕油期货本周料转跌：KLSE Screener 2026-09-25 报道马棕早盘跌 2%、本周料转跌。逻辑上马棕走弱直接拖累国内油脂板块比价，豆油作为替代油脂承压，与本次 Y0 实时价 8868.0、跌 -0.84% 的弱势方向一致。",
+    "[中性偏空] 马盘棕榈油止跌企稳、大连托底与累库压力角力：汇通网 2026-09-24 指出方向待明。说明多空分歧加剧，短期难给豆油明确单边驱动，需结合国内盘面，中性略偏空因累库压力仍在。",
+    "[利多/中性] 中美峰会前景支撑情绪、大豆期货维持稳定：英为财情 2026-09-22 提及中美峰会前景。若中美贸易缓和预期升温，利于美豆出口与中国采购，成本端对豆油构成潜在利多，但当前盘面尚未反映为强势。",
+    "[利空] 大豆跌破 13 美元/蒲式耳、聚焦中国采购需求：证券之星 2026-09-28 报道美豆走弱。进口大豆成本下移削弱豆油成本支撑，压制连盘豆油估值，与本日缩量下跌方向吻合。",
+    "[中性] 美国天气炒作攻略：大豆玉米首份优良率双双低于预期：jin10 2026-09-27 报道优良率偏低或开启天气炒作窗口。若后续减产预期发酵，可阶段性提振豆系情绪，属潜在利多变量，但当前尚未主导价格。",
+    "[利空] 阿根廷 2026/27 年度粮食产量预计创 1.579 亿吨纪录：IndexBox 2026-09-23。南美供应宽松预期利空远月豆类与油脂，压制 Y2705 等远月升水空间（当前 Y2705 对 Y2701 贴水 -188）。",
+    "[中性] 国泰君安期货解读中美八点共识行情线索：新浪财经 2026-09-28。宏观与贸易政策线索可能双向扰动油脂，短期以情绪影响为主，需警惕事件窗口内的波动放大。",
+    "[中性偏空] 光大期货 9 月 28 日农产品日报：新浪财经 2026-09-28。机构日报通常综合现货与库存，若报告基调偏弱则强化当前豆油承压判断，但未提供具体数据，影响有限。"
   ],
   "news_articles": [
     {
-      "title": "马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 - 汇通网 Fx678",
+      "title": "马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明",
       "source": "汇通网 Fx678",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kN1hjWHRNTTZ4TFlsQWl0X0ZRVk1LZ0xMTWxtU25KSmczd1pYR0wxUjRqRDg5MWQyc2tmLW5sZ1hSWlI3TXBVVTJ2NzVCRy1FdmRDWVo5TG1KeHM?oc=5",
-      "detail": "报道发布于 2026-09-24T11:02:00+00:00，指出马来西亚棕榈油在连续走弱后止跌企稳，市场处于大连市场托底力量与产地库存累积压力的角力之中，方向尚不明朗。棕榈油与豆油同属油脂板块且存在替代关系，马棕企稳会在情绪与价差层面对大连豆油形成一定托底，但累库压力限制其反弹空间，整体影响偏中性。该信息发布于本次分析基准之前，属已消化信息。",
+      "detail": "汇通网 2026-09-24 报道马盘棕榈油止跌企稳，行情处于大连盘面托底与产地累库压力的角力之中，方向尚未明朗。报道强调累库压力限制反弹空间，而国内需求与大连油脂盘面对马棕形成一定支撑。对豆油而言，棕榈油作为主要替代油脂，其企稳可减弱油脂板块下行斜率，但累库背景仍构成压制，整体中性偏空。",
       "impact": "中性"
     },
     {
-      "title": "棕油期货早盘跌2% 本周料转跌 - KLSE Screener",
+      "title": "棕油期货早盘跌2% 本周料转跌",
       "source": "KLSE Screener",
       "url": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxOWHNURVgycU9wUmVva0QyX2ZKQnFJVkl6dEIyOEdiRzY3cVB3OUk0UDktQjBhMDh1TDVWaDkxcW5CREhsUlpZbm0wR1N6R1F4Wk9obGN4MUttZnY5ejhPTzNMX0EwT0t4bzJxTHVkd1dUOVo3SUdNXzJYV3Z6clJzSVpnSDBZUEU2YkNnOThPRnZMRzVIdDJKS3Rlb0hOekdRV2JCVGRCMl9LRzVJZHlnS2htdUFmM2NrdmxTTEwyLTRxSGVBaXY4bUZ3eGplTFd4Xy1yWnlwUVQ2QWl5XzB1RlZNY3pQTEJ3NExQT0IxZE1Hdw?oc=5",
-      "detail": "报道发布于 2026-09-25T03:42:47+00:00，称棕油期货早盘下跌 2%，并预计本周走势转为下跌。作为油脂板块的核心品种，棕榈油走弱会通过板块联动与豆棕价差调整对大连豆油形成压力。该消息与本次实时价 8867、涨跌幅 -0.85% 的弱势表现方向一致，构成外部情绪上的利空佐证，但发布时间早于基准日。",
+      "detail": "KLSE Screener 2026-09-25 报道马来西亚棕油期货早盘一度下跌 2%，并预计本周转为下跌。报道指出产地供应与出口节奏偏弱，令棕油反弹乏力。马棕走弱会通过油脂比价传导至国内豆油，削弱板块整体支撑，对豆油构成利空，印证当前 Y0 实时价 8868.0 的弱势格局。",
       "impact": "利空"
     },
     {
-      "title": "中美峰会前景支撑市场情绪，大豆期货维持稳定 提供者 Investing.com - 英为财情 Investing.com",
+      "title": "中美峰会前景支撑市场情绪，大豆期货维持稳定",
       "source": "英为财情 Investing.com",
       "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBWUFZhbFEyam15Y2M1YlBhYU5sVUtTcHN4REVJeG1rbWd2aW4zS3ZnY2czTUxpcTNDSFdaaWtJUk1kUDJFSmRRb2VXWGd0dlRrSUh3TVpwZ1prSEEyZnF4aUNETXJ1OGJ6VU85NjNkSVFZeHFhQnc?oc=5",
-      "detail": "报道发布于 2026-09-22T18:35:00+00:00，指出中美峰会前景改善市场风险偏好，大豆期货维持稳定。中美关系预期回暖有利于美豆出口前景与中国采购节奏，进而在成本端对豆油形成潜在支撑。但该报道时点早于本次基准，且缺乏新的峰会具体进展，对当前实时价的即时影响有限，整体偏中性。",
-      "impact": "中性"
-    },
-    {
-      "title": "中国大豆采购回暖提振美国2026-27市场年度出口前景 - 新闻和统计 - IndexBox",
-      "source": "IndexBox",
-      "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxOSzNUb3pkTFRSUUxpc3JBRWEwczBDUGFUZzdiSFhYdXBjQXJpcHlEQVdzd3diTUFwdUo5TGh0TnFGd01oeTB0SmZTdHBSRFpIbV8yQkY1VHU3amF4YTFoNGZpOFZNZUlMcXlfejlZYVpxRF8xbTBrN2FURWZNU0JVNXM1aWFfb1RsWmFIMGc1cTlRcXhrTGIzQU5ReFZZUThFdmo5ZkI1VVY2XzlqWmFiMHZLMDN2SjRGTVE?oc=5",
-      "detail": "报道发布于 2026-09-22T11:01:00+00:00，称中国大豆采购回暖提振美国 2026-27 市场年度出口前景。采购回暖通常抬升美豆价格预期，进而通过进口成本传导对国内豆油形成成本支撑；但采购增加同时意味着未来进口大豆到港与压榨量上升，可能增加豆油供应，形成多空交织，故判定为中性。",
-      "impact": "中性"
-    },
-    {
-      "title": "中国已完成购买美国大豆承诺的一半以上——《日本时报》 - ua.news",
-      "source": "ua.news",
-      "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxOQW0tN0t6SUplVjBYQmNyNFB0cEk0a052QTVoN0JScFBELW1kUHN0NTJmckVHT084NVBwNEg1a09yVUpka01DME9QNnRKWnBFR0hGVnd0RU5SelJzSXg5ZGljYjFlNkhETWozYUNUVkprck9xMVlIODJ6ZEVrMWo1LVRyczA4di1kZ1hpMUtMbl9mUVAwTnIycnJYWk9wLU5s?oc=5",
-      "detail": "报道发布于 2026-09-21T20:41:00+00:00，援引《日本时报》称中国已完成购买美国大豆承诺的一半以上。这一进展显示中美农产品贸易在逐步兑现，利多美豆出口与价格预期，对豆油成本端构成间接支撑；但采购兑现同时指向后续到港供应增加，对国内豆油价格的多空影响需结合压榨与库存数据观察，故为中性。",
-      "impact": "中性"
-    },
-    {
-      "title": "阿根廷2026/27年度粮食产量预计创1.579亿吨纪录- 新闻和统计 - IndexBox",
-      "source": "IndexBox",
-      "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPU1JscVpJUnUxTTlJZzNmQjhoZFJ5aWg3SDI0R0VfTDR4WWdGOEZSX0hiYnBVZW0xZm9WcG91YlJLOGo5ZGlQNFRqelZTNW5zMWpUdkpRY1B3cFlWWHhNZHpLUXdSVXpsWEhwVTdXWDExM09fMlhoaGNHZ1NxX2N3RlpvOEh3WWw1SUF6bzFUWjZTMU5IUnBTSTZnVlpHaFU0NnZRTFctZXF1aU42Y1RqMEV6RGd2Zlk?oc=5",
-      "detail": "报道发布于 2026-09-23T11:10:45+00:00，IndexBox 预计阿根廷 2026/27 年度粮食产量将达到创纪录的 1.579 亿吨。南美供应前景宽松，将压制全球大豆及其下游豆油的远期价格预期，尤其施压远月合约；这与 contract_bridge 中 Y2705 相对 Y2701 呈 -186 的远月贴水结构方向一致，属利空信息。",
-      "impact": "利空"
-    },
-    {
-      "title": "【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 - 金十数据",
-      "source": "金十数据",
-      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5",
-      "detail": "报道发布于 2026-09-27T12:44:26+00:00，指出美国大豆玉米首份优良率双双低于市场预期，天气炒作窗口或已开启。优良率偏低可能引发市场对新作单产的下调预期，抬升美豆价格，并通过进口成本传导利多国内豆油。不过该信息发布于本次基准之前，尚需跟踪后续优良率数据以确认趋势。",
+      "detail": "英为财情 2026-09-22 报道中美峰会前景提振市场情绪，大豆期货维持稳定。市场关注中美贸易关系可能改善对美豆出口与中国采购需求的潜在推动。若采购预期兑现，进口成本与豆系情绪有望受到提振，对豆油构成潜在利多，但该预期尚待实质兑现，当前盘面未显强势。",
       "impact": "利多"
     },
     {
-      "title": "光大期货：9月28日农产品日报 - 新浪财经",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOZEtUbEFzQ1dhTExpZWcyQ20wOG85ZEFmU1V5RFhibjlyT3ZBQzhHU05hYkxwRDYteFlQMC1Ma19lOWZxNVNVNS1ENjVydXVJNXFRZmNHNW9DZmhLM1NKMEJQZEJjSEU3LU5NQ0xHZlN2WldxdlUzeFNUWElORzB1YVFWM2c2dUxxZ1dXXw?oc=5",
-      "detail": "报道发布于 2026-09-28T02:32:00+00:00，为光大期货当日农产品日报，通常涵盖农产品板块供需与操作观点，可作为当日机构情绪参考。该信息发布时间早于本次基准盘口 13:51:32，属当日早间观点，未提供可引用的具体数据，因此对实时价的方向指引有限，整体判定为中性。",
+      "title": "期货APP哪个能看外盘行情和夜盘",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNZE1oYjUxa3hEWXRhcmpFSW5hQ19WZUZBaTJhZ01xeDlMTkRKWTJiUzVzVHJxc1hSRmo1QlM3UXh4TThibWdmTmExRURNYmVYdGRQZm9HUnF2MnR5czUwM0ZmOHJzSVVlSzA4NFhaSmRWcVQ0YlFPRzRwLXVDRU1DaDVQMHJzV050MFF3OExydUtzWGVQREZXb0tYZkk2dmNZOFpGczRyLTVpSC1VenJxdA?oc=5",
+      "detail": "新浪财经 2026-09-23 发布关于可查看外盘行情与夜盘的期货 APP 介绍。该内容属工具类信息，不涉及豆油基本面或价格驱动。对 Y0 行情判断无实质影响，仅提示夜盘 21:00-23:00 时段可参考外盘联动，属中性信息。",
       "impact": "中性"
+    },
+    {
+      "title": "华泰期货：一多空交织，花生现货区域分化",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxNVDRVak1hVzlvLVFsZ25MTnJKN0NhaVdEUGZWTnBWVzRpZ25LeDI3VDhMYXNnVW1rTDFncXY0UzRVSGFDNjRHYzVJM1ZfSGg0Z09RemZ0bmJMWFlmQ3RObk9EWkZ4Q0pOR0tCRWJ3Y2oyazRjOEFqaGtJYml1RkxyUjM1UmQ3TEhMb1VfRHF1cTdkTmxDd2x3SllBbWhGM1UtOFdsTGR6WWY0NzdEQ1ZPWUtGU0RMVGdfYzY2OFpLRmdaRGhCWFFaSHRfbTNLOHhYUkMtUlF2a0ozVThaY09nYzhFTWk?oc=5",
+      "detail": "新浪财经转载华泰期货 2026-09-22 观点，指出花生多空交织、现货区域分化。内容聚焦花生品种，与豆油无直接驱动关联，但反映油脂油料板块整体多空分歧。对 Y0 豆油判断仅为板块情绪参考，方向中性。",
+      "impact": "中性"
+    },
+    {
+      "title": "国泰君安期货：中美八点共识里，藏着哪些行情线索？",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQa0JnNzhabmdyTzNZSW1NQ3BkaHRGUThybllqeDdNNUJaczNqRkpoMk1hbG9NS25haHBBS3VOdlpSaVRWME8xRjZGWGJWWnphMXZIYWdZeEhvQTIxQXNMckFCdE5xa0tScmQtZXVkS3p6QzExV0FJUVdLRnJvbHo2UHp2Ql9uaTZaM3BwR0VsR1hkaDJjTGludw?oc=5",
+      "detail": "国泰君安期货 2026-09-28 发布报告，解读中美八点共识中的潜在行情线索。报告认为政策与贸易相关共识可能通过大豆采购、汇率与宏观情绪影响油脂油料板块。对豆油而言属事件驱动型变量，方向取决于后续落地细节，短期偏中性，需警惕消息窗口波动放大。",
+      "impact": "中性"
+    },
+    {
+      "title": "光大期货：9月28日农产品日报",
+      "source": "finance.sina.com.cn",
+      "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOdDJmb0NUSWxHZmhrYTNJbmt6Ym1VRHEyREVKWG9uNlZ5TzJmcW4xUVE2ay16SGdrRDh1RURvNlduQVdIdS0zOVpPSjczbUgtdkNPZUhEU01xX0xRbGRtcjgzV3R1QTBLcnNmV3dGaHVWazYxaUVpMi1FRGgwME8xNkZHalZjZndWZEVpNW9JTE9Mc2dqTi1RV09lM3gwR0c0cjdpOXdLWk1zMHFseGl6UEhsd1VyY2llMzFNZFRCM3h1enB1aXFVU3ZCSzRUQmg0VUNTcXVKWnpib2dGdTJfdXhLRQ?oc=5",
+      "detail": "光大期货 2026-09-28 发布农产品日报，综合梳理油脂油料等品种基本面与现货动态。日报通常涵盖库存、压榨与需求信息，若基调偏弱则强化当前豆油承压格局。该条为综合日报，未提供可核实的具体数字，对 Y0 影响偏中性至略偏空。",
+      "impact": "中性"
+    },
+    {
+      "title": "【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？",
+      "source": "xnews.jin10.com",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5",
+      "detail": "jin10 2026-09-27 报道美国大豆与玉米首份优良率双双低于市场预期，或开启天气炒作窗口。若优良率偏低引发减产担忧，将提振美豆与豆系成本端情绪，对豆油构成潜在利多。但天气题材通常波动大、持续性待验证，当前尚未主导国内盘面。",
+      "impact": "中性"
+    },
+    {
+      "title": "阿根廷2026/27年度粮食产量预计创1.579亿吨纪录- 新闻和统计",
+      "source": "IndexBox",
+      "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPU1JscVpJUnUxTTlJZzNmQjhoZFJ5aWg3SDI0R0VfTDR4WWdGOEZSX0hiYnBVZW0xZm9WcG91YlJLOGo5ZGlQNFRqelZTNW5zMWpUdkpRY1B3cFlWWHhNZHpLUXdSVXpsWEhwVTdXWDExM09fMlhoaGNHZ1NxX2N3RlpvOEh3WWw1SUF6bzFUWjZTMU5IUnBTSTZnVlpHaFU0NnZRTFctZXF1aU42Y1RqMEV6RGd2Zlk?oc=5",
+      "detail": "IndexBox 2026-09-23 报道阿根廷 2026/27 年度粮食产量预计创 1.579 亿吨纪录。南美供应宽松预期将压制豆类远月估值，传导至油脂形成利空。当前 Y2705 对 Y2701 贴水 -188（-2.12%）的远月贴水结构，与供应宽松预期方向一致。",
+      "impact": "利空"
+    },
+    {
+      "title": "大豆跌破13美元/蒲式耳 市场聚焦中国采购需求",
+      "source": "证券之星",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE82WldUb3gzZmZQb1NIejNPU0swd0F2MlpfUjQtSlYzeGh4UDM2bFRfVUt4UzRpdUVrOTVVN2h6dXpEMmJpR0ZnOUdvQWx2QjFjX2t0bkFqUExOTGJZSi1JaFk4Q3Y?oc=5",
+      "detail": "证券之星 2026-09-28 报道大豆跌破 13 美元/蒲式耳，市场聚焦中国采购需求。美豆走弱意味着进口大豆成本下移，直接削弱豆油的成本支撑，压制连盘豆油估值。该消息与本次 Y0 实时价 8868.0、日线跌 -1.05% 的弱势相符，属利空因素。",
+      "impact": "利空"
     }
   ],
   "watch_levels": {
-    "support": 8830.0,
-    "resistance": 8932.5
+    "support": 8830.19,
+    "resistance": 8928.05
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于大连商品交易所豆油连续合约 Y0 映射主力 Y2701 在 2026-09-28 13:51:32 的实时价 8867.0（涨跌幅 -0.85%，live）及给定的 1H/4H/日线数据与舆情搜索结果，日线数据延迟至 2026-09-24、分钟 K 线存在口径异常，均可能影响结论。Y0 是连续合约分析口径，不是可直接下单的具体月份合约，交易前请在交易软件二次确认真实主力月份（当前为 Y2701）的报价、流动性与换月价差。model_validation 状态为 unproven，历史胜率与盈亏比不代表未来表现、不构成概率预测。所有方向、入场、止损、目标均为基于当前价格结构的推演，市场存在跳空、涨跌停与流动性风险，本内容不构成任何投资建议，请独立判断并严格控制仓位与风险。",
+  "risk_note": "本分析基于用户提供的行情与舆情数据，Y0 为连续合约分析口径，非可直接下单的具体月份合约；实盘请在交易软件二次确认主力月份（当前映射 Y2701）盘口与持仓。模型 model_validation 状态为 unproven，样本外胜率与盈亏比不代表未来收益，不得作为概率或胜率依据。小时 K 线为 2026-09-28 15:00 收盘、更新于 10:52 UTC，属延迟参考。所有价位、止损与目标仅为基于 realtime.price 8868.0 的技术框架，不构成投资建议，请自行控制仓位与风险。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-09-28T05:52:27+00:00",
-  "latest_date": "2026-09-24",
-  "realtime_price": 8867.0,
-  "realtime_note": "实时行情截至 2026-09-28 13:51:32，当前价 8867，涨跌 -0.85%",
+  "generated_at_utc": "2026-09-28T12:53:55+00:00",
+  "latest_date": "2026-09-28",
+  "realtime_price": 8868.0,
+  "realtime_note": "实时行情截至 2026-09-28 15:04:24，当前价 8868，涨跌 -0.84%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-09-28T05:51:58+00:00",
+    "fetched_at_utc": "2026-09-28T12:53:26+00:00",
     "market_trading_day": "2026-09-28",
-    "market_tick_time": "13:51:32",
+    "market_tick_time": "15:04:24",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-24T11:02:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kN1hjWHRNTTZ4TFlsQWl0X0ZRVk1LZ0xMTWxtU25KSmczd1pYR0wxUjRqRDg5MWQyc2tmLW5sZ1hSWlI3TXBVVTJ2NzVCRy1FdmRDWVo5TG1KeHM?oc=5\n摘要: 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 汇通网 Fx678\n\n[2] 棕油期货早盘跌2% 本周料转跌 - KLSE Screener\n来源: KLSE Screener\n发布时间UTC: 2026-09-25T03:42:47+00:00\nURL: https://news.google.com/rss/articles/CBMi8gFBVV95cUxOWHNURVgycU9wUmVva0QyX2ZKQnFJVkl6dEIyOEdiRzY3cVB3OUk0UDktQjBhMDh1TDVWaDkxcW5CREhsUlpZbm0wR1N6R1F4Wk9obGN4MUttZnY5ejhPTzNMX0EwT0t4bzJxTHVkd1dUOVo3SUdNXzJYV3Z6clJzSVpnSDBZUEU2YkNnOThPRnZMRzVIdDJKS3Rlb0hOekdRV2JCVGRCMl9LRzVJZHlnS2htdUFmM2NrdmxTTEwyLTRxSGVBaXY4bUZ3eGplTFd4Xy1yWnlwUVQ2QWl5XzB1RlZNY3pQTEJ3NExQT0IxZE1Hdw?oc=5\n摘要: 棕油期货早盘跌2% 本周料转跌 KLSE Screener\n\n[3] 中美峰会前景支撑市场情绪，大豆期货维持稳定 提供者 Investing.com - 英为财情 Investing.com\n来源: 英为财情 Investing.com\n发布时间UTC: 2026-09-22T18:35:00+00:00\nURL: https://news.google.com/rss/articles/CBMidkFVX3lxTFBWUFZhbFEyam15Y2M1YlBhYU5sVUtTcHN4REVJeG1rbWd2aW4zS3ZnY2czTUxpcTNDSFdaaWtJUk1kUDJFSmRRb2VXWGd0dlRrSUh3TVpwZ1prSEEyZnF4aUNETXJ1OGJ6VU85NjNkSVFZeHFhQnc?oc=5\n摘要: 中美峰会前景支撑市场情绪，大豆期货维持稳定 提供者 Investing.com 英为财情 Investing.com\n\n[4] 期货APP哪个能看外盘行情和夜盘 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-23T13:07:30+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNZE1oYjUxa3hEWXRhcmpFSW5hQ19WZUZBaTJhZ01xeDlMTkRKWTJiUzVzVHJxc1hSRmo1QlM3UXh4TThibWdmTmExRURNYmVYdGRQZm9HUnF2MnR5czUwM0ZmOHJzSVVlSzA4NFhaSmRWcVQ0YlFPRzRwLXVDRU1DaDVQMHJzV050MFF3OExydUtzWGVQREZXb0tYZkk2dmNZOFpGczRyLTVpSC1VenJxdA?oc=5\n摘要: 期货APP哪个能看外盘行情和夜盘 新浪财经\n\n[5] 华泰期货：一多空交织，花生现货区域分化 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-22T02:30:00+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxQNjRHRnBPb3NkUkl2MFg3T2kyUDlKS0ZBN1lNY2xKbU9SOGlLR1dxS1E5b3o3U21KVkthUmRFb25vWnJSMGZIUW96eTN6a0dkSmNodkhIaTZZMmlKa01UNWxwZW0zODVocl84WW9YZ1Zzd1ZidW9JcUU1bHNkWURLWHYwT195MzROQkdqcWx2bDlOQnpVQXNSTkFwRG0zUUpWUTF6ekxzZnhZMGlvRV9pWHZjelNiT2FPSmFlY0FwSE9WWUJRSjNoUVBBNVBzcFloVDl6T29XY0o5SUVaM3k1QzF0RHE?oc=5\n摘要: 华泰期货：一多空交织，花生现货区域分化 新浪财经\n\n[6] 光大期货：9月28日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-28T02:32:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxOZEtUbEFzQ1dhTExpZWcyQ20wOG85ZEFmU1V5RFhibjlyT3ZBQzhHU05hYkxwRDYteFlQMC1Ma19lOWZxNVNVNS1ENjVydXVJNXFRZmNHNW9DZmhLM1NKMEJQZEJjSEU3LU5NQ0xHZlN2WldxdlUzeFNUWElORzB1YVFWM2c2dUxxZ1dXXw?oc=5\n摘要: 光大期货：9月28日农产品日报 新浪财经\n\n[7] 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-09-27T12:44:26+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5\n摘要: 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 金十数据\n\n[8] 阿根廷2026/27年度粮食产量预计创1.579亿吨纪录- 新闻和统计 - IndexBox\n来源: IndexBox\n发布时间UTC: 2026-09-23T11:10:45+00:00\nURL: https://news.google.com/rss/articles/CBMitwFBVV95cUxPU1JscVpJUnUxTTlJZzNmQjhoZFJ5aWg3SDI0R0VfTDR4WWdGOEZSX0hiYnBVZW0xZm9WcG91YlJLOGo5ZGlQNFRqelZTNW5zMWpUdkpRY1B3cFlWWHhNZHpLUXdSVXpsWEhwVTdXWDExM09fMlhoaGNHZ1NxX2N3RlpvOEh3WWw1SUF6bzFUWjZTMU5IUnBTSTZnVlpHaFU0NnZRTFctZXF1aU42Y1RqMEV6RGd2Zlk?oc=5\n摘要: 阿根廷2026/27年度粮食产量预计创1.579亿吨纪录- 新闻和统计 IndexBox\n\n[9] 中国大豆采购回暖提振美国2026-27市场年度出口前景 - 新闻和统计 - IndexBox\n来源: IndexBox\n发布时间UTC: 2026-09-22T11:01:00+00:00\nURL: https://news.google.com/rss/articles/CBMiugFBVV95cUxOSzNUb3pkTFRSUUxpc3JBRWEwczBDUGFUZzdiSFhYdXBjQXJpcHlEQVdzd3diTUFwdUo5TGh0TnFGd01oeTB0SmZTdHBSRFpIbV8yQkY1VHU3amF4YTFoNGZpOFZNZUlMcXlfejlZYVpxRF8xbTBrN2FURWZNU0JVNXM1aWFfb1RsWmFIMGc1cTlRcXhrTGIzQU5ReFZZUThFdmo5ZkI1VVY2XzlqWmFiMHZLMDN2SjRGTVE?oc=5\n摘要: 中国大豆采购回暖提振美国2026-27市场年度出口前景 - 新闻和统计 IndexBox\n\n[10] 中国已完成购买美国大豆承诺的一半以上——《日本时报》 - ua.news\n来源: ua.news\n发布时间UTC: 2026-09-21T20:41:00+00:00\nURL: https://news.google.com/rss/articles/CBMioAFBVV95cUxOQW0tN0t6SUplVjBYQmNyNFB0cEk0a052QTVoN0JScFBELW1kUHN0NTJmckVHT084NVBwNEg1a09yVUpka01DME9QNnRKWnBFR0hGVnd0RU5SelJzSXg5ZGljYjFlNkhETWozYUNUVkprck9xMVlIODJ6ZEVrMWo1LVRyczA4di1kZ1hpMUtMbl9mUVAwTnIycnJYWk9wLU5s?oc=5\n摘要: 中国已完成购买美国大豆承诺的一半以上——《日本时报》 ua.news",
+  "news_summary": "[1] 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-24T11:02:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kN1hjWHRNTTZ4TFlsQWl0X0ZRVk1LZ0xMTWxtU25KSmczd1pYR0wxUjRqRDg5MWQyc2tmLW5sZ1hSWlI3TXBVVTJ2NzVCRy1FdmRDWVo5TG1KeHM?oc=5\n摘要: 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 汇通网 Fx678\n\n[2] 棕油期货早盘跌2% 本周料转跌 - KLSE Screener\n来源: KLSE Screener\n发布时间UTC: 2026-09-25T03:42:47+00:00\nURL: https://news.google.com/rss/articles/CBMi8gFBVV95cUxOWHNURVgycU9wUmVva0QyX2ZKQnFJVkl6dEIyOEdiRzY3cVB3OUk0UDktQjBhMDh1TDVWaDkxcW5CREhsUlpZbm0wR1N6R1F4Wk9obGN4MUttZnY5ejhPTzNMX0EwT0t4bzJxTHVkd1dUOVo3SUdNXzJYV3Z6clJzSVpnSDBZUEU2YkNnOThPRnZMRzVIdDJKS3Rlb0hOekdRV2JCVGRCMl9LRzVJZHlnS2htdUFmM2NrdmxTTEwyLTRxSGVBaXY4bUZ3eGplTFd4Xy1yWnlwUVQ2QWl5XzB1RlZNY3pQTEJ3NExQT0IxZE1Hdw?oc=5\n摘要: 棕油期货早盘跌2% 本周料转跌 KLSE Screener\n\n[3] 中美峰会前景支撑市场情绪，大豆期货维持稳定 提供者 Investing.com - 英为财情 Investing.com\n来源: 英为财情 Investing.com\n发布时间UTC: 2026-09-22T18:35:00+00:00\nURL: https://news.google.com/rss/articles/CBMidkFVX3lxTFBWUFZhbFEyam15Y2M1YlBhYU5sVUtTcHN4REVJeG1rbWd2aW4zS3ZnY2czTUxpcTNDSFdaaWtJUk1kUDJFSmRRb2VXWGd0dlRrSUh3TVpwZ1prSEEyZnF4aUNETXJ1OGJ6VU85NjNkSVFZeHFhQnc?oc=5\n摘要: 中美峰会前景支撑市场情绪，大豆期货维持稳定 提供者 Investing.com 英为财情 Investing.com\n\n[4] 期货APP哪个能看外盘行情和夜盘 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-09-23T13:07:30+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxNZE1oYjUxa3hEWXRhcmpFSW5hQ19WZUZBaTJhZ01xeDlMTkRKWTJiUzVzVHJxc1hSRmo1QlM3UXh4TThibWdmTmExRURNYmVYdGRQZm9HUnF2MnR5czUwM0ZmOHJzSVVlSzA4NFhaSmRWcVQ0YlFPRzRwLXVDRU1DaDVQMHJzV050MFF3OExydUtzWGVQREZXb0tYZkk2dmNZOFpGczRyLTVpSC1VenJxdA?oc=5\n摘要: 期货APP哪个能看外盘行情和夜盘 finance.sina.com.cn\n\n[5] 华泰期货：一多空交织，花生现货区域分化 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-09-22T02:30:00+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxNVDRVak1hVzlvLVFsZ25MTnJKN0NhaVdEUGZWTnBWVzRpZ25LeDI3VDhMYXNnVW1rTDFncXY0UzRVSGFDNjRHYzVJM1ZfSGg0Z09RemZ0bmJMWFlmQ3RObk9EWkZ4Q0pOR0tCRWJ3Y2oyazRjOEFqaGtJYml1RkxyUjM1UmQ3TEhMb1VfRHF1cTdkTmxDd2x3SllBbWhGM1UtOFdsTGR6WWY0NzdEQ1ZPWUtGU0RMVGdfYzY2OFpLRmdaRGhCWFFaSHRfbTNLOHhYUkMtUlF2a0ozVThaY09nYzhFTWk?oc=5\n摘要: 华泰期货：一多空交织，花生现货区域分化 finance.sina.com.cn\n\n[6] 国泰君安期货：中美八点共识里，藏着哪些行情线索？ - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-09-28T03:19:00+00:00\nURL: https://news.google.com/rss/articles/CBMimAFBVV95cUxQa0JnNzhabmdyTzNZSW1NQ3BkaHRGUThybllqeDdNNUJaczNqRkpoMk1hbG9NS25haHBBS3VOdlpSaVRWME8xRjZGWGJWWnphMXZIYWdZeEhvQTIxQXNMckFCdE5xa0tScmQtZXVkS3p6QzExV0FJUVdLRnJvbHo2UHp2Ql9uaTZaM3BwR0VsR1hkaDJjTGludw?oc=5\n摘要: 国泰君安期货：中美八点共识里，藏着哪些行情线索？ finance.sina.com.cn\n\n[7] 光大期货：9月28日农产品日报 - finance.sina.com.cn\n来源: finance.sina.com.cn\n发布时间UTC: 2026-09-28T02:32:00+00:00\nURL: https://news.google.com/rss/articles/CBMi4wFBVV95cUxOdDJmb0NUSWxHZmhrYTNJbmt6Ym1VRHEyREVKWG9uNlZ5TzJmcW4xUVE2ay16SGdrRDh1RURvNlduQVdIdS0zOVpPSjczbUgtdkNPZUhEU01xX0xRbGRtcjgzV3R1QTBLcnNmV3dGaHVWazYxaUVpMi1FRGgwME8xNkZHalZjZndWZEVpNW9JTE9Mc2dqTi1RV09lM3gwR0c0cjdpOXdLWk1zMHFseGl6UEhsd1VyY2llMzFNZFRCM3h1enB1aXFVU3ZCSzRUQmg0VUNTcXVKWnpib2dGdTJfdXhLRQ?oc=5\n摘要: 光大期货：9月28日农产品日报 finance.sina.com.cn\n\n[8] 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 - xnews.jin10.com\n来源: xnews.jin10.com\n发布时间UTC: 2026-09-27T12:44:26+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5\n摘要: 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 xnews.jin10.com\n\n[9] 阿根廷2026/27年度粮食产量预计创1.579亿吨纪录- 新闻和统计 - IndexBox\n来源: IndexBox\n发布时间UTC: 2026-09-23T11:10:45+00:00\nURL: https://news.google.com/rss/articles/CBMitwFBVV95cUxPU1JscVpJUnUxTTlJZzNmQjhoZFJ5aWg3SDI0R0VfTDR4WWdGOEZSX0hiYnBVZW0xZm9WcG91YlJLOGo5ZGlQNFRqelZTNW5zMWpUdkpRY1B3cFlWWHhNZHpLUXdSVXpsWEhwVTdXWDExM09fMlhoaGNHZ1NxX2N3RlpvOEh3WWw1SUF6bzFUWjZTMU5IUnBTSTZnVlpHaFU0NnZRTFctZXF1aU42Y1RqMEV6RGd2Zlk?oc=5\n摘要: 阿根廷2026/27年度粮食产量预计创1.579亿吨纪录- 新闻和统计 IndexBox\n\n[10] 大豆跌破13美元/蒲式耳 市场聚焦中国采购需求 - 证券之星\n来源: 证券之星\n发布时间UTC: 2026-09-28T10:20:51+00:00\nURL: https://news.google.com/rss/articles/CBMiZEFVX3lxTE82WldUb3gzZmZQb1NIejNPU0swd0F2MlpfUjQtSlYzeGh4UDM2bFRfVUt4UzRpdUVrOTVVN2h6dXpEMmJpR0ZnOUdvQWx2QjFjX2t0bkFqUExOTGJZSi1JaFk4Q3Y?oc=5\n摘要: 大豆跌破13美元/蒲式耳 市场聚焦中国采购需求 证券之星",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 29.3,
+  "api_latency_seconds": 29.0,
   "token_usage": {
-    "prompt_tokens": 15895,
-    "completion_tokens": 6115,
-    "total_tokens": 22010,
+    "prompt_tokens": 15927,
+    "completion_tokens": 6340,
+    "total_tokens": 22267,
     "prompt_tokens_details": {
-      "cached_tokens": 1792
+      "cached_tokens": 1536
     },
-    "prompt_cache_hit_tokens": 1792,
-    "prompt_cache_miss_tokens": 14103
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 14391
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-09-28T05:52:27+00:00",
-    "score": 85,
-    "status": "caution",
-    "label": "仅供参考",
-    "execution_allowed": false,
-    "evidence_confidence": 48,
-    "issues": [
-      {
-        "code": "low_evidence_confidence",
-        "severity": "medium",
-        "message": "AI 自评证据强度仅 48/100。"
-      }
-    ],
+    "checked_at_utc": "2026-09-28T12:53:55+00:00",
+    "score": 100,
+    "status": "passed",
+    "label": "通过",
+    "execution_allowed": true,
+    "evidence_confidence": 58,
+    "issues": [],
     "facts": {
-      "realtime_price": 8867.0,
+      "realtime_price": 8868.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-09-28T05:51:58+00:00",
-      "realtime_market_tick_time": "13:51:32",
-      "daily_rsi14": 53.66,
-      "one_hour_boll_position": "下轨下方",
+      "realtime_fetched_at_utc": "2026-09-28T12:53:26+00:00",
+      "realtime_market_tick_time": "15:04:24",
+      "daily_rsi14": 46.68,
+      "one_hour_boll_position": "中轨下方",
       "four_hour_boll_position": "中轨下方",
       "realtime_trading_day_label": "2026-09-28",
       "realtime_label_is_future": false
@@ -189,16 +204,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-09-28T05:51:58+00:00",
+    "realtime_fetched_at_utc": "2026-09-28T12:53:26+00:00",
     "realtime_market_trading_day": "2026-09-28",
-    "realtime_market_tick_time": "13:51:32",
+    "realtime_market_tick_time": "15:04:24",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-09-28T04:13:48+00:00",
+    "daily_updated_at_utc": "2026-09-28T10:52:29+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-09-28T04:13:48+00:00",
-    "news_updated_at_utc": "2026-09-28T04:13:46+00:00",
-    "contract_bridge_updated_at_utc": "2026-09-28T04:13:46+00:00"
+    "intraday_updated_at_utc": "2026-09-28T10:52:29+00:00",
+    "news_updated_at_utc": "2026-09-28T10:52:26+00:00",
+    "contract_bridge_updated_at_utc": "2026-09-28T10:52:26+00:00"
   }
 }

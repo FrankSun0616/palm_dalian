@@ -1,127 +1,146 @@
 {
-  "summary": "本次分析基准时刻为 UTC 2026-09-30T21:51:45（北京时间 2026-10-01 05:51:45），属夜盘已收盘后的静态窗口。realtime 为 live 实时输入，最新价 9581.0、盘口 ticktime 15:04:48（大商所交易日归属标签 2026-09-30，非未来标签）、涨跌幅 +0.10%（较前结算 9571.0）。注意该 ticktime 反映的是 2026-09-30 日盘收盘后最新可用盘口，北京时间 10-01 凌晨不存在交易时段。1小时/4小时/日线均在中轨下方偏空运行：1小时布林中轨9642、现价9581在中轨下方；4小时中轨9800.1、现价9581在中轨下方且贴近下轨9465.67；日线MA10 9785.3、MA20 9988.45，现价9581在所有短中期均线下方，日线RSI14 35.11处偏弱但未超卖。综合判断为偏空震荡，无高胜率方向，建议以观望或反弹做空为主，严格区间操作。P0为连续合约分析口径，实际映射主力为P2701、次主力P2705，远月升水541点，roll_state=watch（监控移仓），下单前必须在交易软件二次确认具体月份。日线基准模型model_validation状态为rejected（样本外无优势），历史命中率不作为未来概率，禁止包装为胜率。",
+  "summary": "本次分析基准时刻为北京时间2026-10-01T12:07:01+08:00，实时行情realtime（Sina Market Center live，input_status=live，fetch于2026-10-01T04:07:01Z）显示P0连续最新价realtime.price=9581.0，盘口ticktime=15:04:48，涨跌幅=+0.10%（相对上一结算价9571），realtime.tradedate=2026-09-30为交易日归属标签（realtime_label_is_future=false，即归属标签为实际交易日，可使用‘截至该交易日’表述）。该实时抓取发生在上一交易日收市后（15:04:48），因此realtime.price=9581.0本质上是2026-09-30日盘的收盘/收盘后快照，并非正在成交的盘口；1小时、2小时、4小时K线最新一根时间均为2026-09-30 15:00:00，距本次分析时刻已超过20小时，属延迟缓存K线，不得描述为‘刚刚成交’。日线层面P0收于9581（日线收盘与实时价一致），MA10=9785.3、MA20=9988.45、MA60=9742.52，价格在MA10、MA20、MA60三线之下；日线RSI14=35.11，未到30超卖阈值，属偏弱但非超卖。1小时布林中轨9642、下轨9470.96，价格9581位于中轨下方、靠向下轨；4小时布林中轨9800.1、下轨9465.67，价格同样在中轨下方；日线级别价格已跌破MA20并逼近20日低点9508。舆情端以马棕产量激增、出口疲软、触及八周低位为主基调（利空），辅以大连盘托底与印度出口拓展的中性/微弱利多，整体偏空。contract_bridge显示P0映射主力为P2701（mapping_verified=true，价格与持仓一致），次主力P2705价差541（远月升水5.65%），主力持仓占比0.5419，roll_state=watch（监控移仓），下单前须在软件二次确认具体月份。model_validation状态为rejected（样本外无优势，胜率29.33%、期望-0.2394R），历史优势未被证实，不得将其结果当作未来概率。综合1小时/4小时偏空、日线偏空的共振下，bias定为偏空，但因价格贴近下轨且量能萎缩（1小时volume_ratio20=0.06、4小时0.03），存在技术性反抽风险，策略以反弹承压后的轻仓空或观望为主，不追空。",
   "bias": "偏空",
   "analysis": [
-    "【1小时布林】1小时布林上轨9813.04、中轨9642.00、下轨9470.96，带宽0.0355（band_width），现价9581.0位于中轨下方、向下轨一侧靠拢。1小时RSI14为37.91偏弱、ADX14为41.47显示下行趋势强度仍在，价格未突破也未回归中轨，属弱势整理。",
-    "【4小时布林】4小时布林上轨10134.53、中轨9800.10、下轨9465.67，带宽0.0683，现价9581.0处于中轨下方且距下轨9465.67仅约115点，属通道下沿运行。4小时RSI14为31.24中性偏弱（未超卖）、EMA20 9773.34向下（slope -0.0122），中期动能仍偏空。",
-    "【日线布林/均线】日线现价9581.0低于MA10 9785.3、MA20 9988.45，虽略高于MA60 9742.52的下方，短中期均线系统呈空头排列。日线RSI14为35.11（偏弱但未到30超卖阈值），对应布林位置处于中轨下方，日线背景仍偏空，尚未出现趋势反转信号。",
-    "【实时价位置】realtime.price=9581.0，盘口ticktime=15:04:48，涨跌幅+0.10%，买价9580.0/卖价9582.0，买卖盘口量23/13偏薄，日内波幅区间仅9533–9636。以此价作为入场、止损、目标与布林位置的统一基准，不使用日线close或小时线close替代。",
-    "【趋势结构】自9月8日高点10489回落以来形成清晰下降通道，9月30日收9581，仅较前结算9571微涨10点，属超跌后的横盘弱整理而非反转。1小时/4小时/日线三尺度方向一致向下，属多周期共振偏空，但均处中轨下方尚未触及超卖，追空空间受限。",
-    "【量能观察】日线成交量373884手，volume_ratio_20d仅0.67，明显缩量；1小时volume_ratio20为0.06、4小时为0.03，为收盘后低成交状态。持仓量546979较前期减少，1小时open_interest_change为-6137，显示资金减仓离场、缺乏做多承接，反弹动能不足。",
-    "【支撑压力】下方近端支撑9533（9-30日内低）、9508（20日低/关键前低），破位则打开9465.67（4小时下轨）方向；上方压力9581–9642（1小时中轨）为首压，进一步压力9785（MA10）与9800（4小时中轨）。现价处于关键前低9508上方约73点，属临界偏空位。",
-    "【多周期共振结论】1小时、4小时、日线三尺度均处中轨下方且EMA20向下，短期无共振做多基础；但RSI均未达超卖，也缺乏明确的加速破位信号，属弱势震荡下行。下一时段应以反弹至压力区承压做空或跌破前低顺势为主，未触发条件前保持观望。"
+    "实时价位置：realtime.price=9581.0（Sina live，ticktime=15:04:48，涨跌幅+0.10%，realtime.tradedate=2026-09-30为交易日归属标签），该价格同时是日线收盘价。以9581为基准，价格低于MA10(9785.3)、MA20(9988.45)、MA60(9742.52)，位于三线之下，日线结构偏空，9581即为主力P2701的当前定位参考。",
+    "1小时布林：1小时通道上轨9813.04、中轨9642.0、下轨9470.96，带宽0.0355，价格9581.0位于中轨下方、靠近下轨一侧，属弱势区。1小时RSI14=37.91偏弱但未超卖，EMA20=9640.89且斜率-0.0026向下，价格受压于中轨与EMA20，反弹至9640–9660一带将遭遇中轨与均线的双重压制。",
+    "4小时布林：4小时通道上轨10134.53、中轨9800.1、下轨9465.67，带宽0.0683（较大），价格9581.0位于中轨下方，距下轨约115点。4小时RSI14=31.24接近超卖区但未破30，EMA20=9773.34斜率-0.0122向下，ADX14=32.35显示下行趋势具备一定强度，中轨9800附近是4小时级别的关键反压位。",
+    "日线布林/均线：日线价格9581低于MA10/MA20/MA60三线，MA20(9988.45)与MA10(9785.3)呈空头压制形态，MA60=9742.52已由支撑转为上方压力，日线呈震荡下行结构。日线RSI14=35.11为偏弱但未达30超卖，不构成‘超卖’表述；20日高点10489、20日低点9508，当前价距20日低点仅约73点，接近近期箱体下沿。",
+    "趋势与量能：1小时ADX14=41.47、2小时ADX14=50.06、4小时ADX14=32.35，多周期趋势强度确认下行。但量能显著萎缩——日线volume_ratio_20d=0.67，1小时volume_ratio20=0.06、4小时0.03，且1小时/4小时open_interest_change=-6137/-8476持仓下降，说明下跌动能主要来自多头减仓而非空头大举增仓，反弹风险需警惕。",
+    "支撑与压力：下方支撑先看20日低点及4小时下轨约9508–9466区间，其次9500整数关口；上方压力依次为1小时中轨/EMA20约9640–9660、日线MA10约9785、4小时中轨约9800。价格只有有效收复9640–9660并站稳，弱势格局才有阶段性修复可能；反之跌破9508将打开新的下行空间。",
+    "多周期共振与合约结构：1小时、4小时、日线三尺度均处中轨下方、均线空头排列，方向共振偏空。contract_bridge确认主力为P2701(9581)、次主力P2705(10122)，价差541呈远月升水5.65%，主力持仓占比0.5419，roll_state=watch（监控移仓），连续合约P0仅作分析口径，实际下单须核对具体月份与流动性。",
+    "证据边界：本次realtime为live输入但抓取于盘后(ticktime=15:04:48)，1小时/4小时/日线K线均延迟超20小时；model_validation.status=rejected，样本外无优势，不能作为当前日内方案依据。叠加舆情偏空但已部分反映在价格中，故策略应轻仓、等确认，不主动追空。"
   ],
   "intraday_strategy": {
-    "bias": "偏空（反弹沽空为主，破位追空为辅）",
-    "entry": "9520-9560（反弹至1小时中轨9642下方承压时轻仓空）；若开盘直接跌破9508，可在回抽9510-9530区间确认后介入",
-    "stop": "9635（1小时中轨上方且高于9-30日内高9636，收盘价止损）",
-    "take_profit": "第一目标9508（关键前低），第二目标9465（4小时下轨），第三目标9400",
-    "invalidation": "1小时收盘价站上9642（1小时中轨）并放量，或日盘重新站稳9581以上并突破9636，则空头逻辑失效",
-    "notes": "适用下一交易日早盘09:00-11:30及夜盘21:00-23:00。因realtime盘口为2026-09-30日盘收盘后（ticktime 15:04:48），夜盘未开启前不宜提前挂单，须等开盘价与量能确认。P0为连续合约口径、映射主力P2701，下单前在交易软件二次确认月份与价差。仓位控制在常规1/3以内，缩量行情减少频繁操作。"
+    "bias": "偏空（反弹承压为主，不追空）",
+    "entry": "以realtime.price=9581.0为基准，反弹至9630–9660区间（1小时中轨9642与EMA20 9640附近）承压并出现滞涨时，轻仓试空；若直接跌破9508（20日低点）并放量，可在反抽9520–9540时补空，但不追第一根急跌。",
+    "stop": "空单止损参考9685（即1小时中轨上方约45点、超出9640–9660压制带），站稳该位上方则空头逻辑失效。",
+    "take_profit": "第一目标9530（近20日低点上沿），第二目标9480–9466（4小时下轨9465.67附近）；分批止盈，跌破9508后可保留部分仓位看9466。",
+    "invalidation": "若价格有效站上9660并跟随1小时放量收阳、或日线RSI回升至45以上并收复MA10(9785)，则空头思路作废；同时若realtime出现9508下方的假突破快速收回（长下影），亦需离场观望。",
+    "notes": "适配时段：今晚夜盘21:00-23:00开盘后关注（若当日无夜盘则顺延至下一交易日早盘09:00-11:30）。鉴于实时抓取于盘后、K线延迟超20小时，且当前量能萎缩、价格贴近下轨，追空性价比低，建议以反弹到9640–9660承压的空为主；下单前在交易软件对P2701主力月份与盘口二次确认；P0为连续口径，不可直接下单。"
   },
   "decision_frame": {
-    "confidence": 52,
-    "regime": "弱势震荡下行（1小时/4小时/日线三尺度中轨下方，空头排列但RSI未超卖）",
-    "edge": "多周期方向一致向下构成中等偏弱的结构性偏空优势；但量能极度萎缩、价格贴近前低支撑，追空与做多的风险收益均不理想，属边际优势而非高置信方向",
-    "no_trade_condition": "1) 若早盘/夜盘开盘价直接位于9508-9581窄幅区间内且半小时内无放量方向选择，不交易；2) 若首目标（9508）距入场不足1.5倍盈亏比，不硬给方向；3) contract_bridge映射已mapping_verified=true，但换月状态为watch，下单前未在交易软件确认P2701/P2705月份与价差不交易；4) 日线基准模型status=rejected，不得依据历史命中率下单。",
+    "confidence": 58,
+    "regime": "震荡下行/弱势趋势中的技术性反抽区",
+    "edge": "1小时、4小时、日线三尺度价格均在布林中轨与均线下方，趋势与结构共振偏空；但量能萎缩、价格贴近下轨，空头边际优势有限，属弱优势。",
+    "no_trade_condition": "①1小时/4小时反弹首目标盈亏比低于1.5时（当前9581入场至9530仅约51点，而止损需40-100点以上，短线追空盈亏比不足）不得进场；②model_validation.status=rejected（样本外无优势），不得据此模型信号交易；③contract_bridge.mapping_verified虽为true，但roll_state=watch且P0为连续口径，未在软件确认P2701具体月份与流动性前不交易；④K线延迟超20小时，若开盘出现跳空缺口未回补，观望为主。",
     "long_case": {
-      "trigger": "价格在9508前低上方企稳，1小时K线出现放量长下影或站回9581并突破9636",
-      "entry_zone": "9510-9560",
-      "stop": "9460（跌破4小时下轨9465.67下方确认失效）",
+      "trigger": "价格在9508–9530区间出现放量长下影或1小时RSI背离后收阳，且重新站上9640（1小时中轨/EMA20）。",
+      "entry_zone": "9510–9540确认企稳后回踩不破9530时轻仓试多",
+      "stop": "9470（跌破4小时下轨9465.67附近止损）",
       "targets": [
-        "9642",
-        "9785"
+        "9640",
+        "9742"
       ],
-      "invalidation": "1小时收盘跌破9508且不收回",
-      "risk_reward": "约1.6:1（以9550入场、止损9460、首目标9642测算）"
+      "invalidation": "跌破9466并收于其下，多头结构破坏",
+      "risk_reward": "约1.6（以9540入场、9470止损、9640首目标计）"
     },
     "short_case": {
-      "trigger": "反弹至9581-9642区间承压回落，或跌破9508后回抽9510-9530",
-      "entry_zone": "9580-9640",
-      "stop": "9665（1小时中轨9642上方）",
+      "trigger": "反弹至9630–9660（1小时中轨9642/EMA20 9640）承压滞涨，或跌破9508后反抽9520–9540受阻。",
+      "entry_zone": "9630–9660承压做空；破位反抽9520–9540补空",
+      "stop": "9685",
       "targets": [
-        "9508",
-        "9465"
+        "9530",
+        "9480"
       ],
-      "invalidation": "1小时收盘站上9642并放量",
-      "risk_reward": "约1.4:1（以9600入场、止损9665、首目标9508测算，需在9508附近分批兑现避免低于1.5）"
+      "invalidation": "有效站上9660且放量收阳，或日线RSI回到45上方并收复MA10",
+      "risk_reward": "约1.55（以9645入场、9685止损、9530首目标计）；若首目标距离不足以覆盖止损则放弃，转入观望"
     },
     "event_risks": [
-      "马来棕榈油正处八周低位、产量激增与出口疲软（据证券之星），若MPOB后续报告继续利空，内盘承压",
-      "美联储9月中旬加息落地后商品整体承压（据新浪财经），宏观情绪仍偏空",
-      "印尼土地改革及大马对印度出口谈判（据The Edge Malaysia、e南洋）存在政策与出口预期扰动",
-      "外盘原油与汇率波动对棕榈油提供阶段性缓冲（据汇通网），可能放大或缓释隔夜跳空风险"
+      "马来西亚棕榈油产量激增、出口疲软持续施压（来源[2][3]），若后续高频产量/出口数据继续走弱，利空延续。",
+      "美联储加息后短期需求与宏观情绪扰动棕榈油价格（来源[1]），美元与原油波动可能带来双向冲击。",
+      "印尼土地改革带来种植业政策不确定性（来源[8]），或影响供给预期。",
+      "马来对印度出口拓展及印度高进口量（来源[6][9][10]）为潜在边际利多，若兑现可能触发超跌反弹。",
+      "国内夜盘外盘马棕、原油及汇率的隔夜跳空风险。"
     ],
     "data_limits": [
-      "realtime为2026-09-30日盘收盘后live输入（ticktime 15:04:48），非10-01凌晨实时盘口；intraday 1小时/4小时updated_at_utc为2026-09-30T19:57:55，均为收盘后缓存K线而非刚刚成交；新闻最新为2026-09-30T10:30:55，存在时差；日线模型status=rejected，样本外75笔胜率29.33%、expectancy_r -0.2394，历史结果不代表未来；连续合约回测含换月跳空，不能替代具体月份交易。"
+      "realtime抓取于2026-10-01T04:07:01Z（北京时间12:07），但ticktime=15:04:48为2026-09-30日盘收盘后快照，非正在成交盘口。",
+      "1小时/2小时/4小时K线最新时间均为2026-09-30 15:00:00，距分析时刻超20小时，属延迟缓存数据。",
+      "news_updated_at_utc为2026-10-01T02:12:54Z，舆情最新条目（[6][7][9]）发布于2026-09-30，其余多为2026-09-24至09-29，需按发布时间理解其时效。",
+      "model_validation为固定日线基准模型样本外结果，status=rejected，不等同于当前日内方案，不得外推为胜率。",
+      "P0为连续合约口径，历史含换月跳空，不替代具体月份合约回测与下单。"
     ]
   },
   "news_impact": [
-    "[利空] 马来西亚棕榈油触及八周低位，主因产量激增而出口疲软（证券之星，2026-09-29）。逻辑链条为供应端增产叠加需求端出口转弱，直接压制产地报价，进而拖累大连棕榈油盘面情绪，与当前1小时/4小时/日线三尺度偏空一致。",
-    "[利空] 马棕油连续两日回落，出口转弱压制盘面，仅靠原油与汇率提供缓冲（汇通网，2026-09-28）。出口数据走弱意味外需不振，即使原油与汇率阶段性托底，也难以扭转产地累库预期，对内盘棕榈油形成上方压力。",
-    "[利空] 9月中旬美联储加息落地后短期棕榈油价格出现调整（新浪财经，2026-09-28）。加息推升美元与资金成本，压制大宗商品整体估值，棕榈油作为金融属性较强品种跟随承压，构成宏观层面的利空背景。",
-    "[中性偏空] 大连托底与累库压力角力、方向待明（汇通网，2026-09-24）。该报道反映多空因素交织，产地累库为压制项、大连逢低承接为支撑项，与当前价格在前低附近横盘、量能萎缩的观望格局相符。",
-    "[中性] 食用油板块内菜油领涨、豆油稳、棕榈油走弱（搜狐网，2026-09-24）。品种间分化说明棕榈油相对弱势，资金更倾向菜油/豆油，棕榈油缺乏板块领涨动能，短期难有独立上行驱动。",
-    "[中性偏多] 马来西亚拟扩大对印度棕榈油出口，1-8月对印出口已破226万吨、连续13年成最大买家（e南洋、KLSE Screener，2026-09-30）。出口拓张为中长期需求端潜在利多，但需实际出口数据验证，短期难对冲当前产量激增与出口疲软的现实压力。",
-    "[中性] 联昌证券提示印尼土地改革令大马种植业者面临更大不确定性（The Edge Malaysia，2026-09-25）。政策不确定性影响远期供应预期，属中性偏扰动因素，短期对盘面方向指引有限。",
-    "[中性] 葵花籽油期货将上市，产业迎来加速器（导油网，2026-09-26）。油脂板块扩容与替代品竞争属中长期结构性影响，短期对棕榈油价格方向影响中性。"
+    "[利空] 马棕油触及八周低位，产量激增、出口疲软施压（来源[2]）：作为全球第二大棕榈油生产国，马来产量上升叠加出口需求走弱，直接压制产地FOB报价，通过内外盘联动传导至大商所P0，是当前盘面最核心的下行驱动，且与P0跌破MA20的技术弱势相互印证。",
+    "[利空] 马棕油连续两日回落：出口转弱压制盘面（来源[3]）：出口数据转弱意味着需求端对高库存的消化能力下降，原油与汇率仅提供阶段性缓冲而未扭转方向；逻辑链条为‘出口降→库存累积预期→产地价格承压→国内进口成本下移→P0承压’，方向偏空。",
+    "[利空] 9月中旬美联储加息落地，短期棕榈油价格出现调整（来源[1]）：加息抬升美元与融资成本，压制商品整体估值与油脂需求预期，事件已发生（9月中旬），其后P0自高位回落至9500-9600区间，属宏观利空的持续反映，非新增驱动。",
+    "[中性] 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明（来源[5]）：产地累库压力与国内盘面托底力量相持，说明空头在低位遭遇抵抗，与当前价格贴近20日低点9508、量能萎缩的现象一致，提示追空需谨慎，方向尚未选择。",
+    "[中性] 食用油行情：菜油领涨、豆油稳、棕榈油走弱（来源[4]）：油脂板块内部分化，棕榈油相对弱势，若菜油、豆油走强可能通过替代与套利关系对棕榈油形成间接支撑，但板块内强弱差使得棕榈油缺乏领涨动能，整体偏中性。",
+    "[利多] 诺莱妮：连续13年成最大买家，棕油首8月出口印度破226万吨（来源[9]）：印度作为最大买家需求强劲，8个月出口超226万吨为需求端提供中期支撑，若后续对印出口持续放量，有望部分对冲产量激增的利空，属边际利多但短期难以扭转弱势。",
+    "[利多] 大马拟扩大对印度棕油出口、瞄准高附加值产品（来源[6][7][10]）：出口拓展与下游贸易商机若落地，将改善产地出口前景，属于预期层面的温和利多，需跟踪实际订单而非仅凭表态，当前对盘面影响有限。",
+    "[中性] 联昌证券：印尼土地改革，大马种植业者面临更大不确定性（来源[8]）：政策不确定性可能影响印尼供给与马来种植业投资预期，方向暂不明确，需观察后续政策细节，短期对P0构成扰动而非明确单边驱动。"
   ],
   "news_articles": [
+    {
+      "title": "9月中旬美联储加息落地 短期棕榈油价格出现调整",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNZ1F1aUlBUXhfZUNIN3Ntc0R4Zm9EYTAxNFJCVy1IemhhRm9mR1RtMkUwcENVVGxhdXNYYWR2YjBzU2VfdDVpRHEtcXotRE9Za1UzdTVlYndVUGRLLWVMdjNCcnlmVlA2X3ZjWWxlNzlRVWF3OWxZZXMzbnN5dmtWeWp5LTIwTl9TNVltNQ?oc=5",
+      "detail": "报道指出9月中旬美联储加息落地后，短期棕榈油价格出现调整。加息推升美元与资金成本，压制商品估值与油脂需求预期。发布时间为2026-09-28，事件本身已发生。该宏观利空与P0自高位回落至9500-9600区间的走势相呼应。",
+      "impact": "利空"
+    },
     {
       "title": "马棕油触及八周低位，产量激增出口疲软施压",
       "source": "证券之星",
       "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE1GeGZ1OUI0alpaMl9sSzZFWm1tTjRwVjMwdmNWanJ6N2ZVOHpuNmR0QldhRERnSkc1LXVqSnF2VlVnSURFLXZjRE9ZWk9tT0hMdU1mbFk4aU9IcTdCQzhYM3FrQnQ?oc=5",
-      "detail": "报道称马来西亚棕榈油期货触及八周低位，主要受产量激增与出口疲软双重打压。供应端增产与需求端出口走弱共同压制产地报价，市场情绪偏空。该消息与大连棕榈油连续合约近期偏弱走势方向一致。",
+      "detail": "马棕油触及八周低位，主要因产地产量激增叠加出口疲软双重施压。供给端增长而需求端走弱，直接压制产地报价。作为国际定价核心，马棕走弱通过联动传导至大商所P0。这与P0跌破MA20、贴近20日低点9508的技术弱势一致。",
       "impact": "利空"
     },
     {
       "title": "马棕油连续两日回落：出口转弱压制盘面，原油与汇率提供缓冲",
       "source": "汇通网 Fx678",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9VdnZzRW5KMUFYZDhiY210WWNmRE4zVUZXVXNMUnZLM2VxZldPMUI0VlQ3SXZ1QXVlcHJCT09USjQ2NUY0ZFBIT09rUldtVE9SN1N0YWlFNXNnNUE?oc=5",
-      "detail": "报道指出马棕油连续两日回落，核心驱动为出口数据转弱。文章同时提到原油价格与汇率因素为盘面提供一定缓冲，但不足以扭转出口疲软带来的压力。整体表述指向外需不振下的偏空格局。",
+      "detail": "马棕油连续两日回落，出口转弱是主要压制因素，原油走强与汇率因素仅提供阶段性缓冲。出口下滑意味着需求端难以消化供给，库存累积预期升温。传导逻辑为出口降→库存增→产地价格承压→国内进口成本下移→P0走弱，方向偏空。",
       "impact": "利空"
-    },
-    {
-      "title": "9月中旬美联储加息落地 短期棕榈油价格出现调整",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNZ1F1aUlBUXhfZUNIN3Ntc0R4Zm9EYTAxNFJCVy1IemhhRm9mR1RtMkUwcENVVGxhdXNYYWR2YjBzU2VfdDVpRHEtcXotRE9Za1UzdTVlYndVUGRLLWVMdjNCcnlmVlA2X3ZjWWxlNzlRVWF3OWxZZXMzbnN5dmtWeWp5LTIwTl9TNVltNQ?oc=5",
-      "detail": "报道回顾9月中旬美联储加息落地，并称短期棕榈油价格随之出现调整。加息通过推升美元与资金成本压制商品估值，棕榈油跟随承压。该报道属宏观层面对油脂的偏空背景描述。",
-      "impact": "利空"
-    },
-    {
-      "title": "马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明",
-      "source": "汇通网 Fx678",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kN1hjWHRNTTZ4TFlsQWl0X0ZRVk1LZ0xMTWxtU25KSmczd1pYR0wxUjRqRDg5MWQyc2tmLW5sZ1hSWlI3TXBVVTJ2NzVCRy1FdmRDWVo5TG1KeHM?oc=5",
-      "detail": "报道称马盘棕榈油出现止跌企稳迹象，多空处于大连逢低承接与产地累库压力的角力之中。文章强调方向尚未明确，属震荡待变格局。该判断与当前价格在前低附近缩量横盘的表现相符。",
-      "impact": "中性"
     },
     {
       "title": "食用油行情 | 菜油领涨豆油稳 棕榈油走弱",
       "source": "搜狐网",
       "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE9hV0xwaHhfTGdOME43TVZWVGVPYktxaHI0NXBHVFBRZjhOX0Z6MFZxWk9KQzJrbEkxcXJqTU9YZGN4VnpkTnNuZm1ES2FqbDg3bVBmaw?oc=5",
-      "detail": "报道描述食用油板块分化：菜油领涨、豆油相对稳健、棕榈油走弱。品种间强弱分化显示资金偏好不在棕榈油，棕榈油相对弱势。说明棕榈油短期缺乏板块领涨驱动。",
+      "detail": "报道显示油脂板块内部分化，菜油领涨、豆油持稳，而棕榈油走弱。板块内相对弱势意味着棕榈油缺乏领涨动能，若菜油、豆油走强可能通过替代与套利关系对其形成间接支撑。整体对棕榈油偏中性偏弱，未提供明确上行驱动。",
+      "impact": "中性"
+    },
+    {
+      "title": "马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明",
+      "source": "汇通网 Fx678",
+      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kN1hjWHRNTTZ4TFlsQWl0X0ZRVk1LZ0xMTWxtU25KSmczd1pYR0wxUjRqRDg5MWQyc2tmLW5sZ1hSWlI3TXBVVTJ2NzVCRy1FdmRDWVo5TG1KeHM?oc=5",
+      "detail": "马盘棕榈油出现止跌企稳迹象，产地累库压力与国内大连盘面托底力量相互角力，方向尚待明朗。该描述与当前P0贴近20日低点9508、量能萎缩且未继续放量下破的现象一致。提示空头在低位遭遇抵抗，追空需谨慎。",
       "impact": "中性"
     },
     {
       "title": "诺莱妮:连续13年成最大买家 棕油首8月出口印度破226万吨",
-      "source": "KLSE Screener",
-      "url": "https://news.google.com/rss/articles/CBMi8gJBVV95cUxQbFkyQ2xaWXU1dUphQmk1YmViVWNNbWkyMnFQM1g0VlpsVEMxZ3hndTJfZ1ZSUTRWVDMzN3dubVpaOExwS0hZbmU3dk11TUEtazVzSVo0RWxqR28tT2VsdFd6VjRTX2otaFE5X29TY1BINU90ZFg4Yzhfd0FzcERvSG03aS1ZTmgxRXJZekE5b3lOSk11X0NaZVNqR1dhSGZLRVJnTFpnajR6Y3ZEbzh4aGJFWGd1VC1sdjZXS3lxWFBERmxkbml5bUpTZUFXbnE3MzBHVHhCbGg3eVZiZkw5dW1iaG1OMHQtNE85VVFUU1BRTTctWXZudy1YWUlMcTFZVlJYUVRCRWxCWEVSMFFEb2wzTVVVSFNCTVpXZTlySFpiMmRBM21OOVFTNWhpcmpjdGlPZFV4dGtZR3dGc3ZWUjczank0VmhfRW5kaHhNc0JrbTZNbE5FOGVOeHdJTGhPVkRDaUNpSWVzb1FUWEswUG5R?oc=5",
-      "detail": "报道称马来西亚1-8月对印度棕榈油出口突破226万吨，连续13年成为印度最大棕榈油供应国。该数据反映马来西亚对印度出口渠道稳固，属需求端积极信息。但需后续实际出口节奏验证，短期难扭转当前出口疲软现实。",
-      "impact": "中性"
+      "source": "klsescreener.com",
+      "url": "https://news.google.com/rss/articles/CBMi8gJBVV95cUxQbFkyQ2xaWXU1dUphQmk1YmViVWNNbWkyMnFQM1g0VlpsVEMxZ3h1Ml9nVlJRNFZUMzM3d25tWlo4THBLSFlXbmU3dk11TUEtazVzSVo0RWxqR28tT2VsdFd6VjRTX2otaFE5X29TY1BINU90ZFg4Yzhfd0FzcERvSG03aS1ZTmgxRXJZekE5b3lOSk11X0NaZVNqR1dhSGZLRVJnTFpnajR6Y3ZEbzh4aGJFWGd1VC1sdjZXS3lxWFBERmxkbml5bUpTZUFXbnE3MzBHVHhCbGg3eVZiZkw5dW1iaG1OMHQtNE85VVFUU1BRTTctWXZudy1YWUlMcTFZVlJYUVRCRWxCWEVSMFFEb2wzTVVVSFNCTVpXZTlySFpiMmRBM21OOVFTNWhpcmpjdGlPZFV4dGtZR3dGc3ZWUjczank0VmhfRW5kaHhNc0JrbTZNbE5FOGVOeHdJTGhPVkRDaUNpSWVzb1FUWEswUG5R?oc=5",
+      "detail": "马来西亚官员诺莱妮表示，印度连续13年成为大马棕油最大买家，2026年首8个月对印出口突破226万吨。印度需求强劲为产地出口提供中期支撑，若后续持续放量可部分对冲产量激增的利空。属边际利多，但短期难以扭转当前弱势格局。",
+      "impact": "利多"
     },
     {
       "title": "诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口",
       "source": "e南洋",
       "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTFAwTXVFUXZPa1g0WW9tN2dvUWlySVQtTTRuclVRNGtUcFAza1B3Si00QVY0a0o1QXFuZFVmNHA0R1dQZmVHa2NmU3IwN2Z1R0VTbFNTT2JmNXJIX0hDM2VRbDZCdw?oc=5",
-      "detail": "报道称马来西亚拟瞄准高附加值产品并扩大对印度棕榈油出口。政策与产业层面释放拓展出口意愿，属潜在需求端利多方向。但消息偏规划性，落地效果与时间节奏需跟踪，短期对盘面指引有限。",
-      "impact": "中性"
+      "detail": "报道称马来西亚拟瞄准高附加值产品，扩大对印度棕油出口。该表态属于出口拓展的预期层面利多，若实际订单落地将改善产地出口前景。当前仅为规划性消息，对盘面的即时影响有限，需跟踪实际成交数据验证。",
+      "impact": "利多"
+    },
+    {
+      "title": "诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口",
+      "source": "klsescreener.com",
+      "url": "https://news.google.com/rss/articles/CBMi9gJBVV95cUxOcVhUcUlranczUFBwbHNCYzlLcXlFSDFjWm03RnFEaHBVbTgzZnlKV01peW5YT3hVVVVrSHVUU2xlWjhGMmVKWXIwRWhKVnFOZGxER3gyNFBoRlFNY2pXY0hlV3hvZ2NjbWpIRkNWbUlpY08yaVVmbEhMQXBidHJ5c0dfSVJrakRheTZYR0VOZG5kR1RTcmRjV1NLWHB0OXlWN25vU0l1UUZMOENKR2E5QnVURksxRDNfZWZlRTQwU2lkZGV6TGhxUnlBUWZWaEJWblAwTV82TG5Va0lYeWlPWVpUblhiRmR0MmVrVnNlak0tSHV5OGoybXdLNk1iWm1haU4wMU1iMnh0V1Q1YTJ6WjVkX1hLMDNNcFpGd3h6UHk4eWVkUmxoYnNEMi1ZYzUzSnZGNE02Rkh6VDF1ZzVPdTNQODl6V3JHN1pIMnA3ZzlTSTZVNWtLYm1IWG9rOU9FZjlfOHYySDc1a0o0VTEzRzVray14dw?oc=5",
+      "detail": "同一主题的重复报道，均指向马来西亚拟扩大对印度棕榈油出口、瞄准高附加值产品。多来源同步报道显示该政策方向受到关注，但均属预期信息而非成交数据。对棕榈油价格构成温和利多预期，需以实际出口数据落实为准。",
+      "impact": "利多"
     },
     {
       "title": "联昌证券：印尼土地改革 大马种植业者面临更大不确定性",
       "source": "The Edge Malaysia",
       "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5lQlBIU0RvRG5WZUxhNWZGNV9VTFlIS3lvYTVuaFdneVlZTmJ3Q0EtNFdsNjFKX1g1bU83ZGwwdUF0TTkxLVlSd3dJTmJ4RElM?oc=5",
-      "detail": "联昌证券指出印尼土地改革令大马种植业者面临更大不确定性，涉及产区政策与投资环境。该因素影响远期供应预期与产业链布局，属扰动性变量。短期对棕榈油价格方向的直接指引有限。",
+      "detail": "联昌证券指出，印尼土地改革使大马种植业者面临更大不确定性。政策变动可能影响印尼棕榈油供给预期与马来种植业投资决策。方向暂不明确，需观察后续政策细节，短期对P0构成扰动而非清晰的单边驱动。",
       "impact": "中性"
+    },
+    {
+      "title": "拓展棕油下游贸易商机 诺莱妮率团访印度5天",
+      "source": "e南洋",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTFAwYWdjMmwtRFBZRVJnVjQwNTdCOWF0X3pKSDd0VzlsblNWUjU4d04wUWM2M2ZRVEwzWlF0Ylp0bWVob0F5SllVLU1wYnJTNzhNa2VocjI2dmtlWWYxaHlCTWVB?oc=5",
+      "detail": "诺莱妮率团访问印度5天，旨在拓展棕油下游贸易商机。该出访与前述对印出口拓展相呼应，属需求端的预期性利多。实际效果取决于后续签约与订单落地，短期对盘面影响偏温和。",
+      "impact": "利多"
     }
   ],
   "watch_levels": {
@@ -129,52 +148,52 @@
     "resistance": 9642.0
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于用户提供的行情与舆情，仅供参考，不构成投资建议。P0 为连续合约分析口径，并非可直接下单的具体月份合约，当前映射主力为 P2701（与 P0 价格、持仓一致，mapping_verified=true），次主力 P2705 升水 541 点，roll_state=watch 属监控移仓，实际下单请在交易软件二次确认月份、价差与流动性。realtime 为 2026-09-30 日盘收盘后 live 输入（ticktime 15:04:48，涨跌幅 +0.10%），非北京时间 10-01 凌晨盘口；1小时/4小时K线均为收盘后缓存，非刚刚成交。日线基准模型 status=rejected（样本外无优势，75笔胜率29.33%），不得将历史命中率、盈亏比包装为未来胜率或概率。新闻来源为给定搜索结果，事实与推断已区分。请严格设置止损并控制仓位。",
+  "risk_note": "本分析基于用户提供的P0连续合约行情、1小时/2小时/4小时及日线数据与给定舆情搜索结果，仅供研究参考，不构成任何投资建议。关键风险：①realtime.price=9581.0、ticktime=15:04:48为2026-09-30日盘收盘后快照，1小时/4小时/日线K线延迟超20小时，开盘可能跳空使点位失效；②P0为连续合约分析口径，contract_bridge显示主力为P2701、次主力P2705，roll_state=watch（监控移仓），下单前须在交易软件二次确认具体月份、盘口与流动性；③model_validation.status=rejected（样本外无优势），其胜率、期望值不得当作未来概率，不得据此模型信号交易；④当前量能萎缩、价格贴近下轨，反弹与假突破风险高，追空盈亏比不足时应严格执行no_trade_condition；⑤马棕产量/出口高频数据、原油、汇率及宏观事件可能带来隔夜大幅波动，请严格设置止损并控制仓位。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-09-30T21:52:08+00:00",
+  "generated_at_utc": "2026-10-01T04:07:33+00:00",
   "latest_date": "2026-09-30",
   "realtime_price": 9581.0,
   "realtime_note": "实时行情截至 2026-09-30 15:04:48，当前价 9581，涨跌 +0.10%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-09-30T21:51:45+00:00",
+    "fetched_at_utc": "2026-10-01T04:07:01+00:00",
     "market_trading_day": "2026-09-30",
     "market_tick_time": "15:04:48",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 9月中旬美联储加息落地 短期棕榈油价格出现调整 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-28T06:40:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNZ1F1aUlBUXhfZUNIN3Ntc0R4Zm9EYTAxNFJCVy1IemhhRm9mR1RtMkUwcENVVGxhdXNYYWR2YjBzU2VfdDVpRHEtcXotRE9Za1UzdTVlYndVUGRLLWVMdjNCcnlmVlA2X3ZjWWxlNzlRVWF3OWxZZXMzbnN5dmtWeWp5LTIwTl9TNVltNQ?oc=5\n摘要: 9月中旬美联储加息落地 短期棕榈油价格出现调整 新浪财经\n\n[2] 马棕油触及八周低位，产量激增出口疲软施压 - 证券之星\n来源: 证券之星\n发布时间UTC: 2026-09-29T04:03:33+00:00\nURL: https://news.google.com/rss/articles/CBMiZEFVX3lxTE1GeGZ1OUI0alpaMl9sSzZFWm1tTjRwVjMwdmNWanJ6N2ZVOHpuNmR0QldhRERnSkc1LXVqSnF2VlVnSURFLXZjRE9ZWk9tT0hMdU1mbFk4aU9IcTdCQzhYM3FrQnQ?oc=5\n摘要: 马棕油触及八周低位，产量激增出口疲软施压 证券之星\n\n[3] 马棕油连续两日回落：出口转弱压制盘面，原油与汇率提供缓冲 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-28T11:50:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9VdnZzRW5KMUFYZDhiY210WWNmRE4zVUZXVXNMUnZLM2VxZldPMUI0VlQ3SXZ1QXVlcHJCT09USjQ2NUY0ZFBIT09rUldtVE9SN1N0YWlFNXNnNUE?oc=5\n摘要: 马棕油连续两日回落：出口转弱压制盘面，原油与汇率提供缓冲 汇通网 Fx678\n\n[4] 食用油行情 | 菜油领涨豆油稳 棕榈油走弱 - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-09-24T03:39:00+00:00\nURL: https://news.google.com/rss/articles/CBMiVEFVX3lxTE9hV0xwaHhfTGdOME43TVZWVGVPYktxaHI0NXBHVFBRZjhOX0Z6MFZxWk9KQzJrbEkxcXJqTU9YZGN4VnpkTnNuZm1ES2FqbDg3bVBmaw?oc=5\n摘要: 食用油行情 | 菜油领涨豆油稳 棕榈油走弱 搜狐网\n\n[5] 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-24T11:02:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kN1hjWHRNTTZ4TFlsQWl0X0ZRVk1LZ0xMTWxtU25KSmczd1pYR0wxUjRqRDg5MWQyc2tmLW5sZ1hSWlI3TXBVVTJ2NzVCRy1FdmRDWVo5TG1KeHM?oc=5\n摘要: 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 汇通网 Fx678\n\n[6] 诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口 - e南洋\n来源: e南洋\n发布时间UTC: 2026-09-30T07:38:38+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTFAwTXVFUXZPa1g0WW9tN2dvUWlySVQtTTRuclVRNGtUcFAza1B3Si00QVY0a0o1QXFuZFVmNHA0R1dQZmVHa2NmU3IwN2Z1R0VTbFNTT2JmNXJIX0hDM2VRbDZCdw?oc=5\n摘要: 诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口 e南洋\n\n[7] 联昌证券：印尼土地改革 大马种植业者面临更大不确定性 - The Edge Malaysia\n来源: The Edge Malaysia\n发布时间UTC: 2026-09-25T03:29:12+00:00\nURL: https://news.google.com/rss/articles/CBMiUEFVX3lxTE5lQlBIU0RvRG5WZUxhNWZGNV9VTFlIS3lvYTVuaFdneVlZTmJ3Q0EtNFdsNjFKX1g1bU83ZGwwdUF0TTkxLVlSd3dJTmJ4RElM?oc=5\n摘要: 联昌证券：印尼土地改革 大马种植业者面临更大不确定性 The Edge Malaysia\n\n[8] 诺莱妮:连续13年成最大买家 棕油首8月出口印度破226万吨 - KLSE Screener\n来源: KLSE Screener\n发布时间UTC: 2026-09-30T10:30:55+00:00\nURL: https://news.google.com/rss/articles/CBMi8gJBVV95cUxQbFkyQ2xaWXU1dUphQmk1YmViVWNNbWkyMnFQM1g0VlpsVEMxZ3hndTJfZ1ZSUTRWVDMzN3dubVpaOExwS0hZbmU3dk11TUEtazVzSVo0RWxqR28tT2VsdFd6VjRTX2otaFE5X29TY1BINU90ZFg4Yzhfd0FzcERvSG03aS1ZTmgxRXJZekE5b3lOSk11X0NaZVNqR1dhSGZLRVJnTFpnajR6Y3ZEbzh4aGJFWGd1VC1sdjZXS3lxWFBERmxkbml5bUpTZUFXbnE3MzBHVHhCbGg3eVZiZkw5dW1iaG1OMHQtNE85VVFUU1BRTTctWXZudy1YWUlMcTFZVlJYUVRCRWxCWEVSMFFEb2wzTVVVSFNCTVpXZTlySFpiMmRBM21OOVFTNWhpcmpjdGlPZFV4dGtZR3dGc3ZWUjczank0VmhfRW5kaHhNc0JrbTZNbE5FOGVOeHdJTGhPVkRDaUNpSWVzb1FUWEswUG5R?oc=5\n摘要: 诺莱妮:连续13年成最大买家 棕油首8月出口印度破226万吨 KLSE Screener\n\n[9] 拓展棕油下游贸易商机 诺莱妮率团访印度5天 - e南洋\n来源: e南洋\n发布时间UTC: 2026-09-25T07:59:00+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTFAwYWdjMmwtRFBZRVJnVjQwNTdCOWF0X3pKSDd0VzlsblNWUjU4d04wUWM2M2ZRVEwzWlF0Ylp0bWVob0F5SllVLU1wYnJTNzhNa2VocjI2dmtlWWYxaHlCTWVB?oc=5\n摘要: 拓展棕油下游贸易商机 诺莱妮率团访印度5天 e南洋\n\n[10] 葵花籽油期货将上市！产业迎来加速器 - 导油网\n来源: 导油网\n发布时间UTC: 2026-09-26T06:17:12+00:00\nURL: https://news.google.com/rss/articles/CBMiYEFVX3lxTE04TFF3UW9HaWJUS3R3M08wVUlQT1RmUXVqMkJHMkNRQlFXWi04U1dlV0plU1ZJUGZIeXBzUXpqMThoRXlkUE43dmZXZWZaOFBVT01QUEtYTENxUXVRbl8wOA?oc=5\n摘要: 葵花籽油期货将上市！产业迎来加速器 导油网",
+  "news_summary": "[1] 9月中旬美联储加息落地 短期棕榈油价格出现调整 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-28T06:40:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNZ1F1aUlBUXhfZUNIN3Ntc0R4Zm9EYTAxNFJCVy1IemhhRm9mR1RtMkUwcENVVGxhdXNYYWR2YjBzU2VfdDVpRHEtcXotRE9Za1UzdTVlYndVUGRLLWVMdjNCcnlmVlA2X3ZjWWxlNzlRVWF3OWxZZXMzbnN5dmtWeWp5LTIwTl9TNVltNQ?oc=5\n摘要: 9月中旬美联储加息落地 短期棕榈油价格出现调整 新浪财经\n\n[2] 马棕油触及八周低位，产量激增出口疲软施压 - 证券之星\n来源: 证券之星\n发布时间UTC: 2026-09-29T04:03:33+00:00\nURL: https://news.google.com/rss/articles/CBMiZEFVX3lxTE1GeGZ1OUI0alpaMl9sSzZFWm1tTjRwVjMwdmNWanJ6N2ZVOHpuNmR0QldhRERnSkc1LXVqSnF2VlVnSURFLXZjRE9ZWk9tT0hMdU1mbFk4aU9IcTdCQzhYM3FrQnQ?oc=5\n摘要: 马棕油触及八周低位，产量激增出口疲软施压 证券之星\n\n[3] 马棕油连续两日回落：出口转弱压制盘面，原油与汇率提供缓冲 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-28T11:50:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9VdnZzRW5KMUFYZDhiY210WWNmRE4zVUZXVXNMUnZLM2VxZldPMUI0VlQ3SXZ1QXVlcHJCT09USjQ2NUY0ZFBIT09rUldtVE9SN1N0YWlFNXNnNUE?oc=5\n摘要: 马棕油连续两日回落：出口转弱压制盘面，原油与汇率提供缓冲 汇通网 Fx678\n\n[4] 食用油行情 | 菜油领涨豆油稳 棕榈油走弱 - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-09-24T03:39:00+00:00\nURL: https://news.google.com/rss/articles/CBMiVEFVX3lxTE9hV0xwaHhfTGdOME43TVZWVGVPYktxaHI0NXBHVFBRZjhOX0Z6MFZxWk9KQzJrbEkxcXJqTU9YZGN4VnpkTnNuZm1ES2FqbDg3bVBmaw?oc=5\n摘要: 食用油行情 | 菜油领涨豆油稳 棕榈油走弱 搜狐网\n\n[5] 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-09-24T11:02:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kN1hjWHRNTTZ4TFlsQWl0X0ZRVk1LZ0xMTWxtU25KSmczd1pYR0wxUjRqRDg5MWQyc2tmLW5sZ1hSWlI3TXBVVTJ2NzVCRy1FdmRDWVo5TG1KeHM?oc=5\n摘要: 马盘棕榈油止跌企稳：大连托底与累库压力角力，方向待明 汇通网 Fx678\n\n[6] 诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口 - e南洋\n来源: e南洋\n发布时间UTC: 2026-09-30T07:38:38+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTFAwTXVFUXZPa1g0WW9tN2dvUWlySVQtTTRuclVRNGtUcFAza1B3Si00QVY0a0o1QXFuZFVmNHA0R1dQZmVHa2NmU3IwN2Z1R0VTbFNTT2JmNXJIX0hDM2VRbDZCdw?oc=5\n摘要: 诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口 e南洋\n\n[7] 诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口 - klsescreener.com\n来源: klsescreener.com\n发布时间UTC: 2026-09-30T07:38:38+00:00\nURL: https://news.google.com/rss/articles/CBMi9gJBVV95cUxOcVhUcUlranczUFBwbHNCYzlLcXlFSDFjWm03RnFEaHBVbTgzZnlKV01peW5YT3hVVVVrSHVUU2xlWjhGMmVKWXIwRWhKVnFOZGxER3gyNFBoRlFNY2pXY0hlV3hvZ2NjbWpIRkNWbUlpY08yaVVmbEhMQXBidHJ5c0dfSVJrakRheTZYR0VOZG5kR1RTcmRjV1NLWHB0OXlWN25vU0l1UUZMOENKR2E5QnVURksxRDNfZWZlRTQwU2lkZGV6TGhxUnlBUWZWaEJWblAwTV82TG5Va0lYeWlPWVpUblhiRmR0MmVrVnNlak0tSHV5OGoybXdLNk1iWm1haU4wMU1iMnh0V1Q1YTJ6WjVkX1hLMDNNcFpGd3h6UHk4eWVkUmxoYnNEMi1ZYzUzSnZGNE02Rkh6VDF1ZzVPdTNQODl6V3JHN1pIMnA3ZzlTSTZVNWtLYm1IWG9rOU9FZjlfOHYySDc1a0o0VTEzRzVray14dw?oc=5\n摘要: 诺莱妮:瞄准高附加值产品 大马拟扩大对印度棕油出口 klsescreener.com\n\n[8] 联昌证券：印尼土地改革 大马种植业者面临更大不确定性 - The Edge Malaysia\n来源: The Edge Malaysia\n发布时间UTC: 2026-09-25T03:29:12+00:00\nURL: https://news.google.com/rss/articles/CBMiUEFVX3lxTE5lQlBIU0RvRG5WZUxhNWZGNV9VTFlIS3lvYTVuaFdneVlZTmJ3Q0EtNFdsNjFKX1g1bU83ZGwwdUF0TTkxLVlSd3dJTmJ4RElM?oc=5\n摘要: 联昌证券：印尼土地改革 大马种植业者面临更大不确定性 The Edge Malaysia\n\n[9] 诺莱妮:连续13年成最大买家 棕油首8月出口印度破226万吨 - klsescreener.com\n来源: klsescreener.com\n发布时间UTC: 2026-09-30T10:30:55+00:00\nURL: https://news.google.com/rss/articles/CBMi8gJBVV95cUxQbFkyQ2xaWXU1dUphQmk1YmViVWNNbWkyMnFQM1g0VlpsVEMxZ3hndTJfZ1ZSUTRWVDMzN3dubVpaOExwS0hZbmU3dk11TUEtazVzSVo0RWxqR28tT2VsdFd6VjRTX2otaFE5X29TY1BINU90ZFg4Yzhfd0FzcERvSG03aS1ZTmgxRXJZekE5b3lOSk11X0NaZVNqR1dhSGZLRVJnTFpnajR6Y3ZEbzh4aGJFWGd1VC1sdjZXS3lxWFBERmxkbml5bUpTZUFXbnE3MzBHVHhCbGg3eVZiZkw5dW1iaG1OMHQtNE85VVFUU1BRTTctWXZudy1YWUlMcTFZVlJYUVRCRWxCWEVSMFFEb2wzTVVVSFNCTVpXZTlySFpiMmRBM21OOVFTNWhpcmpjdGlPZFV4dGtZR3dGc3ZWUjczank0VmhfRW5kaHhNc0JrbTZNbE5FOGVOeHdJTGhPVkRDaUNpSWVzb1FUWEswUG5R?oc=5\n摘要: 诺莱妮:连续13年成最大买家 棕油首8月出口印度破226万吨 klsescreener.com\n\n[10] 拓展棕油下游贸易商机 诺莱妮率团访印度5天 - e南洋\n来源: e南洋\n发布时间UTC: 2026-09-25T07:59:00+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTFAwYWdjMmwtRFBZRVJnVjQwNTdCOWF0X3pKSDd0VzlsblNWUjU4d04wUWM2M2ZRVEwzWlF0Ylp0bWVob0F5SllVLU1wYnJTNzhNa2VocjI2dmtlWWYxaHlCTWVB?oc=5\n摘要: 拓展棕油下游贸易商机 诺莱妮率团访印度5天 e南洋",
   "symbol": "P0",
   "instrument_name": "棕榈油",
-  "api_latency_seconds": 22.9,
+  "api_latency_seconds": 31.5,
   "token_usage": {
-    "prompt_tokens": 15622,
-    "completion_tokens": 5080,
-    "total_tokens": 20702,
+    "prompt_tokens": 15909,
+    "completion_tokens": 6655,
+    "total_tokens": 22564,
     "prompt_tokens_details": {
-      "cached_tokens": 384
+      "cached_tokens": 1664
     },
-    "prompt_cache_hit_tokens": 384,
-    "prompt_cache_miss_tokens": 15238
+    "prompt_cache_hit_tokens": 1664,
+    "prompt_cache_miss_tokens": 14245
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-09-30T21:52:08+00:00",
+    "checked_at_utc": "2026-10-01T04:07:33+00:00",
     "score": 100,
     "status": "passed",
     "label": "通过",
     "execution_allowed": true,
-    "evidence_confidence": 52,
+    "evidence_confidence": 58,
     "issues": [],
     "facts": {
       "realtime_price": 9581.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-09-30T21:51:45+00:00",
+      "realtime_fetched_at_utc": "2026-10-01T04:07:01+00:00",
       "realtime_market_tick_time": "15:04:48",
       "daily_rsi14": 35.11,
       "one_hour_boll_position": "中轨下方",
@@ -186,16 +205,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-09-30T21:51:45+00:00",
+    "realtime_fetched_at_utc": "2026-10-01T04:07:01+00:00",
     "realtime_market_trading_day": "2026-09-30",
     "realtime_market_tick_time": "15:04:48",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-09-30T19:57:55+00:00",
+    "daily_updated_at_utc": "2026-10-01T02:12:56+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-09-30T19:57:55+00:00",
-    "news_updated_at_utc": "2026-09-30T19:57:52+00:00",
-    "contract_bridge_updated_at_utc": "2026-09-30T19:57:52+00:00"
+    "intraday_updated_at_utc": "2026-10-01T02:12:56+00:00",
+    "news_updated_at_utc": "2026-10-01T02:12:54+00:00",
+    "contract_bridge_updated_at_utc": "2026-10-01T02:12:54+00:00"
   }
 }

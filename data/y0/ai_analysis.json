@@ -1,148 +1,142 @@
 {
-  "summary": "本次分析基准为新浪实时抓取的大商所豆油连续Y0最新盘口：realtime.price=8972元/吨，盘口ticktime为2026-09-30 15:04:48（交易日归属标签tradedate=2026-09-30，realprice_label_is_future=false），较前结算价8855上涨117元、涨跌幅+1.32%。但需注意该实时行情实际交易时段为2026-09-30午后收盘前后，距分析时刻UTC 2026-10-05T21:48:56（北京时间2026-10-06 05:48:56）已跨越国庆长假，盘口严重滞后，属于最新可用静态快照而非活跃交易中的实时报价，所有入场、止损、目标位与布林位置判断均以8972为基准，但必须等到大商所节后恢复交易后方可视为可执行区间。连续合约Y0当前映射主力Y2701（mapping_verified=true，价格与持仓一致，主力持仓占比约48.31%），次主力Y2705报价8755，次主力价差-217元、贴水结构，换月状态stable。多周期看，1小时/2小时/4小时布林均显示价格位于中轨上方但未有效突破上轨，日线价格8972处于ma20（9012.3）下方、ma10（8931.9）上方，RSI14=54.28中性，多空证据强度有限。舆情层面，中国维持对美大豆10%关税、USDA月报偏空与美豆优良率下降、中美300亿对300亿降税但大豆不松口等消息交织，远端供给预期与成本端存在分歧；model_validation状态为unproven，历史优势未被证实，不构成未来概率。综合判断为震荡市中的技术性修复，证据强度不足，不建议在节后开盘前盲目追多或追空，需等待恢复交易并人工复核合约与流动性后决策。",
+  "summary": "本次分析基准时刻为北京时间 2026-10-06 12:50:09；但最新可用的实时行情来自大商所交易日归属标签 2026-09-30 的收盘盘口：realtime.price=8972.0，盘口 ticktime 为 2026-09-30 15:04:48，涨跌幅 +1.32%（相对前结算 8855），input_status 为 live，但其行情时点已落后基准时刻约 5 个日历日（期间含国庆假期），因此该实时价不能视为‘刚刚成交’，只能作为最近一个有效交易日的收盘基准。综合结论：1小时与4小时价格站在布林中轨之上、日线仍在均线附近震荡，多周期偏中性偏多但证据强度有限；叠加 model_validation.status=unproven（历史优势尚未证实）与连续合约不可直接下单，当前更适合观望或极小仓位、严格条件下再跟随区间突破。",
   "bias": "震荡",
   "analysis": [
-    "1小时尺度：1小时布林（20,2）上轨9008.75、中轨8912.75、下轨8816.75，带宽0.0215；当前价realtime.price=8972位于中轨上方、接近上轨，距上轨约37点。1小时RSI14=61.68接近超买区（未达70），EMA20=8923.36且5期斜率+0.0029，显示短线动能温和向上，但最新一根1小时K线（2026-09-30 15:00）成交量仅73手、volume_ratio20=0.0，量能极度萎缩，位置上更像围绕中轨的修复反弹而非放量突破。",
-    "2小时尺度（过渡参考）：2小时布林上轨8998.17、中轨8919.65、下轨8841.13，带宽0.0176；realtime.price=8972位于中轨上方、逼近但未触及上轨，2小时RSI14=54.19中性，EMA20=8930.44斜率仅+0.0001趋于走平，ADX14=21.54显示趋势强度偏弱，属于震荡中枢上移的过程。",
-    "4小时尺度：4小时布林上轨9048.11、中轨8935.15、下轨8822.19，带宽0.0253；realtime.price=8972在中轨上方、但明显低于上轨，4小时RSI14=52.81中性，EMA20=8940.44、5期斜率-0.0017转为轻微下行，ADX14=20.66偏弱，价格在上轨下方运行说明4小时级别尚未形成趋势突破，更多是超跌后的中轨上方整理。",
-    "日线尺度：日线布林未在数据中直接给出，但可用ma10=8931.9、ma20=9012.3、ma60=8736.95近似定位：realtime.price=8972位于ma10上方、ma20下方、ma60明显上方，说明中期均线多头排列尚未破坏，但短期受ma20压制。日线RSI14=54.28位于中性区，未进入超买（>70）或超卖（<30），成交量220858手、volume_ratio_20d=0.63低于20日均量，latest_date=2026-09-30为节前最后一个已完成交易日。",
-    "趋势与量能：日线级别自2026-09-02高点9250以来整体震荡回落，近周在8817-8986区间反复；1小时与4小时KD/ADX均处弱趋势区，量能整体收缩，日线持仓量open_interest从8月的79万手降至60万手附近，显示资金持续减仓离场，缺乏增量资金推动的单边行情。",
-    "支撑与压力：下方支撑参考1小时布林中轨8912.75及2小时/4小时中枢8919-8935，更下方强支撑在日线低点区间8817-8855（前结算价8855）；上方压力参考1小时布林上轨9008.75、2小时上轨8998.17，突破后看向4小时上轨9048.11以及日线ma20=9012.3附近，再上是9月高点9286。",
-    "实时价与滞后提醒：realtime.price=8972元/吨、ticktime=15:04:48、成交涨跌幅+1.32%，但该盘口交易日归属2026-09-30，距本报告时刻已隔长假，属于严重延迟的静态快照，严禁将其描述为当前活跃成交价；节后开盘需重新抓取实时盘口再确认入场基准。"
+    "实时基准：豆油连续 Y0 本次实时输入 realtime.price=8972.0，盘口 ticktime 为 2026-09-30 15:04:48（交易日归属标签 2026-09-30，不是未来日历日期），涨跌幅 +1.32%（对前结算 8855）。该 tick 时点距本次分析基准时刻约 5 天，属于已完成交易日的收盘实时快照，不是当前时刻活跃盘口。",
+    "1小时布林：1小时通道上轨 9008.75、中轨 8912.75、下轨 8816.75，带宽 2.15%。当前实时价 8972.0 位于中轨上方、逼近上轨，属强势但未突破；1小时 RSI 61.68 偏多未超买，EMA20=8923.36 且斜率 +0.0029 向上，说明短线重心仍在上移。",
+    "4小时布林：4小时通道上轨 9048.11、中轨 8935.15、下轨 8822.19，带宽 2.53%。实时价 8972.0 位于中轨上方但距上轨约 76 点，4小时 RSI 52.81 中性，EMA20=8940.44 斜率 -0.0017 走平略偏弱，显示中期处于中轨上方的平衡震荡而非单边趋势。",
+    "2小时过渡参考：2小时通道上轨 8998.17、中轨 8919.65、下轨 8841.13，带宽 1.76%为三尺度最窄，实时价 8972.0 在中轨上方贴近上轨，2小时 RSI 54.19 中性，短中期量能未同步放大。",
+    "日线布林/均线：日线未直接给出布林轨，但以 MA20=9012.3 与 MA10=8931.9 构造的均线带内运行——日线 close=8972.0（与实时价一致）位于 MA10 上方、MA20 下方；MA60=8736.95 距现价约 235 点，构成下方中期支撑参考。日线 RSI14=54.28，处于中性区间，既非超买也非超卖，不能写成‘超买’。",
+    "量能与持仓：日线成交量 220858、20日量比 0.63，明显缩量；1小时与4小时最新 bar 的 volume_ratio20 均为 0.0（收盘钉住 bar），open_interest_change 为 -4116/-5668，显示近端持仓在减少。缩量上涨的持续性需谨慎，量能不配合是本轮上行最大的瑕疵。",
+    "支撑压力：上方压力参考 1小时上轨 9008.75、日线 MA20 9012.3、20日高 9286.0 构成递进压制；下方支撑参考 1小时中轨 8912.75、4小时中轨 8935.15、20日低 8817.0 及 MA60 8736.95。实时价 8972.0 处于支撑带上方、压力带下方的中间偏上区域。",
+    "趋势与结构：日线级别近一个月自 9-08 高点 9286 回落至 9-29 低点 8817 后于 9-30 反弹至 8972，形成下探回升；1小时/4小时均在 9-29 夜盘低点 8837/8817 之后连续上行，短周期结构偏多，但 4小时 EMA20 斜率转平，趋势级别尚不成立。"
   ],
   "intraday_strategy": {
-    "bias": "震荡",
-    "entry": "节后首个交易日（如早盘09:00-11:30恢复交易）若实时价格回落至8940-8960区间（1小时中轨上方、2小时/4小时中枢附近）且出现企稳信号，可轻仓试多，入场触发价参考约8950；若价格先冲高至9000-9010（1小时/2小时上轨）受阻并伴随量能不放大，则不追多。注意：本区间基于滞后的8972基准推算，须以节后实时盘口重新校正。",
-    "stop": "多头止损设于8895下方（跌破1小时布林中轨8912.75并失守2小时中枢8919），对应约-0.6%；若节后高开低走跌穿8870（9-30日低点）应无条件离场。",
-    "take_profit": "第一目标9008（1小时布林上轨），第二目标9048（4小时布林上轨），第三目标关注日线ma20=9012附近是否能站上；达到第一目标后建议减仓并上移止损至成本线。",
-    "invalidation": "若节后开盘跳空跌破8855（前结算价）或当日有效下破8817（日线20日低点），则多头逻辑失效，转为观望；若价格站上9048并放量突破，则震荡偏多格局升级，可另做追踪。",
-    "notes": "本策略适用于节后恢复交易的早盘09:00-11:30与夜盘21:00-23:00时段，午盘13:30-15:00可作为减仓观察窗口。因当前实时盘口采集于2026-09-30 15:04:48、已隔长假，执行前必须重新抓取实时行情并确认主力Y2701与次主力Y2705的价差及流动性，下单软件中需二次确认具体月份合约（连续合约Y0不可直接下单）。首目标盈亏比需按节后实际入场价重算，若达不到1.5倍则不应进场。"
+    "bias": "震荡偏多（区间内高抛低吸，不追单边）",
+    "entry": "以实时基准 8972.0 附近为参照：回踩 8935（4小时中轨）至 8912（1小时中轨）企稳可轻仓试多；若日内放量站上 9008（1小时上轨）且不假突破，可小仓顺势跟随。",
+    "stop": "多单止损参考 8900 下方（跌破 1小时中轨 8912 并失守 8900 整数位），更宽容止损参考 8817（20日低）下方。",
+    "take_profit": "第一目标 9008-9012（1小时上轨/日线 MA20 重合区），第二目标 9048（4小时上轨），延伸目标 9077（4小时前高）。",
+    "invalidation": "若价格在 9008-9012 区域放量滞涨或直接下破 8900 并收盘于其下，则日内偏多思路失效，转为观望或反弹沽空。",
+    "notes": "本策略适用于节后首个交易时段——夜盘 21:00 开盘后及次日早盘 09:00-11:30、午盘 13:30-15:00；因实时 tick 为 2026-09-30 15:04:48 收盘快照，节后开盘可能跳空，开盘前 5-10 分钟应重新读取实时价与盘口，不能以 8972.0 直接拍单。Y0 为连续合约口径，下单需在交易软件中对主力月份 Y2701 二次确认价格与持仓。"
   },
   "decision_frame": {
-    "confidence": 42,
-    "regime": "节假日后的震荡整理，趋势强度弱（1H/2H/4H ADX均低于25），量能收缩，方向证据不足",
-    "edge": "多周期布林显示价格位于中轨上方但均未有效突破上轨，属于中性格局下的技术性修复，无清晰单边优势；证据强度偏低，因此confidence仅42",
-    "no_trade_condition": "1）节后开盘前未重新抓取实时盘口；2）contract_bridge.mapping_verified为true但仍需人工二次确认主力月份与流动性，未确认前不交易；3）若入场后首目标盈亏比低于1.5（节后实际入场价高于约8970做多时更易触发），不交易；4）日线未站上ma20=9012.3且量能不放大时，不追多；5）价格跌破8855前结算价区域，多头逻辑失效不交易。",
+    "confidence": 38,
+    "regime": "日线中性震荡、1H/4H 中轨上方偏多但量能不足",
+    "edge": "多周期均位于布林中轨上方、1小时 EMA20 上倾，短线存在沿中轨偏多的结构；但量比 0.63、4H EMA20 走平、model_validation 未证实，边际优势不足。",
+    "no_trade_condition": "① contract_bridge.mapping_verified=true 已核验，但仍需在交易软件二次确认 Y2701 实际盘口与流动性，若无法确认则不下单；② model_validation.status=unproven，历史优势尚未证实，不得据此放大仓位；③ 若首目标（9008-9012）相对入场测算盈亏比低于 1.5，则不建仓；④ 节后开盘出现大幅跳空（超出 8900-9012 区间）时先观望，等待重新确认结构。",
     "long_case": {
-      "trigger": "节后价格在8940-8960企稳并有效站上1小时中轨8912.75，量能较节前温和放大",
-      "entry_zone": "8940-8960（取中值约8950）",
-      "stop": "8895",
+      "trigger": "回踩 8935/8912 企稳或放量突破 9008 并站稳",
+      "entry_zone": "8920-8972",
+      "stop": "8900",
       "targets": [
-        "9008",
-        "9048",
-        "9012"
+        "9008 / 9048 / 9077"
       ],
-      "invalidation": "跌破8855或日线有效破8817",
-      "risk_reward": "以8950入场、止损8895、首目标9008计算，盈亏比约1.05，低于1.5，故当前不宜直接做多，须待节后价格回落更低或目标位上移后重算"
+      "invalidation": "收盘跌破 8900",
+      "risk_reward": "以入场 8940、止损 8900、首目标 9008 计约 1.7；若入场接近 8972 则首目标盈亏比降至约 0.9，需下调入场或放弃"
     },
     "short_case": {
-      "trigger": "节后价格反弹至9000-9010（1小时/2小时布林上轨）受阻且无法放量突破，4小时仍受压于9048",
-      "entry_zone": "8995-9010（取中值约9002）",
+      "trigger": "反弹 9008-9048 放量滞涨，或跌破 8900 后反抽确认",
+      "entry_zone": "9008-9048",
       "stop": "9060",
       "targets": [
-        "8935",
-        "8912",
-        "8855"
+        "8935 / 8912 / 8817"
       ],
-      "invalidation": "有效站上9048并放量突破4小时上轨",
-      "risk_reward": "以9002入场、止损9060、首目标8935计算，盈亏比约1.15，同样低于1.5，故当前不宜直接做空"
+      "invalidation": "放量站上 9048",
+      "risk_reward": "以入场 9012、止损 9060、首目标 8935 计约 1.6"
     },
     "event_risks": [
-      "中美贸易政策：中国维持对美大豆10%关税、300亿对300亿降税但大豆未松口，影响进口成本与远期供给预期",
-      "USDA 8月月报南美大豆产量及全球库存数据，影响外盘大豆与豆油成本端",
-      "美国大豆优良率低于预期及天气炒作窗口，可能带来外盘波动传导",
-      "大商所节后恢复交易的首日跳空风险及合约换月流动性风险",
-      "model_validation状态为unproven，历史优势未被证实，不代表未来表现"
+      "USDA 8月月报（已发生，南美大豆及全球库存数据）、美国大豆优良率偏低带来的天气题材、中国维持美豆 10% 关税构成的贸易政策扰动；北京时间 2026-10-06 处于国庆假期后，节后开盘存在补涨/补跌跳空风险。"
     ],
     "data_limits": [
-      "realtime虽input_status=live但交易日归属2026-09-30 15:04:48，距分析时刻UTC 2026-10-05已跨长假，属于严重延迟的静态快照，不能当作活跃盘口；intraday小时/日线updated_at_utc=2026-10-05T19:39:24亦为缓存数据，非节后新成交；model_validation为日线固定基准模型且状态unproven，不等于当前日内方案；连续合约历史可能包含换月跳空，Y0不可直接下单。"
+      "实时行情时点为 2026-09-30 15:04:48，距分析基准时刻约 5 天，属最近有效交易日收盘快照而非当前活跃盘口；1小时/2小时/4小时 K 线 updated_at_utc=2026-10-06T00:56:26Z 为缓存分钟线，最新 bar 为收盘钉住 bar（volume_ratio20=0.0），不代表实时成交量；新闻搜索时效截至 UTC 2026-10-06T00:56:22Z，部分条目接近或超过 24 小时，仅为舆情参考。"
     ]
   },
   "news_impact": [
-    "[利空] 中国维持对美大豆10%关税（IDNFinancials，2026-09-29）：报道称美豆承压、中国对美豆关税不放松，意味着进口美豆成本维持高位、采购节奏可能继续转向南美，短期对豆油成本端构成压制，但通过减少进口也可能收紧国内远期供给，逻辑上偏向成本与供给双约束，短期情绪偏空。",
-    "[利多] 美国大豆首份优良率低于预期、天气炒作窗口或开启（金十数据，2026-10-04）：优良率低于预期意味着美豆单产与产量预期可能下调，若外盘美豆走强将抬升进口大豆与豆油成本，对豆油构成成本端支撑，方向上偏多。",
-    "[中性] 中美300亿对300亿降税落地但大豆不松口（or100.cc，2026-09-30）：整体关税缓和改善宏观风险偏好，但大豆被单独排除在降税之外，对豆油的直接传导有限，更多是情绪层面的中性偏多。",
-    "[利空] USDA 8月月报南美大豆和玉米产量及全球库存数据（金十数据，2026-09-30）：月报涉及南美产量与全球库存调整，若显示南美丰产或全球库存偏高，将通过外盘传导压制豆油；需结合具体产量与库存数字评估，当前仅有标题，方向暂判偏空。",
-    "[中性] 华泰期货称豆一上行空间受限、花生盘面承压（新浪财经，2026-09-30）：报告聚焦豆一与花生而非豆油，反映油脂油料板块整体情绪偏谨慎，对豆油为间接中性偏空信号，但传导链条较弱。",
-    "[中性] 美国特色作物出口旨在扩大对中国市场准入（全球果蔬网，2026-10-04）：若未来美豆及特色作物对华出口准入扩大，可能改善远期进口供给，对豆油为潜在利空，但目前仅为意向层面，尚不构成实际供给冲击，暂判中性。"
+    "[中性] USDA 8月月报已公布南美大豆与玉米产量及全球库存数据（金十数据，发布UTC 2026-09-30T14:39:50+00:00），属已发生的常规供需报告。逻辑链条上，南美产量与全球库存直接影响大豆压榨成本与豆油原料端估值，但本次搜索结果未给出具体数值，无法量化方向，故对豆油价格暂判中性，需查原始报告核对数字后再定调。",
+    "[利多] 美国大豆首份优良率双双低于预期、天气炒作窗口或已开启（金十数据，UTC 2026-10-04T15:56:08+00:00）。逻辑链条为：美豆优良率偏低→单产预期下调→美豆期价获支撑→进口大豆成本抬升→传导至国内豆油压榨成本，对豆油构成成本端偏多，但属于市场预期而非已证实减产。",
+    "[利多] 中国维持对美国大豆 10% 关税、不给美豆降税（IDNFinancials，UTC 2026-09-29T05:00:00+00:00；中华网，UTC 2026-09-29T23:36:32+00:00）。逻辑链条为：美豆进入中国成本维持高位→国内压榨原料偏紧或转向南美采购→抬升豆油原料成本中枢，对国内豆油期价构成偏多支撑，同时也增加了进口来源切换的不确定性。",
+    "[中性] 中美‘300亿对300亿’降税落地、但大豆未松口（or100.cc，UTC 2026-09-30T02:08:00+00:00；搜狐网，UTC 2026-10-02T04:53:00+00:00、02:50:00+00:00）。逻辑链条为：宏观关税缓和对整体风险偏好偏正面，但大豆被单独排除，说明油脂油料政策扰动未解除，方向影响被多空对冲，判为中性偏扰动。",
+    "[中性] 华泰期货观点称豆一上行空间受限、花生盘面承压下行（新浪财经，UTC 2026-09-30T07:52:15+00:00）。该观点针对豆一与花生，并非豆油直接品种，逻辑上反映国产豆与油料板块整体上行受限的情绪，对豆油更多是板块情绪参考而非直接驱动，判为中性。",
+    "[中性] 美国特色作物出口旨在扩大对中国市场的准入（全球果蔬网，UTC 2026-10-04T22:58:00+00:00）。逻辑链条为：若准入扩大则美豆对华出口预期改善，理论利空国内豆油成本端；但当前仅为出口意向层面，尚无落地量，对盘面影响有限，判为中性。",
+    "[中性] 中国金属进口创纪录、石油采购下滑、煤炭仍支撑过半发电量（Межа，UTC 2026-09-29T06:32:58+00:00）。该条为宏观商品需求结构新闻，与豆油品种基本面无直接关联，仅可作整体商品需求环境的背景参考，判为中性。"
   ],
   "news_articles": [
     {
       "title": "USDA 8月月报：南美大豆和玉米产量及全球农作物库存数据-市场参考",
       "source": "金十数据",
       "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE5IWnJucE9tUjNQc0FiUXQybDd2UGVqRDA1UW5sSVZQZG9GUGFMVTJKUGZpUTRoczJSWFZIMEVlNE1FMGtpX1FjR0dkOENGcEk?oc=5",
-      "detail": "该报道发布于2026-09-30，涉及USDA 8月月报中南美大豆和玉米产量及全球农作物库存数据。月报若确认南美丰产或全球库存高企，将经由外盘大豆向国内豆油成本端传导偏空压力。当前仅有标题信息，缺乏具体产量数字，需关注后续详细数据。",
-      "impact": "利空"
+      "detail": "USDA 8月月报覆盖南美大豆和玉米产量及全球农作物库存，属已发生的常规供需报告（发布UTC 2026-09-30T14:39:50+00:00）。摘要中未给出具体产量与库存数值，无法据此量化对豆油的方向。理论上南美产量与全球大豆库存变化会通过压榨成本传导至豆油，需查原始报告核对数字。",
+      "impact": "中性"
     },
     {
       "title": "华泰期货：豆一上行空间受限，花生盘面承压下行",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMiugJBVV95cUxPc0lLbVdiRGpKRjNraHVaNHY5aXdfUkhwRG9ITGViRkhNamlIaFViS0ZOSUpJWnRzT2p5N0djM25EYlFLQU1OUWRXYnJNQmN1eFk0dC01cU1lT0ZOaEM5QVRsSF9FVDc2eFZrdlZSZGJpczVzeFdudVRfNFpxV3BSem9aa3h2VHBuQnhGZ3lGbGZIaUs5YXVOUWJEcDFjSVl5Zlo2clYwNURSSm5VdnZKcHdLR05tNkRYSEdVcWZVMjBqUnptOTRWNXdVNlBjbG9XYVBobXRHMTFnTDRWTUdGTGRKUDdFWkRkbjRmTGIzZlVBNnhUckd3SEZ5dTFZM3duNHVYclRrc1FqdEItUEpncExPSmpkMHNwUTk2eERBRlZHUW1CNXpwZFRnZlBaMW53VDhUaTdCd0xFZw?oc=5",
-      "detail": "华泰期货发布于2026-09-30的报告指出豆一上行空间受限、花生盘面承压下行。该观点聚焦油脂油料板块近月情绪，对豆油构成间接参考，显示板块整体偏谨慎。但报告未直接涉及豆油基本面，传导力度有限。",
+      "detail": "华泰期货研报称豆一上行空间受限、花生盘面承压下行（发布UTC 2026-09-30T07:52:15+00:00）。该观点针对国产大豆与花生品种，对豆油并无直接品种驱动。但其反映的油料板块整体上行受限情绪，可作为豆油短线偏多的反向参考。",
       "impact": "中性"
     },
     {
       "title": "【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考",
       "source": "金十数据",
       "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5",
-      "detail": "该报道发布于2026-10-04，提到美国大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启。优良率低于预期可能下调美豆单产预估，提振外盘大豆并抬升国内豆油进口成本。方向上对豆油构成成本端利多，但需观察天气与优良率后续演变。",
+      "detail": "报道称美国大豆与玉米首份优良率双双低于市场预期，天气炒作窗口或已开启（发布UTC 2026-10-04T15:56:08+00:00）。逻辑链条为优良率偏低→单产预期下调→美豆期价获支撑→进口大豆到港成本抬升→传导至国内豆油压榨成本。这属于天气题材预期，尚未被证实为实质性减产。",
       "impact": "利多"
     },
     {
       "title": "中国为何不给美国大豆降税 大豆贸易的特殊考量",
       "source": "中华网",
       "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1FTENBVnF2enMxSjRDbEx5VFN3ZjJkZnM5NklnWHNNU0o5VFFFYXc4bnRGcWZCZF9VQmM4Nmt2VVRBUU9jMnBCZ2o1MGNHWENlenR5QTJvdnh5R1k5YlRyNzl6eTlVTUE4S0FWakdsT3g?oc=5",
-      "detail": "报道发布于2026-09-29，分析中国不给美国大豆降税的特殊贸易考量。维持对美豆关税意味着进口美豆成本高企，国内采购或继续偏向南美。短期对豆油成本端偏空、但对国内远期供给的收紧又形成潜在支撑，需结合进口数据观察。",
-      "impact": "中性"
+      "detail": "文章讨论中国为何不给予美国大豆降税，涉及大豆贸易的特殊政策考量（发布UTC 2026-09-29T23:36:32+00:00）。逻辑上，美豆进入中国成本维持高位将促使国内压榨企业转向南美采购或承受更高原料成本，对国内豆油构成成本端支撑。该条为政策解读而非官方数据公告。",
+      "impact": "利多"
     },
     {
       "title": "中国给美国降关税，唯独大豆不松口！这一手直接把美国拿捏住了！",
       "source": "搜狐网",
       "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBPSno1Q2pqTDVqZ1Q2LThiYm5raGpzYk9BMm5FZWl5N0lBSmdoS0pPMEx0NFZCOEJnMjZPMkI3X2ViemRLcXZyVkpZa1hNMjRLYmdn?oc=5",
-      "detail": "发布于2026-10-02，属自媒体评论性质，称中国给美国降关税但大豆不放行。其信息与官方关税政策方向需以权威来源核实，对豆油的影响主要体现为进口成本与供给预期扰动。作为情绪面消息，参考价值有限。",
-      "impact": "中性"
+      "detail": "文章称中国在关税调整中唯独对大豆不松口（发布UTC 2026-10-02T04:53:00+00:00）。逻辑链条为：美豆关税维持→美豆对华出口受限→国内原料采购向巴西等南美市场倾斜→南美升贴水与运费可能走高→抬升豆油原料成本。属媒体解读与预期而非官方细则。",
+      "impact": "利多"
     },
     {
       "title": "美国大豆承压，中国维持10%关税",
       "source": "IDNFinancials",
       "url": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxPelROT0JRalFEYlcyRElTVFlBUWdWVU9xallCQmJTdkQ4LXJxQ2xOeXV4UHVxeDhBaDBqOUI3ZVRVUExPWDA4R05vb2V6Njl0dTVOZlpiMUZCdE5UNzBvSVZVb3FwSW1sZXZldUl4YTl3X1pIdk0yVWFKVjU1SFJESWxaNHpUUTV4LXpwUDJYdnBKdFhhbV9Uam0yenZUUm9EU3d0Ynl0NlVYYVRZd1d3cENQQjZDbTFRbHFDUGl6X1BNNVAyQzdfU0wzaGpoRU40Mks5dHd5UGE4b0VudEZFeWZpS2NnazB6Y1E?oc=5",
-      "detail": "IDNFinancials于2026-09-29报道美国大豆承压、中国维持10%关税。关税维持压制美豆出口预期，外盘走弱可能通过进口成本传导抑制国内豆油价格。但由于进口转向南美、国内供给节奏受影响，实际影响方向仍有分歧。",
-      "impact": "利空"
-    },
-    {
-      "title": "关税闸门半开：中美“300亿对300亿”降税落地，谁先尝到甜头？",
-      "source": "or100.cc",
-      "url": "https://news.google.com/rss/articles/CBMiREFVX3lxTFB6QnF1aUR4bVNoRExKc1RZQ3ZMTFlNQUtrN3dFdEZ1ekZrS1NZbDVRZDcxdDVWLWtNRUFFOW01VTdUU1l6?oc=5",
-      "detail": "发布于2026-09-30，报道中美300亿对300亿降税落地、大豆未纳入。宏观层面贸易缓和改善风险偏好，但豆油直接受益有限。整体对豆油情绪面中性偏多，实质性供需影响需观察后续采购变化。",
-      "impact": "中性"
+      "detail": "报道称美国大豆承压，中国维持 10% 关税（发布UTC 2026-09-29T05:00:00+00:00）。该关税维持状态使美豆对华出口竞争力下降、美豆价格承压，同时中国进口结构向非美来源倾斜。对国内豆油而言，原料成本端偏多，但进口来源切换也带来短期不确定性。",
+      "impact": "利多"
     },
     {
       "title": "美国特色作物出口旨在扩大对中国市场的准入",
       "source": "全球果蔬网",
       "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxOSlYtc05PWi10TmJYMmVpczN0c0NjNFFRQS1NcGNnX2RVXzVUVU1oeXRjcGMtZDRDNi1DRXZoc21HRWRmcVJxcVEtUTZRUFZlSTVZMHBVX2VsQnkwWDhmMF9yeVh2QmVQMHRpU1BlaHppVXptSlBjUUtnVkYwZF9hSV9SRnNxbzR1b3lKNUNMa2gyc3JFY3BSQWFfR0poTFdwSTVLRjZSOHYwWHUyUWQzOVVfZTJZZ3dyOHFiaHd3?oc=5",
-      "detail": "全球果蔬网于2026-10-04报道美国特色作物出口旨在扩大对中国市场准入。若未来美豆及特色作物对华准入扩大，将改善国内远期供给，对豆油构成潜在利空。目前消息停留在意向层面，尚未形成实际供给冲击。",
+      "detail": "报道称美国特色作物出口旨在扩大对中国市场的准入（发布UTC 2026-10-04T22:58:00+00:00）。若准入扩大且落实，则美豆对华出口预期改善，理论上对国内豆油原料成本端构成压力。但当前仅为出口意向与谈判层面，尚无具体落地数量。",
+      "impact": "中性"
+    },
+    {
+      "title": "关税闸门半开：中美“300亿对300亿”降税落地，谁先尝到甜头？",
+      "source": "or100.cc",
+      "url": "https://news.google.com/rss/articles/CBMiREFVX3lxTFB6QnF1aUR4bVNoRExKc1RZQ3ZMTFlNQUtrN3dFdEZ1ekZrS1NZbDVRZDcxdDVWLWtNRUFFOW01VTdUU1l6?oc=5",
+      "detail": "文章讨论中美 300 亿对 300 亿规模降税落地及其受益方（发布UTC 2026-09-30T02:08:00+00:00）。宏观层面关税缓和对整体商品风险偏好偏正面，但大豆被单独排除在降税之外，说明油脂油料板块的政策扰动并未解除。对豆油方向影响被多空对冲，判为中性偏扰动。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
-    "support": 8912.5,
-    "resistance": 9008.5
+    "support": 8912.75,
+    "resistance": 9010.5
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于用户提供的数据，其中realtime行情实际交易时段为2026-09-30 15:04:48，距分析时刻UTC 2026-10-05T21:48:56已跨越国庆长假，属于严重滞后的静态快照，不能当作活跃交易中的实时盘口；1小时/2小时/4小时及日线数据亦为节前缓存，非节后新成交。Y0/P0为连续合约分析口径，不可直接下单，下单前需在大商所交易软件中二次确认具体主力月份（当前映射Y2701）与次主力（Y2705）的价差及流动性。model_validation状态为unproven，历史优势未被证实，回测中胜率40.26%、盈亏比与期望值均接近1，不代表未来收益或概率。舆情引用自给定搜索结果，含事实与市场评论，部分为自媒体信息未经权威核实，关税政策请以官方口径为准。本报告仅为技术面与消息面的综合梳理，不构成任何投资建议，期货交易具有高杠杆风险，请自行审慎决策。",
+  "risk_note": "本分析基于用户给定的行情与舆情数据，不构成任何投资建议。关键风险与限制：① 实时行情 ticktime 为 2026-09-30 15:04:48，距分析基准时刻约 5 天，input_freshness 显示其为 live 抓取但行情时点已滞后，节后开盘可能跳空，8972.0 不能代表当前可成交价；② model_validation.status=unproven，历史样本外胜率 40.26%、盈亏比与期望值接近零，其命中率、胜率与历史结果不代表未来概率，不得当作交易依据；③ Y0 为连续合约分析口径，实际可交易主力为 Y2701（次主力 Y2705，价差 -217，远月贴水，换月状态 stable 但主力持仓份额 48.31%，仍须在交易软件二次确认价格、持仓与流动性）；④ 1小时/2小时/4小时 K 线为缓存分钟线且最新 bar 为收盘钉住 bar，量能数据（volume_ratio20=0.0）不具实时参考意义；⑤ 舆情仅引用给定搜索结果，区分事实、市场预期与推断，部分条目发布时间已超过 24 小时，仅为背景参考。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-10-05T21:49:21+00:00",
+  "generated_at_utc": "2026-10-06T04:50:34+00:00",
   "latest_date": "2026-09-30",
   "realtime_price": 8972.0,
   "realtime_note": "实时行情截至 2026-09-30 15:04:48，当前价 8972，涨跌 +1.32%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-10-05T21:48:56+00:00",
+    "fetched_at_utc": "2026-10-06T04:50:09+00:00",
     "market_trading_day": "2026-09-30",
     "market_tick_time": "15:04:48",
     "source": "Sina Market Center live request",
@@ -151,41 +145,36 @@
   "news_summary": "[1] USDA 8月月报：南美大豆和玉米产量及全球农作物库存数据-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-09-30T14:39:50+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE5IWnJucE9tUjNQc0FiUXQybDd2UGVqRDA1UW5sSVZQZG9GUGFMVTJKUGZpUTRoczJSWFZIMEVlNE1FMGtpX1FjR0dkOENGcEk?oc=5\n摘要: USDA 8月月报：南美大豆和玉米产量及全球农作物库存数据-市场参考 金十数据\n\n[2] 华泰期货：豆一上行空间受限，花生盘面承压下行 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-09-30T07:52:15+00:00\nURL: https://news.google.com/rss/articles/CBMiugJBVV95cUxPc0lLbVdiRGpKRjNraHVaNHY5aXdfUkhwRG9ITGViRkhNamlIaFViS0ZOSUpJWnRzT2p5N0djM25EYlFLQU1OUWRXYnJNQmN1eFk0dC01cU1lT0ZOaEM5QVRsSF9FVDc2eFZrdlZSZGJpczVzeFdudVRfNFpxV3BSem9aa3h2VHBuQnhGZ3lGbGZIaUs5YXVOUWJEcDFjSVl5Zlo2clYwNURSSm5VdnZKcHdLR05tNkRYSEdVcWZVMjBqUnptOTRWNXdVNlBjbG9XYVBobXRHMTFnTDRWTUdGTGRKUDdFWkRkbjRmTGIzZlVBNnhUckd3SEZ5dTFZM3duNHVYclRrc1FqdEItUEpncExPSmpkMHNwUTk2eERBRlZHUW1CNXpwZFRnZlBaMW53VDhUaTdCd0xFZw?oc=5\n摘要: 华泰期货：豆一上行空间受限，花生盘面承压下行 新浪财经\n\n[3] 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-10-04T15:56:08+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5\n摘要: 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 金十数据\n\n[4] 中国为何不给美国大豆降税 大豆贸易的特殊考量 - 中华网\n来源: 中华网\n发布时间UTC: 2026-09-29T23:36:32+00:00\nURL: https://news.google.com/rss/articles/CBMicEFVX3lxTE1FTENBVnF2enMxSjRDbEx5VFN3ZjJkZnM5NklnWHNNU0o5VFFFYXc4bnRGcWZCZF9VQmM4Nmt2VVRBUU9jMnBCZ2o1MGNHWENlenR5QTJvdnh5R1k5YlRyNzl6eTlVTUE4S0FWakdsT3g?oc=5\n摘要: 中国为何不给美国大豆降税 大豆贸易的特殊考量 中华网\n\n[5] 中国给美国降关税，唯独大豆不松口！这一手直接把美国拿捏住了！ - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-10-02T04:53:00+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTFBPSno1Q2pqTDVqZ1Q2LThiYm5raGpzYk9BMm5FZWl5N0lBSmdoS0pPMEx0NFZCOEJnMjZPMkI3X2ViemRLcXZyVkpZa1hNMjRLYmdn?oc=5\n摘要: 中国给美国降关税，唯独大豆不松口！这一手直接把美国拿捏住了！ 搜狐网\n\n[6] 中国金属进口创纪录、石油采购下滑，煤炭仍支撑过半发电量| 乌克兰新闻 - Межа. Новини України.\n来源: Межа. Новини України.\n发布时间UTC: 2026-09-29T06:32:58+00:00\nURL: https://news.google.com/rss/articles/CBMiaEFVX3lxTE52ZUVPRXc3UmhoWG14cWlCRkVVRzk4YWFzanRJY2dfRjBhYlVBNDV2dVRmT0JjakRGdmVWTlYwaUxNbXpMYjNZWGxSWTdJUFpoVURoNzFtd0FSTGpCQ2lIN3lnZFlaZUVk?oc=5\n摘要: 中国金属进口创纪录、石油采购下滑，煤炭仍支撑过半发电量| 乌克兰新闻 Межа. Новини України.\n\n[7] 中国给美国减关税，偏偏大豆不放手！这一招直接让美国被拿捏住了！ - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-10-02T02:50:00+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1Pa3NGTXdNLXZFd0ZlMkhCeXJ2ZC1rYWJrM2h0SzltN1FvVXQ2MVZlbGVQYW5LV1JMZjZpU3Z6NFBWeFF4QTQ1T3dxY0pHeDNnR2JJ?oc=5\n摘要: 中国给美国减关税，偏偏大豆不放手！这一招直接让美国被拿捏住了！ 搜狐网\n\n[8] 美国大豆承压，中国维持10%关税 - IDNFinancials\n来源: IDNFinancials\n发布时间UTC: 2026-09-29T05:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMi6gFBVV95cUxPelROT0JRalFEYlcyRElTVFlBUWdWVU9xallCQmJTdkQ4LXJxQ2xOeXV4UHVxeDhBaDBqOUI3ZVRVUExPWDA4R05vb2V6Njl0dTVOZlpiMUZCdE5UNzBvSVZVb3FwSW1sZXZldUl4YTl3X1pIdk0yVWFKVjU1SFJESWxaNHpUUTV4LXpwUDJYdnBKdFhhbV9Uam0yenZUUm9EU3d0Ynl0NlVYYVRZd1d3cENQQjZDbTFRbHFDUGl6X1BNNVAyQzdfU0wzaGpoRU40Mks5dHd5UGE4b0VudEZFeWZpS2NnazB6Y1E?oc=5\n摘要: 美国大豆承压，中国维持10%关税 IDNFinancials\n\n[9] 美国特色作物出口旨在扩大对中国市场的准入 - 全球果蔬网\n来源: 全球果蔬网\n发布时间UTC: 2026-10-04T22:58:00+00:00\nURL: https://news.google.com/rss/articles/CBMivgFBVV95cUxOSlYtc05PWi10TmJYMmVpczN0c0NjNFFRQS1NcGNnX2RVXzVUVU1oeXRjcGMtZDRDNi1DRXZoc21HRWRmcVJxcVEtUTZRUFZlSTVZMHBVX2VsQnkwWDhmMF9yeVh2QmVQMHRpU1BlaHppVXptSlBjUUtnVkYwZF9hSV9SRnNxbzR1b3lKNUNMa2gyc3JFY3BSQWFfR0poTFdwSTVLRjZSOHYwWHUyUWQzOVVfZTJZZ3dyOHFiaHd3?oc=5\n摘要: 美国特色作物出口旨在扩大对中国市场的准入 全球果蔬网\n\n[10] 关税闸门半开：中美“300亿对300亿”降税落地，谁先尝到甜头？ - or100.cc\n来源: or100.cc\n发布时间UTC: 2026-09-30T02:08:00+00:00\nURL: https://news.google.com/rss/articles/CBMiREFVX3lxTFB6QnF1aUR4bVNoRExKc1RZQ3ZMTFlNQUtrN3dFdEZ1ekZrS1NZbDVRZDcxdDVWLWtNRUFFOW01VTdUU1l6?oc=5\n摘要: 关税闸门半开：中美“300亿对300亿”降税落地，谁先尝到甜头？ or100.cc",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 25.4,
+  "api_latency_seconds": 24.4,
   "token_usage": {
     "prompt_tokens": 15677,
-    "completion_tokens": 5425,
-    "total_tokens": 21102,
+    "completion_tokens": 5511,
+    "total_tokens": 21188,
     "prompt_tokens_details": {
-      "cached_tokens": 1024
+      "cached_tokens": 2688
     },
-    "prompt_cache_hit_tokens": 1024,
-    "prompt_cache_miss_tokens": 14653
+    "prompt_cache_hit_tokens": 2688,
+    "prompt_cache_miss_tokens": 12989
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-10-05T21:49:21+00:00",
-    "score": 50,
-    "status": "blocked",
-    "label": "规则接管",
+    "checked_at_utc": "2026-10-06T04:50:34+00:00",
+    "score": 85,
+    "status": "caution",
+    "label": "仅供参考",
     "execution_allowed": false,
-    "evidence_confidence": 42,
+    "evidence_confidence": 38,
     "issues": [
-      {
-        "code": "false_rsi_oversold",
-        "severity": "high",
-        "message": "文本声称 RSI 超卖，但日线 RSI 为 54.3。"
-      },
       {
         "code": "low_evidence_confidence",
         "severity": "medium",
-        "message": "AI 自评证据强度仅 42/100。"
+        "message": "AI 自评证据强度仅 38/100。"
       }
     ],
     "facts": {
       "realtime_price": 8972.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-10-05T21:48:56+00:00",
+      "realtime_fetched_at_utc": "2026-10-06T04:50:09+00:00",
       "realtime_market_tick_time": "15:04:48",
       "daily_rsi14": 54.28,
       "one_hour_boll_position": "中轨上方",
@@ -197,16 +186,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-10-05T21:48:56+00:00",
+    "realtime_fetched_at_utc": "2026-10-06T04:50:09+00:00",
     "realtime_market_trading_day": "2026-09-30",
     "realtime_market_tick_time": "15:04:48",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-10-05T19:39:24+00:00",
+    "daily_updated_at_utc": "2026-10-06T00:56:26+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-10-05T19:39:24+00:00",
-    "news_updated_at_utc": "2026-10-05T19:39:21+00:00",
-    "contract_bridge_updated_at_utc": "2026-10-05T19:39:21+00:00"
+    "intraday_updated_at_utc": "2026-10-06T00:56:26+00:00",
+    "news_updated_at_utc": "2026-10-06T00:56:22+00:00",
+    "contract_bridge_updated_at_utc": "2026-10-06T00:56:23+00:00"
   }
 }

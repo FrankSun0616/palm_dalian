@@ -1,203 +1,71 @@
 {
-  "summary": "截至北京时间 2026-10-16 13:42:24（大商所交易日归属标签 2026-10-16，非未来标签），P0 连续合约 realtime.price=9451.0，涨跌幅 -1.20%，较昨结 9566 明显走弱；本轮实时抓取状态为 live，输入有效。当前映射主力为 P2701（价格与 P0 一致，mapping_verified=true），次主力 P2705 报 10053、价差 602 元、远月升水，roll_state=watch，换月处于监控阶段。三尺度共振偏空但短线已现超跌反弹：1小时布林（20,2）上 9842.01/中 9582.85/下 9323.69，价格 9451 位于中轨下方、贴近下轨；4小时布林上 9777.06/中 9609.20/下 9441.34，价格几乎贴住下轨；日线收 9446、跌破 MA10(9622.2)/MA20(9785.5)/MA60(9773.87)，日线 RSI14=36.25 偏弱但尚未超卖（未低于30）。日线基准模型 model_validation 状态为 rejected（样本外无优势），不得把其历史结果当作未来概率。策略上建议以反弹遇阻后的空头思路为主，但入场不追低，需等反弹至压力带确认。",
-  "bias": "偏空",
+  "source": "fallback-rule-analysis",
+  "model": "deepseek-v4-flash",
+  "thinking_mode": "enabled",
+  "reasoning_effort": null,
+  "status": "fallback",
+  "error": "JSONDecodeError: Extra data: line 1 column 3551 (char 3550)",
+  "generated_at_utc": "2026-10-16T05:47:12+00:00",
+  "latest_date": "2026-10-15",
+  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
+  "bias": "等待AI",
   "analysis": [
-    "[实时价基准] realtime.price=9451.0、ticktime=13:42:24、涨跌幅 -1.20%，这是本次所有入场/止损/目标/布林位置的唯一当前基准；日线 close=9446 与小时线 close=9486 均不得替代该实时价。相对昨结 9566 已下移，说明午盘承压明显。",
-    "[1小时布林] 1小时布林上/中/下轨为 9842.01/9582.85/9323.69，带宽 0.0541，当前实时价 9451 位于中轨下方、距下轨约 127 点；1小时 RSI14=42.25 未超卖。价格自 10-15 夜盘低点 9337 反弹后仍受中轨压制，属弱势反抽结构。",
-    "[4小时布林] 4小时布林上/中/下轨为 9777.06/9609.20/9441.34，带宽 0.0349 为三尺度最窄，实时价 9451 紧贴下轨上沿；4小时 RSI14=39.08 偏弱。带宽收窄叠加贴下轨，意味着方向选择临近但尚未确认突破。",
-    "[日线布林/均线] 日线最新收 9446，低于 MA10(9622.2)、MA20(9785.5)、MA60(9773.87)，均线呈空头排列；日线 RSI14=36.25 偏弱但未进入超卖区，不能称超卖。20日区间高 10330/低 9435，当前价贴近 20 日低点，属区间下沿测试。",
-    "[趋势与量能] 1小时 EMA20=9545.33 且斜率 -0.0077、4小时 EMA20=9635.65 斜率 -0.0072，两周期均线均下行；日线 volume_ratio_20d=1.28 显示放量下跌，量能配合偏空。10-15 日线单日 amplitude 从 9735 跌至 9435，跌幅 -2.95% 佐证抛压。",
-    "[支撑压力] 下方关键支撑为 10-16 盘中低点 9337 与日线20日低点 9435 一带（9360-9440 区域）；上方压力为 1小时中轨 9582.85、4小时中轨 9609.20 及日线 MA10 9622.2 共振带（9580-9625），该带是本轮反弹的核心阻力。",
-    "[持仓与结构] 1小时 open_interest_change=-3078，反弹过程中持仓小幅下降，说明反弹偏减仓性质、缺乏新多进场；日线 10-15 持仓 615892 较前值 590922 增加，下跌中增仓，空头主动性更强。",
-    "[连续合约口径] P0 当前映射主力 P2701（价格 9451 与连续一致），次主力 P2705 升水 602、远月升水结构，roll_score=62 触发监控移仓；实盘下单须在软件二次确认具体月份合约，不可直接对 P0 连续口径报单。"
+    "实时价 9453（实时行情截至 2026-10-16 13:46:22，当前价 9453，涨跌 -1.18%），最新日线收盘 9446，日涨跌 -2.95%。",
+    "MA10/MA20/MA60 分别为 9622/9786/9774。",
+    "20日区间支撑压力为 9435-10330。"
   ],
   "intraday_strategy": {
-    "bias": "偏空（反弹遇阻做空为主，超跌不追）",
-    "entry": "今日夜盘 21:00 开盘后及下一交易日早盘 09:00-11:30：若价格反弹至 9570-9625 压力带（1小时中轨 9582.85 与日线 MA10 9622.2 共振）并出现滞涨/上影，分批入场空；午盘 13:30-15:00 若直接下探 9360-9380 不创新低可轻仓抢反弹，但仅日内。",
-    "stop": "空单止损 9660（4小时中轨 9609.20 上方约 50 点）；抢反弹多单止损 9320（跌破日线20日低 9435 与盘中低 9337 结构）。",
-    "take_profit": "空单首目标 9380，次目标 9350（贴近盘中低点 9337）；抢反弹多单目标 9500-9580。",
-    "invalidation": "若价格以收盘方式站上 4小时中轨 9609.20 并伴随放量，或 1小时收盘重回中轨 9582.85 之上，则空头逻辑失效，转为观望。",
-    "notes": "以 1小时+4小时为主尺度；当前实时价 9451 处于压力与支撑之间，盈亏比不足，建议等反弹到 9570-9625 或回落至 9360-9380 再动手，不在中间位置开仓。主力 P2701 换月处于 watch，下单前必须在交易软件核对具体月份与盘口流动性。"
+    "bias": "等待AI",
+    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
+    "stop": "未给出",
+    "take_profit": "未给出",
+    "invalidation": "未给出",
+    "notes": "当前为规则备用分析"
   },
   "decision_frame": {
-    "confidence": 52,
-    "regime": "日线空头趋势叠加日内超跌反弹尝试，区间下沿震荡",
-    "edge": "中等偏弱：趋势方向明确（空）但当前价离压力/支撑均约120点，即时盈亏比不足，需要价格移动到边界才有可交易优势",
-    "no_trade_condition": "1) 价格停留在 9460-9560 中间地带时不交易；2) model_validation 状态为非 positive（rejected，样本外无优势），不得依据历史命中率下注；3) 若 P0 与 P2701 映射在软件端无法二次确认，或换月溢价异常放大导致流动性转移，停止交易；4) 首目标盈亏比低于 1.5 时不开仓。",
-    "long_case": {
-      "trigger": "仅日内超跌反弹：价格下探 9360-9380 区域出现止跌企稳且1小时收盘回到 9400 上方",
-      "entry_zone": "9370-9395",
-      "stop": "9320",
-      "targets": [
-        "9500 / 9580"
-      ],
-      "invalidation": "1小时收盘跌破 9337 盘中低点",
-      "risk_reward": "约 1.3-1.6（需实时价靠近下沿才达标，否则不执行）"
-    },
-    "short_case": {
-      "trigger": "价格反弹至 9570-9625 压力带受阻（1小时中轨 9582.85 + 日线 MA10 9622.2 共振），出现上影或量能萎缩",
-      "entry_zone": "9575-9620",
-      "stop": "9660",
-      "targets": [
-        "9380 / 9350"
-      ],
-      "invalidation": "1小时收盘站稳 9609.20（4小时中轨）以上",
-      "risk_reward": "约 1.9-2.1"
-    },
-    "event_risks": [
-      "MPOB 9月报告已公布，库存升至历史高位（中金在线/搜狐 10-14 报导）对价格施压；厄尔尼诺题材（10-10 中国国家气候中心、10-11 至 10-13 相关报导）提供间歇性利多扰动；10-15 中金在线提到印度采购与马盘走弱的矛盾剧本，消息面双向扰动可能放大夜盘波动。"
-    ],
+    "confidence": 0,
+    "regime": "数据不足",
+    "edge": "等待 DeepSeek",
+    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
+    "long_case": {},
+    "short_case": {},
+    "event_risks": [],
     "data_limits": [
-      "realtime 抓取时间为 2026-10-16 13:42:41 且状态 live，ticktime 13:42:24，为本次有效实时输入；intraday 1小时/2小时/4小时最新 bar 时间为 2026-10-16 14:15/15:00（标签口径），daily/intraday 数据 updated_at_utc 为 04:51:36 属约50分钟前快照，非逐笔实时；日线基准模型 model_validation 为 rejected，样本外无优势，不能作为方向依据；连续合约 P0 不可直接下单。"
+      "当前为备用规则分析"
     ]
   },
-  "news_impact": [
-    "[利空] MPOB 9月报告显示库存升至历史高位，是当前盘面走弱的核心基本面压制。中金在线(10-14 08:30 UTC)与搜狐(10-14 07:43 UTC)均解读为上行承压，逻辑链条为：产地库存高企→出口与内需消化压力→连棕反弹受限，与今日 realtime 价 9451、-1.20% 的弱势一致。",
-    "[利空] 出口关税豁免落空后市场重新审视供需（汇通网 10-09 12:31 UTC）。关税题材落空削弱了此前的出口乐观预期，供需天平重新向宽松倾斜，是本周价格自 9733 回落至 9450 一带的情绪导火索之一。",
-    "[利空] 正信期货(新浪财经 10-15 07:36 UTC)指出马棕增库兑现，短期连棕或反复磨底。该观点与当前 1小时/4小时贴下轨、日线 EMA 下行的技术形态相互印证，指向反弹而非反转。",
-    "[利多] 厄尔尼诺题材持续发酵：中国国家气候中心(虎嗅 10-10)宣布超强厄尔尼诺形成，维科号(10-13)讨论糖、橡胶、棕榈油‘分期到账’，新浪财经(10-11)提到豆粕棕榈油震荡偏强。逻辑为产区远期减产预期，属中长线支撑但短期难敌高库存现实，构成反弹时的阻力放大器。",
-    "[中性偏多] 汇通网(10-13 10:56 UTC)提出‘351万吨库存压顶，棕榈油凭什么收出两周新高’，反映高库存与价格反弹并存的矛盾。事实是高库存存在，两周新高属过去时点，该矛盾提示不宜单边重仓押注。",
-    "[中性] 中金在线(10-15 12:52 UTC)‘印度在抢货，马盘在跳水’揭示采购需求与马盘走弱的两个剧本打架。需求端印度买盘提供下方缓冲，但马盘下跌压制连棕，消息面呈双向扰动，需结合盘面确认方向。",
-    "[中性偏空] 豆油方面新浪财经(10-12)称节后价格小涨但需求尚未明显回暖，油脂板块整体缺乏需求端共振，棕榈油难以获得油脂系整体拉升的助攻。",
-    "[利空] 综合10-14至10-15的库存与增库系列报导，基本面基调为‘高库存+磨底’，与本报告技术面偏空判断方向一致，但厄尔尼诺预期会在下跌途中制造反弹，操作上须防消息反复。"
-  ],
-  "news_articles": [
-    {
-      "title": "棕榈油承压回落，出口关税豁免落空后市场重新审视供需",
-      "source": "汇通网 Fx678",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9vOFM4RldlaW15RDNQZGhhMVJTcGUyM2tJdjVTbGQyM29YWTNpZ2d0VHVlR0s4Y3ZSblhvQkF3WHFiZ0dMY1Z6RW5WUFd4ekhXei01REcxYkxqWnc?oc=5",
-      "detail": "报导指出出口关税豁免落空后，市场重新审视棕榈油供需格局，价格承压回落。关税预期落空削弱了出口端乐观情绪，使供需天平重回宽松一侧。该情绪与本周盘面自 9733 回落至 9450 一带的走势相符，属偏空扰动。",
-      "impact": "利空"
-    },
-    {
-      "title": "MPOB 9月报告解读：库存升至历史高位，棕榈油价格上行承压_期市动态",
-      "source": "中金在线",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE1uSnZMU1JGQTl2UHJJNWpvLUJlVkxFa0RHV202dWt0a2szRmVwOVFscmxoYnNmS2ZJcjd0X2s0M0pwY2tjZUxfdnJxUWNZMzh2V05zZ1FTWmJrcDZ3MzR3Nzh6RlNLT1l2M1QyVVRB?oc=5",
-      "detail": "MPOB 9月报告解读显示马来西亚棕榈油库存升至历史高位，直接压制价格上行空间。高库存意味着出口与内需消化需时间，短期连棕反弹受限。该事实性数据是当前偏空基调的主要来源。",
-      "impact": "利空"
-    },
-    {
-      "title": "正信期货：马棕增库兑现，短期连棕或反复磨底",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOUnJQc04wUkVBZEpna29qRzFmb1hsRENZOF84Z2tRMTN0cmg5Vk8zTklRZXY2NWVnY19MeXpDcVVuSnB4RlhFbXRmYVN0WUhrU2JBM0NONXo0eEg0S01qSGJhb1FEa3h3SFpGSUU0VzdwQnkwSjZIeW5Gd1V3RlpzNXpIN0xoaS1fekhvZl9xVzVFbG9iakw2V1FlOUFOVVlEd0ozVkcxUFR3NGNFT3ozTg?oc=5",
-      "detail": "正信期货认为马棕增库已在盘面兑现，短期连棕更可能反复磨底而非单边拉升。该判断暗示反弹属技术性修复，需以逢高思路对待。与当前 1小时/4小时贴下轨的弱势结构一致。",
-      "impact": "利空"
-    },
-    {
-      "title": "超强厄尔尼诺来了，糖、橡胶、棕榈油、铜为什么“分期到账”？",
-      "source": "维科号",
-      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9WWno2WE5iZkFJRVJrb3dROVBQN0REOVdneFhOcm9PSENaamFfSzJnUlJIdlBlS216bzlmclZZMHotbjIyLXA5aW83a1d4M3B1bFBiSlJB?oc=5",
-      "detail": "文章讨论超强厄尔尼诺对不同商品的影响呈‘分期到账’特征，棕榈油位于受影响品种之列。逻辑是产区天气扰动带来远期减产预期，但对近月的传导有滞后。故构成中长线利多题材，短期难以扭转高库存压制。",
-      "impact": "利多"
-    },
-    {
-      "title": "351万吨库存压顶，棕榈油凭什么收出两周新高？_外汇动态报道",
-      "source": "汇通网 Fx678",
-      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1DT1V5TFNGNWQyMHVDOFVPakw3dEpRUFAweXE3Ni04Qm1LbVNrd2JxX0d0OE5NVUdmTHJSSnFzd3pIaF9uNmx2dm45WUJleUF1bFVaRUk4ZmNsQQ?oc=5",
-      "detail": "报导提到在库存高企背景下棕榈油仍收出两周新高，凸显高库存与价格反弹并存的矛盾。该‘两周新高’为已发生的过去时点，不宜外推。矛盾结构提示单边重仓风险较高。",
-      "impact": "中性"
-    },
-    {
-      "title": "厄尔尼诺气候热度提升影响 豆粕棕榈油震荡偏强运行",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMi2ANBVV95cUxQa3o1MnRMUXNDNUJHWk5ORmlvaGEtNXc0QVZUTmdvVEJ5RDdDWktoVFgwUklVSzNsTGZjbnA4ZVoyaVEwSTVCa21IeGxmMU9EX183eGZEak9CMVlreXRrQU5lQWkzMEQzLTd3TU00aE56QWlaTTRXUEd4Y1hEWjVlRDJteDQ5OEc2dEl4bGNzRk5FdHNwcS1fQ1ZfWUxfUTBSOHpGMWExRjZKYTVsOU94b0NmRXZ5c1otRjZmQm5sbjdUV1daS2JQZ19SeWttMDBEMTNrT2RLVjFDRmRSRHNCb0ZVelNROUItYng1dHJWM3hmVVVuVTZsMmFmZVNCSXVibnlsSkY5bFFYLWtKbjJiazVyWTVLallGbDdWZkp0T0xmQ0JrZExlMEV4YjRpbU1vNVJZOHdGV1JGbDI5Qk5pMmpnb3dNbllBZUQwazgxRU4ycHhObWViaUNyWU5yR2hScW90VHBZSHR0bkc1WGRZQnJ1VXVYSHlabUNMbkMzWjhNaHRpWEQxMXFOcFZHV25Yc0Q5b08ta2syeWFMRjlIQ2hEMDBfcVBlQ0ZHdXJXeGFLXzlMc1pnNGNGdjAyS2JxWDVibTk1TllIWUVaSmh5aUxWVUdiUEox?oc=5",
-      "detail": "报导认为厄尔尼诺气候热度提升对豆粕、棕榈油构成震荡偏强影响。逻辑为天气升水预期支撑油脂油料估值。但‘偏强’为震荡性质而非趋势性看涨，需结合库存事实谨慎对待。",
-      "impact": "利多"
-    },
-    {
-      "title": "印度在抢货，马盘在跳水：棕榈油的两个剧本打架了_期市动态",
-      "source": "中金在线",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE42R3A2eWllczNaMWNHcG1SbHRZVVdvc2FYZmVNRHgwcGFCNmRZRlRiT2xKWnBqc3RuVUpUeHNfOXc5dFlmSU5DSkREYkZmVTBQVV9OaDZPWHBXX3pGSFM5VHpmTHRpQVJ6QTJQRWZB?oc=5",
-      "detail": "文章指出印度采购抢货与马来西亚盘面跳水形成两个相互矛盾的剧本。需求端买盘为价格提供下方缓冲，但马盘走弱压制连棕情绪。该双向扰动意味着方向需要盘面确认，不宜先入为主。",
-      "impact": "中性"
-    },
-    {
-      "title": "MPOB 9月报告解读：库存升至历史高位，棕榈油价格上行承压",
-      "source": "搜狐",
-      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxObEJOblgwOUd1RFRmTzNZLVVtazB0QS15cENfdWZNWjdRWVhvWlBXNmRkeEYwQ251bG01RXVPQUpRUWM1cVhpendhSmV1cUdsb25CTGo1UlhTRUVlOUtiT2FxbXZ5SEVGdklhQ09fVmI1MlQ3QUY2RVQyRHMwQV83c0E0eGR3VlBG?oc=5",
-      "detail": "与中金在线同源解读，强调 MPOB 9月库存升至历史高位令棕榈油价格上行承压。两家媒体一致的高库存基调增强了该事实的可靠性。对盘面构成持续性偏空背景。",
-      "impact": "利空"
-    },
-    {
-      "title": "豆油 | 节后价格小涨，需求尚未明显回暖",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxQa2xvam5CUHlwcHFqWGFUWDVNS1pVbkdEZmE3Z1RWb3RldUd6bXVndUgyV2dYTk9IMFBsTENGNlVkSjZfLWVBRm5DNWphWE1NNTJoaEFfRFdjZHYxazlvQy0yTWNNcDdMcHl3QVhqSmxZb2dlRW1TWnp0bDY0aUUyNWk2eDEydUI4dFE?oc=5",
-      "detail": "豆油节后价格小涨，但需求尚未明显回暖。作为油脂系重要品种，豆油缺乏需求驱动意味着板块整体共振上行动能不足。棕榈油难以从油脂系获得联动拉升。",
-      "impact": "中性"
-    },
-    {
-      "title": "中国国家气候中心宣布超强厄尔尼诺形成，全球农业与电力产业链面临重估",
-      "source": "虎嗅网",
-      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE1fQXpnSW52M3RRVThudm1Tc1ZZaVZjcVJyZC1lNHdLMURpeTJLRUVoNjhMeC1lX19NOEZJQmtORjViWjh0elNpMkhDcTdGaVAzVEVvaQ?oc=5",
-      "detail": "中国国家气候中心宣布超强厄尔尼诺形成，全球农业与电力产业链面临重估。对棕榈油而言，天气升水预期提升远期减产想象空间。属于中长线利多题材，短期难以对冲高库存的现实压力。",
-      "impact": "利多"
-    }
-  ],
+  "news_impact": [],
+  "news_articles": [],
   "watch_levels": {
-    "support": 9350.0,
-    "resistance": 9600.0
-  },
-  "normalization_warnings": [],
-  "risk_note": "本分析基于用户提供的实时行情、分钟/日线数据与给定舆情搜索结果，不构成投资建议。realtime 为 2026-10-16 13:42:24 抓取的 live 报价，作为当前价格基准；日线与分钟快照 updated_at_utc 为 04:51:36，属约50分钟前的缓存快照，非逐笔实时。P0 为连续合约分析口径，当前映射主力 P2701（mapping_verified=true），但连续合约不可直接下单，实盘须在交易软件二次确认具体月份、价差与流动性，并注意 roll_state=watch 的换月监控风险。日线基准模型 model_validation 状态为 rejected（样本外无优势），其胜率、盈亏比等历史结果不得作为未来概率或交易依据。news_impact 中事实、市场预期与推断已区分，舆情仅来自给定搜索结果。价格可能受涨跌停、夜盘跳空、保证金调整及未列入本文的事件影响，请自行控制仓位与风险。",
-  "source": "DeepSeek API",
-  "model": "deepseek-v4-flash",
-  "thinking_mode": "disabled",
-  "reasoning_effort": null,
-  "deepseek_mode": "no-thinking",
-  "status": "ok",
-  "generated_at_utc": "2026-10-16T05:43:14+00:00",
-  "latest_date": "2026-10-15",
-  "realtime_price": 9451.0,
-  "realtime_note": "实时行情截至 2026-10-16 13:42:24，当前价 9451，涨跌 -1.20%",
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-10-16T05:42:41+00:00",
-    "market_trading_day": "2026-10-16",
-    "market_tick_time": "13:42:24",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
-  },
-  "news_summary": "[1] 棕榈油承压回落，出口关税豁免落空后市场重新审视供需 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-10-09T12:31:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE9vOFM4RldlaW15RDNQZGhhMVJTcGUyM2tJdjVTbGQyM29YWTNpZ2d0VHVlR0s4Y3ZSblhvQkF3WHFiZ0dMY1Z6RW5WUFd4ekhXei01REcxYkxqWnc?oc=5\n摘要: 棕榈油承压回落，出口关税豁免落空后市场重新审视供需 汇通网 Fx678\n\n[2] MPOB 9月报告解读：库存升至历史高位，棕榈油价格上行承压_期市动态 - 中金在线\n来源: 中金在线\n发布时间UTC: 2026-10-14T08:30:08+00:00\nURL: https://news.google.com/rss/articles/CBMibkFVX3lxTE1uSnZMU1JGQTl2UHJJNWpvLUJlVkxFa0RHV202dWt0dGszRmVwOVFscmxoYnNmS2ZJcjd0X2s0M0pwY2tjZUxfdnJxUWNZMzh2V05zZ1FTWmJrcDZ3MzR3Nzh6RlNLT1l2M1QyVVRB?oc=5\n摘要: MPOB 9月报告解读：库存升至历史高位，棕榈油价格上行承压_期市动态 中金在线\n\n[3] 正信期货：马棕增库兑现，短期连棕或反复磨底 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-15T07:36:03+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxOUnJQc04wUkVBZEpna29qRzFmb1hsRENZOF84Z2tRMTN0cmg5Vk8zTklRZXY2NWVnY19MeXpDcVVuSnB4RlhFbXRmYVN0WUhrU2JBM0NONXo0eEg0S01qSGJhb1FEa3h3SFpGSUU0VzdwQnkwSjZIeW5Gd1V3RlpzNXpIN0xoaS1fekhvZl9xVzVFbG9iakw2V1FlOUFOVVlEd0ozVkcxUFR3NGNFT3ozTg?oc=5\n摘要: 正信期货：马棕增库兑现，短期连棕或反复磨底 新浪财经\n\n[4] 超强厄尔尼诺来了，糖、橡胶、棕榈油、铜为什么“分期到账”？ - 维科号\n来源: 维科号\n发布时间UTC: 2026-10-13T03:32:00+00:00\nURL: https://news.google.com/rss/articles/CBMiVkFVX3lxTE9WWno2WE5iZkFJRVJrb3dROVBQN0REOVdneFhOcm9PSENaamFfSzJnUlJIdlBlS216bzlmclZZMHotbjIyLXA5aW83a1d4d3B1bFBiSlJB?oc=5\n摘要: 超强厄尔尼诺来了，糖、橡胶、棕榈油、铜为什么“分期到账”？ 维科号\n\n[5] 351万吨库存压顶，棕榈油凭什么收出两周新高？_外汇动态报道 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-10-13T10:56:47+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTE1DT1V5TFNGNWQyMHVDOFVPakw3dEpRUFAweXE3Ni04Qm1LbVNrd2JxX0d0OE5NVUdmTHJSSnFzd3pIaF9uNmx2dm45WUJleUF1bFVaRUk4ZmNsQQ?oc=5\n摘要: 351万吨库存压顶，棕榈油凭什么收出两周新高？_外汇动态报道 汇通网 Fx678\n\n[6] 厄尔尼诺气候热度提升影响 豆粕棕榈油震荡偏强运行 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-11T01:28:00+00:00\nURL: https://news.google.com/rss/articles/CBMi2ANBVV95cUxQa3o1MnRMUXNDNUJHWk5ORmlvaGEtNXc0QVZUTmdvVEJ5RDdDWktoVFgwUklVSzNsTGZjbnA4ZVoyaVEwSTVCa21IeGxmMU9EX183eGZEak9CMVlreXRrQU5lQWkzMEQzLTd3TU00aE56QWlaTTRXUEd4Y1hEWjVlRDJteDQ5OEc2dEl4bGNzRk5FdHNwcS1fQ1ZfWUxfUTBSOHpGMWExRjZKYTVsOU94b0NmRXZ5c1otRjZmQm5sbjdUV1daS2JQZ19SeWttMDBEMTNrT2RLVjFDRmRSRHNCb0ZVelNROUItYng1dHJWM3hmVVVuVTZsMmFmZVNCSXVibnlsSkY5bFFYLWtKbjJiazVyWTVLallGbDdWZkp0T0xmQ0JrZExlMEV4YjRpbU1vNVJZOHdGV1JGbDI5Qk5pMmpnb3dNbllBZUQwazgxRU4ycHhObWViaUNyWU5yR2hScW90VHBZSHR0bkc1WGRZQnJ1VXVYSHlabUNMbkMzWjhNaHRpWEQxMXFOcFZHV25Yc0Q5b08ta2syeWFMRjlIQ2hEMDBfcVBlQ0ZHdXJXeGFLXzlMc1pnNGNGdjAyS2JxWDVibTk1TllIWUVaSmh5aUxWVUdiUEox?oc=5\n摘要: 厄尔尼诺气候热度提升影响 豆粕棕榈油震荡偏强运行 新浪财经\n\n[7] 印度在抢货，马盘在跳水：棕榈油的两个剧本打架了_期市动态 - 中金在线\n来源: 中金在线\n发布时间UTC: 2026-10-15T12:52:13+00:00\nURL: https://news.google.com/rss/articles/CBMibkFVX3lxTE42R3A2eWllczNaMWNHcG1SbHRZVVdvc2FYZmVNRHgwcGFCNmRZRlRiT2xKWnBqc3RuVUpUeHNfOXc5dFlmSU5DSkREYkZmVTBQVV9OaDZPWHBXX3pGSFM5VFpmTHRpQVJ6QTJQRWZB?oc=5\n摘要: 印度在抢货，马盘在跳水：棕榈油的两个剧本打架了_期市动态 中金在线\n\n[8] MPOB 9月报告解读：库存升至历史高位，棕榈油价格上行承压 - 搜狐\n来源: 搜狐\n发布时间UTC: 2026-10-14T07:43:00+00:00\nURL: https://news.google.com/rss/articles/CBMiiAFBVV95cUxObEJOblgwOUd1RFRmTzNZLVVtazB0QS15cENfdWZNWjdRWVhvWlBXNmRkeEYwQ251bG01RXVPQUpRUWM1cVhpendhSmV1cUdsb25CTGo1UlhTRUVlOUtiT2FxbXZ5SEVGdklhQ09fVmI1MlQ3QUY2RVQyRHMwQV83c0E0eGR3VlBG?oc=5\n摘要: MPOB 9月报告解读：库存升至历史高位，棕榈油价格上行承压 搜狐\n\n[9] 豆油 | 节后价格小涨，需求尚未明显回暖 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-12T03:54:00+00:00\nURL: https://news.google.com/rss/articles/CBMiigFBVV95cUxQa2xvam5CUHlwcHFqWGFUWDVNS1pVbkdEZmE3Z1RWb3RldUd6bXVndUgyV2dYTk9IMFBsTENGNlVkSjZfLWVBRm5DNWphWE1NNTJoaEFfRFdjZFYxazlvQy0yTWNNcDdMcHl3QVhqSmxZb2dlRW1TWnp0bDY0aUUyNWk2eDEydUI4dFE?oc=5\n摘要: 豆油 | 节后价格小涨，需求尚未明显回暖 新浪财经\n\n[10] 中国国家气候中心宣布超强厄尔尼诺形成，全球农业与电力产业链面临重估 - 虎嗅网\n来源: 虎嗅网\n发布时间UTC: 2026-10-10T09:53:26+00:00\nURL: https://news.google.com/rss/articles/CBMiVEFVX3lxTE1fQXpnSW52M3RRVThudm1Tc1ZZaVZjcVJyZC1lNHdLMURpeTJLRUVoNjhMeC1lX19NOEZJQmtORjViWjh0elNpMkhDcTdGaVAzVEVvaQ?oc=5\n摘要: 中国国家气候中心宣布超强厄尔尼诺形成，全球农业与电力产业链面临重估 虎嗅网",
-  "symbol": "P0",
-  "instrument_name": "棕榈油",
-  "api_latency_seconds": 32.7,
-  "token_usage": {
-    "prompt_tokens": 15897,
-    "completion_tokens": 5424,
-    "total_tokens": 21321,
-    "prompt_tokens_details": {
-      "cached_tokens": 1152
-    },
-    "prompt_cache_hit_tokens": 1152,
-    "prompt_cache_miss_tokens": 14745
+    "support": 9435.0,
+    "resistance": 10330.0
   },
   "integrity": {
-    "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-10-16T05:43:14+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
-    "evidence_confidence": 52,
-    "issues": [],
-    "facts": {
-      "realtime_price": 9451.0,
-      "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-10-16T05:42:41+00:00",
-      "realtime_market_tick_time": "13:42:24",
-      "daily_rsi14": 36.25,
-      "one_hour_boll_position": "中轨下方",
-      "four_hour_boll_position": "中轨下方",
-      "realtime_trading_day_label": "2026-10-16",
-      "realtime_label_is_future": false
-    }
+    "version": "deterministic-integrity-v1",
+    "checked_at_utc": "2026-10-16T05:47:12+00:00",
+    "score": 0,
+    "status": "blocked",
+    "label": "规则接管",
+    "execution_allowed": false,
+    "evidence_confidence": 0,
+    "issues": [
+      {
+        "code": "ai_unavailable",
+        "severity": "high",
+        "message": "JSONDecodeError: Extra data: line 1 column 3551 (char 3550)"
+      }
+    ],
+    "facts": {}
   },
+  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "symbol": "P0",
+  "instrument_name": "棕榈油",
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-10-16T05:42:41+00:00",
+    "realtime_fetched_at_utc": "2026-10-16T05:46:43+00:00",
     "realtime_market_trading_day": "2026-10-16",
-    "realtime_market_tick_time": "13:42:24",
+    "realtime_market_tick_time": "13:46:22",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
@@ -206,5 +74,13 @@
     "intraday_updated_at_utc": "2026-10-16T04:51:36+00:00",
     "news_updated_at_utc": "2026-10-16T04:51:33+00:00",
     "contract_bridge_updated_at_utc": "2026-10-16T04:51:35+00:00"
+  },
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-10-16T05:46:43+00:00",
+    "market_trading_day": "2026-10-16",
+    "market_tick_time": "13:46:22",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   }
 }

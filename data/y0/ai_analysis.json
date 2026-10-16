@@ -1,192 +1,186 @@
 {
-  "summary": "本次分析基准为大连商品交易所豆油连续合约 Y0 在 2026-10-16 交易日归属标签下、盘口 ticktime 09:40:35 抓取的实时价 8830.0 元/吨，实时涨跌幅 -1.02%（相对前结算 8921），较昨收 8854 继续走弱。实时输入状态为 live，但 1小时/2小时/4小时 K 线 updated_at_utc 为 2026-10-16T00:32:11Z（北京时间 08:32），最新 K 线时间戳停在 2026-10-15 23:00 或 2026-10-16 11:15（4小时为跨界标签），属于有延迟的缓存 K 线，不能当作刚刚成交的实时盘口。当前价位于 1小时布林中轨 8955.7 下方、贴近下轨 8817.61；4小时布林中轨 8940.0 下方、贴近下轨 8814.74；日线 close 8854 低于 MA10 8939.4 与 MA20 8952.9，仅高于 MA60 8773.18，日线 RSI14 45.55 属中性偏弱、未超卖。\n\n多周期共振结论：1小时 RSI14 33.8 偏弱但未到极值，ADX14 14.77 显示趋势强度不足；4小时 RSI14 40.77、ADX14 12.35，同样是无趋势偏空震荡结构；日线连续两日回落并跌破 MA10/MA20，但仍在 MA60 上方，方向偏空、力度有限。日内策略上，倾向在 8830 附近的超跌反抽中做区间震荡/弱势反弹思路，但首目标盈亏比不足 1.5，因此主要策略设为等待确认信号的观望优先。\n\n合约映射：contract_bridge mapping_verified=true，Y0 当前行情与主力 Y2701 价格及持仓一致，主力稳定（roll_state=stable，roll_score=49），次主力 Y2705 价格 8690，Y2701-Y2705 价差 -140（远月贴水，spread_ratio -1.59%），主力持仓占比 45.82%、次主力持仓比 0.4932。注意 Y0 只是连续合约分析口径，不是可直接下单的具体月份合约；实际下单前请在交易软件中二次确认 Y2701 合约代码、价格与流动性。\n\n模型验证：fixed daily 基准模型 model_validation.status=rejected（样本外无优势），历史样本外 76 笔胜率 39.47%、期望 R -0.0136、盈亏比 0.9781，历史优势未被证实。本结论不代表当前日内方案的胜率或未来概率，仅用于说明不应依赖该日线模型做单边方向押注。",
-  "bias": "震荡偏空",
+  "summary": "本次分析基准时刻为北京时间2026-10-16 09:45:47，实时输入为live。最关键的当前基准是 realtime.price=8822.0、盘口 ticktime=09:45:24、相对昨结算涨跌幅 -1.11%（相对昨收8854为-0.36%）。注意：日线级别数据截至2026-10-15，其 high 9042 / low 8850 / close 8854 属于昨日及更早，不是当前实时盘口；1小时/4小时K线最新为2026-10-15 23:00，已延迟约10小时以上，只能作为形态背景而不能称为刚刚成交。以8822为基准，价格处于1小时布林(上9093.79/中8955.70/下8817.61)下轨附近、4小时布林(上9065.26/中8940.00/下8814.74)下轨附近、日线则运行于20日均线8952.9下方、10日均线8939.4下方。三周期共振方向偏空，但价格已贴近下轨与外盘马棕三连涨、中国重启美豆采购存在对冲，属于空头趋势中的超卖敏感区，追空性价比差，策略上以反弹遇阻做空或跌破下轨顺势短空为主。连续合约Y0当前映射主力Y2701，主力持仓占比45.8%，次主力Y2705贴水141元、持仓比49.36%，换月状态stable，下单前必须在交易软件二次确认具体月份。",
+  "bias": "偏空",
   "analysis": [
-    "【1小时布林与实时价】1小时最新 K 线收 8843（2026-10-15 23:00，非当前实时价），布林上轨 9093.79 / 中轨 8955.7 / 下轨 8817.61，带宽 0.0308。实时价 8830（ticktime 09:40:35）位于中轨下方、贴近下轨 8817.61 上方约 12 点，属于通道下沿运行，尚未有效跌破下轨。1小时 RSI14 33.8 偏弱但未极值，EMA20 8934.7 且斜率 -0.0055，显示短线均价下压，反抽幅度受限。",
-    "【4小时布林与实时价】4小时布林上轨 9065.26 / 中轨 8940.0 / 下轨 8814.74，带宽 0.028，实时价 8830 位于中轨下方且距下轨 8814.74 仅约 15 点。4小时 RSI14 40.77、ADX14 12.35 表明无明确趋势、偏弱震荡，EMA20 8940.83 与中轨重合构成上方压制。若 8814.74 被有效跌破，则 4小时结构转弱加剧。",
-    "【日线布林偏推断与均线】日线未直接给出布林三轨，但以 MA10 8939.4、MA20 8952.9 作为中轨参考、MA60 8773.18 作为中期支撑，昨收 8854 已跌破 MA10/MA20，位于两线下方、MA60 上方约 81 点。日线 RSI14 45.55 属中性偏弱，未超卖；当前偏空更多来自短均线压制而非极端超卖。20 日高点 9177、20 日低点 8817 构成较宽箱体。",
-    "【实时价位置与量能】实时价 8830、涨跌幅 -1.02%，买价 8830/卖价 8831、买量 67/卖量 33，盘口买盘稍厚但成交偏薄；实时成交 159526 手、持仓 563570 手（较前值小幅减少）。日线昨成交 394960 手、量为 20 日均量 1.31 倍，属放量下跌，说明 8850 破位有资金参与，反弹需要看到缩量止跌或放量收复 8880 上方才能确认。",
-    "【支撑与压力】下方支撑参考昨日低点 8850（已跌破，转为压力）、4小时下轨 8814.74 与 20 日低点 8817、日线 MA60 8773.18；上方压力参考 1小时 EMA20 8934.7 / 日线 MA10 8939.4、日线 MA20 8952.9、1小时中轨 8955.7。日内若在 8817-8830 区止跌，可视为通道下沿支撑；若跌破 8773（MA60），则日线级别转弱风险上升。",
-    "【趋势结构】1小时与4小时 ADX 分别 14.77 与 12.35，均为弱趋势区间，日线连续两日自 9078 高点回落至 8854，形成短线下行通道。三周期方向一致偏空但强度均不足，属于弱势震荡而非单边趋势，做单边突破需要 ADX 与量能配合确认。",
-    "【量能与持仓】日线持仓自 10-14 的 585185 降至 10-15 的 567879，实时持仓 563570，持仓持续流出说明多头减仓为主，而非新空大举进场。1小时 open_interest_change -2395、4小时 -3195，同样反映减仓式下行，进一步支持‘偏空但非趋势性抛压’的判断。",
-    "【多周期共振与合约口径提醒】1小时、4小时、日线三周期均在中轨下方，共振偏空但均在通道下沿附近，存在技术性反抽需求。contract_bridge 显示 Y0 映射主力 Y2701（mapping_verified=true，主力稳定），Y2701-Y2705 价差 -140 呈远月贴水。Y0 为连续合约分析口径，不可直接下单，实际执行请在软件中确认 Y2701 具体合约与盘口。"
+    "实时基准：realtime.price=8822.0，盘口 ticktime=09:45:24，涨跌幅 -1.11%（相对前结算8921），相对昨收8854为-0.36%，买卖价8822/8823、盘口量95/77，属本次live盘口；日线 close 8854 为2026-10-15收盘，不能替代当前价。",
+    "1小时尺度（数据截至2026-10-15 23:00，已延迟）：布林上轨9093.79、中轨8955.70、下轨8817.61，close 8843位于中轨下方、贴近下轨，带宽约3.08%属中性偏窄；实时价8822已略跌破1小时下轨8817.61一线，若日盘重新收回下轨之上则是回归中轨的技术性修复。",
+    "4小时尺度（数据截至2026-10-15 23:00，延迟）：布林上轨9065.26、中轨8940.00、下轨8814.74，close 8843位于中轨下方、距下轨仅约28点，带宽约2.80%且持续收窄；实时价8822在新一轮K线中贴住下轨8814.74，带宽收窄意味着方向选择临近，但4小时RSI 40.77、ADX 12.35显示趋势动能疲弱，易出现假突破。",
+    "日线背景：数据截至2026-10-15，收8854、跌1.91%，位于ma10 8939.4与ma20 8952.9下方、ma60 8773.18上方，为短期空头、中期仍属震荡区间；日线RSI14=45.55中性偏弱，不构成超买或超卖，价格位于20日高9177与20日低8817的中下区域，昨日放量下跌使20日量比1.31，属放量破位。",
+    "支撑结构：第一支撑是日线20日低点8817与4小时下轨8814.74密集区；其下是ma60 8773.18与9月低点8817—8850成交密集带；再下为8800整数与日线布林下轨估算区。以realtime.price=8822计，距第一支撑仅约5点，多头止损空间极小、空头进场则离支撑过近，是当前不宜追空的核心原因。",
+    "压力结构：上方第一压力为1小时中轨8955.70与日线ma20 8952.9重叠区，其次为4小时中轨8940.00与日线ma10 8939.4重叠区，再上为昨日高点9042及1小时上轨9093.79；由于ma10与ma20间距很窄(约13点)，8950附近是决定反弹能否转多的关键分水岭。",
+    "趋势与量能：1小时EMA20为8934.7、斜率-0.0055，4小时EMA20为8940.83、斜率-0.0016，两周期均线均向下且价格在其下方，中期偏空；但1小时ADX 14.77、4小时ADX 12.35均低于20，属无趋势的震荡下移，1小时量比0.19、4小时量比0.12，说明下跌动能并未放大，持仓量同步减少(1小时-2395、4小时-3195)，更多是多头离场而非空头大举建仓。",
+    "多周期共振结论：日线偏空＋4小时偏空＋1小时偏空但超卖，形成方向一致、动能不足的组合；日内更可能是8814-8955区间内先弱后修复的震荡，只有在放量下破8814并站稳其下时才打开向8773—8750的空间，反之若早盘快速收回8850-8860并放量，则可能测试8940-8955。"
   ],
   "intraday_strategy": {
-    "bias": "震荡偏空，反弹遇阻为主，逢低只做轻仓短线反抽",
-    "entry": "8830-8815 区间（以实时价 8830 为基准，贴近 4小时下轨 8814.74 与 20 日低点 8817）",
-    "stop": "8773（日线 MA60，跌破则短线多单逻辑失效）",
-    "take_profit": "第一目标 8930（1小时 EMA20/日线 MA10 附近），第二目标 8950（日线 MA20 与 1小时中轨 8955.7 附近）",
-    "invalidation": "实时价有效跌破 8773 且 1小时/4小时均收于该位下方，或反抽至 8940 以上无法站稳并再度回落，则本策略失效，转为观望",
-    "notes": "适用时段：今日早盘 09:00-11:30 与午盘 13:30-15:00 主看，晚间夜盘 21:00-23:00 需重新核对当时实时价与量能。当前 1小时/4小时 ADX 均低于 20，为弱趋势，优先区间操作而非追单边；首目标 8930 距入场 8830 的空间约 100 点、止损距入场约 57 点，盈亏比约 1.75（按第二目标 8950 计算约 2.1），仅在贴近 8817-8830 下沿入场时才达标，追高不做。Y0 为连续合约，下单请以交易软件确认的主力 Y2701 实际价格与流动性为准。"
+    "bias": "偏空（反弹做空为主，不追空）",
+    "entry": "8838-8855区间分批轻仓试空（以realtime.price=8822为基准，反弹约16-33点进场）；若早盘直接放量下破8814并回抽不破，可在8805-8815顺势短空。",
+    "stop": "短线空单统一止损8882（今日实时高点上方）；逆势短多的止损设在8798（1小时/4小时下轨下方）。",
+    "take_profit": "第一目标8773（日线ma60附近），第二目标8750（9月低点8817下方的量度延伸位）；激进者可在第一次触及8773-8780时减半仓。",
+    "invalidation": "1小时收盘（非盘中插针）重新站上8850-8860并伴随量比回升，或价格放量上破8940-8955（日线ma10/ma20与4小时中轨共振区），则空头逻辑失效，转为观望或反手做多。",
+    "notes": "适用2026-10-16早盘09:00-11:30及午盘13:30-15:00；当前为早盘09:45实时，若14:30后仍在8814-8822窄幅横盘且量能萎缩，则放弃交易等待夜盘21:00-23:00跟随外盘（马棕、原油）再定方向。本方案以1小时＋4小时为主，日线为背景；Y0为连续合约，下单前须在交易软件确认主力Y2701实际合约月份、保证金及流动性与盘口一致。"
   },
   "decision_frame": {
-    "confidence": 55,
-    "regime": "日线跌破 MA10/MA20、三周期位于布林中轨下方的弱势震荡（ADX 偏低，趋势强度不足）",
-    "edge": "三周期共振偏空叠加通道下沿支撑，存在技术性反抽的边际优势，但日内 ADX 与量能均不支持单边，优势有限",
-    "no_trade_condition": "1) contract_bridge.mapping_verified 若不能人工复核确认为 true 则不交易；2) 若入场点距首目标盈亏比低于 1.5（例如追高至 8880 以上再进多）则不交易；3) 若实时价跌破 8773（日线 MA60）或量能持续放量下行则不交易；4) model_validation.status=rejected（样本外无优势），不得以该模型作为方向依据",
+    "confidence": 58,
+    "regime": "短期空头趋势中的下轨超卖震荡（三周期方向一致但动能不足，ADX低于20）",
+    "edge": "以实时价8822为基准，价格贴近日线20日低8817与4小时下轨8814.74，反弹至8838-8855做空、止损8882、首目标8773，盈亏比约(8850-8773)/(8882-8850)≈2.4，具备边际；但追空至下轨则首目标仅约50点而止损需要更大，性价比不足。",
+    "no_trade_condition": "1) 若早盘09:00-11:30在8814-8822窄幅横盘、1小时量比持续低于0.5，则方向不明不交易；2) 若价格先触及8773而空单尚未进场，禁止追空；3) contract_bridge.mapping_verified=true且主力持仓47.7%，但仍需交易软件二次确认月份，若无法确认Y2701/Y2705实际报价与流动性，不交易；4) 日线基准模型model_validation.status=rejected（样本外无优势，胜率39.47%、期望R -0.0136、盈亏因子0.9781），其历史结果不得作为方向或胜率依据，只可作为‘不依赖单一模型’的约束。",
     "long_case": {
-      "trigger": "实时价在 8817-8830 区止跌企稳，1小时 K 线收出带下影阳线且成交量不再放大",
-      "entry_zone": "8815-8830",
-      "stop": "8773",
+      "trigger": "1小时K线重新收于8850之上并伴随量比回升（>0.8），且外盘马棕维持三连涨不回落。",
+      "entry_zone": "8850-8862回踩不破后轻仓做多",
+      "stop": "8798",
       "targets": [
-        "8930",
-        "8950"
+        "8940",
+        "8955"
       ],
-      "invalidation": "跌破 8773 收盘，或反抽 8930 后无量回落",
-      "risk_reward": "首目标 8930 对应约 1.75；第二目标 8950 约 2.1（以 8830 入场、8773 止损估算）"
+      "invalidation": "1小时收盘跌破8814且无法快速收回",
+      "risk_reward": "约1.9（首目标8940，入场约8855，止损8798）"
     },
     "short_case": {
-      "trigger": "反抽至 8930-8955 区间（1小时中轨/日线 MA20）遇阻回落，1小时收出长上影阴线",
-      "entry_zone": "8930-8955",
-      "stop": "8990",
+      "trigger": "反弹至8838-8855遇阻且1小时RSI回升后再度回落，或放量跌破8814并回抽不破。",
+      "entry_zone": "8838-8855（反弹空）；8805-8815（破位顺空）",
+      "stop": "8882",
       "targets": [
-        "8830",
-        "8773"
+        "8773",
+        "8750"
       ],
-      "invalidation": "有效站上 8955.7 并收于其上",
-      "risk_reward": "首目标 8830 对应约 1.7（以 8940 入场、8990 止损估算），达标临界"
+      "invalidation": "1小时收盘放量站上8940-8955",
+      "risk_reward": "约2.4（首目标8773，入场约8850，止损8882）"
     },
     "event_risks": [
-      "中国 9 月大豆进口 1188 万吨、同比下降 7.7%，需求端偏弱持续压制豆油估值",
-      "中国国有贸易商重启美国大豆采购，远期到港供应预期增加，利空豆油",
-      "马来西亚棕榈油受原油与连盘带动三连涨但仍处创纪录库存背景，外盘油脂反弹对豆油有外溢支撑",
-      "厄尔尼诺气候预期提升、油籽蛋白数据偏空但盘面抗跌，天气与数据博弈带来波动",
-      "隔夜原油、CBOT 豆油及马棕走势将直接影响下一交易时段开盘跳空"
+      "外盘联动：马棕期货三连涨、原油共振（汇通网 2026-10-14），若夜盘外盘延续强势，会削弱国内豆油空头逻辑。",
+      "中国国有贸易商重启美国大豆采购（美国之音 2026-10-15），中美大豆贸易预期变化可能压制或提振远月豆油成本端，需关注消息持续性。",
+      "中国9月大豆进口1188万吨、同比下降7.7%（联合早报/华尔街见闻 2026-10-14），原料端偏紧预期与全球库存压力相互对冲。",
+      "厄尔尼诺气候题材（新浪财经 2026-10-11、文学城 2026-10-10）扰动棕油与油脂板块波动。",
+      "美豆关键支撑位盘整（Traders Union 2026-10-14），若美豆破位将拖累豆油，反之则提供支撑。"
     ],
     "data_limits": [
-      "realtime 为 live 且 ticktime 09:40:35，为本次实时输入；但 1小时/2小时/4小时 K 线 updated_at_utc 为 2026-10-16T00:32:11Z（北京 08:32），最新 K 线时间戳多为 2026-10-15 23:00，属延迟缓存 K 线，不可视为刚刚成交",
-      "日线数据 latest_date 2026-10-15，为上一交易日收盘，非实时",
-      "日线未直接提供布林三轨，本文以 MA10/MA20/MA60 作为偏推断的通道参考",
-      "model_validation 为固定日线基准模型样本外结果且 status=rejected，不代表日内方案，亦不代表未来收益",
-      "舆情均来自给定搜索结果，含未来日期标签的发布时间，只能作为背景，不得当作已确认实时事件"
+      "realtime_fetch_status=live，realtime.price=8822、ticktime=09:45:24 为本次实时输入；日线数据截至2026-10-15，1小时/2小时/4小时K线最新为2026-10-15 23:00，均为延迟数据，不能描述为刚刚成交。",
+      "analysis_as_of_utc=2026-10-16T01:45:47+00:00 的‘今晚/即将’仅指此时点之后，10-14至10-15发布的报告与进口数据均属已发生事实。",
+      "Y0为连续合约，主力Y2701与次主力Y2705价差-141（远月贴水）、主力持仓占比45.8%、次主力持仓比49.36%，换月状态stable，roll_score 49，但连续合约回测含换月跳空，不能替代具体月份。",
+      "model_validation.status=rejected，样本外无优势，历史命中率/期望R不代表未来概率。",
+      "舆情仅来自给定搜索结果，未包含USDA、MPOB官方实时数据，无法核验具体产量库存数字。"
     ]
   },
   "news_impact": [
-    "[利空] 中国 9 月大豆进口 1188 万吨、同比下降 7.7%（联合早报、华尔街见闻均提及原油降 21.5%、大豆降 7.7%），说明国内大豆到港阶段性回落，但报告同时反映需求端收缩预期，整体对豆油需求前景偏谨慎。逻辑链条为进口与压榨需求走弱、豆油刚性消费增速放缓，对豆油价格构成温和利空。",
-    "[利空] 中国国有贸易商重启美国大豆采购、峰会后首批大额订单（美国之音），意味着远期美豆到港供应预期上升，压榨原料供给改善将抬升后续豆油产出，供应端预期偏宽松。对近月豆油期货形成偏空压制，尤其压制远月价差结构。",
-    "[利多] 马棕期货三连涨，受原油与连盘共振带动（汇通网），外盘油脂走强对国内豆油有情绪与比价外溢支撑。但报道同时指出马棕仍处创纪录库存背景，反弹持续性存疑，故利多为短期情绪面而非趋势性反转。",
-    "[中性] 油籽蛋白数据偏空但盘面抗跌（新浪财经热点报告），美豆产量与库存数据对豆类估值偏空，但价格未同步走弱，说明市场已部分计价或存在其他支撑。对豆油方向指引有限，更多体现为‘利空不跌’的抗跌属性。",
-    "[利多] 厄尔尼诺气候热度提升，豆粕棕榈油震荡偏强（新浪财经），天气升水预期对油脂油料板块形成阶段性支撑。逻辑为潜在产区天气扰动抬升风险溢价，对豆油价格短期偏多，但需实际天气落地验证，当前仅为预期层面。",
-    "[中性] 第19届国际油脂油料大会信息显示中国大豆压榨量突破亿吨（导油网），反映国内压榨产能持续扩张，长期豆油供应弹性大。对中长期豆油价格偏压制，但短期影响有限，属结构性背景。",
-    "[中性] 中国 9 月原油进口量同比降 21.5%、芯片进出口高增（华尔街见闻），原油走弱会削弱生物柴油与油脂的能源属性联动。若原油持续偏弱，将部分抵消马棕反弹对豆油的外溢支撑，方向影响偏中性偏空。"
+    "[利多] 马棕期货三连涨、原油与连盘共振（汇通网 2026-10-14）：作为油脂板块最重要外部定价锚，马棕走强直接提升国内豆油与棕油比价，即使马棕库存创纪录，短期反弹仍给国内豆油在8814-8822下轨区提供底部支撑，削弱深跌空间。",
+    "[利多/中性] 中国国有贸易商重启美国大豆采购、峰会后首批大额订单（美国之音 2026-10-15）：采购恢复短线缓解远月原料担忧、利好豆类整体情绪，但也意味着远期到港供应增加，对豆油近强远弱结构的影响需跟踪成交与装船节奏。",
+    "[中性偏多] 中国9月大豆进口1188万吨、同比下降7.7%（联合早报、华尔街见闻 2026-10-14）：进口下滑意味着短期压榨原料到港偏紧，对豆油构成成本端支撑；但同比降幅也反映下游压榨利润与需求走弱，方向影响相互抵消。",
+    "[中性偏空] 油籽蛋白热点报告：美豆数据偏空但盘面抗跌（新浪财经 2026-10-10）：美豆产量与库存数据偏空压制油脂成本端，但报告同时指出盘面抗跌，说明市场对利空已有部分消化，短线对豆油是偏空但不极端的影响。",
+    "[中性] 中国采购货船协议令大豆期货在关键支撑位附近盘整（Traders Union 2026-10-14）：美豆在关键支撑盘整意味着方向未定，若后续破位则拖累国内豆油下探8773—8750，若守住则限制Y2701在8814下方的跌幅。",
+    "[中性偏多] 厄尔尼诺气候热度提升，豆粕棕榈油震荡偏强（新浪财经 2026-10-11）：天气题材属于预期而非既成事实，但会提升棕油与油脂板块的风险溢价，在豆油已贴近日线20日低8817时，这类题材更易触发空头回补与短线反弹。",
+    "[中性] 第19届国际油脂油料大会：中国大豆压榨量突破亿吨（导油网 2026-10-14）：压榨产能扩张长期利空豆油供给端，但对次日收盘前的盘面影响有限，属中长期供需结构信息。",
+    "[利空] 中国9月原油进口同比降21.5%（华尔街见闻 2026-10-14）：原油走弱会削弱生柴与植物油价格外溢支撑，若10-16夜盘原油延续弱势，将放大豆油跌破8814后的下行压力。"
   ],
   "news_articles": [
     {
       "title": "马棕期货三连涨：原油与连盘共振，创纪录库存下反弹能走多远",
       "source": "汇通网 Fx678",
       "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9BVDZETVEwZW1pZ1lrQlZuMHZDQjAxaWJTa1h5a3RTU2xDck5aRXpRcVdwT0E3NjRVSk5RQmZzb2l6Y084YWE2WXRnYkQxQUlOa2xFem9tWTFsQQ?oc=5",
-      "detail": "报道指出马来西亚棕榈油期货连续第三个交易日上涨，主要受原油价格走强与连盘油脂共振带动。文章同时强调马棕当前仍处创纪录库存水平，反弹持续性取决于出口与原油走势。该消息对国内豆油构成短期情绪面利多，但库存压力限制了反弹空间的上限。",
-      "impact": "利多"
-    },
-    {
-      "title": "【热点报告】油籽蛋白：数据偏空盘面抗跌",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMipwJBVV95cUxPUERWX2ZFeXdJNU5PeGs2c3prOWhpdkdNS2ZxVk1qc0pFMzYxV2JzbFE4ZnBoeGdhMlVQV3o4NVYxMFdFZW9HV28tRDRYeHI2am0ycnNUMnJ0bVJVTkViWGtmZ1kxUl9iU0RTaTJTMC1iSTBoTkVveVBVdEZsQzNWRHBjejNYaHFhbi1scUJMT01sN3MtM1BoNG1zcGNFcWdXZUdmcWEwZlNkUjI4b0FlWnBsTWdIWG9iUnVkNkd0eUUwd04xeXlDbURHWE02eFA0QzlyX2hHNTRwUzQtdzNGdWFYN1V4cHRjSWNWUi1keUtmZXlTcjk2STJYMWlmWFFfSHJOc09Na3lQX09NUUs5eVl0ZldUZ19PalVhVDhaX2JSTzNSYTcw?oc=5",
-      "detail": "报告聚焦油籽蛋白板块，指出美豆产量、库存等数据整体偏空，但盘面表现出抗跌特征。文章认为市场对利空已有部分计价，需关注后续出口与压榨数据。对豆油而言，原料端偏空但盘面抗跌，方向指引偏中性。",
-      "impact": "中性"
-    },
-    {
-      "title": "中国采购货船协议令大豆期货价格在关键支撑位附近盘整",
-      "source": "Traders Union",
-      "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNaF9FOWV3N3NRVGNRWjI3d0xsVUZydXFQRWs1WWFKeFkzOC1zWWo2RWplZFdaVkM0c1BUVEdKVzhoUlJFeVpWQzh0S05SN1ktdWtKQ21LNUs3SzF0RGpfZzBNa2Jmc1NkdUhvb2lRTFNZUjlibFY1VG5aeWRxekc5ZkxqWmIyVTJDR2FaaXdSdnNZYjlMOE9kOXhvbHk?oc=5",
-      "detail": "报道称受中国采购货船协议消息影响，大豆期货价格在关键支撑位附近盘整。市场关注协议对应的实际采购规模与节奏。对豆油而言，供应预期改善使其价格承压，但盘整格局显示多空暂时平衡。",
-      "impact": "中性"
-    },
-    {
-      "title": "厄尔尼诺气候热度提升影响 豆粕棕榈油震荡偏强运行",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMi2ANBVV95cUxQa3o1MnRMUXNDNUJHWk5ORmlvaGEtNXc0QVZUTmdvVEJ5RDdDWktoVFgwUklVSzNsTGZjbnA4ZVoyaVEwSTVCa21IeGxmMU9EX183eGZEak9CMVlreXRrQU5lQWkzMEQzLTd3TU00aE56QWlaTTRXUEd4Y1hEWjVlRDJteDQ5OEc2dEl4bGNzRk5FdHNwcS1fQ1ZfWUxfUTBSOHpGMWExRjZKYTVsOU94b0NmRXZ5c1otRjZmQm5sbjdUV1daS2JQZ19SeWttMDBEMTNrT2RLVjFDRmRSRHNCb0ZVelNROUItYng1dHJWM3hmVVVuVTZsMmFmZVNCSXVibnlsSkY5bFFYLWtKbjJiazVyWTVLallGbDdWZkp0T0xmQ0JrZExlMEV4YjRpbU1vNVJZOHdGV1JGbDI5Qk5pMmpnb3dNbllBZUQwazgxRU4ycHhObWViaUNyWU5yR2hScW90VHBZSHR0bkc1WGRZQnJ1VXVYSHlabUNMbkMzWjhNaHRpWEQxMXFOcFZHV25Yc0Q5b08ta2syeWFMRjlIQ2hEMDBfcVBlQ0ZHdXJXeGFLXzlMc1pnNGNGdjAyS2JxWDVibTk1TllIWUVaSmh5aUxWVUdiUEox?oc=5",
-      "detail": "报道指出受厄尔尼诺气候热度提升影响，豆粕与棕榈油呈现震荡偏强走势。天气预期提升为油脂油料板块带来风险溢价。对豆油构成阶段性偏多支撑，但需实际天气数据验证。",
-      "impact": "利多"
-    },
-    {
-      "title": "超级厄尔尼诺来了，我们的日常真会因它涨价吗？",
-      "source": "文学城",
-      "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPdU9kb3VsM21KMDNuSDRLcHF2N1pRZy1EVm9kR2QxbGR0LWlpTmxteXh5VTJOUDZDa3ROTF9VdFU1b2lPWVhtRXZqWnNGVDdVdXZRbG1NR1hKYnJON05MY3J0MHBJX2xRNC1mREhUTmlNRGJhMERfM3poeVVCYXNhNA?oc=5",
-      "detail": "文章讨论超级厄尔尼诺对农产品及日常消费品价格的潜在影响，属于科普与市场预期类内容。其核心是天气因素可能推升农产品价格预期。对豆油而言偏情绪面利多，但缺乏具体数据支撑，实际影响需观察。",
+      "detail": "报道马棕期货连续第三个交易日上涨，并指出其与原油及连盘油脂形成共振。文中提及马棕库存处于创纪录水平，说明本轮上涨更多来自原油与外部情绪驱动，而非库存去化。对国内豆油而言，外盘走强在8814-8822下轨区提供情绪支撑，削弱深跌动能。",
       "impact": "利多"
     },
     {
       "title": "中国国有贸易商重启美国大豆采购，峰会后首批大额订单引关注",
       "source": "美国之音",
       "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPaGN2MW10Q21wQWdTWnpOOUd6amEzTW54TWVISDAxUkVMLVRXdFhmbEh4cVRTR09ocWd4NzF5WGE3WklRV2taVDFMbzYwU19FUmJNU0k2SUxnVHEzV3FzNm94cjZYQVZNRzdZZW9QaG5TNVBaalBTam5HdjY1OUtuMy01ZnRMbW1PZ3Jjd1JTZGZsaGhGTnVxSFk5OUpYaWlqOFpDZVJjRm10eDRudHdJY0stcGRQenpVZC1UZVNDUdIBwgFBVV95cUxOWWV6bDZGUktmQmdQdU5XTFh4TzBVTUk0aEtXWmxHcWpoYWtiOWVwcEZSVnlYWURTZmtsVXpFNm1jWEI2M1lmY0UxVzh5ZlNyOTg1cUlfTmZJaWxSY3A3VTFwX1ZOYnRlc3BmSDJHWDNVV3hoZEpMUmNxQ0Vod2lYcFUzSlVCOGNYU2ZXem9PSFJiZ292R09HMW5ydHZHcUJuLUN2WFdsN2tOTFp1b2ZQUG5TN0x3UURuV1E4VXF6Y2dGdw?oc=5",
-      "detail": "报道称中国国有贸易商重启美国大豆采购，为峰会后的首批大额订单，引发市场关注。这意味着远期美豆到港供应预期改善。对豆油而言，原料供给预期增加将抬升压榨产出，构成偏空压制。",
-      "impact": "利空"
+      "detail": "报道称中国国有贸易商重启美国大豆采购，被视为峰会后的首批大额订单。该消息短线改善豆类成本与情绪预期，对豆油构成偏多扰动。但采购属于远期供应，实际到港节奏与数量仍待装船与检验数据验证。",
+      "impact": "利多"
+    },
+    {
+      "title": "中国9月大豆进口1188万吨 同比下降7.7%",
+      "source": "联合早报",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9QV3hMTm9IRzJjSGIwUlR4TFJnSFRJdzVzRjRiNW4zYlVkXzNzSzQ1LThGM1Vsd3JPVlRZZjdRbll4RnRTcHJ2bHB1UkZyXzllbG9ZcC0wRjdrMnZJZ01OeE1LMVB6M2VsQQ?oc=5",
+      "detail": "公布中国9月大豆进口1188万吨，同比下降7.7%。进口下降意味着短期压榨原料到港收紧，对豆油成本端有支撑。但同比下滑也反映下游需求与压榨利润承压，对盘面影响方向中性偏多。",
+      "impact": "中性"
     },
     {
       "title": "中国9月芯片进出口额高增，原油进口量同比降21.5%、大豆降7.7%，稀土出口同比增6.7%",
       "source": "华尔街见闻",
       "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBQVkg2aE1jVEhUZndhMHlGQXRzMFgtVlRFQ1pTSUI4LWVqT3B5WnhxcWhQU0szV2lWZ3dOWnJ0eFdVSTdoQ2VvYVRtcEU4OFZ3emtn?oc=5",
-      "detail": "数据显示中国 9 月原油进口量同比下降 21.5%、大豆进口同比下降 7.7%，芯片进出口额高增。原油走弱会削弱油脂的能源属性联动，大豆进口回落则反映需求端偏弱。对豆油方向影响偏中性偏空。",
+      "detail": "报道9月中国原油进口同比下降21.5%、大豆进口下降7.7%。原油走弱削弱生柴与植物油比价外溢支撑，对豆油偏空；大豆进口下滑则对成本端偏多，两条信息方向相反。综合看对豆油单边影响偏中性，但需关注夜盘原油走势。",
+      "impact": "利空"
+    },
+    {
+      "title": "【热点报告】油籽蛋白：数据偏空盘面抗跌",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMipwJBVV95cUxPUERWX2ZFeXdJNU5PeGs2c3prOWhpdkdNS2ZxVk1qc0pFMzYxV2JzbFE4ZnBoeGdhMlVQV3o4NVYxMFdFZW9HV28tRDRYeHI2am0ycnNUMnJ0bVJVTkViWGtmZ1kxUl9iU0RTaTJTMC1iSTBoTkVveVBVdEZsQzNWRHBjejNYaHFhbi1scUJMT01sN3MtM1BoNG1zcGNFcWdXZUdmcWEwZlNkUjI4b0FlWnBsTWdIWG9iUnVkNkd0eUUwd04xeXlDbURHWE02eFA0QzlyX2hHNTRwUzQtdzNGdWFYN1V4cHRjSWNWUi1keUtmZXlTcjk2STJYMWlmWFFfSHJOc09Na3lQX09NUUs5eVl0ZldUZ19PalVhVDhaX2JSTzNSYTcw?oc=5",
+      "detail": "报告指出油籽蛋白相关数据偏空但盘面表现抗跌，说明市场对利空已有部分消化。对豆油而言，美豆端压力压制成本，但抗跌特征意味着下方存在买盘承接。短线更可能表现为宽幅震荡而非单边下行。",
       "impact": "中性"
     },
     {
-      "title": "第19届国际油脂油料大会 | 压榨量突破亿吨，中国大豆压榨产业面临哪些机遇与挑战?",
+      "title": "厄尔尼诺气候热度提升影响 豆粕棕榈油震荡偏强运行",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMi2ANBVV95cUxQa3o1MnRMUXNDNUJHWk5ORmlvaGEtNXc0QVZUTmdvVEJ5RDdDWktoVFgwUklVSzNsTGZjbnA4ZVoyaVEwSTVCa21IeGxmMU9EX183eGZEak9CMVlreXRrQU5lQWkzMEQzLTd3TU00aE56QWlaTTRXUEd4Y1hEWjVlRDJteDQ5OEc2dEl4bGNzRk5FdHNwcS1fQ1ZfWUxfUTBSOHpGMWExRjZKYTVsOU94b0NmRXZ5c1otRjZmQm5sbjdUV1daS2JQZ19SeWttMDBEMTNrT2RLVjFDRmRSRHNCb0ZVelNROUItYng1dHJWM3hmVVVuVTZsMmFmZVNCSXVibnlsSkY5bFFYLWtKbjJiazVyWTVLallGbDdWZkp0T0xmQ0JrZExlMEV4YjRpbU1vNVJZOHdGV1JGbDI5Qk5pMmpnb3dNbllBZUQwazgxRU4ycHhObWViaUNyWU5yR2hScW90VHBZSHR0bkc1WGRZQnJ1VXVYSHlabUNMbkMzWjhNaHRpWEQxMXFOcFZHV25Yc0Q5b08ta2syeWFMRjlIQ2hEMDBfcVBlQ0ZHdXJXeGFLXzlMc1pnNGNGdjAyS2JxWDVibTk1TllIWUVaSmh5aUxWVUdiUEox?oc=5",
+      "detail": "报道厄尔尼诺气候热度提升，豆粕与棕榈油震荡偏强。天气题材提升油脂板块风险溢价，在豆油贴近日线20日低8817时更易触发短线反弹。但该影响属预期层面，需跟踪实际产区降雨与产量数据。",
+      "impact": "中性"
+    },
+    {
+      "title": "中国采购货船协议令大豆期货价格在关键支撑位附近盘整",
+      "source": "Traders Union",
+      "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNaF9FOWV3N3NRVGNRWjI3d0xsVUZydXFQRWs1WWFKeFkzOC1zWWo2RWplZFdaVkM0c1BUVEdKVzhoUlJFeVpWQzh0S05SN1ktdWtKQ21LNUs3SzF0RGpfZzBNa2Jmc1NkdUhvb2lRTFNZUjlibFY1VG5aeWRxekc5ZkxqWmIyVTJDR2FaaXdSdnNZYjlMOE9kOXhvbHk?oc=5",
+      "detail": "报道中国采购货船协议使大豆期货在关键支撑位附近盘整。美豆方向未定，若后续破位将拖累国内豆油下探8773—8750，若支撑有效则限制豆油跌破8814后的空间。对日内策略而言，关键支撑是否守住是判断继续下探或反弹的重要外部条件。",
+      "impact": "中性"
+    },
+    {
+      "title": "第19届国际油脂油料大会 | 压榨量突破亿吨，中国大豆压榨产业面临哪些机遇与挑战",
       "source": "导油网",
       "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9JWnpIbmpSdi1Tb0dKVGhFdEJHclgxR1RGTmM1VGgza0lpR3pXRllka09ZSkFTaDlBOTFTWXpBRmRXb1lhSXhzb0pKRTA4Qkx2dktMdkV0cVpNS3pUTzVFMw?oc=5",
-      "detail": "大会信息显示中国大豆压榨量已突破亿吨，行业讨论产能扩张下的机遇与挑战。压榨产能持续增长意味着豆油供应弹性较大。对中长期豆油估值构成压制，短期影响相对有限。",
+      "detail": "第19届国际油脂油料大会讨论中国大豆压榨量突破亿吨的背景与挑战，指向压榨产能扩张与供给端持续释放。长期看对豆油供给构成压力，但对次日盘面的即时影响有限，属中长期供需结构信息，短线仅作为背景参考。",
       "impact": "中性"
-    },
-    {
-      "title": "中国9月大豆进口1188万吨 同比下降7.7%",
-      "source": "联合早报",
-      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9QV3hMTm9IRzJjSGIwUlR4TFJnSFRJdzVzRjRiNW4zYlVkXzNzSzQ1LThGM1Vsd3JPVlRZZjdRbll4RnRTcHJ2bHB1UkZyXzllbG9ZcC0wRjdrMnZJZ01OeE1LblAxejNlbEE?oc=5",
-      "detail": "数据显示中国 9 月大豆进口 1188 万吨，同比下降 7.7%。进口量回落一方面反映到港节奏，另一方面也体现需求端收缩。对豆油而言需求端偏弱预期构成温和利空。",
-      "impact": "利空"
     }
   ],
   "watch_levels": {
-    "support": 8817.0,
-    "resistance": 8955.7
+    "support": 8814.74,
+    "resistance": 8952.9
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于用户给出的实时行情、延迟 K 线、合约桥接与舆情搜索结果，不构成任何投资建议。实时价 8830（ticktime 09:40:35、涨跌幅 -1.02%）为本次唯一实时输入；1小时/2小时/4小时 K 线更新于 2026-10-16T00:32:11Z（北京 08:32），最新 K 线多为 2026-10-15 23:00，属延迟缓存，不可视为刚刚成交；日线为 2026-10-15 收盘。Y0 为连续合约分析口径，contract_bridge 显示映射主力为 Y2701 且 mapping_verified=true，但下单前仍须在交易软件二次确认具体合约代码、价格与流动性。model_validation.status=rejected，历史样本外无优势，其中胜率、盈亏比等均为历史统计，不代表未来概率或当前日内方案表现。期货交易具有杠杆风险，请严格控制仓位并自行承担交易结果。",
+  "risk_note": "本分析为基于给定行情与舆情的量化整理，不构成任何投资建议。实时基准为 realtime.price=8822.0、盘口 ticktime=09:45:24、涨跌幅 -1.11%，日线与小时K线为延迟数据，不得当作实时成交。Y0为连续合约口径，当前映射主力Y2701（次主力Y2705贴水141元、换月状态stable），实际下单前须在交易软件二次确认合约月份、保证金与流动性。model_validation.status=rejected，日线基准模型样本外无优势，历史胜率39.47%与期望R -0.0136不代表未来概率。当前价格下轨区追空与逆势抢反弹风险均高，建议控制仓位并严格止损。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-10-16T01:41:31+00:00",
+  "generated_at_utc": "2026-10-16T01:46:24+00:00",
   "latest_date": "2026-10-15",
-  "realtime_price": 8830.0,
-  "realtime_note": "实时行情截至 2026-10-16 09:40:35，当前价 8830，涨跌 -1.02%",
+  "realtime_price": 8822.0,
+  "realtime_note": "实时行情截至 2026-10-16 09:45:24，当前价 8822，涨跌 -1.11%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-10-16T01:40:52+00:00",
+    "fetched_at_utc": "2026-10-16T01:45:47+00:00",
     "market_trading_day": "2026-10-16",
-    "market_tick_time": "09:40:35",
+    "market_tick_time": "09:45:24",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
   "news_summary": "[1] 马棕期货三连涨：原油与连盘共振，创纪录库存下反弹能走多远_外汇动态报道 - 汇通网 Fx678\n来源: 汇通网 Fx678\n发布时间UTC: 2026-10-14T10:45:33+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTE9BVDZETVEwZW1pZ1lrQlZuMHZDQjAxaWJTa1h5a3RTU2xDck5aRXpRcVdwT0E3NjRVSk5RQmZzb2l6Y084YWE2WXRnYkQxQUlOa2xFem9tWTFsQQ?oc=5\n摘要: 马棕期货三连涨：原油与连盘共振，创纪录库存下反弹能走多远_外汇动态报道 汇通网 Fx678\n\n[2] 【热点报告】油籽蛋白：数据偏空盘面抗跌|库存|大豆|产量|美豆|年度 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-10T07:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMipwJBVV95cUxPUERWX2ZFeXdJNU5PeGs2c3prOWhpdkdNS2ZxVk1qc0pFMzYxV2JzbFE4ZnBoeGdhMlVQV3o4NVYxMFdFZW9HV28tRDRYeHI2am0ycnNUMnJ0bVJVTkViWGtmZ1kxUl9iU0RTaTJTMC1iSTBoTkVveVBVdEZsQzNWRHBjejNYaHFhbi1scUJMT01sN3MtM1BoNG1zcGNFcWdXZUdmcWEwZlNkUjI4b0FlWnBsTWdIWG9iUnVkNkd0eUUwd04xeXlDbURHWE02eFA0QzlyX2hHNTRwUzQtdzNGdWFYN1V4cHRjSWNWUi1keUtmZXlTcjk2STJYMWlmWFFfSHJOc09Na3lQX09NUUs5eVl0ZldUZ19PalVhVDhaX2JSTzNSYTcw?oc=5\n摘要: 【热点报告】油籽蛋白：数据偏空盘面抗跌|库存|大豆|产量|美豆|年度 新浪财经\n\n[3] 中国采购货船协议令大豆期货价格在关键支撑位附近盘整 - Traders Union\n来源: Traders Union\n发布时间UTC: 2026-10-14T12:59:59+00:00\nURL: https://news.google.com/rss/articles/CBMinAFBVV95cUxNaF9FOWV3N3NRVGNRWjI3d0xsVUZydXFQRWs1WWFKeFkzOC1zWWo2RWplZFdaVkM0c1BUVEdKVzhoUlJFeVpWQzh0S05SN1ktdWtKQ21LNUs3SzF0RGpfZzBNa2Jmc1NkdUhvb2lRTFNZUjlibFY1VG5aeWRxekc5ZkxqWmIyVTJDR2FaaXdSdnNZYjlMOE9kOXhvbHk?oc=5\n摘要: 中国采购货船协议令大豆期货价格在关键支撑位附近盘整 Traders Union\n\n[4] 厄尔尼诺气候热度提升影响 豆粕棕榈油震荡偏强运行 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-11T01:28:00+00:00\nURL: https://news.google.com/rss/articles/CBMi2ANBVV95cUxQa3o1MnRMUXNDNUJHWk5ORmlvaGEtNXc0QVZUTmdvVEJ5RDdDWktoVFgwUklVSzNsTGZjbnA4ZVoyaVEwSTVCa21IeGxmMU9EX183eGZEak9CMVlreXRrQU5lQWkzMEQzLTd3TU00aE56QWlaTTRXUEd4Y1hEWjVlRDJteDQ5OEc2dEl4bGNzRk5FdHNwcS1fQ1ZfWUxfUTBSOHpGMWExRjZKYTVsOU94b0NmRXZ5c1otRjZmQm5sbjdUV1daS2JQZ19SeWttMDBEMTNrT2RLVjFDRmRSRHNCb0ZVelNROUItYng1dHJWM3hmVVVuVTZsMmFmZVNCSXVibnlsSkY5bFFYLWtKbjJiazVyWTVLallGbDdWZkp0T0xmQ0JrZExlMEV4YjRpbU1vNVJZOHdGV1JGbDI5Qk5pMmpnb3dNbllBZUQwazgxRU4ycHhObWViaUNyWU5yR2hScW90VHBZSHR0bkc1WGRZQnJ1VXVYSHlabUNMbkMzWjhNaHRpWEQxMXFOcFZHV25Yc0Q5b08ta2syeWFMRjlIQ2hEMDBfcVBlQ0ZHdXJXeGFLXzlMc1pnNGNGdjAyS2JxWDVibTk1TllIWUVaSmh5aUxWVUdiUEox?oc=5\n摘要: 厄尔尼诺气候热度提升影响 豆粕棕榈油震荡偏强运行 新浪财经\n\n[5] 超级厄尔尼诺来了，我们的日常真会因它涨价吗？ - 文学城\n来源: 文学城\n发布时间UTC: 2026-10-10T04:28:21+00:00\nURL: https://news.google.com/rss/articles/CBMigAFBVV95cUxPdU9kb3VsM21KMDNuSDRLcHF2N1pRZy1EVm9kR2QxbGR0LWlpTmxteXh5VTJOUDZDa3ROTF9VdFU1b2lPWVhtRXZqWnNGVDdVdXZRbG1NR1hKYnJON05MY3J0MHBJX2xRNC1mREhUTmlNRGJhMERfM3poeVVCYXNhNA?oc=5\n摘要: 超级厄尔尼诺来了，我们的日常真会因它涨价吗？ 文学城\n\n[6] 中国国有贸易商重启美国大豆采购，峰会后首批大额订单引关注 - 美国之音\n来源: 美国之音\n发布时间UTC: 2026-10-15T18:03:20+00:00\nURL: https://news.google.com/rss/articles/CBMivwFBVV95cUxPaGN2MW10Q21wQWdTWnpOOUd6amEzTW54TWVISDAxUkVMLVRXdFhmbEh4cVRTR09ocWd4NzF5WGE3WklRV2taVDFMbzYwU19FUmJNU0k2SUxnVHEzV3FzNm94cjZYQVZNRzdZZW9QaG5TNVBaalBTam5HdjY1OUtuMy01ZnRMbW1PZ3Jjd1JTZGZsaGhGTnVxSFk5OUpYaWlqOFpDZVJjRm10eDRudHdJY0stcGRQenpVZC1UZVNDUdIBwgFBVV95cUxOWWV6bDZGUktmQmdQdU5XTFh4TzBVTUk0aEtXWmxHcWpoYWtiOWVwcEZSVnlYWURTZmtsVXpFNm1jWEI2M1lmY0UxVzh5ZlNyOTg1cUlfTmZJaWxSY3A3VTFwX1ZOYnRlc3BmSDJHWDNVV3hoZEpMUmNxQ0Vod2lYcFUzSlVCOGNYU2ZXem9PSFJiZ292R09HMW5ydHZHcUJuLUN2WFdsN2tOTFp1b2ZQUG5TN0x3UURuV1E4VXF6Y2dGdw?oc=5\n摘要: 中国国有贸易商重启美国大豆采购，峰会后首批大额订单引关注 美国之音\n\n[7] 中国9月芯片进出口额高增，原油进口量同比降21.5%、大豆降7.7%，稀土出口同比增6.7% - 华尔街见闻\n来源: 华尔街见闻\n发布时间UTC: 2026-10-14T07:23:30+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTFBQVkg2aE1jVEhUZndhMHlGQXRzMFgtVlRFQ1pTSUI4LWVqT3B5WnhxcWhQU0szV2lWZ3dOWnJ0eFdVSTdoQ2VvYVRtcEU4OFZ3emtn?oc=5\n摘要: 中国9月芯片进出口额高增，原油进口量同比降21.5%、大豆降7.7%，稀土出口同比增6.7% 华尔街见闻\n\n[8] 第19届国际油脂油料大会 | 压榨量突破亿吨，中国大豆压榨产业面临哪些机遇与挑战? - 导油网\n来源: 导油网\n发布时间UTC: 2026-10-14T15:37:47+00:00\nURL: https://news.google.com/rss/articles/CBMiYEFVX3lxTE9JWnpIbmpSdi1Tb0dKVGhFdEJHclgxR1RGTmM1VGgza0lpR3pXRllka09ZSkFTaDlBOTFTWXpBRmRXb1lhSXhzb0pKRTA4Qkx2dktMdkV0cVpNS3pUTzVFMw?oc=5\n摘要: 第19届国际油脂油料大会 | 压榨量突破亿吨，中国大豆压榨产业面临哪些机遇与挑战? 导油网\n\n[9] 中国9月大豆进口1188万吨 同比下降7.7% - 联合早报\n来源: 联合早报\n发布时间UTC: 2026-10-14T04:30:53+00:00\nURL: https://news.google.com/rss/articles/CBMiakFVX3lxTE9QV3hMTm9IRzJjSGIwUlR4TFJnSFRJdzVzRjRiNW4zYlVkXzNzSzQ1LThGM1Vsd3JPVlRZZjdRbll4RnRTcHJvdmxwdVJGcl85ZWxvWXAtMEY3azJ2SWdNTnhNSzFQejNlbEE?oc=5\n摘要: 中国9月大豆进口1188万吨 同比下降7.7% 联合早报\n\n[10] 中国出口猛增36.3%，美欧面临贸易压力 - IDNFinancials\n来源: IDNFinancials\n发布时间UTC: 2026-10-14T10:20:00+00:00\nURL: https://news.google.com/rss/articles/CBMihAJBVV95cUxPaWJqU1hOOXR3cGs1R2hOOUEtSzUyLVNGZVdiY3RoZllTeFFON2ppc3BvOC01SVczRURJdE01Mm4yZmpQWGlfY2F4dmYxZmtnZkRidXVWY2dyZmVLeWhvWkZrTTl1b2t6NUJSdU5rRGVDbGdzRkFlUnJKTC15T3psNHNGMDlPTThqVGRza0JzbnJiSjRoYkRwMmZDR19Da1o1NVlJbExYZlY3Yng2b211aXdfSkF5alppZFl1ZTNXUkhBcXlZVWtkUkRXak5xaGxiSXBXZ1ZpSnR3QzBvMmpFdWpKVnhIMXV6eHJsenZZcTJzVHVHSXNwOWJsT3pCbVN6WlczXw?oc=5\n摘要: 中国出口猛增36.3%，美欧面临贸易压力 IDNFinancials",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 39.0,
+  "api_latency_seconds": 37.1,
   "token_usage": {
-    "prompt_tokens": 16389,
-    "completion_tokens": 6598,
-    "total_tokens": 22987,
+    "prompt_tokens": 16388,
+    "completion_tokens": 6220,
+    "total_tokens": 22608,
     "prompt_tokens_details": {
       "cached_tokens": 3456
     },
     "prompt_cache_hit_tokens": 3456,
-    "prompt_cache_miss_tokens": 12933
+    "prompt_cache_miss_tokens": 12932
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-10-16T01:41:31+00:00",
+    "checked_at_utc": "2026-10-16T01:46:24+00:00",
     "score": 100,
     "status": "passed",
     "label": "通过",
     "execution_allowed": true,
-    "evidence_confidence": 55,
+    "evidence_confidence": 58,
     "issues": [],
     "facts": {
-      "realtime_price": 8830.0,
+      "realtime_price": 8822.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-10-16T01:40:52+00:00",
-      "realtime_market_tick_time": "09:40:35",
+      "realtime_fetched_at_utc": "2026-10-16T01:45:47+00:00",
+      "realtime_market_tick_time": "09:45:24",
       "daily_rsi14": 45.55,
       "one_hour_boll_position": "中轨下方",
       "four_hour_boll_position": "中轨下方",
@@ -197,9 +191,9 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-10-16T01:40:52+00:00",
+    "realtime_fetched_at_utc": "2026-10-16T01:45:47+00:00",
     "realtime_market_trading_day": "2026-10-16",
-    "realtime_market_tick_time": "09:40:35",
+    "realtime_market_tick_time": "09:45:24",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,

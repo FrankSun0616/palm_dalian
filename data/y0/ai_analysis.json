@@ -1,173 +1,189 @@
 {
-  "summary": "本次分析基准时刻为北京时间2026-10-24 00:26:47，实时盘口为Y0连续合约，最新价9164（ticktime 23:00:00，交易日归属标签2026-10-26，非未来行情），较前结算价9080上涨+0.93%。日线前一日收于9125（+1.73%），已突破近期震荡区间上沿，但实时价在此基础继续走高。1小时布林通道中轨9004.7，当前价9164位于中轨上方并接近上轨9194.12；2小时和4小时布林均显示价格突破上轨（2小时上轨9134.18，4小时上轨9141.33），短线呈现强势突破特征，但1小时RSI 73.85已进入短期超买区域，4小时RSI 68.8接近超买，日线RSI 62.21接近超买但未超买。量能方面，夜盘成交量萎缩，1小时和4小时量比仅0.03-0.22，突破有效性有待日盘量能确认。主力合约为Y2701（映射已验证），次主力Y2705贴水220元/吨，持仓比接近1:0.50，进入移仓监控期，交易时需注意合约选择。历史日线基准模型样本外无优势（胜率39.47%，盈亏比0.9781），不能将历史结果视作未来概率，当前日内策略需独立评估盈亏比。综合多周期，短线偏多但超买且量能不足，建议等待回踩确认或放量突破再行动，否则观望。",
+  "summary": "数据基准为北京时间2026-10-24 04:58，本次实时输入来自盘口实时抓取（realtime_fetch_status=live）：Y0 豆油连续最新价 realtime.price=9164.0，盘口 ticktime=23:00:00，涨跌幅 +0.93%（相对前结算9080，较前收盘9125为+39元）。需要特别说明：realtime.tradedate=2026-10-26 是大商所交易日归属标签（realtime_label_is_future=true），并不代表未来行情，盘口实际时刻为23:00（夜盘收盘）。多尺度共振方向偏多：1小时价格位于中轨上方偏上轨，2小时/4小时已突破布林上轨，日线站上MA10/MA20/MA60且当日大涨1.73%、量比1.6，但日线RSI14为62.21属接近超买而非超买，且4小时ADX仅16.2显示趋势强度偏弱，上冲后短线回踩概率不低。舆情多空交织：豆油现货弱势、8月前后美豆到港增加利空，但国内夜盘放量拉升与主力合约增仓显示资金面偏强。综合看，日内以回踩不破1小时中轨上方企稳后再做多为主，不追高；连续合约Y0映射主力Y2701（mapping_verified=true），换月状态为watch（监控移仓），下单前须在交易软件二次确认具体月份。本分析不构成投资建议。",
   "bias": "偏多",
   "analysis": [
-    "1小时布林：上轨9194.12，中轨9004.7，下轨8815.28；当前价9164位于中轨上方，接近上轨。带宽4.21%，呈开口扩张，价格自下轨反弹后连续上行，尚未有效突破上轨，但已突破前高9194附近压力需确认。1小时RSI 73.85已进入短期超买区，警惕回踩中轨。",
-    "4小时布林：上轨9141.33，中轨8954.4，下轨8767.47；当前价9164已突破上轨，带宽4.18%略有扩张。4小时RSI 68.8接近超买但未超买，ADX 16.2显示趋势强度偏弱，突破有效性存疑，需关注回踩上轨或中轨的支撑。",
-    "日线布林/均线：日线收盘9125位于所有短期均线上方（MA10 8941.8，MA20 8932.6，MA60 8812.98），均线呈多头排列。日线RSI 62.21接近超买但未超买，价格突破20日高点9146失败后回落，但实时价9164已站上该高点，需日盘确认突破有效性。",
-    "实时价位置：当前价9164位于1小时布林上半部、4小时布林上轨之上，且高于日线前高9146，处于短期强势区域。但实时价较日盘收盘9125上涨0.93%，涨幅主要在夜盘缩量中实现，需警惕假突破。",
-    "趋势：1小时EMA20斜率向上（0.0081），4小时EMA20斜率向上（0.007），日线均线多头排列，多周期趋势方向一致向上。但4小时ADX仅16.2，趋势强度不足，短线可能转为震荡。",
-    "量能：夜盘1小时成交量仅139手，量比0.22；4小时成交量139手，量比0.03，显示夜盘参与度极低，突破缺乏量能配合。日线成交量440207手，量比1.6，日盘放量明显，需观察次日日盘能否延续放量。",
-    "支撑压力：短期支撑位于1小时布林中轨9004.7及日线前高9146（突破后转为支撑），上方压力位于1小时布林上轨9194.12及整数关口9200。若回踩9146不破，则突破有效。",
-    "持仓变化：1小时和4小时持仓量分别减少3240手和1274手，夜盘减仓上行，部分空头离场推动价格，但缺乏新多入场，持续性存疑。日线持仓量增加50193手，日盘增仓上行，趋势相对健康。"
+    "【实时价位置】本次分析以实时盘口为基准：realtime.price=9164.0、ticktime=23:00:00、涨跌幅+0.93%（相对前结算9080），该价为夜盘收盘附近最新成交，并非日线close 9125，也不是1小时close替代值。盘口买9162/卖9166，买量47手、卖量12手，卖压略薄但绝对量小，说明23:00收尾时段流动性偏薄，不适合以该价盲目市价追多。",
+    "【1小时布林】1小时布林上轨9194.33、中轨9004.75、下轨8815.17，带宽4.21%，当前价9164.0位于中轨上方、贴近上轨，未形成有效突破。1小时RSI14为74.07已超买，ADX53.23显示短线趋势较强，但23:00这根1小时量能仅1227手、量比0.21且持仓减4340手，属缩量收尾，突破上轨的持续性需次日早盘放量确认。",
+    "【4小时布林】4小时布林上轨9141.61、中轨8954.45、下轨8767.29，带宽4.18%，当前价9164.0已突破上轨（position=突破上轨），属强势但偏离上轨约22点。4小时RSI14为68.86接近超买、ADX仅16.2趋势强度弱，说明突破更多是脉冲式拉升而非稳固趋势，若不能站稳9141上方，易向4小时中轨8954方向回归。",
+    "【2小时过渡参考】2小时布林上轨9134.46、中轨8938.0、下轨8741.54，当前价同样突破上轨，RSI14为73.27超买，与4小时方向一致，进一步印证短线上冲动能，但也同步提示短线过热。",
+    "【日线布林/均线】日线close 9125，MA10=8941.8、MA20=8932.6、MA60=8812.98，均线呈多头排列，价格站上全部均线；日线high20=9146、low20=8783。日线RSI14=62.21属接近超买（非超买），说明日线仍有上行空间但已不低；日线未直接给出布林轨道数值，以均线与20日高低点作为位置参考，当前价处于20日区间上沿附近。",
+    "【趋势与量能】日线2026-10-23开8988、高9146、低8982、收9125，涨1.73%，量440207、量比1.6属放量上行，持仓由536750增至586963明显增仓，价涨仓增偏多头信号。但需注意夜盘实时持仓584589相较日盘收盘略减，说明夜盘拉升伴随部分获利了结，趋势可信但需次日承接验证。",
+    "【支撑压力】下方支撑看1小时中轨9004.75与日线MA10/MA20密集区8932-8942，前者为短线多空分水；上方压力看4小时高点9194及日线high20 9146上方延伸区，若放量站稳9194则打开新空间，否则9194-9146一带为第一压力带。",
+    "【合约与换月】contract_bridge显示Y0与Y2701价格及持仓一致（mapping_verified=true），主力Y2701持仓占比47.8%，次主力Y2705贴水220元（-2.40%），呈远月贴水结构，roll_state=watch监控移仓、roll_score 50。Y0为连续合约分析口径，不可直接当作可下单月份，实际交易须在软件确认Y2701/Y2705具体合约与流动性。"
   ],
   "intraday_strategy": {
     "bias": "偏多",
-    "entry": "回踩9146-9155区域企稳后轻仓试多，或放量突破9195后追多（需量比>1）",
-    "stop": "多单止损设在9100下方（低于1小时布林中轨与日盘收盘价）",
-    "take_profit": "第一目标9220，第二目标9260",
-    "invalidation": "若价格跌破9100且1小时收盘确认，则多头逻辑失效；或突破9195后迅速回落至9160下方，视为假突破。",
-    "notes": "适用于下一个交易日早盘09:00-11:30及午盘13:30-15:00。因夜盘缩量，早盘需观察量能是否配合；若开盘直接高开在9200上方且量比不足1，不追多，等待回踩。参考主力合约Y2701，下单前二次确认合约月份。"
+    "entry": "回踩1小时中轨上方企稳区，参考9140-9160一带分批轻仓试多；不追9194以上高位。若早盘直接跳空高开至9195以上，等待回踩不破9164（实时基准价）再考虑",
+    "stop": "跌破9080（前结算/多头结构参考下沿）离场，激进者以1小时中轨9005上方设保护",
+    "take_profit": "首目标9194（4小时冲高高点），次目标9230-9250延伸区；触及9194减仓",
+    "invalidation": "1小时收盘跌回中轨9005下方或放量跌破9080，视为多头结构破坏，策略失效",
+    "notes": "适用时段：下一交易日早盘09:00-11:30开盘后重点观察，夜盘21:00-23:00为补充观察窗口（本次分析时点为准北京10-24 04:58，最近交易时段为下一工作日早盘）。因夜盘23:00量能极薄（1小时量1227、量比0.21），实时价不具完整定价意义，务必等早盘放量确认方向；1小时RSI74.07超买叠加4小时突破上轨，优先回踩做多而非追高。Y0为连续合约，下单前须在软件二次确认Y2701等具体月份与盘口。本策略不构成投资建议。"
   },
   "decision_frame": {
     "confidence": 55,
-    "regime": "短线多头趋势中的超买震荡",
-    "edge": "多周期趋势向上，但超买且量能不足，回踩支撑后做多的风险收益比尚可，但需严格止损。",
-    "no_trade_condition": "若首目标盈亏比低于1.5（当前测算约1.4-1.6，取决于入场点），或价格直接跳空高开超过9200且量比不足1，或1小时RSI继续上升至80以上，则观望不交易。",
+    "regime": "上行突破后的偏强震荡，短线过热需回踩确认",
+    "edge": "日线放量增仓多头排列+夜盘站上9146前高，方向偏多成立；但1小时RSI超买、4小时ADX仅16.2趋势弱、夜盘量薄，入场需等回踩企稳，不能依赖高位追单",
+    "no_trade_condition": "1) 若仅在9164以上高位追多，首目标9194相对现价的盈亏比不足1.5；2) 早盘跳空高开超过9195且不回踩9164，不入场；3) 跌破9080多头结构失效，不做多；4) contract_bridge虽mapping_verified=true但roll_state=watch，未在软件确认具体主力月份前不交易；5) 日线基准模型status=rejected（样本外无优势），其历史结果不得作为入场依��",
     "long_case": {
-      "trigger": "价格回踩9146-9155区域企稳，或放量突破9195",
-      "entry_zone": "9146-9155（回踩）或9195-9200（突破）",
-      "stop": "9100（回踩）或9160（突破）",
+      "trigger": "下一交易日早盘放量站稳9141（4小时上轨）并在9140-9160区间回踩不破",
+      "entry_zone": "9140-9160",
+      "stop": "9075",
       "targets": [
-        "9220",
-        "9260"
+        "9194",
+        "9230",
+        "9250"
       ],
-      "invalidation": "跌破9100或突破后跌回9160下方",
-      "risk_reward": "回踩入场：止损9100，目标9220，盈亏比约1.5；突破入场：止损9160，目标9220，盈亏比约1.25，低于1.5，因此突破追多需谨慎，建议仅回踩做多。"
+      "invalidation": "1小时收盘跌破9005或放量破9080",
+      "risk_reward": "以9164基准、入场9150、止损9075（风险75）、首目标9194（收益约44）计算首目标盈亏比约0.6；若回踩至9140入场则首目标盈亏比约1.0——首目标盈亏比低于1.5，须以9230-9250为实际目标（9140入场到9230约90点，盈亏比约1.2），仍偏低，故列为条件性做多，未达盈亏比要求时执行no_trade_condition"
     },
     "short_case": {
-      "trigger": "价格在9195-9200区域出现明显滞涨且1小时RSI背离，或跌破9100",
-      "entry_zone": "9190-9200（滞涨）或9095-9100（跌破）",
-      "stop": "9230（滞涨）或9140（跌破）",
+      "trigger": "若1小时有效跌破中轨9005且反抽不上9141，转为偏空观察",
+      "entry_zone": "9010-9030（反抽不上中轨时）",
+      "stop": "9146",
       "targets": [
-        "9100",
-        "9050"
+        "8954",
+        "8932"
       ],
-      "invalidation": "突破9230或跌破后快速收回9100上方",
-      "risk_reward": "滞涨做空：止损9230，目标9100，盈亏比约2.3；跌破追空：止损9140，目标9050，盈亏比约0.5，低于1.5，不推荐。"
+      "invalidation": "重新站上9141并放量",
+      "risk_reward": "以9030入场、止损9146（风险116）、首目标8954（收益76）计算盈亏比约0.65，偏低，仅作逆势观察，不主动追空"
     },
     "event_risks": [
-      "1）南美天气及美豆出口数据可能引发外盘波动；2）原油价格波动影响生物柴油需求预期；3）国内油脂库存及政策变化；4）移仓换月期间Y2701流动性可能下降。"
+      "美豆到港增加与豆油现货弱势的基本面压制，若现货继续走弱可能拖累盘面上行",
+      "夜盘量能极薄，早盘可能因隔夜外盘或资金情绪跳空，扩大滑点",
+      "主力Y2701进入移仓观察期，换月价差与流动性变化"
     ],
     "data_limits": [
-      "1）实时行情为夜盘23:00数据，非日盘连续交易；2）1小时和4小时K线最新时间标注为2026-10-23 23:00和2026-10-26 11:15（交易日归属标签），可能存在时间对齐问题；3）舆情搜索结果与豆油基本面无关，无法提供有效新闻驱动；4）历史日线模型样本外无优势，不构成未来概率。"
+      "1小时、2小时、4小时K线更新于2026-10-23T18:47:52Z，最新bar时间23:00，与本次分析时刻（北京10-24 04:58）之间无新成交，属夜盘收盘数据非盘中实时",
+      "4小时最新bar标注时间2026-10-26 11:15为交易日归属/聚合标签，不代表未来行情",
+      "日线为10-23收盘，非当前盘中价",
+      "日线基准模型status=rejected样本外无优势，历史命中率/胜率不代表未来概率"
     ]
   },
   "news_impact": [
-    "[中性] 提供的舆情搜索结果主要为巴黎郊区枪击案及大豆百科知识，与豆油期货基本面无关，无法对价格产生直接影响。市场未获得新的供需或政策信息。",
-    "[中性] 巴黎枪击案被作为恐怖袭击调查，但事件对全球油脂市场无直接传导链条，预计对豆油价格影响可忽略。",
-    "[中性] 大豆百科类内容仅提供基础知识，不包含最新产量、库存或贸易数据，无法据此判断豆油方向。",
-    "[中性] 当前缺乏来自给定搜索结果的豆油相关新闻，市场情绪可能更多受技术面和资金面驱动，需关注其他信息源。"
+    "[利空] 新浪财经10月22日刊文指出豆油弱势格局延续、现货价格上下两难，现货端缺乏上行动力与盘面夜盘放量拉升形成背离，说明当前涨势更多来自资金与情绪而非现货驱动，若盘面冲高后现货不能跟进，回踩风险加大。",
+    "[利空] e南洋10月20日报道中国9月进口美国大豆逾36万吨、去年同期挂零，进口来源增加意味着中期大豆与豆油原料供应预期改善，对豆油形成一定压制，但属于已发生的9月数据，短期边际影响有限。",
+    "[利空/中性] 搜狐10月22日关于36万吨大豆到港、美国重回中国市场的报道强化了进口增加的叙事，可能压制豆油上行想象空间；不过该报道偏重贸易解读，对即时盘面影响需观察实际到港节奏。",
+    "[利多/中性] 证券之星10月21日报道豆油期货收盘上涨0.26%报8914元，与随后10-23日放量升至9125形成对照，说明近两日盘面情绪转强，短线动能延续；但该数据为历史收盘，不等于当前实时价。",
+    "[中性] Vietnam.vn 10月21日报道大豆和铁矿石价格大幅下跌，若外盘大豆走弱理论上利空豆油成本端，但该消息与国内10-23放量拉升方向相反，需警惕外盘与内盘阶段性背离，不宜单凭该条定方向。",
+    "[中性] 界面新闻10月19日援引FAO称全球食品价格涨势或贯穿明年、叠加食糖减产预期，宏观农产品板块偏暖对油脂形成情緒支撑，但属预期层面、传导链条长，对豆油日内方向影响有限。",
+    "[中性/利空] 美国之音10月19日关于大豆议题进入美国中期选举的报道提示中美农产品贸易存在政策不确定性，短期不构成直接价格驱动，但为潜在扰动事件，需关注后续政策表态。",
+    "[中性] 光大期货10月20日农产品日报提供机构观点背景，属常规信息，对盘面方向无明确指向，仅作参考，不改变以实时价与技术面为主的判断。"
   ],
   "news_articles": [
     {
-      "title": "French prosecutors investigate Paris shooting as suspected terror",
-      "source": "MSN",
-      "url": "https://www.msn.com/en-gb/news/other/one-killed-four-injured-in-drive-by-shooting-in-paris-suburb/ar-AA2fUKbn",
-      "detail": "巴黎郊区特拉普发生驾车枪击事件，造成1人死亡、4人受伤。法国检察机关已作为疑似恐怖主义行为展开调查。事件发生在上周五，嫌疑人已被逮捕。该事件与油脂市场无直接关联。",
+      "title": "豆油弱势格局延续，现货价格上下两难",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxQZnFyUFRNSnJHalZBRmJCREg2b3NsY2E2ZEl2SG1JeV9nZVFoOWZRSkp5TmF0MjJkZTlwNFZ2dzdKLUxKLVdQOXgzRjFtMG55S0Y1Q2Y4aG1DdE1TWFNJQzQxNlFNbDl6Y1YtY24tOWlNOEJGSEEtYU5MWFdoMVNJcDRqNlpaTDVIZEE?oc=5",
+      "detail": "新浪财经10月22日文章指出豆油弱势格局延续，现货价格上下两难。该表述反映现货端缺乏趋势性驱动，与盘面近日拉升形成一定背离。现货若不能跟随盘面上行，可能限制上行空间。",
+      "impact": "利空"
+    },
+    {
+      "title": "中国9月进口美国大豆逾36万吨 去年同期挂零",
+      "source": "e南洋",
+      "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTFBxbG9FcmJjamtwVmdGeXg4TmE0WVZGd1JlUEd1NmZVdV9DbzZvbXozUGRPOG82RHJWQk5NWUx0OTR2djNMOHhOM1JDYy1hcGp3ZXR5YTdtcVJPaWpfU2xRMEZ5NA?oc=5",
+      "detail": "e南洋10月20日报道，中国9月进口美国大豆逾36万吨，而去年同期为零。进口来源增加意味着中期大豆原料供应预期改善，对豆油成本端形成压制。该数据为9月已发生事实，短期边际影响需结合到港节奏观察。",
+      "impact": "利空"
+    },
+    {
+      "title": "中国抛弃巴西了？36万吨大豆到港，美国庆祝终于夺回中国市场！",
+      "source": "搜狐",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPb1BVNkdtbFh2RWE0ZXA1bHY4dnRtTEtmYjZhaTRHZXEyMncwdlBaZEZBS0wxS2s0Q205cGpXWjk2a3RRUm11RVdKYmNMX0hweTZSbVdldEl2RjhXY1Zka3ZyMlE3OHFCRkY2bEN1YVhFdzJSaTdBUnh5d2dseG40RGQxenhsaFBXeW1HYQ?oc=5",
+      "detail": "搜狐10月22日报道36万吨美国大豆到港，并以美国重新夺回中国市场为叙事。进口增加强化了国内原料供应宽松的预期，理论利空豆油。但报道偏贸易解读，对即时盘面影响需检验实际到港与压榨节奏。",
+      "impact": "利空"
+    },
+    {
+      "title": "10月21日豆油期货收盘上涨0.26%，报8914元",
+      "source": "证券之星",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFB3VFRYUVBCS3ZHS0VMcHlZMm9IQUN6ZExPMHhVSFBESm0zMmlNUTVjcEpDSjRmbTJLVEdQVWd2WlhLeW9wTTU4cUw0cWtlSFBmRjNwMkVQU0JlXzdJRi1fRDVldkY?oc=5",
+      "detail": "证券之星10月21日报道豆油期货收盘上涨0.26%，报8914元。该收盘与随后10-23日升至9125形成对照，显示近两日盘面情绪转强。但此为历史收盘数据，不等同于当前实时价9164。",
       "impact": "中性"
     },
     {
-      "title": "Gunman in Paris suburb kills 1, wounds 4 in possible terrorist act",
-      "source": "CBS News",
-      "url": "https://www.cbsnews.com/news/gunman-terrorist-attack-paris-suburb/",
-      "detail": "一名枪手在巴黎郊区向人群开火，导致1人死亡、4人受伤。官方正在调查是否为恐怖袭击。事件发生在特拉普地区，警方已逮捕嫌疑人。对豆油期货无直接影响。",
+      "title": "大豆和铁矿石价格均大幅下跌",
+      "source": "Vietnam.vn",
+      "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTE13UWJ0amxfQ0FFOHlPMVJFMHVYRndnbGd3TDBDamxtTllJb2lsR09tMzQwb281VU1EaWhTWENpclpqUnJONFMyVVdGMGZoejJXaUpFV0t6bk9QLWRRelloTGdwM3R1bHZibVoxbFRFZXNFZno2LVozbVE0WHc?oc=5",
+      "detail": "Vietnam.vn 10月21日报道大豆和铁矿石价格均大幅下跌。外盘大豆走弱理论上利空豆油成本端。该消息与国内10-23放量拉升方向相反，需警惕内外盘阶段性背离。",
       "impact": "中性"
     },
     {
-      "title": "1 killed, several wounded as suspect opens fire in Paris suburb",
-      "source": "AP News",
-      "url": "https://apnews.com/article/france-shooting-trappes-arrest-edcd3ab6c5ec2112505b358ca0a3de5a",
-      "detail": "法国当局报告称，巴黎郊区发生枪击事件，造成1人死亡、数人受伤。嫌疑人已被拘留。事件正在调查中。该新闻不涉及农产品市场。",
+      "title": "巴西、印度食糖减产预期升温！FAO：全球食品价格涨势或将贯穿明年全年",
+      "source": "界面新闻",
+      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBYQnNMT1laLUhUOUFVV1p0OW5qeGVDSW4xdVc5NjBCdEdXMHdWVzdjcnI5dDJVajM5SUlhc2tsZlRXUC1RMWp6dFU0Nk4tNlNneGdBVkk4X2g?oc=5",
+      "detail": "界面新闻10月19日援引FAO称全球食品价格涨势或贯穿明年全年，并提及巴西、印度食糖减产预期升温。宏观农产品板块偏暖对油脂情绪形成支撑。属预期层面，传导链条较长，对日内方向影响有限。",
       "impact": "中性"
     },
     {
-      "title": "Anti-terror police investigate as one person killed in shooting near Paris",
-      "source": "BBC",
-      "url": "https://www.bbc.com/news/articles/c6ev38dj1g8zo",
-      "detail": "反恐警察正在调查巴黎附近发生的枪击事件，该事件导致1人死亡。大量警力和应急人员部署在现场。事件对全球油脂市场无传导效应。",
+      "title": "从大豆到数据中心：中国议题如何进入美国中期选举",
+      "source": "美国之音",
+      "url": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxNaDhyYXFmSzdyZFdoNlNabGd6LUV5bFdQaE1iZEljdHJWSjZacE81QnotLVhLb3BRU1Vac2ZzQlNKMjAwaHdPYUU2c1loZG42Ym9pVHlhd2VGc3FBelgweV9HUVZVVUF1ODNSMEpPbVpsOXJEYkwxRVhtYzlhekF6QUUwaHN0cGZmNE1qeVpRaXhCWVJOemRXWFZ5N0t4YnpuZ01QY09Rc2ZqSmhaTzNFU3dmUDdGZF9XQ05Vb05rQ0xJbDB1NWxxS1J4dHhyX0t0Sno00gHWAUFVX3lxTFA3RmFPSk5GYW5jeWRvMktESjJZVFlDa2NZUHd4bVN4alhwT09JZjZBZGdOcERpMm5tN3UwWVMxSm9oTmxfTEx2OGpMRTB0NW1wWExmdWVkVU9wOW5nOEpxOWVWeWxJdUd0WmdCNXREdU5ONnpFR0t2eHNoS1NvRGJESl9FLVZBbGdtQms3V1pJUWlWcHN1ZG56clZFRndjcUNhVXpldXhEOXJQX0JQSjZTeHJRSVplemRTbWlyajROYnNtc3ZIV1lCZ1JnVmxRTGpWNW1kaFE?oc=5",
+      "detail": "美国之音10月19日报道大豆议题进入美国中期选举讨论。提示中美农产品贸易存在政策不确定性。短期不构成直接价格驱动，但为潜在扰动事件，需关注后续政策表态。",
       "impact": "中性"
     },
     {
-      "title": "One dead, four injured in Paris shooting as police probe terror link",
-      "source": "ABC News (AU)",
-      "url": "https://www.abc.net.au/news/2026-10-23/france-investigating-possible-terror-link-paris-shooting/107303752",
-      "detail": "巴黎一个街区发生枪击，造成1人死亡、至少4人受伤。一名男子被拘留。警方正在调查与恐怖主义的关联。对豆油期货无影响。",
-      "impact": "中性"
-    },
-    {
-      "title": "Soybean - Wikipedia",
-      "source": "Wikipedia",
-      "url": "https://en.wikipedia.org/wiki/Soybean",
-      "detail": "维基百科介绍大豆的基础知识，指出全球约85%的大豆作物被加工成豆粕和豆油。内容为静态百科信息，不含最新市场数据。无法用于短期交易决策。",
-      "impact": "中性"
-    },
-    {
-      "title": "Soybean | Description, Cultivation, Products, & Facts",
-      "source": "Britannica",
-      "url": "https://www.britannica.com/plant/soybean",
-      "detail": "大英百科全书提供大豆的植物学描述、种植和产品信息。发布日期为2026年10月2日，但内容为知识性介绍，无价格或供需数据。对豆油价格无直接影响。",
-      "impact": "中性"
-    },
-    {
-      "title": "Soybeans: Nutrition, 20 Benefits, Side Effects & How to Eat Them",
-      "source": "MyHealthopedia",
-      "url": "https://myhealthopedia.com/soybeans-nutrition-benefits-side-effects-uses/",
-      "detail": "健康知识网站介绍大豆的营养价值、益处和食用方法。内容与期货市场无关，不包含产量、库存或贸易信息。对豆油价格无影响。",
+      "title": "光大期货：农产品类日报10.20",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxQaDVrVy01aVBUbHhQbGdxbDdVam85NlRMVTJseGE4VDhCZ2lXWlJud3VScjhCWnBKTHJ3Y0RSUGd2alVvTlZwVDNiRXBNU1lBZ2g5RnNOZkg0c184V2w1eTFfTlBkUloyRTM2NmhZY3JjSlBSX0x4Ri1lNWNrc1UwOE5id2t5NHVqYnNNN3Y0WmV1SnhpUlpVcVpqSDN0eVNyVnlIb2hoTUZTSVFpR1FhcnllN0xjUzBnOHM2TUwxX0YwTFpJaTNNci1FenMzZ213UlAwLU1DLXNHRUVmSWl4clNOalI?oc=5",
+      "detail": "新浪财经转发光大期货10月20日农产品日报，属机构常规观点汇总。提供豆类油脂基本面背景参考。对盘面方向无明确指向，仅作辅助信息。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
-    "support": 9146.0,
-    "resistance": 9200.0
+    "support": 9005.0,
+    "resistance": 9194.0
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于用户提供的实时行情及历史数据，不构成投资建议。Y0为连续合约，实际交易需在软件中二次确认主力合约Y2701。实时行情为夜盘23:00数据，日盘开盘后可能变化；夜盘量能极度萎缩，突破有效性存疑。历史日线模型样本外无优势，胜率39.47%不代表未来表现。请严格止损，控制仓位。",
+  "risk_note": "本分析为基于给定实时盘口（realtime.price=9164.0、ticktime=23:00:00、涨跌幅+0.93%）及历史K线、舆情的综合研判，不构成投资建议。关键风险：1) realtime.tradedate=2026-10-26为交易日归属标签而非未来行情，盘口实际为23:00夜盘收盘，量能极薄不具完整定价意义；2) 1小时、2小时、4小时及日线数据更新于2026-10-23T18:47前后，与本次分析时刻存在时差，非盘中即时成交；3) 日线基准模型status=rejected，样本外无优势，历史命中率/胜率不代表未来概率；4) Y0为连续合约口径，实际交易须在软件二次确认Y2701等具体月份与流动性，并注意移仓观察期（roll_state=watch）风险；5) 当前做多首目标盈亏比不足1.5，已列入no_trade_condition，未达条件应观望而非强行入场。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-10-23T16:27:06+00:00",
+  "generated_at_utc": "2026-10-23T20:58:49+00:00",
   "latest_date": "2026-10-23",
   "realtime_price": 9164.0,
   "realtime_note": "盘口交易日归属标签 2026-10-26，最新盘口时间 23:00:00（不是未来行情），当前价 9164，涨跌 +0.93%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-10-23T16:26:47+00:00",
+    "fetched_at_utc": "2026-10-23T20:58:20+00:00",
     "market_trading_day": "2026-10-26",
     "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] French prosecutors investigate Paris shooting as suspected terror\n来源: www.msn.com\n发布时间UTC: \nURL: https://www.msn.com/en-gb/news/other/one-killed-four-injured-in-drive-by-shooting-in-paris-suburb/ar-AA2fUKbn\n摘要: A gunman firing from his car killed one person and wounded four in the Paris suburb of Trappes on Friday, authorities said, with at …\n\n[2] Gunman in Paris suburb kills 1, wounds 4 in possible terrorist act ...\n来源: www.cbsnews.com\n发布时间UTC: \nURL: https://www.cbsnews.com/news/gunman-terrorist-attack-paris-suburb/\n摘要: 1 hour ago · Officials said they are investigating the shooting in Trappes, outside Paris, as a potential terrorist act and called it a …\n\n[3] 1 killed, several wounded as suspect opens fire in Paris suburb | AP …\n来源: apnews.com\n发布时间UTC: \nURL: https://apnews.com/article/france-shooting-trappes-arrest-edcd3ab6c5ec2112505b358ca0a3de5a\n摘要: 4 hours ago · French authorities report that a shooting in a Parisian suburb on Friday left one person dead and several others …\n\n[4] Anti-terror police investigate as one person killed in shooting near Paris\n来源: www.bbc.com\n发布时间UTC: \nURL: https://www.bbc.com/news/articles/c6ev38dj1g8zo\n摘要: 3 hours ago · A big deployment of police and emergency services has been present at the scene One person has been killed and …\n\n[5] One dead, four injured in Paris shooting as police probe terror link\n来源: www.abc.net.au\n发布时间UTC: \nURL: https://www.abc.net.au/news/2026-10-23/france-investigating-possible-terror-link-paris-shooting/107303752\n摘要: 2 hours ago · A man is in custody after allegedly opening fire on a Paris neighbourhood, killing one and injuring at least four others, …\n\n[6] Soybean - Wikipedia\n来源: en.wikipedia.org\n发布时间UTC: \nURL: https://en.wikipedia.org/wiki/Soybean\n摘要: Approximately 85% of the world's soybean crop is processed into soybean meal and soybean oil, the remainder processed in other …\n\n[7] Soybean | Description, Cultivation, Products, & Facts | Britannica\n来源: www.britannica.com\n发布时间UTC: \nURL: https://www.britannica.com/plant/soybean\n摘要: Oct 2, 2026 · Soybean, annual legume of the pea family (Fabaceae) and its edible seed. The soybean is economically the most …\n\n[8] Soybeans: Nutrition, 20 Benefits, Side Effects & How to Eat Them\n来源: myhealthopedia.com\n发布时间UTC: \nURL: https://myhealthopedia.com/soybeans-nutrition-benefits-side-effects-uses/\n摘要: Oct 26, 2025 · Is soybean good or bad for you? Soybeans are generally good for you when eaten in moderation. They provide high …\n\n[9] Soybeans 101: Nutrition Facts and Health Effects\n来源: www.healthline.com\n发布时间UTC: \nURL: https://www.healthline.com/nutrition/soybeans\n摘要: Mar 20, 2019 · Various soy products are available, including soy flour, soy protein, tofu, soy milk, soy sauce, and soybean oil.\n\n[10] Soybean - YouTube\n来源: www.youtube.com\n发布时间UTC: \nURL: https://www.youtube.com/@ohsoybean\n摘要: Sub-channels! Soysauce 21.1K subscribers Subscribe Soybean VODs 11.1K subscribers Subscribe WASD 73.9K subscribers …",
+  "news_summary": "[1] 大豆和铁矿石价格均大幅下跌。 - Vietnam.vn\n来源: Vietnam.vn\n发布时间UTC: 2026-10-21T08:02:03+00:00\nURL: https://news.google.com/rss/articles/CBMifEFVX3lxTE13UWJ0amxfQ0FFOHlPMVJFMHVYRndnbGd3TDBDamxtTllJb2lsR09tMzQwb281VU1EaWhTWENpclpqUnJONFMyVVdGMGZoejJXaUpFV0t6bk9QLWRRelloTGdwM3R1bHZibVoxbFRFZXNFZno2LVozbVE0WHc?oc=5\n摘要: 大豆和铁矿石价格均大幅下跌。 Vietnam.vn\n\n[2] 10月21日豆油期货收盘上涨0.26%，报8914元_综合资讯 - 证券之星\n来源: 证券之星\n发布时间UTC: 2026-10-21T07:31:03+00:00\nURL: https://news.google.com/rss/articles/CBMiZEFVX3lxTFB3VFRYUVBCS3ZHS0VMcHlZMm9IQUN6ZExPMHhVSFBESm0zMmlNUTVjcEpDSjRmbTJLVEdQVWd2WlhLeW9wTTU4cUw0cWtlSFBmRjNwMkVQU0JlXzdJRi1fRDVldkY?oc=5\n摘要: 10月21日豆油期货收盘上涨0.26%，报8914元_综合资讯 证券之星\n\n[3] 巴西、印度食糖减产预期升温！FAO：全球食品价格涨势或将贯穿明年全年！国内秋粮收获已超七成！粮食ETF汇添富(159073)标的指数收涨近1%！ - 界面新闻\n来源: 界面新闻\n发布时间UTC: 2026-10-19T17:51:00+00:00\nURL: https://news.google.com/rss/articles/CBMiWEFVX3lxTFBYQnNMT1laLUhUOUFVV1p0OW5qeGVDSW4xdVc5NjBCdEdXMHdWVzdjcnI5dDJVajM5SUlhc2tsZlRXUC1RMWp6dFU0Nk4tNlNneGdBVkk4X2g?oc=5\n摘要: 巴西、印度食糖减产预期升温！FAO：全球食品价格涨势或将贯穿明年全年！国内秋粮收获已超七成！粮食ETF汇添富(159073)标的指数收涨近1%！ 界面新闻\n\n[4] 中国9月进口美国大豆逾36万吨 去年同期挂零 - e南洋\n来源: e南洋\n发布时间UTC: 2026-10-20T07:07:08+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTFBxbG9FcmJjamtwVmdGeXg4TmE0WVZGd1JlUEd1NmZVdV9DbzZvbXozUGRPOG82RHJWQk5NWUx0OTR2djNMOHhOM1JDYy1hcGp3ZXR5YTdtcVJPaWpfU2xRMEZ5NA?oc=5\n摘要: 中国9月进口美国大豆逾36万吨 去年同期挂零 e南洋\n\n[5] 豆油弱势格局延续，现货价格上下两难 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-22T07:15:18+00:00\nURL: https://news.google.com/rss/articles/CBMiigFBVV95cUxQZnFyUFRNSnJHalZBRmJCREg2b3NsY2E2ZEl2SG1JeV9nZVFoOWZRSkp5TmF0MjJkZTlwNFZ2dzdKLUxKLVdQOXgzRjFtMG55S0Y1Q2Y4aG1DdE1TWFNJQzQxNlFNbDl6Y1YtY24tOWlNOEJGSEEtYU5MWFdoMVNJcDRqNlpaTDVIZEE?oc=5\n摘要: 豆油弱势格局延续，现货价格上下两难 新浪财经\n\n[6] 中国抛弃巴西了？36万吨大豆到港，美国庆祝终于夺回中国市场！ - 搜狐\n来源: 搜狐\n发布时间UTC: 2026-10-22T01:50:36+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxPb1BVNkdtbFh2RWE0ZXA1bHY4dnRtTEtmYjZhaTRHZXEyMncwdlBaZEZBS0wxS2s0Q205cGpXWjk2a3RRUm11RVdKYmNMX0hweTZSbVdldEl2RjhXY1Zka3ZyMlE3OHFCRkY2bEN1YVhFdzJSaTdBUnh5d2dseG40RGQxenhsaFBXeW1HYQ?oc=5\n摘要: 中国抛弃巴西了？36万吨大豆到港，美国庆祝终于夺回中国市场！ 搜狐\n\n[7] 中国出口激增，年度贸易顺差有望再次刷新纪录 - 早晨报\n来源: 早晨报\n发布时间UTC: 2026-10-20T06:31:00+00:00\nURL: https://news.google.com/rss/articles/CBMiaEFVX3lxTE1qM2VrcE1RckZtZzNhb0FZUnRrUjkyN21LenREOHVzeWN3bHdvTEV3N09iZXoxWUkzZnBadHcxNkVRSUlLY0RzLWhvZVNUQmUwVDhGZzMyWlZvNUdOcFowOGFacTJ5SG5X?oc=5\n摘要: 中国出口激增，年度贸易顺差有望再次刷新纪录 早晨报\n\n[8] 光大期货：农产品类日报10.20 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-20T02:21:23+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxQaDVrVy01aVBUbHhQbGdxbDdVam85NlRMVTJseGE4VDhCZ2lXWlJud3VScjhCWnBKTHJ3Y0RSUGd2alVvTlZwVDNiRXBNU1lBZ2g5RnNOZkg0c184V2w1eTFfTlBkUloyRTM2NmhZY3JjSlBSX0x4Ri1lNWNrc1UwOE5id2t5NHVqYnNNN3Y0WmV1SnhpUlpVcVpqSDN0eVNyVnlIb2hoTUZTSVFpR1FhcnllN0xjUzBnOHM2TUwxX0YwTFpJaTNNci1FenMzZ213UlAwLU1DLXNHRUVmSWl4clNOalI?oc=5\n摘要: 光大期货：农产品类日报10.20 新浪财经\n\n[9] 巴西出口石油中国占近半 刺激双边贸易创同期历史新高 - 香港01\n来源: 香港01\n发布时间UTC: 2026-10-17T06:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMimwNBVV95cUxQM0hEMndPYUpHb05XcU00TVlOMnZJWkRYWnZVb0VWdkxjM184U2tXc294RnVldmtTYzE1WUQzSElmbmdaLTJHZHN5Z2FHeTVoZGFFcVZiRTFkaTlONFhGS0p5UW1iYkFKb1FGR1lVQTZWc0FkX1hoR2xHajVLaE80VXBKRWk3Mm94NWZNb19xWVBGbThWZ3d6VThpTVNQX3NkaGdrZHVabUJNSWxrZ0kwLVNHUXpZdVJmbTlmcmZHR1NjR0gzZWFsQjJFcnZBTkNDUm9tRWM2Z2swckgyaXFia1NOc3lwTmt0SE96d0RHbHA3bklTek5uWXBQUzdyYm1tQVVsdlZBQnVPVVJwM3hibi1GaXV4eG1mZFdaYjBsTDhfeHQtRGlDenpMYUk0aFJtbnlodHJrbnl1ZzhhRGdWT3pnUGo1R0d2MFVOc2tBQ3dyQTZLVDlKd3BTamg2TVUxYnlXUUpnSUlIUENvYWNaZUN6aFdmWWJMRHFWVTBtZzN3TThBWUNuaU5YcHBFRmdXVExJVXc4WlBMbHM?oc=5\n摘要: 巴西出口石油中国占近半 刺激双边贸易创同期历史新高 香港01\n\n[10] 从大豆到数据中心：中国议题如何进入美国中期选举 - 美国之音\n来源: 美国之音\n发布时间UTC: 2026-10-19T18:51:26+00:00\nURL: https://news.google.com/rss/articles/CBMi0wFBVV95cUxNaDhyYXFmSzdyZFdoNlNabGd6LUV5bFdQaE1iZEljdHJWSjZacE81QnotLVhLb3BRU1Vac2ZzQlNKMjAwaHdPYUU2c1loZG42Ym9pVHlhd2VGc3FBelgweV9HUVZVVUF1ODNSMEpPbVpsOXJEYkwxRVhtYzlhekF6QUUwaHN0cGZmNE1qeVpRaXhCWVJOemRXWFZ5N0t4YnpuZ01QY09Rc2ZqSmhaTzNFU3dmUDdGZF9XQ05Vb05rQ0xJbDB1NWxxS1J4dHhyX0t0Sno00gHWAUFVX3lxTFA3RmFPSk5GYW5jeWRvMktESjJZVFlDa2NZUHd4bVN4alhwT09JZjZBZGdOcERpMm5tN3UwWVMxSm9oTmxfTEx2OGpMRTB0NW1wWExmdWVkVU9wOW5nOEpxOWVWeWxJdUd0WmdCNXREdU5ONnpFR0t2eHNoS1NvRGJESl9FLVZBbGdtQms3V1pJUWlWcHN1ZG56clZFRndjcUNhVXpldXhEOXJQX0JQSjZTeHJRSVplemRTbWlyajROYnNtc3ZIV1lCZ1JnVmxRTGpWNW1kaFE?oc=5\n摘要: 从大豆到数据中心：中国议题如何进入美国中期选举 美国之音",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 18.8,
+  "api_latency_seconds": 29.5,
   "token_usage": {
-    "prompt_tokens": 14219,
-    "completion_tokens": 3052,
-    "total_tokens": 17271,
+    "prompt_tokens": 16092,
+    "completion_tokens": 5066,
+    "total_tokens": 21158,
     "prompt_tokens_details": {
       "cached_tokens": 384
     },
     "prompt_cache_hit_tokens": 384,
-    "prompt_cache_miss_tokens": 13835
+    "prompt_cache_miss_tokens": 15708
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-10-23T16:27:06+00:00",
-    "score": 100,
-    "status": "passed",
-    "label": "通过",
-    "execution_allowed": true,
+    "checked_at_utc": "2026-10-23T20:58:49+00:00",
+    "score": 65,
+    "status": "blocked",
+    "label": "规则接管",
+    "execution_allowed": false,
     "evidence_confidence": 55,
-    "issues": [],
+    "issues": [
+      {
+        "code": "false_rsi_overbought",
+        "severity": "high",
+        "message": "文本声称 RSI 超买，但4小时 RSI 为 68.9。"
+      }
+    ],
     "facts": {
       "realtime_price": 9164.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-10-23T16:26:47+00:00",
+      "realtime_fetched_at_utc": "2026-10-23T20:58:20+00:00",
       "realtime_market_tick_time": "23:00:00",
       "daily_rsi14": 62.21,
       "one_hour_boll_position": "中轨上方",
@@ -179,16 +195,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-10-23T16:26:47+00:00",
+    "realtime_fetched_at_utc": "2026-10-23T20:58:20+00:00",
     "realtime_market_trading_day": "2026-10-26",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-10-23T14:57:17+00:00",
+    "daily_updated_at_utc": "2026-10-23T18:47:52+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-10-23T14:57:01+00:00",
-    "news_updated_at_utc": "2026-10-23T14:57:17+00:00",
-    "contract_bridge_updated_at_utc": "2026-10-23T14:56:57+00:00"
+    "intraday_updated_at_utc": "2026-10-23T18:47:52+00:00",
+    "news_updated_at_utc": "2026-10-23T18:47:50+00:00",
+    "contract_bridge_updated_at_utc": "2026-10-23T18:47:50+00:00"
   }
 }

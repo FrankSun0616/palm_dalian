@@ -1,189 +1,175 @@
 {
-  "summary": "本次基准为实时输入：P0 连续合约最新价 realtime.price=9679，盘口 ticktime=23:00:00（对应大商所交易日归属标签 2026-10-26，这是交易日标签而非未来行情），较昨结涨跌幅 +1.17%；日线最新收盘仍是 2026-10-23 的 9561（+0.05%），不能替代当前价。三个核心尺度呈短线转强、日线仍弱的共振：1小时价 9680 贴近布林上轨 9694.45 且已站上中轨 9600.6，4小时 9679 位于中轨 9586.2 与上轨 9751.29 之间偏上，日线价 9561 仍在中轨（约9637）附近及下方、且低于 MA20 9637.15 与 MA60 9797.77，日线 RSI 43.14 未超买也未超卖。结论：下一个交易时段以 9679 为基准，夜盘大幅拉升后的日盘更宜轻仓低吸对待回踩，不宜追高；日线趋势尚未扭转，方向置信度中等偏低。",
-  "bias": "偏多",
+  "summary": "基于大商所 P0 连续合约本次实时盘口（来源 Sina Market Center，抓取时间 2026-10-24T03:15:09 UTC，盘口 ticktime 23:00:00，交易日归属标签 2026-10-26，非未来行情），最新价 realtime.price=9679.0，较前结算价 9567.0 上涨 +1.17%（+112.0）。1小时布林通道上轨 9694.45/中轨 9600.6/下轨 9506.75，当前价处于中轨上方但接近上轨，带宽 1.95%；4小时布林上轨 9751.29/中轨 9586.2/下轨 9421.11，当前价位于中轨与上轨之间，带宽 3.44%；日线布林（基于近20日收盘价近似）上轨约 9810/中轨约 9637/下轨约 9464，当前价位于中轨略下方，日线 RSI14 43.14 属中性，未超买或超卖。1小时与4小时共振偏多，但日线仍处均线下方（MA20 9637.15，MA60 9797.77），形成多周期背离，且实时盘口 ticktime 23:00:00 与抓取时间 03:15 UTC 存在约4小时15分钟延迟（按盘口本身为当时夜盘收盘后快照），策略需以实时价为基准并防范跳空。连续合约 P0 映射主力 P2701（mapping_verified=true），次主力 P2705 价差 581 点（+6.0%远月升水），主力持仓占比 47.97%，次主力持仓比 69.89%，处于监控移仓状态（roll_state=watch）。历史日线基准模型样本外无优势（status=rejected，胜率 28.95% 不代表未来概率），因此以日内技术信号为主，不宜依赖历史模型。综合判断：下一个交易时段（2026-10-27 夜盘 21:00-23:00 或早盘）以回调后短多为主，但需等待价格回踩 1小时中轨或 4小时中轨企稳，并严格止损，盈亏比低于 1.5 时不交易。舆情多空交织：马来西亚棕油库存创新高及潜在出口税豁免利空 vs 印尼下游化推进及食用油板块验证窗口带来支撑。",
+  "bias": "震荡",
   "analysis": [
-    "实时价位置：本次实时输入为 P0 最新价 9679、盘口 ticktime 23:00:00、涨跌幅 +1.17%（较昨结 9567 的 112 点），而日线最新 close 9561 为 10-23 收盘价，不代表当前盘口；入场、止损、目标与布林位置判断全部以 9679 为基准。",
-    "1小时布林：上轨 9694.45、中轨 9600.6、下轨 9506.75，带宽约 1.95% 属偏窄；现价 9680 处于中轨上方并贴近上轨，属突破边缘的强势位置，未回落至中轨即视为短线多头未破，但贴轨意味着短线追多风险回报不佳。",
-    "4小时布林：上轨 9751.29、中轨 9586.2、下轨 9421.11，带宽约 3.44%；现价 9679 位于中轨上方偏上区域，未触及上轨，且 EMA20 9605.68 斜率约 -0.0004 走平，属弱多头修复而非趋势加速，需价格站稳 9605 以上才算多头结构成立。",
-    "日线布林/均线：日线价 9561 仍低于 MA20 9637.15 与 MA60 9797.77，MA10 9579.2 基本走平；日线 RSI 43.14 位于中性偏弱区，未超买（未高于70）也未超卖（未低于30），从数据看日线仍属反弹未改下行结构，需要收盘重回 9637 上方才谈得上趋势修复。",
-    "趋势与量能：日线成交量 636268、量为20日均量 1.28 倍，说明 10-23 的拉锯有放量但对方向贡献有限；但 1小时/4小时成交量比约 0.02，仅反映抓取窗口，不可用于判断实时交投强弱。夜盘 22:00 那一根1小时K线从 9579 拉至 9688、并带有约 177906 的成交量，是本轮上冲的主要来源。",
-    "支撑压力：短线支撑参考 1小时中轨 9600.6 与 EMA20 9592.8（下破则回踩 9565–9517 日内低区），上方压力为 1小时上轨 9694.45、本次实时高点 9718 与 4小时上轨 9751.29；日线层面的关键分水岭是 9637.15（MA20），再上是前高 9979。",
-    "合约与结构：contract_bridge 显示 P0 映射主力 P2701，价格 9679 与连续合约一致、mapping_verified=true；次主力 P2705 报 10260，次主力价差 581、价差率约 6.0%，呈远月升水，主力持仓占比 47.97%、次主力/主力持仓比 69.89%，换月状态 watch（监控移仓）。远月升水与监控换月提示 P2701 的定价需留意移仓节奏，连续合约不是可直接下单的月份合约，执行前须在交易软件二次确认具体月份。",
-    "模型与证据限制：model_validation 状态为 rejected（样本外无优势），日线基准模型不能作为当前日内方案的依据，也不把这些历史结果当作未来概率；新闻发布时间与本次基准时刻相比多为数小时至数日前的旧闻，只能作背景参考。",
-    "回顾：10-20 至 10-23 日线量能在 47–64 万手区间，持仓从 602694 降至 545068，价格自 10-16 低点 9337 后逐步抬升至 9561–9648 区，属于低点抬升的弱反弹；本次实时价 9679 已突破 10-23 高点 9638，是短线结构改善的确认信号之一。"
+    "1小时布林（20,2）：上轨 9694.45、中轨 9600.6、下轨 9506.75，当前价 9679.0 位于中轨上方但紧贴上轨（距上轨仅 15.45 点），带宽 1.95%，较前值略有扩张，显示短线偏强但接近超买区域；1小时 RSI14 59.93 中性偏强，未超买；价格自下轨反弹后连续上行，尚未有效突破上轨，若无法放量突破 9694.45 则可能回归中轨。",
+    "4小时布林（20,2）：上轨 9751.29、中轨 9586.2、下轨 9421.11，当前价 9679.0 位于中轨与上轨之间，距上轨 72.29 点，带宽 3.44%，带宽处于中等水平；4小时 RSI14 53.06 中性，ADX14 16.16 显示趋势强度偏弱，价格自下轨反弹后回归中轨上方，但尚未突破上轨，属于震荡偏强格局。",
+    "日线布林及均线：基于近20日收盘价计算，布林上轨约 9810、中轨约 9637、下轨约 9464，当前价 9679.0 位于中轨略下方（低约 42 点），带宽约 3.6%，日线 RSI14 43.14 处于中性偏弱区域（未超卖），价格仍低于 MA10（9579.2）、MA20（9637.15）和 MA60（9797.77），均线系统空头排列，日线级别背景偏空。",
+    "实时价位置与多周期共振：本次实时价 9679.0（ticktime 23:00:00，涨跌幅 +1.17%）已上穿 1小时和 4小时中轨，且站上日线 MA10，但受制于日线 MA20（9637.15）和布林中轨（约 9637），多周期共振方向不一致：1小时和4小时偏多，日线仍偏空，因此日内以短多对待，但需警惕日线压力。",
+    "趋势与量能：1小时 ADX14 16.51 显示趋势较弱，4小时 ADX14 16.16 同样弱势，日线级别未提供强趋势；实时成交量 236,636 手，volume_ratio_20d 1.28，量能温和放大；持仓量 533,095 手，较前日 545,068 手减少约 12,000 手，1小时 open_interest_change 为 -3,922，显示上涨过程中伴随减仓，多头推力有限，需警惕假突破。",
+    "支撑压力：短期支撑看 1小时中轨 9600.6 和 4小时中轨 9586.2，关键支撑看日线下轨约 9464 及前低 9337（20日低点）；短期压力看 1小时上轨 9694.45 和 4小时上轨 9751.29，关键压力看日线 MA20 9637.15（已上破但需确认）及日线布林中轨约 9637 上方 9810。当前价处于压力密集区下沿，突破需要量能配合。",
+    "周期过渡参考（2小时）：2小时布林上轨 9696.46、中轨 9545.45、下轨 9394.44，当前价 9680.0 位于中轨上方且接近上轨，2小时 RSI14 56.15 中性，带宽 3.16%，与1小时和4小时偏多信号一致，但2小时同样面临上轨压力，过渡信号支持回调后短多而非追高。"
   ],
   "intraday_strategy": {
-    "bias": "偏多（轻仓、回踩为主）",
-    "entry": "9679 为当前基准，优先在日盘 9610–9650 回踩区低吸（参考 1小时中轨 9600.6 与 EMA20 9592.8 上方），不追高于 9695–9718",
-    "stop": "9588（跌破 1小时中轨与 EMA20 共振下方）",
-    "take_profit": "首目标 9718，次目标 9751（4小时上轨）",
-    "invalidation": "1小时收盘跌破 9592 并连续两根K线未能收回；或价格上冲至 9718 后放量回落并跌回 9650 以下（突破失败）",
-    "notes": "适用于下一交易日日盘 09:00–11:30 及 13:30–15:00；今晚夜盘（21:00–23:00）已在 22:00 那根1小时K线上拉到 9688，因此不宜在夜盘已拉升后追高。执行时需用交易软件确认具体月份（当前 mapping 指向 P2701），若换月状态变化或 mapping_verified 需人工复核，则不交易。模型为 rejected，不依其历史命中率入场。"
+    "bias": "震荡偏多（回调做多）",
+    "entry": "以实时价 9679.0 为基准，不追高；等待价格回踩 1小时布林中轨 9600.6 至 4小时布林中轨 9586.2 区域（取中值 9593.4）企稳后做多，入场区间 9590-9605（中值 9597.5）。",
+    "stop": "止损设在 4小时布林下轨 9421.11 下方约 20 点，即 9400.0；或按 1小时 ATR14（72.36）的 1.5 倍设置动态止损，但固定止损参考 9400.0。",
+    "take_profit": "第一目标 1小时布林上轨 9694.45 与 4小时布林上轨 9751.29 之间，取 9720.0；第二目标日线布林上轨约 9810.0。若价格在 9720 附近受阻回落，可部分止盈。",
+    "invalidation": "若价格跌破 4小时布林中轨 9586.2 且 1小时收盘确认，或跌破 4小时布林下轨 9421.11，则多头逻辑失效，应离场观望。另外，若价格直接放量突破 1小时上轨 9694.45 并站稳，则取消回踩入场计划，转为突破追多（需另设止损）。",
+    "notes": "适用时段：2026-10-27 夜盘 21:00-23:00（或下一交易日早盘 09:00-11:30）。注意实时盘口 ticktime 为 23:00:00，抓取时间 03:15 UTC，实际交易需以开盘后实时价为准，若开盘跳空超过 1% 则策略失效。P0 连续合约映射主力 P2701，下单前务必在交易软件中确认实际月份合约。首目标盈亏比：入场 9597.5，止损 9400.0（风险 197.5 点），第一目标 9720.0（盈利 122.5 点），盈亏比约 0.62，低于 1.5，因此需等待更优入场点（如回踩至 9550 以下）或调整目标至 9800 以上（盈亏比约 1.03），仍不足 1.5，故本策略严格设置 no_trade_condition：若入场时盈亏比低于 1.5，则放弃交易。"
   },
   "decision_frame": {
-    "confidence": 45,
-    "regime": "日线弱势区间内的短线反弹，1小时/4小时偏多但日线未确认",
-    "edge": "1小时贴靠上轨的突破边缘加夜盘放量上冲，回踩 9600–9650 的低吸窗口略占优势；但日线低于 MA20/MA60，趋势尚未转向，多头与空头两个方向证据都不充分",
-    "no_trade_condition": "日线仍在中轨下方且 1小时收盘跌破 9592、上冲 9718 后跌破 9650 时不做多；若首目标盈亏比低于1.5（即从追高 9695 以上入场到 9718 目标）则不交易；mapping_verified 未经人工复核或换月状态转为移仓不交易；夜盘已拉升的追高行情不交易",
+    "confidence": 62,
+    "regime": "震荡偏多（1小时/4小时偏多，日线偏空，多周期背离）",
+    "edge": "1小时与4小时布林带中轨上方的短线动能，叠加实时价站上日线 MA10，但日线均线空头排列限制上行空间。",
+    "no_trade_condition": "1) 若开盘价跳空高于 9720 或低于 9590，则策略失效；2) 若价格跌破 4小时布林中轨 9586.2 且 1小时收盘确认，则多头逻辑失效；3) 首目标盈亏比低于 1.5（按当前入场 9597.5、止损 9400.0、目标 9720.0 计算仅 0.62，若未出现更优入场点则放弃交易）；4) mapping_verified=false 时（当前为 true）需人工复核；5) 主力移仓状态为监控（roll_state=watch），若盘中出现移仓跳空则暂停交易。",
     "long_case": {
-      "trigger": "回踩 9610–9650 不破 9600.6 且1小时K线收阳",
-      "entry_zone": "9610–9650",
-      "stop": "9588",
+      "trigger": "价格回踩 1小时布林中轨 9600.6 至 4小时布林中轨 9586.2 区域并出现企稳信号（如1小时阳线收盘或下影线）。",
+      "entry_zone": "9590-9605（中值 9597.5）",
+      "stop": "9400.0",
       "targets": [
-        "9718 / 9751"
+        "9720.0",
+        "9810.0"
       ],
-      "invalidation": "1小时收盘跌破 9592",
-      "risk_reward": "以 9630 入场、止损 9588、目标 9718 计约 2.1:1；若追至 9695 以上、目标 9718 则仅约 0.5:1，低于1.5，属不交易条件"
+      "invalidation": "跌破 9586.2 且 1小时收盘确认。",
+      "risk_reward": "首目标盈亏比约 0.62（低于1.5），若入场点下移至 9550 则盈亏比升至 1.03，仍不足 1.5；因此需等待更优价格或放弃交易。"
     },
     "short_case": {
-      "trigger": "上冲 9718 后1小时出现长上影回落，并跌回 9650 以下",
-      "entry_zone": "9650–9680",
-      "stop": "9720",
+      "trigger": "价格反弹至 1小时布林上轨 9694.45 或 4小时布林上轨 9751.29 附近受阻回落，并出现1小时阴线确认。",
+      "entry_zone": "9694-9751（中值 9722.5）",
+      "stop": "9805.0（日线布林上轨上方）",
       "targets": [
-        "9600 / 9565"
+        "9600.6",
+        "9586.2"
       ],
-      "invalidation": "1小时收盘站稳 9718 以上",
-      "risk_reward": "以 9665 入场、止损 9720、目标 9565 计约 1.8:1"
+      "invalidation": "突破 9751.29 且站稳。",
+      "risk_reward": "首目标盈亏比约 1.39，低于1.5，且逆短期偏多趋势，不建议主动做空。"
     },
     "event_risks": [
-      "数据反映的是 10-23 夜盘 23:00 的盘口；东南亚出口税与库存、原油区间波动、移仓换月与远月升水结构（价差率约 6.0%）可能放大次日开盘跳空。不能排除外盘原油与油脂板块传导，新闻多为旧闻，风险与事件对方向的偏斜未量化。"
+      "马来西亚棕油库存创新高及潜在出口税豁免（利空）、印尼下游化项目推进（利多）、食用油板块关键验证窗口（舆情扰动）、移仓换月期间价差波动（P2705 升水 581 点）、原油价格波动（联动效应）。"
     ],
     "data_limits": [
-      "realtime_fetch_status=live，但 intraday/daily/news/contract_bridge 的 updated_at_utc 约 21:42:22，早于本次实时抓取约2小时，1小时/4小时部分数据及新闻存在延迟或为缓存；1小时/4小时 volume_ratio20 约 0.02 的统计意义有限！4小时 latest_time 标签为 2026-10-26 11:15，属交易日归属标签，不能视为已发生或未来行情；日线数据截至 10-23 收盘，不反映最新盘口；P0 为连续合约，不是具体月份合约。"
+      "1) 实时盘口 ticktime 23:00:00 与抓取时间 03:15:09 UTC 存在约 4 小时 15 分钟延迟（盘口为当时夜盘快照），小时线更新时间为 2026-10-24T00:00:14 UTC，日内数据可能无法反映最新变动；2) 日线布林带基于近20日收盘价近似计算，非官方指标；3) 历史日线基准模型状态为 rejected（样本外无优势），其胜率不代表未来概率；4) 连续合约 P0 分析口径不代表具体月份合约，下单需二次确认；5) 舆情仅基于给定搜索结果，未覆盖全部市场信息。"
     ]
   },
   "news_impact": [
-    "[利空] 大马棕油库存创新高叠加可能暂免 10% 出口税的报道（e南洋，2026-10-20），若政策落地会刺激马来西亚出口、增加近月供应预期，对 P0 构成潜在压制；属市场预期，未获最终确认。",
-    "[中性] 汇通财经（2026-10-21）提出棕榈油冲高回落后食用油板块进入关键验证窗口、豆油菜籽油葵花油走向待验证，与当前 1小时贴轨、日线未突破 9637 的结构相互印证，属观点与预期，提示方向确认前不宜重仓单边。",
-    "[中性] 光大期货 10-20 与 10-21 农产品日报为事件后的背景信息，未给出可核实新数据；对本次传导有限，只能作情绪参考，不能作为入场依据。",
-    "[利多] 导油网（2026-10-23）报道市场情绪回暖、豆油菜油收涨，若油脂板块整体走强，会通过替代需求与板块共振对 P0 形成情绪支撑；但这是板块性描述，未涉及棕榈油具体报价。",
-    "[中性] 印尼政府通讯局（2026-10-19）确认 Danantara 推进 26 项下游化项目，属中长期产业政策，不改变近月供需，对短线价格影响偏中性，事件仍待细则确认。",
-    "[中性偏空] 黄金网（2026-10-22）称原油高位区间内波动，原油走平意味着棕榈油生柴需求端的边际驱动有限，难以给 P0 提供额外上行助推。",
-    "[中性] 导油网（2026-10-22）高油酸葵花油与国产高油酸豆油消息属消费细分趋势，对棕榈油盘面短期定价影响有限，且发布时间较本次基准更早，只能作长效题材。",
-    "[中性] 马来西亚东方日报（2026-10-21）所述预算案潜在免税牵动大宗商品变局，逻辑上可能通过税率预期影响马棕出口竞争力，但方向不确定，需待政策细节，不构成可交易信号。"
+    "[利空] 马来西亚棕油库存创新高（e南洋，2026-10-20），且政府考虑暂免 10% 出口税。库存高企直接增加供给压力，出口税豁免虽可能刺激出口，但短期库存压力主导，对棕油价格形成压制。",
+    "[利空] 光大期货农产品日报（2026-10-20、10-21）多次提及油脂板块冲高回落，市场对食用油板块进入关键验证窗口，情绪偏谨慎，抑制多头追高意愿。",
+    "[利多] 印尼政府通讯局证实 Danantara 正全力推进 26 项下游化项目（Shangbao Indonesia，2026-10-19），长期提升棕油国内消费需求，减少出口供应，对价格形成潜在支撑。",
+    "[中性] 汇通财经报道棕榈油冲高回落之后，豆油、菜籽油、葵花油走向何方（2026-10-21），食用油板块迎来关键验证窗口，多空因素交织，市场等待方向确认，短期波动可能加大。",
+    "[中性] 马来西亚东方日报报道预算案后微调，潜在免税牵动大宗商品变局（2026-10-21），政策不确定性对棕油出口成本产生影响，但具体细节未明，暂中性评估。",
+    "[中性] 原油走势进入高位区间内波动运行（黄金网，2026-10-22），原油与棕油生物柴油需求联动，高位震荡对棕油指引有限，暂中性。",
+    "[中性] 高油酸赛道持续升温，嘉吉高油酸葵花油登陆山姆（导油网，2026-10-22），替代油脂竞争长期存在，但短期对棕油直接影响有限，中性。"
   ],
   "news_articles": [
     {
       "title": "棕油库存创新高 大马或暂免10%出口税",
       "source": "e南洋",
       "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE83TkNQckR5eGhEQ09KV3hpT2dsMGppeFdVVldDWVVtUDJ0QjFPUVFMNWdTTEtVZTNJallleWMtMUJBMTM3Q0FtQzlFQktSb1hldEtxNmN5YXllY2JMT2txSktmOA?oc=5",
-      "detail": "报道称马来西亚棕榈油库存创出新高，政府可能暂免 10% 的出口税以刺激出口。若落地，出口增加与库存高企并存，对产地报价与近月结构形成双向影响；该信息属市场预期，尚无最终官宣，仅作背景参考。",
+      "detail": "马来西亚棕榈油库存升至历史新高，政府考虑暂时免除10%出口税以刺激出口。库存高企反映供应过剩，出口税豁免可能短期提振出口但难以快速消化库存。该消息对棕油价格形成利空压力。",
       "impact": "利空"
     },
     {
       "title": "棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口",
       "source": "汇通财经",
       "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9YSlp4WUFja21sck40YlJsaTRseUIwYXQxaWFzTnBsNjRKaWw5akVjU2t0cTVMTDBsQWlYWG9ZWk5DY1pkcDM2dVZGLUNlNGxqMmxFazd3MlA?oc=5",
-      "detail": "文章讨论棕榈油冲高回落后豆油、菜籽油、葵花油等食用油品种的分化走向，并称板块进入关键验证窗口。其核心是观点与预期，未给出可核实的数据更新，提示方向确认前不宜重仓，和当前1小时贴轨、日线未突破的结构一致。",
-      "impact": "中性"
-    },
-    {
-      "title": "市场情绪回暖，豆油菜油收涨—10月23日",
-      "source": "导油网",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQZ2gyZVB0cWVPVnU1VEVBN1duMF9zZWo3eXBZbVphcklENVVGLWNtSnVoRUFMZTZRUER3Q0hFTXZfZ1lkV2dTYWN3a0N6Tjc2MTlUd3NuNE41TEhJVXpJaUhSY0RPM0FKSFJtckUxTEZ4c1RPZFBYR0NFazl0MTlMTktRWQ?oc=5",
-      "detail": "报道 10-23 市场情绪回暖、豆油与菜油收涨，反映油脂板块整体偏暖。棕榈油作为替代油脂之一，情绪上易获板块共振支撑，但该文未涉及棕榈油具体报价与库存，只能作为短线情绪参考。",
-      "impact": "利多"
-    },
-    {
-      "title": "光大期货：农产品类日报10.21",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNTlhBRmttYWZjeHBycllBX2xTME5xTjRpZzJudkd5VGNSMWllWkRRVkI1Z2VuTjdzMElBeDZCQXBCbTFEdXBTRzJ5MGk0QzlnMEEtQUJRR3VSS1R3bExjblJpejJqVE43T0swLVFnWlhaV1g2Z190TERBcHVyQWRhandLQ3RVX0tzd3hCcFhNWkxqdGU4ZThING05NWFDUkV4VFFVdW54MXBGZW1aMkpvQkZIaXNvN1lnMXlLUDR2ZlRqSW9vb0ZnemIyZnVmWVQzN05SWlZGeUNpVWNrdkNvTzR5cw?oc=5",
-      "detail": "光大期货在 10-21 的农产品日报中对油脂等品种给出跟踪观点。该内容早于本次基准时刻，不包含可核实现货报价，属背景信息；对 P0 的方向影响有限，仅作情绪与结构参考，不能作为入场依据。",
-      "impact": "中性"
-    },
-    {
-      "title": "光大期货：农产品类日报10.20",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxQaDVrVy01aVBUbHhQbGdxbDdVam85NlRMVTJseGE4VDhCZ2lXWlJud3VScjhCWnBKTHJ3Y0RSUGd2alVvTlZwVDNiRXBNU1lBZ2g5RnNOZkg0c184V2w1eTFfTlBkUloyRTM2NmhZY3JjSlBSX0x4Ri1lNWNrc1UwOE5id2t5NHVqYnNNN3Y0WmV1SnhpUlpVcVpqSDN0eVNyVnlIb2hoTUZTSVFpR1FhcnllN0xjUzBnOHM2TUwxX0YwTFpJaTNNci1FenMzZ213UlAwLU1DLXNHRUVmSWl4clNOalI?oc=5",
-      "detail": "10-20 的农产品日报对油脂板块进行常规跟踪，发布时间较本次基准更早，属旧闻。其未提供可核实的现货或库存数字，只能作为当时情绪的背景，不能据此判断当前盘口走向。",
+      "detail": "棕榈油经历冲高回落后，市场关注豆油、菜籽油、葵花油等替代油脂的走向。食用油板块进入关键验证窗口，多空因素交织，等待方向确认。该报道反映市场情绪谨慎，短期波动可能加大。",
       "impact": "中性"
     },
     {
       "title": "印尼政府通讯局证实 Danantara正全力推进26项下游化项目",
       "source": "Shangbao Indonesia",
       "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFA0cEM0cVd3aFZCeG9CSWZ2VWJaQkd4czJNenRTeDFfT0N1Wng1S1R3aEI4b0NSMFVEZE9TZHZxMXUzZlBJajZyUGZ4bVNtd3V6WWEwNFMtR2NnbnAxUmt0UHBsSWRIV3ExRDJJQTQydEx4Zw?oc=5",
-      "detail": "印尼政府通讯局确认 Danantara 正推进 26 项下游化项目，涉及资源与农产品加工。政策属中长期产业布局，对近月棕榈油供需影响有限，更多是远期需求与出口结构的故事，短线偏中性。",
+      "detail": "印尼政府通讯局确认Danantara正全力推进26项下游化项目，涉及棕榈油等资源的下游加工。长期来看，下游化将增加印尼国内棕油消费，减少出口供应，对棕油价格形成潜在支撑。",
+      "impact": "利多"
+    },
+    {
+      "title": "光大期货：农产品类日报10.20",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxQaDVrVy01aVBUbHhQbGdxbDdVam85NlRMVTJseGE4VDhCZ2lXWlJud3VScjhCWnBKTHJ3Y0RSUGd2alVvTlZwVDNiRXBNU1lBZ2g5RnNOZkg0c184V2w1eTFfTlBkUloyRTM2NmhZY3JjSlBSX0x4Ri1lNWNrc1UwOE5id2t5NHVqYnNNN3Y0WmV1SnhpUlpVcVpqSDN0eVNyVnlIb2hoTUZTSVFpR1FhcnllN0xjUzBnOHM2TUwxX0YwTFpJaTNNci1FenMzZ213UlAwLU1DLXNHRUVmSWl4clNOalI?oc=5",
+      "detail": "光大期货农产品日报10.20提及油脂板块行情，棕榈油等品种近期波动加大。报告可能涉及供需数据和市场情绪，但未提供具体数字。整体偏向谨慎，对价格影响中性偏空。",
+      "impact": "中性"
+    },
+    {
+      "title": "光大期货：农产品类日报10.21",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxNNVRQbEZUdl9vemlHbERpNDJnWWRNWUJmNlVsS2JyeEhkbmRUOWVTcjRuVEhsRFFPMW9HMzVNcEYtd2RBM2lMWWQ0N2I4ZHlmaElTWDhwUUdWWFBSR3M1Zl84R0VEMkQ0Y1k5THhtMXhDVlF3ODJRYTFVZVgwM1VPQnFvMldGNXlqOXNCaFB5WE14bFJvbnNpYkJxMTVobVUtaktlYVpaQk56aHJLX2k5ZGY0YlVXUHp4R0M2MUE2SnhnbFo2OXhWWkNqbkh1YnB2N3dRT3MzT3lRS250LWRhSWZqT0g?oc=5",
+      "detail": "光大期货农产品日报10.21继续跟踪油脂市场，棕榈油冲高回落后的走势受到关注。报告可能强调供需宽松和出口竞争，对价格影响偏空。",
+      "impact": "利空"
+    },
+    {
+      "title": "预算案后微调？ 潜在免税牵动大宗商品变局",
+      "source": "马来西亚东方日报",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBSWkZpdm9wWTAyRnlpZkhyODZWdkRmdGtjdnVBU3dYaVlmZkJLb2N1TU9peHpVTndETDJfTDJ6RTkySjJZQ3lCcVJYZURLc2ZXY2pQV00ydWwwZWNpX1VBSUktd0FCVHdOWFhaSXdjeDJwdw?oc=5",
+      "detail": "马来西亚预算案后可能微调免税政策，潜在免税措施牵动大宗商品市场。对棕榈油而言，若出口税调整将影响马来西亚出口竞争力，但具体细节尚未明确，暂中性评估。",
       "impact": "中性"
     },
     {
       "title": "主次节奏：原油走势进入高位区间内波动运行",
       "source": "黄金网",
       "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9HdlBISGtWbkl4R2hEN2JwNGd1RGhhaVdEWnAwQkdIbW80WTRERVAzTkhkS0hfU1FXMGo4VW9ldE1ST0Qxak00ZncwR2VtMHE3VU1QLXJXSUFGeVI4X0RWVmN5RU1qUThPcl9Ccg?oc=5",
-      "detail": "文章认为原油进入高位区间内波动，方向不明。棕榈油的生物柴油需求与原油价格存在联系，原油走平意味着生柴端对棕榈油的边际驱动有限，难以给出额外上行推力；该文为技术观点，非数据事实。",
-      "impact": "中性"
-    },
-    {
-      "title": "预算案后微调？ 潜在免税牵动大宗商品变局",
-      "source": "马来西亚东方日报",
-      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBSWkZpdm9wWTAyRnlpZkhyODZWdkRmdGtjdnVBU3dYaVlmZkJLb2N1TU9peHpVTndETDJfTDJ6RTkySjJZQ3lCcVJYZURLc2ZXY2pQV00ydWwwZWNpX1VBSUktd0FCVHdOWFhaSXdjeDJwdw?oc=5",
-      "detail": "报道称马来西亚预算案后可能有微调，潜在免税措施牵动大宗商品变局。逻辑上税率变化会影响马棕出口竞争力与产地库存去化节奏，但方向取决于具体税种与细则，目前尚不确定，不构成可交易信号。",
+      "detail": "原油价格进入高位区间内波动运行，对棕榈油生物柴油需求联动影响有限。原油高位震荡未能提供明确方向指引，对棕油价格影响中性。",
       "impact": "中性"
     },
     {
       "title": "高油酸赛道持续升温：嘉吉高油酸葵花油登陆山姆，国产高油酸大豆油亮相",
       "source": "导油网",
       "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOX0NEZW9nU1JWRWItSW1KOGtxMzZKeGwtTGRCT1FTSkFaVkt0V2c4WmFrQWt1U09xNnRRT3VFYmd5cndoZ3FLSHZRdlptd1RYQXRDajFnVjQ2X25wWnpJT3RnWTlPSnVpejRDVURNZU1aUS13S2w4Z1NqbGdacXZsb3k5QQ?oc=5",
-      "detail": "报道高油酸葵花油与国产高油酸豆油新品上市，反映食用油消费结构向健康化升级。该类题材属中长期消费趋势，短期对棕榈油盘面定价影响有限，且发布时间早于本次基准，只能作背景参考。",
+      "detail": "高油酸葵花油和大豆油等替代油脂竞争升温，长期可能分流棕榈油食用需求。但短期对棕油价格直接影响有限，暂中性评估。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
-    "support": 9600.5,
-    "resistance": 9718.0
+    "support": 9586.2,
+    "resistance": 9694.45
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于用户提供的实时盘口（realtime.price=9679、ticktime=23:00:00、涨跌幅 +1.17%）与截至 10-23 收盘的日线、延迟的小时线及新闻数据；P0 为连续合约，当前映射主力为 P2701，次主力 P2705 呈远月升水（价差约 581、价差率约 6.0%），换月状态为 watch，下单前须在交易软件对待下单的具体月份、价格与手续费二次确认。model_validation 状态为 rejected，历史样本外无优势，本分析不将其视为未来概率，也不作胜率承诺；1小时/4小时成交量比统计意义有限，新闻多为数小时至数日前旧闻且含市场预期。本内容不构成投资建议，投资者应自行承担风险。",
+  "risk_note": "本分析基于大商所 P0 连续合约数据，连续合约非可直接下单的具体月份合约，实际交易需在软件中二次确认主力月份（当前映射 P2701，mapping_verified=true）。实时盘口 ticktime 为 2026-10-26 23:00:00（交易日归属标签，非未来行情），抓取时间 2026-10-24T03:15:09 UTC，与盘口时点存在延迟，请以开盘后实时价为准。历史日线基准模型样本外结果无优势（status=rejected），其胜率等指标不代表未来概率。舆情信息仅基于给定搜索结果，不构成投资建议。交易者应根据自身风险承受能力独立决策，注意移仓换月（roll_state=watch）及政策事件风险。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-10-23T23:48:27+00:00",
+  "generated_at_utc": "2026-10-24T03:15:40+00:00",
   "latest_date": "2026-10-23",
   "realtime_price": 9679.0,
   "realtime_note": "盘口交易日归属标签 2026-10-26，最新盘口时间 23:00:00（不是未来行情），当前价 9679，涨跌 +1.17%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-10-23T23:47:57+00:00",
+    "fetched_at_utc": "2026-10-24T03:15:09+00:00",
     "market_trading_day": "2026-10-26",
     "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 印尼政府通讯局证实 Danantara正全力推进26项下游化项目 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-10-19T08:26:00+00:00\nURL: https://news.google.com/rss/articles/CBMickFVX3lxTFA0cEM0cVd3aFZCeG9CSWZ2VWJaQkd4czJNenRTeDFfT0N1Wng1S1R3aEI4b0NSMFVEZE9TZHZxMXUzZlBJajZyUGZ4bVNtd3V6WWEwNFMtR2NnbnAxUmt0UHBsSWRIV3ExRDJJQTQydEx4Zw?oc=5\n摘要: 印尼政府通讯局证实 Danantara正全力推进26项下游化项目 Shangbao Indonesia\n\n[2] 预算案后微调？ 潜在免税牵动大宗商品变局 - 马来西亚东方日报\n来源: 马来西亚东方日报\n发布时间UTC: 2026-10-21T08:36:00+00:00\nURL: https://news.google.com/rss/articles/CBMickFVX3lxTFBSWkZpdm9wWTAyRnlpZkhyODZWdkRmdGtjdnVBU3dYaVlmZkJLb2N1TU9peHpVTndETDJfTDJ6RTkySjJZQ3lCcVJYZURLc2ZXY2pQV00ydWwwZWNpX1VBSUktd0FCVHdOWFhaSXdjeDJwdw?oc=5\n摘要: 预算案后微调？ 潜在免税牵动大宗商品变局 马来西亚东方日报\n\n[3] 光大期货：农产品类日报10.20 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-20T02:21:23+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxQaDVrVy01aVBUbHhQbGdxbDdVam85NlRMVTJseGE4VDhCZ2lXWlJud3VScjhCWnBKTHJ3Y0RSUGd2alVvTlZwVDNiRXBNU1lBZ2g5RnNOZkg0c184V2w1eTFfTlBkUloyRTM2NmhZY3JjSlBSX0x4Ri1lNWNrc1UwOE5id2t5NHVqYnNNN3Y0WmV1SnhpUlpVcVpqSDN0eVNyVnlIb2hoTUZTSVFpR1FhcnllN0xjUzBnOHM2TUwxX0YwTFpJaTNNci1FenMzZ213UlAwLU1DLXNHRUVmSWl4clNOalI?oc=5\n摘要: 光大期货：农产品类日报10.20 新浪财经\n\n[4] 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-10-21T12:07:06+00:00\nURL: https://news.google.com/rss/articles/CBMiWEFVX3lxTE9YSlp4WUFja21sck40YlJsaTRseUIwYXQxaWFzTnBsNjRKaWw5akVjU2t0cTVMTDBsQWlYWG9ZWk5DY1pkcDM2dVZGLUNlNGxqMmxFazd3MlA?oc=5\n摘要: 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 汇通财经\n\n[5] 光大期货：农产品类日报10.21 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-21T03:04:30+00:00\nURL: https://news.google.com/rss/articles/CBMi4wFBVV95cUxNTlhBRmttYWZjeHBycllBX2xTME5xTjRpZzJudkd5VGNSMWllWkRRVkI1Z2VuTjdzMElBeDZCQXBCbTFEdXBTRzJ5MGk0QzlnMEEtQUJRR3VSS1R3bExjblJpejJqVE43T0swLVFnWlhaV1g2Z190TERBcHVyQWRhandLQ3RVX0tzd3hCcFhNWkxqdGU4ZThING05NWFDUkV4VFFVdW54MXBGZW1aMkpvQkZIaXNvN1lnMXlLUDR2ZlRqSW9vb0ZnemIyZnVmWVQzN05SWlZGeUNpVWNrdkNvTzR5cw?oc=5\n摘要: 光大期货：农产品类日报10.21 新浪财经\n\n[6] 棕油库存创新高 大马或暂免10%出口税 | e南洋 - e南洋\n来源: e南洋\n发布时间UTC: 2026-10-20T02:50:59+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE83TkNQckR5eGhEQ09KV3hpT2dsMGppeFdVVldDWVVtUDJ0QjFPUVFMNWdTTEtVZTNJallleWMtMUJBMTM3Q0FtQzlFQktSb1hldEtxNmN5YXllY2JMT2txSktmOA?oc=5\n摘要: 棕油库存创新高 大马或暂免10%出口税 | e南洋 e南洋\n\n[7] 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-10-21T12:07:06+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTFBTbERsb2UxeV9RSzFaX1h4OGVSYnFMU1NsUC01WV9VMVR5QlBmQmYxbklfWkRpenhuUlpwNU5KNXBzNEM2WkNsTVdac28tVUdJSzdCRDJHa24tUQ?oc=5\n摘要: 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 汇通财经\n\n[8] 主次节奏：原油走势进入高位区间内波动运行_国际原油市场 - 黄金网\n来源: 黄金网\n发布时间UTC: 2026-10-22T00:35:08+00:00\nURL: https://news.google.com/rss/articles/CBMibEFVX3lxTE9HdlBISGtWbkl4R2hEN2JwNGd1RGhhaVdEWnAwQkdIbW80WTRERVAzTkhkS0hfU1FXMGo4VW9ldE1ST0Qxak00ZncwR2VtMHE3VU1QLXJXSUFGeVI4X0RWVmN5RU1qUThPcl9Ccg?oc=5\n摘要: 主次节奏：原油走势进入高位区间内波动运行_国际原油市场 黄金网\n\n[9] 高油酸赛道持续升温：嘉吉高油酸葵花油登陆山姆，国产高油酸大豆油亮相 - 导油网\n来源: 导油网\n发布时间UTC: 2026-10-22T15:49:15+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxOX0NEZW9nU1JWRWItSW1KOGtxMzZKeGwtTGRCT1FTSkFaVkt0V2c4WmFrQWt1U09xNnRRT3VFYmd5cndoZ3FLSHZRdlptd1RYQXRDajFnVjQ2X25wWnpJT3RnWTlPSnVpejRDVURNZU1aUS13S2w4Z1NqbGdacXZsb3k5QQ?oc=5\n摘要: 高油酸赛道持续升温：嘉吉高油酸葵花油登陆山姆，国产高油酸大豆油亮相 导油网\n\n[10] 市场情绪回暖，豆油菜油收涨—10月23日 - 导油网\n来源: 导油网\n发布时间UTC: 2026-10-23T08:43:28+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxQZ2gyZVB0cWVPVnU1VEVBN1duMF9zZWo3eXBZbVphcklENVVGLWNtSnVoRUFMZTZRUER3Q0hFTXZfZ1lkV2dTYWN3a0N6Tjc2MTlUd3NuNE41TEhJVXpJaUhSY0RPM0FKSFJtckUxTEZ4c1RPZFBYR0NFazl0MTlMTktRWQ?oc=5\n摘要: 市场情绪回暖，豆油菜油收涨—10月23日 导油网",
+  "news_summary": "[1] 光大期货：农产品类日报10.20 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-20T02:21:23+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxQaDVrVy01aVBUbHhQbGdxbDdVam85NlRMVTJseGE4VDhCZ2lXWlJud3VScjhCWnBKTHJ3Y0RSUGd2alVvTlZwVDNiRXBNU1lBZ2g5RnNOZkg0c184V2w1eTFfTlBkUloyRTM2NmhZY3JjSlBSX0x4Ri1lNWNrc1UwOE5id2t5NHVqYnNNN3Y0WmV1SnhpUlpVcVpqSDN0eVNyVnlIb2hoTUZTSVFpR1FhcnllN0xjUzBnOHM2TUwxX0YwTFpJaTNNci1FenMzZ213UlAwLU1DLXNHRUVmSWl4clNOalI?oc=5\n摘要: 光大期货：农产品类日报10.20 新浪财经\n\n[2] 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-10-21T12:07:06+00:00\nURL: https://news.google.com/rss/articles/CBMiWEFVX3lxTE9YSlp4WUFja21sck40YlJsaTRseUIwYXQxaWFzTnBsNjRKaWw5akVjU2t0cTVMTDBsQWlYWG9ZWk5DY1pkcDM2dVZGLUNlNGxqMmxFazd3MlA?oc=5\n摘要: 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 汇通财经\n\n[3] 每日期货短评|20261021 - 新浪网\n来源: 新浪网\n发布时间UTC: 2026-10-22T07:36:00+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxPeE41UVZkLXpDN2ZTeS0xdmV3a0hkeXctNjBRNkExY3U5NzV5VFlFM19KS0JxcWw4V1pSU0hyb2tlN3h6ZG10cXpkLW5UV2lXc3lIM3prd0xtVXBvbjhUNXlpbV9QaE13czEwc0xpT1BmZFFEYUlncWdYbFI1MzNMQmVOVQ?oc=5\n摘要: 每日期货短评|20261021 新浪网\n\n[4] 印尼政府通讯局证实 Danantara正全力推进26项下游化项目 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-10-19T08:26:00+00:00\nURL: https://news.google.com/rss/articles/CBMickFVX3lxTFA0cEM0cVd3aFZCeG9CSWZ2VWJaQkd4czJNenRTeDFfT0N1Wng1S1R3aEI4b0NSMFVEZE9TZHZxMXUzZlBJajZyUGZ4bVNtd3V6WWEwNFMtR2NnbnAxUmt0UHBsSWRIV3ExRDJJQTQydEx4Zw?oc=5\n摘要: 印尼政府通讯局证实 Danantara正全力推进26项下游化项目 Shangbao Indonesia\n\n[5] 预算案后微调？ 潜在免税牵动大宗商品变局 - 马来西亚东方日报\n来源: 马来西亚东方日报\n发布时间UTC: 2026-10-21T08:36:00+00:00\nURL: https://news.google.com/rss/articles/CBMickFVX3lxTFBSWkZpdm9wWTAyRnlpZkhyODZWdkRmdGtjdnVBU3dYaVlmZkJLb2N1TU9peHpVTndETDJfTDJ6RTkySjJZQ3lCcVJYZURLc2ZXY2pQV00ydWwwZWNpX1VBSUktd0FCVHdOWFhaSXdjeDJwdw?oc=5\n摘要: 预算案后微调？ 潜在免税牵动大宗商品变局 马来西亚东方日报\n\n[6] 光大期货：农产品类日报10.21 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-21T03:04:30+00:00\nURL: https://news.google.com/rss/articles/CBMi5AFBVV95cUxNNVRQbEZUdl9vemlHbERpNDJnWWRNWUJmNlVsS2JyeEhkbmRUOWVTcjRuVEhsRFFPMW9HMzVNcEYtd2RBM2lMWWQ0N2I4ZHlmaElTWDhwUUdWWFBSR3M1Zl84R0VEMkQ0Y1k5THhtMXhDVlF3ODJRYTFVZVgwM1VPQnFvMldGNXlqOXNCaFB5WE14bFJvbnNpYkJxMTVobVUtaktlYVpaQk56aHJLX2k5ZGY0YlVXUHp4R0M2MUE2SnhnbFo2OXhWWkNqbkh1YnB2N3dRT3MzT3lRS250LWRhSWZqT0g?oc=5\n摘要: 光大期货：农产品类日报10.21 新浪财经\n\n[7] 棕油库存创新高 大马或暂免10%出口税 | e南洋 - e南洋\n来源: e南洋\n发布时间UTC: 2026-10-20T02:50:59+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE83TkNQckR5eGhEQ09KV3hpT2dsMGppeFdVVldDWVVtUDJ0QjFPUVFMNWdTTEtVZTNJallleWMtMUJBMTM3Q0FtQzlFQktSb1hldEtxNmN5YXllY2JMT2txSktmOA?oc=5\n摘要: 棕油库存创新高 大马或暂免10%出口税 | e南洋 e南洋\n\n[8] 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-10-21T12:07:06+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTFBTbERsb2UxeV9RSzFaX1h4OGVSYnFMU1NsUC01WV9VMVR5QlBmQmYxbklfWkRpenhuUlpwNU5KNXBzNEM2WkNsTVdac28tVUdJSzdCRDJHa24tUQ?oc=5\n摘要: 棕榈油冲高回落之后：豆油、菜籽油、葵花油走向何方？食用油板块迎来关键验证窗口_外汇动态报道 汇通财经\n\n[9] 主次节奏：原油走势进入高位区间内波动运行_国际原油市场 - 黄金网\n来源: 黄金网\n发布时间UTC: 2026-10-22T00:35:08+00:00\nURL: https://news.google.com/rss/articles/CBMibEFVX3lxTE9HdlBISGtWbkl4R2hEN2JwNGd1RGhhaVdEWnAwQkdIbW80WTRERVAzTkhkS0hfU1FXMGo4VW9ldE1ST0Qxak00ZncwR2VtMHE3VU1QLXJXSUFGeVI4X0RWVmN5RU1qUThPcl9Ccg?oc=5\n摘要: 主次节奏：原油走势进入高位区间内波动运行_国际原油市场 黄金网\n\n[10] 高油酸赛道持续升温：嘉吉高油酸葵花油登陆山姆，国产高油酸大豆油亮相 - 导油网\n来源: 导油网\n发布时间UTC: 2026-10-22T15:49:15+00:00\nURL: https://news.google.com/rss/articles/CBMigwFBVV95cUxOX0NEZW9nU1JWRWItSW1KOGtxMzZKeGwtTGRCT1FTSkFaVkt0V2c4WmFrQWt1U09xNnRRT3VFYmd5cndoZ3FLSHZRdlptd1RYQXRDajFnVjQ2X25wWnpJT3RnWTlPSnVpejRDVURNZU1aUS13S2w4Z1NqbGdacXZsb3k5QQ?oc=5\n摘要: 高油酸赛道持续升温：嘉吉高油酸葵花油登陆山姆，国产高油酸大豆油亮相 导油网",
   "symbol": "P0",
   "instrument_name": "棕榈油",
-  "api_latency_seconds": 29.7,
+  "api_latency_seconds": 30.8,
   "token_usage": {
     "prompt_tokens": 15704,
-    "completion_tokens": 5086,
-    "total_tokens": 20790,
+    "completion_tokens": 5428,
+    "total_tokens": 21132,
     "prompt_tokens_details": {
-      "cached_tokens": 768
+      "cached_tokens": 384
     },
-    "prompt_cache_hit_tokens": 768,
-    "prompt_cache_miss_tokens": 14936
+    "prompt_cache_hit_tokens": 384,
+    "prompt_cache_miss_tokens": 15320
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-10-23T23:48:27+00:00",
-    "score": 85,
-    "status": "caution",
-    "label": "仅供参考",
-    "execution_allowed": false,
-    "evidence_confidence": 45,
-    "issues": [
-      {
-        "code": "low_evidence_confidence",
-        "severity": "medium",
-        "message": "AI 自评证据强度仅 45/100。"
-      }
-    ],
+    "checked_at_utc": "2026-10-24T03:15:40+00:00",
+    "score": 100,
+    "status": "passed",
+    "label": "通过",
+    "execution_allowed": true,
+    "evidence_confidence": 62,
+    "issues": [],
     "facts": {
       "realtime_price": 9679.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-10-23T23:47:57+00:00",
+      "realtime_fetched_at_utc": "2026-10-24T03:15:09+00:00",
       "realtime_market_tick_time": "23:00:00",
       "daily_rsi14": 43.14,
       "one_hour_boll_position": "中轨上方",
@@ -195,16 +181,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-10-23T23:47:57+00:00",
+    "realtime_fetched_at_utc": "2026-10-24T03:15:09+00:00",
     "realtime_market_trading_day": "2026-10-26",
     "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-10-23T21:42:22+00:00",
+    "daily_updated_at_utc": "2026-10-24T00:00:14+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-10-23T21:42:22+00:00",
-    "news_updated_at_utc": "2026-10-23T21:42:21+00:00",
-    "contract_bridge_updated_at_utc": "2026-10-23T21:42:21+00:00"
+    "intraday_updated_at_utc": "2026-10-24T00:00:14+00:00",
+    "news_updated_at_utc": "2026-10-24T00:00:12+00:00",
+    "contract_bridge_updated_at_utc": "2026-10-24T00:00:12+00:00"
   }
 }

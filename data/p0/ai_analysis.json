@@ -1,186 +1,171 @@
 {
-  "summary": "本次分析的实时基准为 P0 连续合约 realtime.price=9090.0，盘口 ticktime=15:05:05（大商所交易日归属标签 2026-10-29，非未来标签），相对前结算价 9312 的涨跌幅为 -2.38%，即当日午后已收市，属于 live 抓取但对应 15:05 的收盘附近报价，非当前正在成交的盘口；分析基准时刻为北京时间 2026-10-29 17:18，日盘已结束。1小时与4小时K线数据 updated_at_utc 为 05:40:59，对应北京时间约 13:41，其最新 bar 时间标注 14:15/15:00，存在约 10 分钟以上延迟，需标注为延迟数据。多尺度共振方向偏空：1小时跌破布林下轨（下轨9097.42），4小时同样跌破下轨（下轨9139.86），日线收于9321但实时价9090已明显低于全部均线（MA10=9484.1、MA20=9566.75、MA60=9794.92），日线 RSI14=36.36既不超买也不超卖。连续合约映射 P2701（主力，mapping_verified=true），次主力 P2705 价差+530元/吨呈远月升水，roll_state=watch 处于监控移仓状态。model_validation 状态为 rejected（样本外无优势），历史命中率不得当作未来概率。舆情搜索结果为网页噪声，无一条有效棕榈油产业信息，新闻维度证据缺失。综合：日盘已大幅收跌且位于布林下轨外，夜盘策略以观望或反弹高空为主，不建议在下轨外追空，止损目标均以9090为基准。",
+  "summary": "基准时刻为北京时间2026-10-30 02:00:30，最新实时输入为 P0 连续合约（映射 P2701）：realtime.price=9175.0，盘口 ticktime=23:00:00，涨跌幅 -0.14%（相对前结算 9188，实时涨跌 -13）。注意 realtime.tradedate 为 2026-10-30，这是大商所交易日归属标签（夜盘归属次日交易日），不是未来行情标签。当前价 9175 处于日线大幅下跌后的夜盘反弹中，1小时中轨 9264.05 下方、靠近下轨 9090.32；4小时中轨 9441.35 下方、贴近下轨 9101.85；日线收 9090 已跌破全部均线（MA10 9448.5/MA20 9535.35/MA60 9790），日线 RSI14=30.25 接近超卖（未破30，不称超卖）。三尺度同处布林中轨下方、空头排列，夜盘仅为超跌反弹，反弹力度弱（1小时量比0.04、4小时量比0.03，盘口薄）。策略基调以反弹承压做空或观望为主，入场以 9175 为基准，不追多。连续合约不可直接下单，需在交易软件二次确认 P2701 实际月份与流动性。",
   "bias": "偏空",
   "analysis": [
-    "1小时布林：上轨9536.68、中轨9317.05、下轨9097.42，带宽4.71%，realtime.price=9090.0（ticktime 15:05:05，涨跌-2.38%）已跌破下轨，属通道外运行，短期超卖但趋势极弱，ADX14=51.9显示单边下行力度强，1小时RSI14=25.83处超卖区。",
-    "4小时布林：上轨9774.74、中轨9457.3、下轨9139.86，带宽6.71%，当前价9090同样跌破下轨，4小时RSI14=28.77超卖，但ADX14=18.97偏弱，说明4小时级别是跟随1小时的破位而非自身加速，反弹可能先修复至下轨9139附近再定方向。",
-    "日线布林/均线：日线close=9321，实时价9090已明显低于MA10=9484.1、MA20=9566.75、MA60=9794.92，呈空头排列；日线RSI14=36.36接近超卖但未达超卖阈值（<30），仅可表述为偏弱，不可称超买或超卖。",
-    "实时价位置：realtime.price=9090、ticktime 15:05:05、涨跌幅-2.38%，已跌近日线低20=9240下方并接近日内低点9045，处于20日区间下沿之外，说明空头突破近期震荡箱体，但也进入容易技术反抽的极端位置。",
-    "趋势与量能：日线volume=374256、volume_ratio_20d=0.73为缩量下跌，1小时volume_ratio20=0.74也低于均量，说明下跌更多是承接薄而非巨量抛售；但3小时前段open_interest_change=+7789显示增仓下行，空头主动性仍在。",
-    "支撑压力：下方支撑看日盘低点9045与整数关口9000，上方压力看1小时下轨9097.42（已破位的回补位）、4小时下轨9139.86及1小时中轨9317，反弹到9139-9317属空头重新入场观察区。",
-    "contract_bridge：P0 对应主力 P2701（价格9090、持仓591573，验证通过），次主力 P2705=9620，价差+530元/吨（5.83%）呈远月升水，主力持仓占比51.78%，次主力/主力持仓比0.6036，roll_state=watch 监控移仓，下单前须在交易软件二次确认具体月份与流动性。",
-    "model_validation：固定日线基准模型状态 rejected，样本外77笔胜率28.57%、期望-0.2502R、盈亏比0.6643，历史优势未被证实；该结果不代表当前日内方案，也不得转化为未来胜率或概率，仅提示日线级别追趋势本身在样本外表现不佳。"
+    "实时价与基准：realtime.price=9175.0、ticktime=23:00:00、涨跌幅-0.14%，相对前结算9188仍为下跌；该价距日线收盘9090已反弹约85点，但盘口bid/ask仅3/1手，成交极薄，反弹证据强度有限。",
+    "1小时布林：上轨9437.78/中轨9264.05/下轨9090.32，带宽3.75%；当前价9175位于中轨下方、贴近下轨上方，未突破中轨，属弱势反弹回归下轨区，1小时 RSI 36.97 偏弱未超卖。",
+    "4小时布林：上轨9780.85/中轨9441.35/下轨9101.85，带宽7.19%；当前价9175位于中轨下方、紧贴下轨9101.85，带宽偏宽显示前期下跌动能强，价格尚未有效收复下轨，属空头趋势中的低位盘整。",
+    "日线布林/均线：日线收9090，MA10 9448.5、MA20 9535.35、MA60 9790 全部在上方形成空头排列压制；前一日大跌-2.48%并创20日新低9045，当前反弹属超跌修复，日线趋势仍向下。",
+    "实时价位置与趋势：9175处于日内区间9089–9208偏上沿，反弹高点9208正对1小时中轨9264下方的第一压力带；2小时布林中轨9415.95远在上方，过渡周期同样确认反弹未改趋势。",
+    "量能：1小时 latest 量1590、量比0.04，4小时量1595、量比0.03，夜盘成交极度萎缩；日线成交量636234、量比20日1.24属放量下跌，量价配合指向空头主导、反弹缺乏承接。",
+    "支撑压力：下方支撑关注日线低点9045及4小时下轨9101.85附近；上方压力依次为1小时中轨9264、4小时中轨9441、日线MA10 9448.5，反弹在9264一带易受阻。",
+    "共振结论：1小时、4小时、日线三周期价格均在布林中轨下方且均线空头，属空头共振；夜盘仅超跌反抽，未出现放量站上中轨的信号，故不追多，等待反弹承压或破位延续。"
   ],
   "intraday_strategy": {
-    "bias": "偏空（反弹高空为主，下轨外不追空）",
-    "entry": "9090-9140区间作为观察基准，反弹至1小时下轨9097.42至4小时下轨9139.86承压时轻仓试空；若直接低开跌破9045确认再考虑顺势",
-    "stop": "9200（站回4小时下轨9139上方且有效收复则空头逻辑失效）",
-    "take_profit": "第一目标9045（今日日盘低点），第二目标9000整数关口",
-    "invalidation": "实时价有效站上9200并伴随放量，或1小时重新收回布林中轨9317，则空头方案作废转观望",
-    "notes": "适用今晚夜盘21:00-23:00及明日早盘09:00-11:30；因日盘15:05已收市，实时价9090是收盘附近基准而非连续盘口，夜盘开盘可能跳空，需以夜盘实际首笔成交重新校准。1小时/4小时RSI分别25.83/28.77处超卖，下轨外追空盈亏比不足1.5，必须等反弹承压或跌破9045确认后才入场。若contract_bridge映射或P2701盘口流动性未能在交易软件二次确认，列为不交易条件。"
+    "bias": "偏空",
+    "entry": "9175–9208 区间反弹承压时分批试空（以实时价9175为基准，反弹至9200附近加仓）",
+    "stop": "9265（1小时中轨9264上方）",
+    "take_profit": "第一目标9102（4小时下轨附近），第二目标9045（日线前低）",
+    "invalidation": "若1小时放量收盘站上9264中轨并维持，则空头逻辑失效，转为观望",
+    "notes": "适用于下一交易日早盘09:00–11:30及午盘13:30–15:00；夜盘21:00–23:00若承接不足可延续观察。当前为连续合约分析口径，请在交易软件二次确认P2701实际月份与盘口流动性；盘口极薄，避免市价追单。"
   },
   "decision_frame": {
     "confidence": 58,
-    "regime": "空头趋势中的下轨外超卖，方向偏空但追空风险大",
-    "edge": "多尺度（1小时/4小时）同步跌破布林下轨、日线空头排列，方向一致性高；但量能缩量、ADX在4小时偏弱，且模型样本外无优势，边际优势有限",
-    "no_trade_condition": "开盘跳空低开直接跌破9045且未回补、或反弹直接站回9200上方时均不入场；首目标盈亏比低于1.5（下轨外追空）不入场；contract_bridge映射或P2701流动性未在交易软件二次确认前不入场；舆情无有效产业信息下不放大仓位",
+    "regime": "日线空头趋势中的超跌反弹/低位盘整",
+    "edge": "三周期均处布林中轨下方且均线空头排列，反弹承压做空的顺势逻辑清晰；但夜盘量能极小、盘口薄，方向确认度受限",
+    "no_trade_condition": "1）反弹至9175–9208后若1小时放量站上9264中轨，禁止做空；2）盘口bid/ask挂单持续低于5手时不进场；3）下单前未在软件二次确认P2701实际主力月份与可成交价差；4）model_validation状态为rejected（样本外无优势），日线基准模型结论不得作为交易依据",
     "long_case": {
-      "trigger": "夜盘在9000-9045区间出现止跌放量并收回1小时下轨9097上方",
-      "entry_zone": "9030-9070",
-      "stop": "8985",
+      "trigger": "若价格放量收复1小时中轨9264并站稳",
+      "entry_zone": "9264–9280",
+      "stop": "9140",
       "targets": [
-        "9139",
-        "9270"
+        "9440（4小时中轨）",
+        "9535（日线MA20）"
       ],
-      "invalidation": "收盘跌破9000整数关口",
-      "risk_reward": "1.6"
+      "invalidation": "跌回9175下方",
+      "risk_reward": "约1.7"
     },
     "short_case": {
-      "trigger": "反弹至9097-9140（1小时与4小时下轨区）承压回落",
-      "entry_zone": "9100-9140",
-      "stop": "9200",
+      "trigger": "反弹至9175–9208承压且1小时未能站上9264",
+      "entry_zone": "9175–9208",
+      "stop": "9265",
       "targets": [
-        "9045",
-        "9000"
+        "9102",
+        "9045"
       ],
-      "invalidation": "有效站上9200",
-      "risk_reward": "1.55"
+      "invalidation": "放量收盘站上9264",
+      "risk_reward": "约1.6（首目标）"
     },
     "event_risks": [
-      "夜盘跳空风险：日盘已收于9090，夜盘外盘及宏观情绪可能引致开盘缺口",
-      "远月升水+530元/吨，近月到远月价差结构切换可能引发跨期资金扰动",
-      "主力处于roll_state=watch监控移仓，移仓期间连续合约价格可能因换月产生不连续跳空",
-      "本次舆情搜索结果无有效棕榈油产业信息，印尼/马来出口与产量数据、汇率及原油等外部因素无法从给定数据验证"
+      "MPOB月报及马来出口数据预期变化",
+      "强厄尔尼诺概率传闻对远月供需预期的扰动",
+      "夜盘/外盘马棕波动可能带来跳空"
     ],
     "data_limits": [
-      "realtime 抓取时间为 09:18:47 UTC，对应盘口 ticktime 15:05:05，日盘已收，属收盘附近基准非连续成交盘口",
-      "1小时/2小时/4小时K线 updated_at_utc=05:40:59（约北京时间13:41），最新bar标注14:15/15:00，存在10分钟以上延迟，不可视为刚成交实时K线",
-      "舆情搜索结果均为电视剧、大连城市百科、棕榈词义等无关内容，无产业新闻，新闻维度证据缺失",
-      "model_validation 状态 rejected，历史结果不构成未来胜率或概率",
-      "P0为连续合约口径，非可直接下单的具体月份，须用P2701等实际合约二次确认"
+      "realtime为本次实时输入（ticktime 23:00:00，交易日归属标签2026-10-30），但成交量与盘口极薄，代表性有限",
+      "intraday与日线K线更新时间UTC 17:31，距基准约29分钟，属近实时但非逐笔",
+      "P0为连续合约，含换月跳空，不等于可下单月份",
+      "model_validation为rejected，历史样本外无优势，不构成未来概率"
     ]
   },
   "news_impact": [
-    "[中性] 本次给定的舆情原始搜索结果共10条，全部为《Bold and the Beautiful》电视节目表、大连市百科与旅游攻略、Palm英文词义等无关网页，无任何棕榈油供需、出口、产量或政策信息，新闻维度不能提供方向性证据。",
-    "[中性] 搜索结果中出现的“2026-09-11”等日期来自大连市政府网页快照（[6]），与棕榈油期货无关，不能作为本交易日的产业事件解读，仅说明搜索召回被城市与词义类结果占据。",
-    "[中性] 因无马来西亚/印尼产量出口数据、无国内库存与进口成本数据，无法从舆情端对本轮-2.38%的下跌归因；价格行为只能由技术面（跌破1小时与4小时布林下轨）解释，属推断而非事实。",
-    "[中性] 缺乏可验证的产业新闻意味着方向判断的证据强度受限，任何基于“传闻利多/利空”的加仓都应禁止；本报告置信度58主要来自技术共振而非消息面。",
-    "[中性] 合约结构上P2705较P2701升水530元/吨，属盘面事实而非新闻事件；远月升水结构可视为市场对后市的一种定价，但不得据此编造供需结论或具体原因。",
-    "[中性] 主力进入监控移仓（roll_state=watch），持仓切换本身会改变连续合约的可比性，属数据口径事实；交易者应关注P2701与P2705的流动性与价差变化，但不作为多空信号。"
+    "[利空] 证券之星报道马来西亚棕榈油期货跌超1.5%并创10月中以来新低（UTC 2026-10-29），外盘走弱与国内P0夜盘反弹乏力相互印证，压制做多信心。",
+    "[利空] 同源报道指出马棕逼近两周低位（UTC 2026-10-27），连续下跌强化空头趋势，对应日线破位与布林中轨下方运行。",
+    "[中性] 搜狐网称‘现货弱期货强，棕榈油在等一个拐点’（UTC 2026-10-28），提示现货偏弱、期现背离，短期缺乏现货驱动上行的证据。",
+    "[利多] e南洋/KLSE称出口需求支撑、棕油期货延续涨势（UTC 2026-10-25），提供远端利多预期，但已被后续下跌部分抵消。",
+    "[利多] 证券之星称马棕反弹至4700林吉特/吨上方、供需提供支撑（UTC 2026-10-28），为超跌反弹提供一定基本面想象，但力度有限。",
+    "[中性] 金十数据MPOB 7月月报前瞻提及强厄尔尼诺概率上升（UTC 2026-10-27），属预期而非事实，可能放大远月波动。",
+    "[中性] 导油网称菜油花生油上涨、玉米油葵花籽油平稳（UTC 2026-10-29），油脂板块分化，棕油未获明确联动利多。"
   ],
   "news_articles": [
     {
-      "title": "The Bold and the Beautiful TV Schedule - On TV Tonight",
-      "source": "ontvtonight.com",
-      "url": "https://www.ontvtonight.com/guide/listings/16888938/the-bold-and-the-beautiful/",
-      "detail": "该结果为美国电视剧节目表页面，介绍该剧在美国的播出时间与频道。内容与棕榈油期货、油脂供需完全无关，属于搜索召回噪声。",
+      "title": "马来西亚棕榈油期货跌超1.5% 创10月中以来新低",
+      "source": "证券之星",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE41U1BQYzVvQnJvd1RmRzFhcjRLY3NmRUtGMV8yX3lFLXNCMDY4d2ZfVjhqa2xXY1h3dEdpRGVxLUhGQ3A0UmFVZVlBSzFWTGFuZGM5VTE2LWdBcEwtRUJ6UGo2Uzk?oc=5",
+      "detail": "报道称马来西亚棕榈油期货当日下跌超过1.5%，创10月中旬以来新低。该走势与国内P0日线跌破均线、夜盘反弹乏力方向一致，印证外盘空头氛围。",
+      "impact": "利空"
+    },
+    {
+      "title": "马来西亚棕榈油期货跌逾1.5% 逼近两周低位",
+      "source": "证券之星",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5DMHhGVDd4ZW9heHBPSXJMVTFSQ1NnalVobzhZaVZuMi1BRGhGaWNMYTBZd00yUEhXN2NXNmJ4TEQzRzZFWENUZXBxUjFLZEYtSFowNW5CbTdLZWhoTjkzUmhGNUQ?oc=5",
+      "detail": "报道指出马棕跌逾1.5%并逼近两周低位，显示下跌具备连续性。对国内棕油构成情绪与成本端压制，支持反弹承压做空的思路。",
+      "impact": "利空"
+    },
+    {
+      "title": "现货弱期货强，棕榈油在等一个拐点",
+      "source": "搜狐网",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOT0VyZk5pcTFNanlZT095dVFNc2d6N0hHdnQtTXREUm5pNExFYU52X1A5empVV3doVm9Pd2tmRkcyQmRWTkNudnNyVmI3TEdwUWMzVHRzbnVuSkZaUTlRRUZlU2lBVnRsTnA0MFJIb2JVY0Yxc3NKYjhLY3kyUGxyNE9TMDdxV2xVQTN4QQ?oc=5",
+      "detail": "文章描述当前现货偏弱、期货相对偏强，市场在等待方向拐点。期现背离意味着期货上行缺乏现货印证，短期趋势延续性存疑。",
       "impact": "中性"
     },
     {
-      "title": "大连市_百度百科",
-      "source": "baike.baidu.com",
-      "url": "https://baike.baidu.com/item/大连市/127186",
-      "detail": "该词条介绍大连市的地理、行政与港口工业定位，提及东北亚重要港口城市。虽涉及大连这一交易所所在地，但与棕榈油行情无直接关联，不构成交易信息。",
+      "title": "出口需求支撑价格 棕油期货延续涨势",
+      "source": "e南洋",
+      "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTFBlMFNEdTFtZnZqOV9GQm9MMzFZbWJMUzcydzZtLTBXN09UVHZrM2pRYjdPOHpoN2xnamNHYXlRWTY0UUNNN25KdjhzSG5GM21NS2czaGx0T2p3ODZsZk1xLXNfQQ?oc=5",
+      "detail": "报道称出口需求对棕油价格形成支撑，期货延续涨势。该利多预期偏向远端，但已被随后马棕创新低的走势部分抵消。",
+      "impact": "利多"
+    },
+    {
+      "title": "马棕油期货反弹至4700林吉特/吨上方，供需面提供支撑",
+      "source": "证券之星",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE1RUElobk4yWURqZTZYZHNJTHdpSE1QNlpWeUFqcFI4aEJoLXNSLWk0VWNtVEs3YlNOSEhyZFFzTXNCN1NvUThERkt3LTZCV1pNYWZNYW9DQUFDV25rZDI5MGNJdlo?oc=5",
+      "detail": "报道称马棕油期货反弹至4700林吉特/吨上方，供需面提供支撑。为超跌反弹提供基本面理由，但力度尚不足以扭转日线空头结构。",
+      "impact": "利多"
+    },
+    {
+      "title": "【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？",
+      "source": "金十数据",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5",
+      "detail": "月报前瞻提及强厄尔尼诺概率上升，市场关注库存拐点。该内容属预期层面，并非已发生事实，可能放大远月合约波动。",
       "impact": "中性"
     },
     {
-      "title": "大连市 - 维基百科，自由的百科全书",
-      "source": "zh.wikipedia.org",
-      "url": "https://zh.wikipedia.org/wiki/大连市",
-      "detail": "维基百科条目描述大连为中国北方港口、贸易、工业与金融中心。属城市背景资料，无棕榈油供需或价格数据。",
+      "title": "油脂粕类：多方扰动，走势分化2026.10.24",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxNQnpVY2hKUjk5MUlIZndtckZPY25pb3ZBVUt1bUNQZ3J6S21GWnZzZ19Pd2FCaEZRa01jU0lzM3lYM2gzTzlCRTVCV2VLWTVoanU3VDZjeHVaVWNVWi1VY0R1M0JFSmh3VkZiTmNLU1ZPc0JyQUx3LUJRemI5MmgyQ1NOWW5xN2FCejBJS3J3?oc=5",
+      "detail": "文章指出油脂粕类受多方因素扰动、走势分化。说明板块未形成一致利多，棕油缺乏板块共振支撑。",
       "impact": "中性"
     },
     {
-      "title": "大连十大必玩景点深度攻略 | 本地人私藏版 - 知乎",
-      "source": "zhuanlan.zhihu.com",
-      "url": "https://zhuanlan.zhihu.com/p/1907030928775164398",
-      "detail": "旅游攻略文章列举星海广场等大连景点并附交通提示。内容属旅游信息，与棕榈油期货交易无任何关系。",
-      "impact": "中性"
-    },
-    {
-      "title": "大连旅行超详细攻略（亲测版） - 知乎",
-      "source": "zhuanlan.zhihu.com",
-      "url": "https://zhuanlan.zhihu.com/p/656789613",
-      "detail": "个人游记形式的大连旅行攻略，描述作者长期停留与美食体验。属生活类内容，对棕榈油行情无参考价值。",
-      "impact": "中性"
-    },
-    {
-      "title": "大连市人民政府",
-      "source": "www.dl.gov.cn",
-      "url": "https://www.dl.gov.cn/",
-      "detail": "大连市政府门户首页，快照中出现2026-09-11的重工装备与粮食运输船等新闻标题。虽提及港口物流，但非棕榈油专项信息，且无发布时间与具体数据可核验。",
-      "impact": "中性"
-    },
-    {
-      "title": "Arecaceae - Wikipedia",
-      "source": "en.m.wikipedia.org",
-      "url": "https://en.m.wikipedia.org/wiki/Arecaceae",
-      "detail": "该条目介绍棕榈科植物的分类与宗教文化象征意义，属植物学与人文内容。未涉及棕榈油产量、出口或期货价格。",
-      "impact": "中性"
-    },
-    {
-      "title": "PALM Definition & Meaning - Merriam-Webster",
-      "source": "www.merriam-webster.com",
-      "url": "https://www.merriam-webster.com/dictionary/palm",
-      "detail": "词典页面给出palm一词的英文释义，覆盖棕榈植物及相关用法。纯语言词条，与油脂市场无关。",
-      "impact": "中性"
-    },
-    {
-      "title": "Types of Palm Trees with Names and Pictures - vocabineer.com",
-      "source": "vocabineer.com",
-      "url": "https://www.vocabineer.com/types-of-palm-trees/",
-      "detail": "植物图鉴类文章介绍不同棕榈树品种名称与图片。属植物学内容，不包含棕榈油商业或期货信息。",
-      "impact": "中性"
-    },
-    {
-      "title": "Palm | Description, Uses, Examples, Distribution, Types, & Facts - Britannica",
-      "source": "www.britannica.com",
-      "url": "https://www.britannica.com/plant/palm-tree",
-      "detail": "大英百科介绍棕榈科约190属、2450余种的分布与用途。为科普条目，无棕榈油供需数据，不能作为交易依据。",
+      "title": "菜油花生油还在涨，玉米油葵花籽油保持平稳",
+      "source": "导油网",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE14Y09fSUtGN2dpUXY3WUtlXzFvVzQzNmZ4TDlsUnI3RTJRbGduZjJvdzA4Y0tQbWZvMV9fR3hUdUt5RXNiaTBNWk4wTThfQjZEcTZoZ0o0VEVJOW1wb2JNZQ?oc=5",
+      "detail": "报道称菜油、花生油上涨，玉米油、葵花籽油平稳，油脂内部品种分化。棕油未在列，间接说明其基本面驱动相对偏弱。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
-    "support": 9045.0,
-    "resistance": 9139.86
+    "support": 9102.0,
+    "resistance": 9264.0
   },
   "normalization_warnings": [],
-  "risk_note": "P0 为连续合约分析口径，实际主力映射 P2701（mapping_verified=true），下单前请在交易软件二次确认具体月份、盘口深度与保证金。本次实时基准 realtime.price=9090、ticktime 15:05:05、涨跌幅-2.38%，日盘已收市，夜盘可能跳空；1小时/4小时K线存在10分钟以上延迟。model_validation 状态为 rejected，历史命中率不代表未来概率。舆情搜索结果均为无关噪声，无产业信息支撑，方向判断主要来自技术面。本内容不构成投资建议。",
+  "risk_note": "本分析仅为基于给定行情与舆情的结构化研究，不构成投资建议。P0为连续合约分析口径，实战须在交易软件二次确认主力P2701实际月份、换月价差（次主力P2705升水约478）与流动性，P2701换月状态为watch（监控移仓）。实时盘口极薄（bid 3手/ask 1手），夜盘量比仅0.03–0.04，滑点风险高。model_validation为rejected（样本外无优势），历史命中率、期望值等不得视为未来胜率或概率。留意MPOB月报、马棕出口与厄尔尼诺预期带来的跳空风险，严格执行止损。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-10-29T09:19:07+00:00",
-  "latest_date": "2026-10-28",
-  "realtime_price": 9090.0,
-  "realtime_note": "实时行情截至 2026-10-29 15:05:05，当前价 9090，涨跌 -2.38%",
+  "generated_at_utc": "2026-10-29T18:00:51+00:00",
+  "latest_date": "2026-10-29",
+  "realtime_price": 9175.0,
+  "realtime_note": "实时行情截至 2026-10-30 23:00:00，当前价 9175，涨跌 -0.14%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-10-29T09:18:47+00:00",
-    "market_trading_day": "2026-10-29",
-    "market_tick_time": "15:05:05",
+    "fetched_at_utc": "2026-10-29T18:00:30+00:00",
+    "market_trading_day": "2026-10-30",
+    "market_tick_time": "23:00:00",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] The Bold and the Beautiful TV Schedule - On TV Tonight\n来源: www.ontvtonight.com\n发布时间UTC: \nURL: https://www.ontvtonight.com/guide/listings/16888938/the-bold-and-the-beautiful/\n摘要: 5 hours ago · Find out when The Bold and the Beautiful is on TV in the US. See local TV air times, channels, episode listings, streaming …\n\n[2] 大连市_百度百科\n来源: baike.baidu.com\n发布时间UTC: \nURL: https://baike.baidu.com/item/大连市/127186\n摘要: 大连市（Dalian City），别称“滨城”，辽宁省辖地级市、副省级市、计划单列市、特大城市，东北亚地区重要港口、工业城市与东北对外开放 …\n\n[3] 大连市 - 维基百科，自由的百科全书\n来源: zh.wikipedia.org\n发布时间UTC: \nURL: https://zh.wikipedia.org/wiki/大连市\n摘要: 大连市是 中国北方 重要的港口、贸易、工业、金融和旅游城市，也是 中国东北地区 的国际航运中心、国际物流中心和区域性金融中心 [4]。  …\n\n[4] 大连十大必玩景点深度攻略 | 本地人私藏版 - 知乎\n来源: zhuanlan.zhihu.com\n发布时间UTC: \nURL: https://zhuanlan.zhihu.com/p/1907030928775164398\n摘要: 大连十大必玩景点深度攻略 | 本地人私藏版 避开人挤人！ 附交通指南+防坑提醒，保姆级干货赶紧码住！ 1. 星海广场——亚洲最大城市广场 亮 …\n\n[5] 大连旅行超详细攻略（亲测版） - 知乎\n来源: zhuanlan.zhihu.com\n发布时间UTC: \nURL: https://zhuanlan.zhihu.com/p/656789613\n摘要: Oct 10, 2023 · 这段时间去大连，连工作带玩呆了近20天，把大连是玩了个底朝天，既倾心于大连的美景，也臣服于大连的美食，尤其是海鲜 …\n\n[6] 大连市人民政府\n来源: www.dl.gov.cn\n发布时间UTC: \nURL: https://www.dl.gov.cn/\n摘要: 2026-09-11 大连重工装备集团首个智慧钢材加工配送中心投产 2026-09-11 第八艘8万吨多用途粮食运输船“国富海”轮命名交付 2026-09-11  …\n\n[7] Arecaceae - Wikipedia\n来源: en.m.wikipedia.org\n发布时间UTC: \nURL: https://en.m.wikipedia.org/wiki/Arecaceae\n摘要: Early Christians used the palm branch to symbolize the victory of the faithful over enemies of the soul, as in the Palm Sunday festival …\n\n[8] PALM Definition & Meaning - Merriam-Webster\n来源: www.merriam-webster.com\n发布时间UTC: \nURL: https://www.merriam-webster.com/dictionary/palm\n摘要: 2 days ago · The meaning of PALM is any of a family (Palmae synonym Arecaceae) of mostly tropical or subtropical monocotyledonous …\n\n[9] Types of Palm Trees with Names and Pictures - vocabineer.com\n来源: www.vocabineer.com\n发布时间UTC: \nURL: https://www.vocabineer.com/types-of-palm-trees/\n摘要: May 11, 2026 · Learn different types of palm trees with English names and pictures. Easy vocabulary list for students, beginners, and …\n\n[10] Palm | Description, Uses, Examples, Distribution, Types, & Facts ...\n来源: www.britannica.com\n发布时间UTC: \nURL: https://www.britannica.com/plant/palm-tree\n摘要: palm, (family Arecaceae), family of nearly 190 genera and more than 2,450 species of monocotyledonous flowering plants (order …",
+  "news_summary": "[1] 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-10-27T01:34:08+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5\n摘要: 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 金十数据\n\n[2] 现货弱期货强，棕榈油在等一个拐点 - 搜狐网\n来源: 搜狐网\n发布时间UTC: 2026-10-28T08:25:00+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxOT0VyZk5pcTFNanlZT095dVFNc2d6N0hHdnQtTXREUm5pNExFYU52X1A5empVV3doVm9Pd2tmRkcyQmRWTkNudnNyVmI3TEdwUWMzVHRzbnVuSkZaUTlRRUZlU2lBVnRsTnA0MFJIb2JVY0Yxc3NKYjhLY3kyUGxyNE9TMDdxV2xVQTN4QQ?oc=5\n摘要: 现货弱期货强，棕榈油在等一个拐点 搜狐网\n\n[3] 马来西亚棕榈油期货跌超1.5% 创10月中以来新低_期货评论 - 证券之星\n来源: 证券之星\n发布时间UTC: 2026-10-29T04:12:14+00:00\nURL: https://news.google.com/rss/articles/CBMiZEFVX3lxTE41U1BQYzVvQnJvd1RmRzFhcjRLY3NmRUtGMV8yX3lFLXNCMDY4d2ZfVjhqa2xXY1h3dEdpRGVxLUhGQ3A0UmFVZVlBSzFWTGFuZGM5VTE2LWdBcEwtRUJ6UGo2Uzk?oc=5\n摘要: 马来西亚棕榈油期货跌超1.5% 创10月中以来新低_期货评论 证券之星\n\n[4] 出口需求支撑价格 棕油期货延续涨势 - e南洋\n来源: e南洋\n发布时间UTC: 2026-10-25T16:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTFBlMFNEdTFtZnZqOV9GQm9MMzFZbWJMUzcydzZtLTBXN09UVHZrM2pRYjdPOHpoN2xnamNHYXlRWTY0UUNNN25KdjhzSG5GM21NS2czaGx0T2p3ODZsZk1xLXNfQQ?oc=5\n摘要: 出口需求支撑价格 棕油期货延续涨势 e南洋\n\n[5] 马棕油期货反弹至4700林吉特/吨上方，供需面提供支撑_期货评论 - 证券之星\n来源: 证券之星\n发布时间UTC: 2026-10-28T04:06:12+00:00\nURL: https://news.google.com/rss/articles/CBMiZEFVX3lxTE1RUElobk4yWURqZTZYZHNJTHdpSE1QNlpWeUFqcFI4aEJoLXNSLWk0VWNtVEs3YlNOSEhyZFFzTXNCN1NvUThERkt3LTZCV1pNYWZNYW9DQUFDV25rZDI5MGNJdlo?oc=5\n摘要: 马棕油期货反弹至4700林吉特/吨上方，供需面提供支撑_期货评论 证券之星\n\n[6] 出口需求支撑价格 棕油期货延续涨势 - KLSE Screener\n来源: KLSE Screener\n发布时间UTC: 2026-10-25T16:00:00+00:00\nURL: https://news.google.com/rss/articles/CBMioAJBVV95cUxPaHBqbTBRR2pZRkhLYVNMdGVNcXRDazZhMVBVbzhsQVB0eHlYOEI0aUlCMElsc3pSOWY0SlZCcGxGcDV2Nzlfbkp4a2JPTUdTdmo1Vm5VNFJvdG0zWG5mZHZ2MFpXdmhJV0YtNk5sRTJEaXhybkdOaE9odWEwQnVfdm1rOE1tRGo4ZnJqVnJnRGRXNjRZUTVqY0FORGtVNmhfb2RReEFfT0NpOGNOT3k2TEdTM0FpOUZQdFZXamtGRGctekJVei1hRzlRT3lPdHBmTHdfU1o1RS1KVkQ4YWFqV1BoWG0zdm4zZ0VfMHpBX1FYRUNOc2VkWmV1NDRUZkdlWlZhS01QUlExdnNFUGQ4WmFTT0xRcEg5LVlfTG5tQlQ?oc=5\n摘要: 出口需求支撑价格 棕油期货延续涨势 KLSE Screener\n\n[7] 马来西亚棕榈油期货跌逾1.5% 逼近两周低位_期货评论 - 证券之星\n来源: 证券之星\n发布时间UTC: 2026-10-27T04:15:53+00:00\nURL: https://news.google.com/rss/articles/CBMiZEFVX3lxTE5DMHhGVDd4ZW9heHBPSXJMVTFSQ1NnalVobzhZaVZuMi1BRGhGaWNMYTBZd00yUEhXN2NXNmJ4TEQzRzZFWENUZXBxUjFLZEYtSFowNW5CbTdLZWhoTjkzUmhGNUQ?oc=5\n摘要: 马来西亚棕榈油期货跌逾1.5% 逼近两周低位_期货评论 证券之星\n\n[8] 期货市场下周值得关注的大事件有哪些？各板块有哪些关注点？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-10-25T12:41:27+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE85VDd4OWZ0SGYxMnBPTWdyb3RoZFpIMVVubGxBUldZMlZOMzBvQWo1XzNiaHdkalQtczhMbTJ4ZTIwbjlNZ1hURzVHQkJDUkU?oc=5\n摘要: 期货市场下周值得关注的大事件有哪些？各板块有哪些关注点？-市场参考 金十数据\n\n[9] 油脂粕类：多方扰动，走势分化2026.10.24 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-10-24T09:51:08+00:00\nURL: https://news.google.com/rss/articles/CBMijgFBVV95cUxNQnpVY2hKUjk5MUlIZndtckZPY25pb3ZBVUt1bUNQZ3J6S21GWnZzZ19Pd2FCaEZRa01jU0lzM3lYM2gzTzlCRTVCV2VLWTVoanU3VDZjeHVaVWNVWi1VY0R1M0JFSmh3VkZiTmNLU1ZPc0JyQUx3LUJRemI5MmgyQ1NOWW5xN2FCejBJS3J3?oc=5\n摘要: 油脂粕类：多方扰动，走势分化2026.10.24 新浪财经\n\n[10] 菜油花生油还在涨，玉米油葵花籽油保持平稳 - 导油网\n来源: 导油网\n发布时间UTC: 2026-10-29T03:34:52+00:00\nURL: https://news.google.com/rss/articles/CBMiYEFVX3lxTE14Y09fSUtGN2dpUXY3WUtlXzFvVzQzNmZ4TDlsUnI3RTJRbGduZjJvdzA4Y0tQbWZvMV9fR3hUdUt5RXNiaTBNWk4wTThfQjZEcTZoZ0o0VEVJOW1wb2JNZQ?oc=5\n摘要: 菜油花生油还在涨，玉米油葵花籽油保持平稳 导油网",
   "symbol": "P0",
   "instrument_name": "棕榈油",
-  "api_latency_seconds": 20.7,
+  "api_latency_seconds": 21.7,
   "token_usage": {
-    "prompt_tokens": 14307,
-    "completion_tokens": 3456,
-    "total_tokens": 17763,
+    "prompt_tokens": 15592,
+    "completion_tokens": 3575,
+    "total_tokens": 19167,
     "prompt_tokens_details": {
       "cached_tokens": 384
     },
     "prompt_cache_hit_tokens": 384,
-    "prompt_cache_miss_tokens": 13923
+    "prompt_cache_miss_tokens": 15208
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-10-29T09:19:07+00:00",
+    "checked_at_utc": "2026-10-29T18:00:51+00:00",
     "score": 100,
     "status": "passed",
     "label": "通过",
@@ -188,30 +173,30 @@
     "evidence_confidence": 58,
     "issues": [],
     "facts": {
-      "realtime_price": 9090.0,
+      "realtime_price": 9175.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-10-29T09:18:47+00:00",
-      "realtime_market_tick_time": "15:05:05",
-      "daily_rsi14": 36.36,
-      "one_hour_boll_position": "下轨下方",
-      "four_hour_boll_position": "下轨下方",
-      "realtime_trading_day_label": "2026-10-29",
+      "realtime_fetched_at_utc": "2026-10-29T18:00:30+00:00",
+      "realtime_market_tick_time": "23:00:00",
+      "daily_rsi14": 30.25,
+      "one_hour_boll_position": "中轨下方",
+      "four_hour_boll_position": "中轨下方",
+      "realtime_trading_day_label": "2026-10-30",
       "realtime_label_is_future": false
     }
   },
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-10-29T09:18:47+00:00",
-    "realtime_market_trading_day": "2026-10-29",
-    "realtime_market_tick_time": "15:05:05",
+    "realtime_fetched_at_utc": "2026-10-29T18:00:30+00:00",
+    "realtime_market_trading_day": "2026-10-30",
+    "realtime_market_tick_time": "23:00:00",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-10-29T05:41:22+00:00",
+    "daily_updated_at_utc": "2026-10-29T17:31:51+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-10-29T05:40:59+00:00",
-    "news_updated_at_utc": "2026-10-29T05:41:22+00:00",
-    "contract_bridge_updated_at_utc": "2026-10-29T05:40:58+00:00"
+    "intraday_updated_at_utc": "2026-10-29T17:31:51+00:00",
+    "news_updated_at_utc": "2026-10-29T17:31:49+00:00",
+    "contract_bridge_updated_at_utc": "2026-10-29T17:31:50+00:00"
   }
 }

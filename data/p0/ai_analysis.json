@@ -1,71 +1,196 @@
 {
-  "source": "fallback-rule-analysis",
-  "model": "deepseek-v4-flash",
-  "thinking_mode": "enabled",
-  "reasoning_effort": null,
-  "status": "fallback",
-  "error": "JSONDecodeError: Expecting ',' delimiter: line 1 column 8196 (char 8195)",
-  "generated_at_utc": "2026-11-18T06:00:45+00:00",
-  "latest_date": "2026-11-17",
-  "summary": "DeepSeek 未生成分析，当前显示规则分析摘要。",
-  "bias": "等待AI",
+  "summary": "基准时刻为北京时间2026-11-18 14:08:10，正值午盘时段。实时行情（Sina live，ticktime 14:07:47，交易日标签2026-11-18，非未来标签）显示P0连续/P2701最新价8640，较前结算8874跌234点、跌幅-2.64%，当日区间8606–8803，买8640/卖8641盘口偏薄。日线背景：11月17日收8794（-2.39%），MA10 8848.3、MA20 9110.7、MA60 9657.4呈空头排列，日线RSI14 37.2（未超卖），20日高9718/低8485。1小时布林：上9147.87/中8880.4/下8612.93，现价8640贴近下轨、中轨下方，带宽6.02%，1小时RSI31.04接近超卖、ADX42.32趋势强。4小时布林：上9095.93/中8800.9/下8505.87，现价中轨下方、带宽6.7%，4小时RSI33.31。三尺度均处中轨下方，短周期超跌但未见反转信号，日线仍偏空。连续合约映射P2701（mapping_verified=true），次主力P2705价9155、价差+515（远月升水5.96%）、次主力/主力持仓比0.7209，roll_state=watch监控移仓。model_validation状态rejected（样本外无优势），历史日线基准模型命中率不代表未来概率。策略上以反弹承压偏空或极短线超跌反抽为主，但盈亏比不足时明确观望。不构成投资建议。",
+  "bias": "偏空",
   "analysis": [
-    "实时价 8616（实时行情截至 2026-11-18 14:00:10，当前价 8616，涨跌 -2.91%），最新日线收盘 8794，日涨跌 -2.39%。",
-    "MA10/MA20/MA60 分别为 8848/9111/9657。",
-    "20日区间支撑压力为 8485-9718。"
+    "【实时价位置】实时ticktime 14:07:47最新价8640、跌幅-2.64%（对前结算8874），位于当日区间8606–8803下沿，盘口买8640/卖8641量能薄（27/11手），显示午盘抛压主导、反弹承接有限。",
+    "【1小时布林】1小时布林上9147.87/中8880.4/下8612.93，现价8640贴近下轨并在中轨下方，带宽6.02%，未突破下轨但持续贴轨；1小时RSI31.04接近超卖、ADX42.32，属强趋势下的超跌，尚无回归中轨迹象。",
+    "【4小时布林】4小时布林上9095.93/中8800.9/下8505.87，现价8640位于中轨下方偏下位置，带宽6.7%，价格自11月16日9072高点回落，未触及下轨8505.87，4小时RSI33.31偏弱但未超卖。",
+    "【日线布林/均线】日线收8794低于MA10 8848.3、MA20 9110.7、MA60 9657.4，均线空头排列；日线RSI14 37.2，未进入超卖区（<30），中期下行趋势明确，20日区间8485–9718。",
+    "【趋势结构】1小时EMA20 8818.9、4小时EMA20 8869.92，现价8640均在其下方且EMA斜率向下，多周期共振偏空；1小时/4小时/日线三尺度全部位于中轨下方，属趋势延续而非反转形态。",
+    "【量能与持仓】实时成交量464544、持仓475539，较日线11月17日487095/480617呈减仓下跌；1小时/4小时open_interest_change -1959，伴随下跌减仓说明多头止损离场为主，非新空大举建仓，追空性价比需谨慎。",
+    "【支撑压力】下方关键支撑8485.0（20日低点，与4小时布林下轨8505.87接近）、上方压力8800.9（4小时中轨）及8880.4（1小时中轨），反弹至此为偏空参考位；日线MA10 8848.3为第一压制带。",
+    "【合约与数据时效】P0映射P2701（mapping_verified=true，价格持仓一致），次主力P2705价9155、价差+515远月升水，roll_state=watch；实时为live输入，小时线/日线updated_at 05:46:38–05:46:40 UTC（约14:08前20余分钟）属最新收盘缓存，非逐笔实时成交。"
   ],
   "intraday_strategy": {
-    "bias": "等待AI",
-    "entry": "等待手动触发 DeepSeek 后生成1小时/2小时策略",
-    "stop": "未给出",
-    "take_profit": "未给出",
-    "invalidation": "未给出",
-    "notes": "当前为规则备用分析"
+    "bias": "偏空（反弹承压做空为主，极短线超跌反抽需严格轻仓快进快出）",
+    "entry": "8640附近为当前基准；反弹至8800–8810（4小时中轨附近）为理想偏空入场区，或在跌破8606当日低点后回抽8610–8640顺势跟进",
+    "stop": "空单止损8835（1小时中轨8880.4下方与日线MA10 8848.3之上取防假突破位），反抽多单止损8585（8606下方）",
+    "take_profit": "第一目标8505.87（4小时布林下轨/8400–8500支撑带），第二目标8485.0（20日低点）",
+    "invalidation": "若1小时收盘站回8880.4中轨上方且放量、或4小时收复8800.9中轨并站稳，则空头逻辑失效转观望",
+    "notes": "适用今晚夜盘21:00–23:00开盘后关注及明日早盘09:00–11:30；午盘13:30–15:00临近尾盘不建议新开仓。P0为连续合约，下单前须在交易软件二次确认为P2701具体月份合约，注意换月价差（P2705升水515）与流动性。首目标盈亏比若在8800入场约1.6、在8640直接追空约1.4，低于1.5时按no_trade_condition观望。"
   },
   "decision_frame": {
-    "confidence": 0,
-    "regime": "数据不足",
-    "edge": "等待 DeepSeek",
-    "no_trade_condition": "AI 未生成时不把规则摘要当作独立交易依据",
-    "long_case": {},
-    "short_case": {},
-    "event_risks": [],
+    "confidence": 55,
+    "regime": "日线空头趋势下的1小时/4小时超跌延续，短周期贴轨但未反转",
+    "edge": "多周期中轨下方共振偏空，但价格已贴近1小时下轨且RSI31接近超卖，直接追空盈亏比不足，优势主要在反弹至4小时中轨8800附近的承压沽空",
+    "no_trade_condition": "1）P0未在交易软件二次确认为P2701具体月份合约前不交易；2）若入场点至首目标盈亏比<1.5（如8640直接追空至8505约1.35–1.4）则观望，不硬给方向；3）若1小时收盘站上8880.4或4小时收复8800.9并放量则不做空；4）model_validation为rejected，历史日线模型无样本外优势，不得据此加仓或当作胜率依据",
+    "long_case": {
+      "trigger": "1小时在下轨8612.93附近出现放量止跌且收复1小时EMA20 8818.9方向",
+      "entry_zone": "8585–8640",
+      "stop": "8540",
+      "targets": [
+        "8700,8800.9"
+      ],
+      "invalidation": "跌破8540或1小时继续贴轨阴跌",
+      "risk_reward": "约1.9（至8700）"
+    },
+    "short_case": {
+      "trigger": "反弹至4小时中轨8800.9附近承压或跌破当日低点8606后回抽",
+      "entry_zone": "8790–8810（反弹空）或8610–8640（破位回抽空）",
+      "stop": "8835",
+      "targets": [
+        "8505.87,8485.0"
+      ],
+      "invalidation": "1小时收盘站上8880.4且放量",
+      "risk_reward": "约1.6（8800空至8505.87）"
+    },
+    "event_risks": [
+      "MPOB 10月报告已公布（累库低于预期，超跌反弹逻辑已被11月中旬价格消化），后续关注马来西亚11月产量与出口高频数据、印尼出口税政策及美联储12月加息预期对商品的宏观压制；舆情中库存362万吨创新高的利空与减产预期并存，方向存在反复。"
+    ],
     "data_limits": [
-      "当前为备用规则分析"
+      "1小时/4小时/日线数据为05:46 UTC缓存收盘，非逐笔实时；实时价8640为14:07:47 live快照；model_validation样本外无优势（win_rate 0.2857, expectancy -0.26R），不代表未来；连续合约含换月跳空，不等同具体月份回测。"
     ]
   },
-  "news_impact": [],
-  "news_articles": [],
+  "news_impact": [
+    "[利空]马来西亚棕油库存362万吨创新高（KLSE Screener、e南洋 11-17报道），业界促政府速定出口税豁免，反映产地累库压力仍在，压制棕榈油外盘及国内P0估值中枢下移。",
+    "[中性偏多]MPOB 10月报告显示累库低于市场预期，同花顺11-12解读为棕榈油超跌反弹，但该反弹已在11月12–16日价格（9008→9073高点）中体现，当前8640已回吐，利多边际减弱。",
+    "[中性偏多]e南洋11-11报道减产潮将至、库存料回落、12月棕油出口税维持10%，属市场预期而非已实现数据，对中期构成潜在支撑，但短期难敌累库现实。",
+    "[利空]金十数据11-14 MPOB月报前瞻称出口预期暴增四成仍挡不住库存创新高，强化累库叙事，对盘面偏空。",
+    "[利空]和平日报11-17报道美联储预计12月再次加息，全球风险偏好承压、印尼盾与印尼金融市场承压，宏观层面利空商品与棕榈油出口需求。",
+    "[利空]The Edge Malaysia 11-17报道原棕油销量下降、合成种植第三季净利下滑，印证下游需求走弱，利空棕榈油消费端。",
+    "[中性]Mongabay 11-16报道印尼国内棕榈油消费与毁林风险相关，属ESG/监管议题，短期对价格直接影响有限，但为中长期供应政策不确定性来源。",
+    "[中性偏多]金十数据11-12提及强厄尔尼诺概率飙升、市场期待库存拐点，属天气预期炒作，尚未兑现为产量数据，可作为远月升水（P2705升水515）的注脚。"
+  ],
+  "news_articles": [
+    {
+      "title": "MPOB 10月月报前瞻：出口预期暴增四成仍挡不住库存创新高，马棕油何时才能走出“累库泥潭”？",
+      "source": "金十数据",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9OS0tsSWlzUjF2Tjd5N1J3aGNSa3ZfSXcwczhKQWhQR3h0a00yMmlFUzdzajB4cGhEbmNyZHFEUTZMOHhlNWtlV3FZSEMtNEE?oc=5",
+      "detail": "金十数据11月14日发布MPOB 10月月报前瞻，指出即便出口预期环比暴增约四成，马来西亚棕榈油库存仍将创新高。文章认为累库格局短期难改，市场对马棕走出累库泥潭存疑。该预期与后续11月17日库存362万吨创新高的报道方向一致。",
+      "impact": "利空"
+    },
+    {
+      "title": "MPOB 10月报告解读｜马棕累库低于预期，棕榈油超跌反弹",
+      "source": "同花顺财经",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTFA2aGRUQ1JmaW01ZXhqaTBsSjM1YjZfM1R4MlBNUGw4QktoNTRnM2pLN3NBUEN0NlU2SC02R0ZJMk5rWDVTVHJlYUxXNy1lRmlMMkpnbWg2UkJ5WS0zZ29yamhB?oc=5",
+      "detail": "同花顺财经11月12日解读MPOB 10月报告，称马棕累库低于市场预期，带动棕榈油超跌反弹。该利多已在11月12–16日盘面（期价从8729反弹至9073高点）中体现。当前P0已回落至8640，说明反弹动能衰减。",
+      "impact": "中性"
+    },
+    {
+      "title": "【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？",
+      "source": "金十数据",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5",
+      "detail": "金十数据11月12日提及强厄尔尼诺概率飙升，市场关注未来库存拐点是否临近。该内容属天气与预期层面，尚未转化为实际减产数据。可作为远月合约升水（P2705较P2701升水515）的潜在注脚。",
+      "impact": "中性"
+    },
+    {
+      "title": "棕油库存362万吨创新高 业界促政府速定出口税豁免（KLSE Screener）",
+      "source": "KLSE Screener",
+      "url": "https://news.google.com/rss/articles/CBMi4AJBVV95cUxOaUtKNVdRTFNMTkJ5X3ZGRm9mMk1kS0hIYzZub2xBeURSdldzcTVGcjdqWllLZ2lRRWdKeVdPdjJpZS1ISG44NTFVMmZ3TkdKVDQzRENQT3pweDlXU2dwcHFEWlZ4bmFwY0x0TmVVVTl1STNxYkdYY3pEMHRtSk1fanJyMWVBZTBjUmxVWFlfVEdrYk1jSmVVYUtyZGo5c09pUDB6dTdvNEZLcXhWckxPdkRiS0Z0WFRYOGdxQk5rV2FST0o3RldwV1hoU0tDdjc3YUpINGxRbElJbGFnSnJNYnktQ0xTR215aFl2YWsxRWRUYXpGSjl4dUgxX1pLamRMUnNJejdNOGQ2UDktUTQ4V0ZhdmZJS1RuNXdiaXpBWEsyOGc3OTVXTDk5MWlsaVpoZmtXMmJtUGdENkZIUFZwZmtLQ0FoRFVfNEx0S1BSQnoyS3dHdmthd1VXR3N6NWFf?oc=5",
+      "detail": "KLSE Screener 11月17日报道马来西亚棕油库存攀升至362万吨创新高，业界呼吁政府尽快确定出口税豁免以缓解压力。高库存是压制外盘及国内棕榈油价格的核心利空。该消息与盘面11月17–18日连续下跌方向吻合。",
+      "impact": "利空"
+    },
+    {
+      "title": "减产潮将至 库存料回落 12月棕油出口税维持10%",
+      "source": "e南洋",
+      "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE1WS3FvWWhiWGNueEVCcm51aXhuUnBVREtaamZmRlZJYldTcEdOSGxRMmlsdW9GQjZXMjAzajlmM2oxOHZoWEN5MVFWUEZHNkdodXZpUWpOSV9qX3gxWWR2LVI4TQ?oc=5",
+      "detail": "e南洋11月11日报道称减产周期将至、库存预计回落，且12月棕油出口税维持10%。这属于对未来的市场预期，而非已实现数据。对中期构成潜在支撑，但短期难敌当前高库存现实。",
+      "impact": "中性"
+    },
+    {
+      "title": "棕油库存362万吨创新高 业界促政府速定出口税豁免（e南洋）",
+      "source": "e南洋",
+      "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5aeDRnSDlBc2EwMzdsdERuMHFyemtRUmpCVUV5VjVmYjhlSkh4UTlBYk9fVVY3UndqR05kRUtqc2tKVmtMOFdrd2hKLXY5M3N2M2xyeTVWWFJqbVFlRVk1QTV4VQ?oc=5",
+      "detail": "e南洋11月17日报道同样指出棕油库存362万吨创新高，并呼吁政府速定出口税豁免。重复强化了产地累库利空。对国内P0构成持续性压制。",
+      "impact": "利空"
+    },
+    {
+      "title": "美联储预计12月再次加息 全球经济面临新一轮冲击，印尼盾与印尼金融市场承压",
+      "source": "和平日报",
+      "url": "https://news.google.com/rss/articles/CBMi1wJBVV95cUxOQ19vdVpoRExFbmZMUkkwOTM4X2hqUXhXcnJJZWJWaHpsaDZUNjlNQ1V1Q3NtZjREdHVZbkNuQmRSMnJZRzVjdWRuZU51cjdNMHVSWFRZVDcxWDJXRDZmekt6RHVPc3BrWmxMM09HaElqTUlVUXpISlkwdlljaWF2VHdGazl1cXFOd2R6eWhMWlVXbUQ4NmdUbDEwbmRrd29EQzRuaF9YTFZvNXZ6SV84NFlMU2RGNjhBZ0tRX1NuVkRpUlBfM1JTTk9JcDlJaWRUanJLTlRRM0E4S0FRTWxOTllfeDFya1NOcW5lcHpITjh0SzRBX0k5MXBLRzdCcHpXektCQzFjMXRoYlBOakdzaGZPRkpUS1JaSG1kV1M4NVI5RjhhaGJ2ZzVWTER0em14WkVCSjdpTkpXNkR6ZUhudWY2VGxhalRQbzE4cVdqT3JOeEZQUzBR?oc=5",
+      "detail": "和平日报11月17日报道美联储预计12月再次加息，称全球经济面临新一轮冲击，印尼盾与印尼金融市场承压。宏观紧缩预期利空大宗商品风险偏好。对棕榈油出口需求与价格构成间接压力。",
+      "impact": "利空"
+    },
+    {
+      "title": "原棕油销量降 合成种植第三季净利跌",
+      "source": "The Edge Malaysia",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9GRjJYT1kxdUhCbW9ObU1YaWM4UWx5OXg3YkhLbDZIUUpJWF9uN09LVGVmN3NndGJQZXZsWEprZFdLallZUFhlUzRvNmlZQUk?oc=5",
+      "detail": "The Edge Malaysia 11月17日报道合成种植第三季净利下滑，主因原棕油销量下降。这印证下游需求走弱。对棕榈油价格构成需求端的利空信号。",
+      "impact": "利空"
+    },
+    {
+      "title": "Mongabay：印尼国内棕榈油消费与三分之二的毁林风险相关",
+      "source": "UA.NEWS",
+      "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPTDhIdG10djdfNmpDdWsxV1pWc1JHOHVlZWZXWmdpeU1nWnN2MVFMZ3JLZUJ4UUJJWGdPTTltdzhiRHk3Y3JDZXpFeWtQbGg4VEZPd2xwNTEtZG9NVGhuWWQtZGo4a05OY1NvNFBsYnR6eVlscEpsZXRWODRZMHVSdDFWZ2sySXNHd1hYWkFQWm9XcWg0UUowZElGMlJpdVY5eVNuV05Yel9QdzNiTUl4OXFWaC13Qm81Q3EzaGsyVEJvaDhUTFh4Q1gzcw?oc=5",
+      "detail": "UA.NEWS 11月16日援引Mongabay报道，印尼国内棕榈油消费与三分之二的毁林风险相关，指向ESG与监管风险。短期对盘面价格直接影响有限。但为中长期供应与政策不确定性来源。",
+      "impact": "中性"
+    }
+  ],
   "watch_levels": {
     "support": 8485.0,
-    "resistance": 9718.0
+    "resistance": 8800.9
   },
-  "integrity": {
-    "version": "deterministic-integrity-v1",
-    "checked_at_utc": "2026-11-18T06:00:45+00:00",
-    "score": 0,
-    "status": "blocked",
-    "label": "规则接管",
-    "execution_allowed": false,
-    "evidence_confidence": 0,
-    "issues": [
-      {
-        "code": "ai_unavailable",
-        "severity": "high",
-        "message": "JSONDecodeError: Expecting ',' delimiter: line 1 column 8196 (char 8195)"
-      }
-    ],
-    "facts": {}
+  "normalization_warnings": [],
+  "risk_note": "本分析基于北京时间2026-11-18 14:08:10实时快照（ticktime 14:07:47，live）及05:46 UTC缓存的小时线/日线，非逐笔实时成交；P0为连续合约，实盘须在交易软件二次确认为P2701具体月份并注意换月价差与流动性风险；model_validation为rejected，历史样本外无优势，任何方向与点位均不构成投资建议或收益保证；行情可能受外盘、政策、汇率及突发事件影响剧烈波动，请严格止损、控制仓位。",
+  "source": "DeepSeek API",
+  "model": "deepseek-v4-flash",
+  "thinking_mode": "disabled",
+  "reasoning_effort": null,
+  "deepseek_mode": "no-thinking",
+  "status": "ok",
+  "generated_at_utc": "2026-11-18T06:08:39+00:00",
+  "latest_date": "2026-11-17",
+  "realtime_price": 8640.0,
+  "realtime_note": "实时行情截至 2026-11-18 14:07:47，当前价 8640，涨跌 -2.64%",
+  "realtime_input": {
+    "status": "live",
+    "fetched_at_utc": "2026-11-18T06:08:10+00:00",
+    "market_trading_day": "2026-11-18",
+    "market_tick_time": "14:07:47",
+    "source": "Sina Market Center live request",
+    "cached_quote_used": false
   },
-  "risk_note": "本分析仅供行情研究，不构成投资建议。",
+  "news_summary": "[1] 【MPOB 10月月报前瞻】出口预期暴增四成仍挡不住库存创新高，马棕油何时才能走出“累库泥潭”？ - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-11-14T09:44:41+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9OS0tsSWlzUjF2Tjd5N1J3aGNSa3ZfSXcwczhKQWhQR3h0a00yMmlFUzdzajB4cGhEbmNyZHFEUTZMOHhlNWtlV3FZSEMtNEE?oc=5\n摘要: 【MPOB 10月月报前瞻】出口预期暴增四成仍挡不住库存创新高，马棕油何时才能走出“累库泥潭”？ 金十数据\n\n[2] MPOB 10月报告解读|马棕累库低于预期，棕榈油超跌反弹 - 同花顺财经\n来源: 同花顺财经\n发布时间UTC: 2026-11-12T13:31:57+00:00\nURL: https://news.google.com/rss/articles/CBMiYkFVX3lxTFA2aGRUQ1JmaW01ZXhqaTBsSjM1YjZfM1R4MlBNUGw4QktoNTRnM2pLN3NBUEN0NlU2SC02R0ZJMk5rWDVTVHJlYUxXNy1lRmlMMkpnbWg2UkJ5WS0zZ29yamhB?oc=5\n摘要: MPOB 10月报告解读|马棕累库低于预期，棕榈油超跌反弹 同花顺财经\n\n[3] 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-11-12T23:44:36+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE11WlBBRWkzUHpjS2UyUUlLWlI1T3hLSUE2UmpUekNXd0Ixd2tWMjlFaEN6QUxhTnd2dG1HY0NfcTd0Y2lGd1V4UGgxamxXS2c?oc=5\n摘要: 【MPOB 7月月报前瞻】强厄尔尼诺概率飙升，市场期待的“库存拐点”还会远吗？-市场参考 金十数据\n\n[4] 棕油库存362万吨创新高 业界促政府速定出口税豁免 - KLSE Screener\n来源: KLSE Screener\n发布时间UTC: 2026-11-17T09:17:43+00:00\nURL: https://news.google.com/rss/articles/CBMi4AJBVV95cUxOaUtKNVdRTFNMTkJ5X3ZGRm9mMk1kS0hIYzZub2xBeURSdldzcTVGcjdqWllLZ2lRRWdKeVdPdjJpZS1ISG44NTFVMmZ3TkdKVDQzRENQT3pweDlXU2dwcHFEWlZ4bmFwY0x0TmVVVTl1STNxYkdYY3pEMHRtSk1fanJyMWVBZTBjUmxVWFlfVEdrYk1jSmVVYUtyZGo5c09pUDB6dTdvNEZLcXhWckxPdkRiS0Z0WFRYOGdxQk5rV2FST0o3RldwV1hoU0tDdjc3YUpINGxRbElJbGFnSnJNYnktQ0xTR215aFl2YWsxRWRUYXpGSjl4dUgxX1pLamRMUnNJejdNOGQ2UDktUTQ4V0ZhdmZJS1RuNXdiaXpBWEsyOGc3OTVXTDk5MWlsaVpoZmtXMmJtUGdENkZIUFZwZmtLQ0FoRFVfNEx0S1BSQnoyS3dHdmthd1VXR3N6NWFf?oc=5\n摘要: 棕油库存362万吨创新高 业界促政府速定出口税豁免 KLSE Screener\n\n[5] 减产潮将至 库存料回落 12月棕油出口税维持10% - e南洋\n来源: e南洋\n发布时间UTC: 2026-11-11T12:07:14+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE1WS3FvWWhiWGNueEVCcm51aXhuUnBVREtaamZmRlZJYldTcEdOSGxRMmlsdW9GQjZXMjAzajlmM2oxOHZoWEN5MVFWUEZHNkdodXZpUWpOSV9qX3gxWWR2LVI4TQ?oc=5\n摘要: 减产潮将至 库存料回落 12月棕油出口税维持10% e南洋\n\n[6] 棕油库存362万吨创新高 业界促政府速定出口税豁免 - e南洋\n来源: e南洋\n发布时间UTC: 2026-11-17T09:17:43+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE5aeDRnSDlBc2EwMzdsdERuMHFyemtRUmpCVUV5VjVmYjhlSkh4UTlBYk9fVVY3UndqR05kRUtqc2tKVmtMOFdrd2hKLXY5M3N2M2xyeTVWWFJqbVFlRVk1QTV4VQ?oc=5\n摘要: 棕油库存362万吨创新高 业界促政府速定出口税豁免 e南洋\n\n[7] 美联储预计12月再次加息 全球经济面临新一轮冲击，印尼盾与印尼金融市场承压 - 和平日报\n来源: 和平日报\n发布时间UTC: 2026-11-17T06:00:53+00:00\nURL: https://news.google.com/rss/articles/CBMi1wJBVV95cUxOQ19vdVpoRExFbmZMUkkwOTM4X2hqUXhXcnJJZWJWaHpsaDZUNjlNQ1V1Q3NtZjREdHVZbkNuQmRSMnJZRzVjdWRuZU51cjdNMHVSWFRZVDcxWDJXRDZmekt6RHVPc3BrWmxMM09HaElqTUlVUXpISlkwdlljaWF2VHdGazl1cXFOd2R6eWhMWlVXbUQ4NmdUbDEwbmRrd29EQzRuaF9YTFZvNXZ6SV84NFlMU2RGNjhBZ0tRX1NuVkRpUlBfM1JTTk9JcDlJaWRUanJLTlRRM0E4S0FRTWxOTllfeDFya1NOcW5lcHpITjh0SzRBX0k5MXBLRzdCcHpXektCQzFjMXRoYlBOakdzaGZPRkpUS1JaSG1kV1M4NVI5RjhhaGJ2ZzVWTER0em14WkVCSjdpTkpXNkR6ZUhudWY2VGxhalRQbzE4cVdqT3JOeEZQUzBR?oc=5\n摘要: 美联储预计12月再次加息 全球经济面临新一轮冲击，印尼盾与印尼金融市场承压 和平日报\n\n[8] 印尼矿业再收紧！采矿收益七成归国家，镍出口监管升级 - ChemNet News\n来源: ChemNet News\n发布时间UTC: 2026-11-17T01:33:46+00:00\nURL: https://news.google.com/rss/articles/CBMiX0FVX3lxTFB3U21iMDBYOGY0Z3ZIV3VWcUNfT0owREFwWTlyallJZlk2ZEROb2VpREJVY3M3M0JwMlRCSEVrVXlJQVowbFVueXdvZHhndndvUUp4d2NqMHJkNm5ZUmR3?oc=5\n摘要: 印尼矿业再收紧！采矿收益七成归国家，镍出口监管升级 ChemNet News\n\n[9] 原棕油销量降 合成种植第三季净利跌 - The Edge Malaysia\n来源: The Edge Malaysia\n发布时间UTC: 2026-11-17T12:58:00+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9GRjJYT1kxdUhCbW9ObU1YaWM4UWx5OXg3YkhLbDZIUUpJWF9uN09LVGVmN3NndGJQZXZsWEprZFdLallZUFhlUzRvNmlZQUk?oc=5\n摘要: 原棕油销量降 合成种植第三季净利跌 The Edge Malaysia\n\n[10] Mongabay： 印尼国内棕榈油消费与三分之二的毁林风险相关 - UA.NEWS\n来源: UA.NEWS\n发布时间UTC: 2026-11-16T01:16:00+00:00\nURL: https://news.google.com/rss/articles/CBMiywFBVV95cUxPTDhIdG10djdfNmpDdWsxV1pWc1JHOHVlZWZXWmdpeU1nWnN2MVFMZ3JLZUJ4UUJJWGdPTTltdzhiRHk3Y3JDZXpFeWtQbGg4VEZPd2xwNTEtZG9NVGhuWWQtZGo4a05OY1NvNFBsYnR6eVlscEpsZXRWODRZMHVSdDFWZ2sySXNHd1hYWkFQWm9XcWg0UUowZElGMlJpdVY5eVNuV05Yel9QdzNiTUl4OXFWaC13Qm81Q3EzaGsyVEJvaDhUTFh4Q1gzcw?oc=5\n摘要: Mongabay： 印尼国内棕榈油消费与三分之二的毁林风险相关 UA.NEWS",
   "symbol": "P0",
   "instrument_name": "棕榈油",
+  "api_latency_seconds": 29.2,
+  "token_usage": {
+    "prompt_tokens": 15929,
+    "completion_tokens": 4902,
+    "total_tokens": 20831,
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 12985
+  },
+  "integrity": {
+    "version": "deterministic-integrity-v2",
+    "checked_at_utc": "2026-11-18T06:08:39+00:00",
+    "score": 100,
+    "status": "passed",
+    "label": "通过",
+    "execution_allowed": true,
+    "evidence_confidence": 55,
+    "issues": [],
+    "facts": {
+      "realtime_price": 8640.0,
+      "realtime_fetch_status": "live",
+      "realtime_fetched_at_utc": "2026-11-18T06:08:10+00:00",
+      "realtime_market_tick_time": "14:07:47",
+      "daily_rsi14": 37.2,
+      "one_hour_boll_position": "中轨下方",
+      "four_hour_boll_position": "中轨下方",
+      "realtime_trading_day_label": "2026-11-18",
+      "realtime_label_is_future": false
+    }
+  },
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-11-18T06:00:16+00:00",
+    "realtime_fetched_at_utc": "2026-11-18T06:08:10+00:00",
     "realtime_market_trading_day": "2026-11-18",
-    "realtime_market_tick_time": "14:00:10",
+    "realtime_market_tick_time": "14:07:47",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
@@ -74,13 +199,5 @@
     "intraday_updated_at_utc": "2026-11-18T05:46:38+00:00",
     "news_updated_at_utc": "2026-11-18T05:46:35+00:00",
     "contract_bridge_updated_at_utc": "2026-11-18T05:46:40+00:00"
-  },
-  "realtime_input": {
-    "status": "live",
-    "fetched_at_utc": "2026-11-18T06:00:16+00:00",
-    "market_trading_day": "2026-11-18",
-    "market_tick_time": "14:00:10",
-    "source": "Sina Market Center live request",
-    "cached_quote_used": false
   }
 }

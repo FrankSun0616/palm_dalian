@@ -1,191 +1,206 @@
 {
-  "summary": "本次分析基准为实时输入（realtime_fetch_status=live）：P0 连续合约最新实时价 8478.0，盘口 ticktime 为北京时间 2026-11-27 11:30:00（大商所交易日归属标签 2026-11-27，非未来标签），相对前结算 8335 上涨 +1.72%，相对前收盘 8322 上涨 143 点。价格已突破 1 小时布林上轨 8477.01（实时价 8478 刚站上上轨），位于 4 小时布林上轨 9042.1 与中轨 8490.7 之间、仍未收复中轨，日线仍深度运行于 ma10/ma20/ma60 之下且日线 RSI14 仅 32.44（接近超卖但未达 30）。因此短线为超跌反弹叠加夜盘跳空高开后的强势延续，但中线仍是空头格局下的修复，不宜把反弹直接等同于趋势反转。注意：intraday 1H/2H/4H K 线更新于 2026-11-26T23:29:08Z（北京 11-27 07:29），最新的 1 小时收盘为 11-26 23:00，距基准时刻已超过 10 分钟，属延迟 K 线，4 小时最新标签 11-27 11:15 但成交量仅 1764，量能明显偏低，需以实时盘口为价格基准。连续合约 P0 并不等于可下单的具体月份合约：contract_bridge 显示最高持仓合约为 P2705（价 8956、持仓 395379），而 P0 实时价 8478 更贴近次主力 P2701（价 8478、持仓 368944），mapping_verified=false，换月状态 urgent，下单前必须人工复核映射与流动性。model_validation 状态为 rejected（样本外无优势），历史优势未被证实，不得将其胜率当作未来概率。综合方向偏多（震荡偏强），但仅在回踩确认后操作，否则观望。",
+  "summary": "本次分析基准为北京时间2026-11-27 13:33:18（UTC 2026-11-27T05:33:18+00:00），处于午盘13:30-15:00时段。实时盘口 P0 连续合约最新价 realtime.price=8511.0，ticktime=13:33:13，涨跌幅 +2.11%（相对前结算8335参考），实时抓取状态 live，属本次实时输入。注意：盘中1小时/4小时/2小时K线数据 updated_at_utc 为 2026-11-27T05:13:42，约延迟20分钟，且最新1H/4H bar 时间标注 14:15/15:00，属未收盘/预生成bar，只能作为方向参考，不能当作已成交实时盘口；日线最新为 2026-11-26 收盘（延迟一日），新闻最新约 2026-11-25 13:29 UTC，均有延迟。1小时布林上轨8536.37/中轨8335.15/下轨8133.93，价8511运行于中轨上方、接近上轨；4小时布林上轨8977.62/中轨8470.75/下轨7963.88，价8511在中轨上方但距上轨远；日线布林未直接给出但价8322远低于 MA10 8524.4、MA20 8737.4、MA60 9457.3，日线布林位置偏低（下轨附近反弹），RSI14 32.44 为弱势非超卖。综合：1H+4H 短线反弹偏多，但日线仍为下行趋势中的技术反弹，方向偏多但证据强度中等。contract_bridge 显示 P0 连续实际映射到的次主力为 P2701（8511，与实时价一致），最高持仓主力为 P2705（8995，贴水结构、次主力/主力价差-484约-5.38%，主力持仓占比41.22%，roll_state=urgent 临近换月），且 mapping_verified=false，必须人工复核后再下单，下单软件需二次确认具体月份。model_validation 状态 rejected（样本外无优势，77笔胜率29.87%、期望-0.2393R），历史优势未被证实，不得把该命中率当作未来概率。",
   "bias": "偏多",
   "analysis": [
-    "1小时布林：上轨 8477.01 / 中轨 8296.45 / 下轨 8115.89，带宽 4.35%。1小时最新收盘 8408（延迟 K 线，11-26 23:00），而实时价 8478 已上穿上轨 8477.01，属于通道外强势；1小时 RSI14 54.26 偏中性偏多，ADX14 仅 14.26 说明趋势强度弱，突破更可能是反弹脉冲而非单边启动。",
-    "4小时布林：上轨 9042.1 / 中轨 8490.7 / 下轨 7939.3，带宽 12.99%。4小时收盘 8409 仍在中轨下方，实时价 8478 逼近但未收复中轨 8490.7，4小时 RSI14 44.12 偏弱、ADX14 51.11 表明中期下行趋势强度仍高、ema20 8460.6 斜率为负；即短线强、4小时仍是反弹至中轨受压的格局。",
-    "日线布林/均线：日线最新收盘 8322（11-26），ma10 8524.4、ma20 8737.4、ma60 9457.3 呈空头排列，实时价 8478 仍在 ma10 下方约 46 点；日线 RSI14 32.44 接近超卖（未破 30，不能称超卖），属超跌后的技术修复，日线级别趋势仍向下，需站上 8524 区域才谈得上日线企稳。",
-    "实时价位置：实时价 8478.0（ticktime 11:30:00，涨跌 +1.72%），位于当日区间 8375–8504 上沿附近，接近日内高点 8504，距 1 小时上轨 8477 已站上、距 4 小时中轨 8490.7 仅约 13 点，构成短线关键分水岭，不破 8490.7 则反弹受压。",
-    "趋势结构：日线自 10 月底 9592 高点持续回落至 11-24 低点 8070，随后 11-24/11-25/11-26 日线连续收涨（8311→8216→8322 波折但重心上移），叠加 11-26 夜盘跳空至 8415 及今日实时 8478，短线呈超跌反弹；但高点与均线序列仍在下移，4小时 ema20 斜率 -0.0103 与日线空头排列制约反弹高度。",
-    "量能：日线 11-26 成交量 642074、量为 20 日均量的 1.16 倍，属放量修复；但 4 小时最新一根成交量仅 1764、volume_ratio20 0.02，1 小时最新 1756，说明盘中 K 线量能数据严重不完整（延迟/不完整样本），不能据此判定资金持续流入，反弹的持续性证据不足。",
-    "支撑压力：下方向上第一支撑为 1 小时中轨 8296.45 与今日开盘/前结算 8335–8377 区间；再下为日线低点 8070（20 日低点）。上方压力依次为今日高点 8504、4 小时中轨 8490.7、日线 ma10 8524.4，更上方为 4 小时上轨 9042 与日线 ma20 8737。价格处于压力密集区下沿，追多风险收益不佳。",
-    "多周期共振与换月：1 小时偏多（站上上轨）、4 小时中性偏空（中轨下方）、日线偏空（均线下、RSI 近超卖），三周期并未形成同向共振，属短线反弹对抗中长线下行。contract_bridge 显示 P2705 为主力但 P0 映射到 P2701、mapping_verified=false 且 roll_state=urgent，P2705 与 P2701 价差 -478（远月贴水）、次主力持仓比 0.9331，映射与流动性需人工复核后方可执行。"
+    "【实时价位置】当前 realtime.price=8511.0、ticktime=13:33:13、涨跌幅+2.11%，为本次实时输入（fetch_status=live）。该价已站上 1H/4H 布林中轨（8335/8470）并逼近1H上轨8536，属短线强势，但为午盘13:30-15:00时段内价，夜盘前仍需以最新盘口为基准。",
+    "【1小时布林】1H 上轨8536.37、中轨8335.15、下轨8133.93，带宽4.83%，价8511位于中轨上方、距上轨约25点，属突破上轨边缘/强势回归后延续。1H RSI14=58.19 未超买，若有效上破8536且收盘站稳则打开上行空间，反之回落中轨8335为回踩区。",
+    "【4小时布林】4H 上轨8977.62、中轨8470.75、下轨7963.88，带宽11.97%（较宽），价8511刚站上中轨但距上轨尚远。4H ADX14=52.02 显示前期趋势强、EMA20 8469.5 与中轨接近，价站上中轨为短线转强信号，但带宽大意味着波动剧烈、假突破风险高。",
+    "【日线布林/均线】日线最新收盘8322（2026-11-26，延迟一日），远低于 MA10 8524.4、MA20 8737.4、MA60 9457.3，均线空头排列，日线RSI14=32.44 属偏弱但未达超卖（<30）。日线处于下轨附近的技术性反弹，尚未改变中期下行结构，realprice 8511 上方近阻力即 MA10 8524。",
+    "【趋势与量能】1H EMA20 斜率+0.0064 向上、4H EMA20 斜率-0.0064 走平略向下，短期反弹与中期偏空并存；实时成交量428190、持仓365861较前日继续下降（日线持仓由417960降至385722）。量能未明显放大（1H volume_ratio20仅0.03为bar采样不全，参考意义弱），上涨持续性存疑。",
+    "【支撑压力】短支撑：1H中轨8335、实时开盘8375/前收8322；压力：1H上轨8536、日线MA10约8524、4H上轨8977。当前价8511正卡在8536与8524的密集压力带下方，能否放量突破是短线多空分水岭，否则易回踩8335-8375。",
+    "【换月与流动性】contract_bridge 显示最高持仓主力为 P2705（8995，+2.02%，远月贴水，次主力P2701相对主力价差-484、价差比-5.38%），次主力/主力持仓比0.9253，roll_state=urgent 临近换月且 mapping_verified=false。连续合约P0不是可直接下单的具体月份，执行前须人工复核主力与次主力流动性及换月跳空。",
+    "【证据强度】model_validation 状态 rejected（样本外77笔、胜率29.87%、期望-0.2393R、净R-18.43），历史日线基准模型无正优势，不能外推为当前日内胜率。故本次偏多仅为1H+4H共振的短周期技术判断，置信度受限，须严格执行止损与不交易条件。",
+    "【2小时过渡参考】2H 上轨8545.73/中轨8336.1/下轨8126.47，价8511在中轨上方、接近上轨8545，2H RSI14=50.87中性，ADX38.72趋势中等，作为1H与4H的过渡确认：突破8545可增强短多，失守8336则转弱。"
   ],
   "intraday_strategy": {
-    "bias": "偏多（仅在回踩确认后做多，不追高）",
-    "entry": "8478 为当前基准价，不直接追单；等待回踩 8420–8440 区间（1 小时上轨 8477 下方、今日 8375–8504 区间中上部）企稳再介入，若强势突破并站稳 8504 今日高点，可用小仓在 8505–8515 顺势跟进",
-    "stop": "回踩多单止损 8365（今日开盘 8377 下方、前结算 8335 上方）；突破跟进止损 8435",
-    "take_profit": "第一目标 8524.4（日线 ma10），第二目标 8580–8600（4 小时上沿中枢上方压力），不设过远目标，因中线仍偏空",
-    "invalidation": "若 1 小时收盘重新跌回 8477 上轨下方且失守 8377 今日开盘价、或盘中跌破 8335 前结算，则反弹结构破坏，多单离场并转为观望；若 4 小时始终无法收复 8490.7 中轨，视为反弹受阻",
-    "notes": "适用于北京时间 13:30–15:00 午盘及今晚 21:00–23:00 夜盘。午盘为早盘冲高后的消化时段，13:30 开盘若直接开在 8504 上方且无量，不追；优先等回踩 8420–8440。今晚夜盘 21:00 开盘需重新以实时价为准，留意马来西亚盘与印尼出口费用、印尼盾贬值消息的进一步发酵。P0 为连续合约口径，并非可下单的具体月份合约，实际下单前必须在交易软件对 P2701/P2705 的持仓、价差与流动性二次确认。"
+    "bias": "偏多",
+    "entry": "以 realtime.price=8511.0 为基准，回踩1H中轨8335-8380区间分批（中值约8358）逢低做多；若午盘/夜盘放量站稳8536上方可突破追多。执行前须确认具体月份合约（P2701/P2705）流动性。",
+    "stop": "跌破1H中轨8335且收盘确认（约8330下方）止损；突破追多头寸止损设在8490下方。",
+    "take_profit": "第一目标8536（1H上轨/日线MA10附近），第二目标8600-8630（前期密集区上沿），对应回踩多入场约8358的盈亏比第一目标约1.5-1.8、第二目标更高；突破追多目标8545（2H上轨）→8600。",
+    "invalidation": "实时价失守8335（1H中轨）且4H回落中轨8470下方，或夜盘放量跌破8375/8322，则多单逻辑失效转观望；若主力换月跳空明显或 mapping_verified 仍未复核，取消交易。",
+    "notes": "适用于：今晚夜盘21:00开盘后关注回踩8358-8380逢低多及8536突破确认；明日早盘09:00-11:30承接。午盘13:30-15:00为当前时段，临近尾盘不宜追高。注意1H/4H K线约延迟20分钟且末根bar未收盘，须以实时盘口复核；P0为连续合约，非直接下单标的，须在软件确认 P2701/P2705 主力月份；本策略不构成投资建议。"
   },
   "decision_frame": {
-    "confidence": 52,
-    "regime": "日线空头趋势中的超跌反弹，短线偏强但中长线受压，多周期未共振",
-    "edge": "实时价站上 1 小时布林上轨、突破今日开盘并逼近当日高点，短线动能明确；但 4 小时仍在布林中轨 8490.7 下方、日线均线空头排列与 RSI 接近超卖，反弹的可持续性未获中周期确认，边缘优势主要体现在回踩不破后的短多，而非追高。",
-    "no_trade_condition": "1）contract_bridge mapping_verified=false 且 roll_state=urgent，未完成人工复核主力/次主力映射与流动性前不交易；2）若 13:30 午盘开盘直接跳空至 8504 上方而无回踩、或首目标（8524.4）相对入场盈亏比低于 1.5，不追多；3）若 1 小时收盘失守 8377 今日开盘、或 4 小时持续受制于 8490.7 中轨，转观望；4）model_validation 为 rejected，历史优势未被证实，不得以回测结果作为加仓依据。",
+    "confidence": 55,
+    "regime": "日线下行趋势中的1H+4H短线反弹（多周期未完全共振，1H偏强、4H刚站上中轨、日线仍空头）",
+    "edge": "1H价站上中轨并逼近上轨、4H站上中轨，短线动能偏多；但日线均线空头、实价卡在8524-8536密集压力带，且换月urgent、模型样本外无优势，edge有限、仅限短线逆反弹做多并严格止损",
+    "no_trade_condition": "① mapping_verified=false 未经人工复核主力/次主力流动性前不交易；② 1H失守8335或4H跌破8470不做的多；③ 第一目标盈亏比低于1.5时不硬给方向；④ K线数据延迟未刷新、末根bar未收盘前不开仓；⑤ 换月跳空或盘口异常（买卖量极薄）不交易",
     "long_case": {
-      "trigger": "回踩 8420–8440 区间企稳并出现 1 小时级别止跌信号，或放量站稳 8504 今日高点",
-      "entry_zone": "8420–8440（回踩多）；8505–8515（突破跟进）",
-      "stop": "8365（回踩多）；8435（突破跟进）",
+      "trigger": "实时价8511站稳8536上方或回踩8335-8380获支撑企稳",
+      "entry_zone": "8335-8380（回踩多，中值约8358）；突破追多8536上方",
+      "stop": "8330下方（回踩多）/8490下方（追多）",
       "targets": [
-        "8524.4 / 8580–8600"
+        "8536",
+        "8600"
       ],
-      "invalidation": "1 小时收盘跌回 8477 下方并失守 8377，或盘中跌破 8335 前结算",
-      "risk_reward": "回踩多：入场约 8430、止损 8365 风险约 65 点，目标 8524.4 收益约 94 点，盈亏比约 1.45；突破跟进：入场约 8510、止损 8435 风险约 75 点，目标 8580 收益约 70 点，盈亏比约 0.93。首目标盈亏比低于 1.5，故仅小仓试探并以 8580 第二目标考量，严格执行 no_trade_condition。"
+      "invalidation": "跌破8335且收盘确认，或4H回落8470下",
+      "risk_reward": "回踩8358入场、止损8330、第一目标8536，盈亏比约1.5-1.8"
     },
     "short_case": {
-      "trigger": "反弹在 8490.7（4 小时中轨）至 8524.4（日线 ma10）压力区受阻回落，1 小时收盘跌回 8477 下方",
-      "entry_zone": "8490–8505（压力区遇阻后）",
-      "stop": "8540",
+      "trigger": "实价跌破8335（1H中轨）并收盘确认，反弹不站回",
+      "entry_zone": "8335-8380反弹遇阻做空",
+      "stop": "8540上方",
       "targets": [
-        "8377 / 8335"
+        "8270",
+        "8170"
       ],
-      "invalidation": "4 小时收盘站上 8524.4 并放量突破 8550",
-      "risk_reward": "入场约 8495、止损 8540 风险约 45 点，目标 8377 收益约 118 点、8335 约 160 点，盈亏比约 2.6–3.5，理论占优；但当前短线动能偏强，须待明确滞涨信号方可执行，否则观望。"
+      "invalidation": "重新站上8536放量上行",
+      "risk_reward": "8380入场、止损8540、第一目标8270，盈亏比约0.7偏弱，短线空头需跌破8335后才成立，否则首目标盈亏比不足，列入不交易条件"
     },
     "event_risks": [
-      "1）印尼棕榈油出口新费用细节（11-25 舆情）与印尼盾兑美元跌破 18300 创新低，汇率与出口成本或在后续交易日传导；2）欧盟与印尼贸易协议（11-22/11-23 舆情）取消大部分关税，中长期或影响需求与贸易流；3）MPOB 月报前瞻（11-21 舆情）提示库存恐创同期新高，报告兑现时存在预期差风险；4）马棕减产预期（11-25 华泰期货观点）与吉隆坡棕油连跌（11-23）多空交织，外盘波动会通过夜盘传导至 P0。"
+      "MPOB 6月月报前瞻显示6月库存恐创同期新高（金十数据2026-11-21），马棕库存压力为潜在利空；但月报本身在更早月份已公布，当前仅前瞻信息，不构成新增事实",
+      "印尼出口新费用细节、印尼-欧盟贸易协议落地（2026-11-22/23/25）可能重塑印尼棕榈油出口成本，方向待评估",
+      "吉隆坡棕榈油连跌五日（2026-11-23），马棕弱势与华泰期货马棕减产预期升温（2026-11-25）多空交织",
+      "印尼盾兑美元跌破18300创历史新低（2026-11-25），汇率贬值或影响印尼出口报价与需求",
+      "主力换月urgent、P2705贴水结构，换月跳空与流动性风险",
+      "新闻最新约2026-11-25 13:29 UTC，相对基准时刻有延迟，需以最新消息复核"
     ],
     "data_limits": [
-      "1）realtime 为 live、ticktime 11:30:00、价 8478、涨跌 +1.72%，可作实时基准；但 intraday 1H/2H/4H K 线更新于 2026-11-26T23:29:08Z，最新 1 小时收盘为 11-26 23:00，已超过 10 分钟，属延迟 K 线，4 小时最新标签 11-27 11:15 但成交量 1764，量能不完整；2）日线数据更新于 11-26，最新日线收盘 8322，非当日实时；3）P0 为连续合约，非具体可下单月份合约，contract_bridge mapping_verified=false、roll_state=urgent，价差 -478 为远月贴水；4）model_validation 状态 rejected，样本外无优势，不代表未来收益；5）本分析不构成投资建议。"
+      "realtime 为本次实时输入（live），价8511、ticktime13:33:13 为当前基准；但1H/4H/2H K线 updated_at_utc 为05:13:42，约延迟20分钟，末根bar（14:15/15:00标签）为未收盘/预生成，不能当实时盘口",
+      "日线最新为2026-11-26收盘（延迟一日），非当日盘中数据",
+      "新闻最新约2026-11-25 13:29 UTC，存在延迟，未含基准时刻后新增事件",
+      "P0为连续合约，含换月跳空，不能替代P2701/P2705具体月份回测；mapping_verified=false 须人工复核",
+      "model_validation 样本外无优势（rejected），其胜率/期望不代表未来概率",
+      "本分析不构成投资建议"
     ]
   },
   "news_impact": [
-    "[利空] 印尼棕榈油出口新费用细节曝光（汇通财经 11-25），市场关注成本结构如何重塑。若出口费用上调或结构变化抬升出口成本，可能压制印尼棕榈油出口竞争力并刺激生产端抛售意愿，从供应端对未来马棕与国内进口成本形成压力；但费用结构尚待明确，短期更多是预期扰动而非已兑现的供需冲击。",
-    "[利多] 华泰期货（新浪财经 11-25）称马棕减产预期升温、油脂板块探底回升。减产预期若在后续产量数据中得到验证，将收缩远期供应，与本次 P0 从 8070 低点的反弹逻辑一致，构成短线反弹的基本面注脚；但当前仅为机构观点而非官方产量确认，需警惕预期被证伪。",
-    "[中性] 印尼与欧盟历时十年经贸谈判正式落地（Shangbao Indonesia 11-22；Investing.com 11-23），取消大部分关税。关税取消中长期利于印尼棕榈油对欧出口与需求，属需求侧潜在利多；但对短周期价格传导间接、滞后，且其与林产品、可持续认证等议题的细节仍待观察，因此暂定为中性偏多、不构成日内驱动。",
-    "[利空] 印尼盾兑美元跌破 18300 创历史新低（IDNFinancials 11-25）。本币大幅贬值通常抬高以美元计价的进口成本、同时增强印尼出口商以本币计价的销售意愿，可能增加出口供应并压制国际棕榈油价格，对以美元环比的马棕及国内盘面构成偏空压力；但汇率影响需结合出口税费政策综合判断。",
-    "[利空] MPOB 6 月月报前瞻（金十数据 11-21）提示库存恐创历史同期新高。若实际库存与预期一致，将强化供应宽松格局，对棕榈油期价形成下行压力，与当前日线仍处均线下方空头排列相符；报告兑现前后的预期差是短线波动的重要来源。",
-    "[中性] 吉隆坡棕榈油连跌五日、豁免再实施已无用（汇通财经 11-23）、棕油出口免税错失救市良机（e南洋 11-23）。连续下跌与出口刺激政策效果有限的表述反映外盘偏弱情绪，对国内 P0 形成情绪层面的压制；但近期国内已出现探底回升（11-24 低点 8070 后反弹至实时 8478），外盘弱势与内盘反弹存在背离，不宜单边外推。",
-    "[中性] 棕榈油近期预期调整（新浪财经 11-20）。该文聚焦预期层面的调整，未披露明确量化数据，更多反映市场对前期下跌后的预期修正，与近几日盘面的超跌反弹节奏方向一致，可作为反弹的情绪背景，但不构成独立的交易信号。"
+    "[利空] MPOB 6月月报前瞻（金十数据2026-11-21）显示6月库存恐创历史同期新高，逻辑链条：库存累积→供应宽松预期→压制马棕及国内棕榈油上方空间；属市场预期前瞻，需关注预期差对夜盘情绪的扰动，但该月报节点已过，只作库存方向参考。",
+    "[利空] 吉隆坡棕榈油连跌五日（汇通财经2026-11-23）叠加出口免税错失救市良机（e南洋2026-11-23），反映马棕出口与需求疲弱，压制外盘情绪，对DCE棕榈油形成外盘拖累，属已发生的偏空背景。",
+    "[利多] 华泰期货（新浪财经2026-11-25）称马棕减产预期升温、油脂板块探底回升，逻辑：减产预期→供应收缩预期→油脂板块情绪修复，与当前1H/4H反弹方向一致，构成短线偏多的舆情配合，但属预期而非已确认产量数据。",
+    "[中性] 印尼与欧盟历时十年经贸谈判落地、取消大部分关税（Investing.com 2026-11-23、Shangbao 2026-11-22），逻辑：印尼棕油对欧出口成本下降可能利多印尼出口量，但也可能加剧全球供应竞争，对价格方向影响不确定，需观察实际出口数据。",
+    "[中性] 印尼棕榈油出口新费用细节曝光（汇通财经2026-11-25），逻辑：出口成本结构重塑→可能抬升印尼FOB报价（利多）或抑制出口需求（利空），方向待评估，属中性政策变量。",
+    "[利空] 印尼盾兑美元跌破18300创历史新低（IDNFinancials 2026-11-25），逻辑：本币贬值→印尼出口商美元报价更有竞争力→可能压价出货，对国际棕油价格偏空，但对印尼出口量或有支撑，需结合需求端判断。",
+    "[中性] 新浪财经《棕榈油：近期预期调整》（2026-11-20）反映市场对棕油预期处于调整期、多空分歧加大，与当前日线偏空、短线反弹的格局一致，提示不宜单边重仓。",
+    "[利空] 综合外盘马棕连跌与6月库存创高预期，上方8524-8536密集压力带的基本面配合偏弱，短线反弹更可能是技术性修复而非趋势反转，追多需控制仓位与止损。"
   ],
   "news_articles": [
     {
-      "title": "印尼与欧盟历时十年经贸谈判正式落地 国内产业准备与应对挑战成为核心议题",
-      "source": "Shangbao Indonesia",
-      "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNUTdDMm1JMnh6clFVSWNfaHVPcEE5MEJBMGFnQm53cXdGYUFYXzlrZEQ0X0dqR1JKdnFMVXJpcUNnMDdPM0lQb1VTa3ZMaUphempYam5GU1NoMjg3SnM2aWZfTWJzaUhxMVR4NEZfRFBmaGdfdGdGaEFaeVFWaVJWLTRnVlE?oc=5",
-      "detail": "报道印尼与欧盟历时十年的经贸谈判正式落地，国内产业围绕准备与应对挑战展开讨论。谈判落地涉及关税与贸易安排，对棕榈油等大宗商品贸易流可能产生中长期影响。文中以产业准备与挑战为核心议题，未披露具体关税数字。发布时间为 2026-11-22。",
-      "impact": "中性"
-    },
-    {
-      "title": "欧盟与印度尼西亚签署贸易协议，取消大部分关税",
-      "source": "英为财情 Investing.com",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5mUUxad2NOUHZNNVBvdW1PbW9EYjdoNEVOZE9hTXpoSGtSTGtPQm9zVnNmNkhRd1FGYVJGTjlDUURXSlZmd1Fkd2tRMUcxR1RrRzc5eWRIbnJ1dkFqVWt1X3lNRXBDSnNEWHpFZ09BTVI?oc=5",
-      "detail": "报道欧盟与印度尼西亚签署贸易协议，取消大部分关税。该协议降低印尼产品（含棕榈油相关）进入欧盟的关税壁垒，中长期利于印尼对欧出口需求。协议细节与生效节奏未在摘要中量化。发布时间为 2026-11-23。",
-      "impact": "中性"
-    },
-    {
-      "title": "印尼棕榈油出口新费用细节曝光，成本结构将如何重塑？",
-      "source": "汇通财经",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5LTERGa25uLUEtMW1jaUtlUU9keHNxcWtiTC1DQlZ6QkxXNnc3SjdtZzhKcURaZmpOV2ctM0l4SEE1ZTlBTFp5U1pnWllMZmZBa3NsNlEyRFpZOXM?oc=5",
-      "detail": "报道印尼棕榈油出口新费用细节曝光，关注成本结构如何被重塑。出口费用变化可能影响印尼出口商报价与国际竞争力，进而传导至进口成本与国内盘面。摘要未给出费用的具体数值。发布时间为 2026-11-25。",
-      "impact": "利空"
-    },
-    {
-      "title": "印尼盾兑美元跌破18,300印尼盾，创历史新低",
-      "source": "IDNFinancials",
-      "url": "https://news.google.com/rss/articles/CBMinwJBVV95cUxQckJyVXhlUzlib3ljRk9sdERITUtWWkEyOF9xXzF5aHlfZFQtWHFhWVBNcVVRMHlyUGJPTWVfUmhMWDhXWFhwMVVzZXBIVFliLWY4RDlRTW5ZYU9UeVc0OTVyWVEzc2pDaGNHSnFoNVpyYktrcEpZaWEzUUpjSzNkN1Zwc04tZ2RJWXVKdWxUbE1VWTRQRTdBX2YzLXlSS1Q5LUFibkE5cE5ma2JnR2I2WUk3ZDhqTlgwVWVYSDZydUhkdGNjMTNOdk9DVUw2ZTVDWTAtdnA4UmZoeml1TEZnSEcyVEdidkdPVGZfeXJGaHVaV1pFczk4MWpweGt5M3ZXdGEwMHltS2NsRFdTb3VKaFVWOGVfVS1wUHFmU19ybw?oc=5",
-      "detail": "报道印尼盾兑美元跌破 18,300 印尼盾，创历史新低。本币贬值通常增强出口意愿、抬高进口成本，可能增加印尼出口供应并对国际棕榈油价格形成压力。汇率走势后续或影响印尼出口报价与套保行为。发布时间为 2026-11-25。",
-      "impact": "利空"
-    },
-    {
-      "title": "【MPOB 6月月报前瞻】6月库存恐创历史同期新高，关注MPOB报告带来的预期差！",
+      "title": "【MPOB 6月月报前瞻】6月库存恐创历史同期新高，关注MPOB报告带来的预期差！-市场参考",
       "source": "金十数据",
       "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9EejEyU3d6NzVUQ19OMGlQdFp2OFpGRFNiUU9Ed2JTaWpFVm9sYWNQNnJFZzJKTUxyOHNVM09GZHJ1dk5kRk1LbmlqU2MxVlU?oc=5",
-      "detail": "MPOB 月报前瞻指出 6 月库存恐创历史同期新高，提示关注报告带来的预期差。若库存兑现高位，将强化供应宽松格局，对棕榈油期价形成下行压力。报告兑现前后的预期差是短线波动来源。发布时间为 2026-11-21。",
+      "detail": "金十数据2026-11-21发布MPOB 6月月报前瞻，指出6月库存恐创历史同期新高，提示关注报告带来的预期差。逻辑上库存累积利空棕榈油上方空间，但属前瞻预期而非已确认数据。该节点已过，仅作库存方向参考。",
       "impact": "利空"
     },
     {
       "title": "吉隆坡棕榈油连跌五日，豁免再实施已无用？",
       "source": "汇通财经",
       "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1uTjBCWnl1RWtwbVdKVXRXV3lBYXNkS005bERIVEhmWUVTMnNDdFppOVV1SFdzVzRwb2M5TXNNaTVJN3lpSzFVbTNYWlFZUVYyUy1wU1B0c3hRZw?oc=5",
-      "detail": "报道吉隆坡棕榈油连跌五日，并质疑出口豁免再实施是否还有效。外盘连续下跌反映偏弱的国际市场情绪，对国内 P0 形成情绪压制。摘要未给出具体跌幅数据。发布时间为 2026-11-23。",
-      "impact": "中性"
+      "detail": "汇通财经2026-11-23报道吉隆坡棕榈油连跌五日，质疑豁免政策再实施的效果。连续下跌反映马棕出口与需求疲弱，外盘弱势对DCE棕榈油形成拖累。属已发生的偏空背景信息。",
+      "impact": "利空"
     },
     {
       "title": "华泰期货：马棕减产预期升温，油脂板块探底回升",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNdnNHLU1JYW4xS3diMWNOTDNScm1kd3ZCeUVaV2ZqQ21iM2lOOGNPc0hsblhTNHkwQ1ZYbzdzR25UR2RrT0c2NWJLZlVTLXplN1VjQXI3dVp0Z09jZ3JyTXVJSktzb2c1QWlKbmpMT1E0OWE2YmxHcHQ0QmFPWmpuOUZSUTBBOEhNOGlKbg?oc=5",
-      "detail": "华泰期货观点称马棕减产预期升温，油脂板块探底回升。减产预期若获产量数据验证，将收缩远期供应，与近期盘面反弹逻辑一致。当前为机构研判而非官方确认。发布时间为 2026-11-25。",
+      "detail": "新浪财经2026-11-25刊发华泰期货观点，称马棕减产预期升温、油脂板块探底回升。逻辑为减产预期→供应收缩→板块情绪修复，与当前1H/4H短线反弹方向一致，但属预期而非确认产量数据。",
       "impact": "利多"
     },
     {
       "title": "棕油出口免税错失救市良机 业界:如今落实恐难见效",
       "source": "e南洋",
-      "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE1QZ2ZvWTNXTVZINEpCM1AwaDgtNUthQVA0blMzZ2xDcHRxZ2liM2tFNTFCV0RkT1VxS2lJWjlTQlF0ai1sQWJMcGhB?oc=5",
-      "detail": "报道称棕油出口免税错失救市良机，业界认为如今落实恐难见效。这反映出口刺激政策效果有限的判断，对价格提振作用可能被削弱。摘要未披露具体政策细节与数据。发布时间为 2026-11-23。",
+      "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE96VjE0RHZmRXpseUVBVDF6QTVvRElFNHZ4LUc1Zm9ETEhraDJhelpHUnZpZXJvOEIzdFU0bkx0RmpnUVFBVGhub0J0SFZmLXlTa3NuZ2U4SWx2TWFrZGxKdzVwQQ?oc=5",
+      "detail": "e南洋2026-11-23报道棕油出口免税政策错失救市良机，业界认为如今落实恐难见效。反映出口疲弱与政策效果有限，对棕榈油需求端偏空。属已发生的舆情信息。",
+      "impact": "利空"
+    },
+    {
+      "title": "印尼与欧盟历时十年经贸谈判正式落地 国内产业准备与应对挑战成为核心议题",
+      "source": "Shangbao Indonesia",
+      "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxNUTdDMm1JMnh6clFVSWNfaHVPcEE5MEJBMGFnQm53cXdGYUFYXzlrZEQ0X0dqR1JKdnFMVXJpcUNnMDdPM0lQb1VTa3ZMaUphempYam5GU1NoMjg3SnM2aWZfTWJzaUhxMVR4NEZfRFBmaGdfdGdGaEFaeVFWaVJWLTRnVlE?oc=5",
+      "detail": "Shangbao Indonesia 2026-11-22报道印尼与欧盟经贸谈判正式落地，国内产业准备与应对成为核心。贸易便利可能影响印尼棕油对欧出口节奏，方向需结合关税细则评估。属事实性事件、影响中性偏观望。",
       "impact": "中性"
+    },
+    {
+      "title": "印尼棕榈油出口新费用细节曝光，成本结构将如何重塑？",
+      "source": "汇通财经",
+      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5LTERGa25uLUEtMW1jaUtlUU9keHNxcWtiTC1DQlZ6QkxXNnc3SjdtZzhKcURaZmpOV2ctM0l4SEE1ZTlBTFp5U1pnWllMZmZBa3NsNlEyRFpZOXM?oc=5",
+      "detail": "汇通财经2026-11-25披露印尼棕榈油出口新费用细节，讨论成本结构重塑。出口费用上升可能抬升FOB报价（利多）或抑制出口（利空），方向不确定。属中性政策变量。",
+      "impact": "中性"
+    },
+    {
+      "title": "欧盟与印度尼西亚签署贸易协议，取消大部分关税",
+      "source": "Investing.com 英为财情",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5mUUxad2NOUHZNNVBvdW1PbW9EYjdoNEVOZE9hTXpoSGtSTGtPQm9zVnNmNkhRd1FGYVJGTjlDUURXSlZmd1Fkd2tRMUcxR1RrRzc5eWRIbnJ1dkFqVWt1X3lNRXBDSnNEWHpFZ09BTVI?oc=5",
+      "detail": "Investing.com 2026-11-23报道欧盟与印尼签署贸易协议、取消大部分关税。逻辑上印尼棕油对欧出口成本下降，可能利多印尼出口量但加剧全球供应竞争。对价格方向影响混合，需观察实际出口数据。",
+      "impact": "中性"
+    },
+    {
+      "title": "印尼盾兑美元跌破18,300印尼盾，创历史新低",
+      "source": "IDNFinancials",
+      "url": "https://news.google.com/rss/articles/CBMinwJBVV95cUxQckJyVXhlUzlib3ljRk9sdERITUtWWkEyOF9xXzF5aHlfZFQtWHFhWVBNcVVRMHlyUGJPTWVfUmhMWDhXWFhwMVVzZXBIVFliLWY4RDlRTW5ZYU9UeVc0OTVyWVEzc2pDaGNHSnFoNVpyYktrcEpZaWEzUUpjSzNkN1Zwc04tZ2RJWXVKdWxUbE1VWTRQRTdBX2YzLXlSS1Q5LUFibkE5cE5ma2JnR2I2WUk3ZDhqTlgwVWVYSDZydUhkdGNjMTNOdk9DVUw2ZTVDWTAtdnA4UmZoeml1TEZnSEcyVEdidkdPVGZfeXJGaHVaV1pFczk4MWpweGt5M3ZXdGEwMHltS2NsRFdTb3VKaFVWOGVfVS1wUHFmU19ybw?oc=5",
+      "detail": "IDNFinancials 2026-11-25报道印尼盾兑美元跌破18300创历史新低。本币贬值使印尼出口商美元报价更有竞争力，可能压价出货，对国际棕油价格偏空。属汇率端事实信息。",
+      "impact": "利空"
     },
     {
       "title": "【市场聚焦】棕榈油：近期预期调整",
       "source": "新浪财经",
       "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNMFZSamRkOUM0S25hYU5PazN2VGcwR0xiVFo0eDFCQWlMaDU1dHZWbU9XbU1GektxVm5vVDVydzQ1Z0FKNklXYXd6aDJ6YmZvTEc3bFFKVFN2LW84dlpBWFZHX2g2eU9mWXNkU0k3ZE9lQUlYd1htNE5Lc045aG5CcGNJRC04bUNQSHFudA?oc=5",
-      "detail": "新浪财经市场聚焦栏目讨论棕榈油近期预期调整。内容侧重预期层面的修正，与近期下跌后盘面反弹的情绪节奏一致。摘要未给出明确量化数据。发布时间为 2026-11-20。",
+      "detail": "新浪财经2026-11-20刊发棕榈油近期预期调整分析，反映市场对棕油预期处于调整期、多空分歧加大。与当前日线偏空、短线反弹格局一致，提示不宜单边重仓。属观点性信息。",
+      "impact": "中性"
+    },
+    {
+      "title": "印尼MIND ID出席2026年东盟矿业投资论坛 重点展示镍和锡供应链一体化布局",
+      "source": "Shangbao Indonesia",
+      "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE53VkVLNGN4bm5JdDBfV3BaZ1dZdW1OaElsQUYwSWgwM0taMGpJbWhVaWpsZV9xeldlOFZ6TndKQlpodEFBeTNCYVpuYjBqT2dMc29GVHZQa3lRemN5dG1XODlHbG9hT1VURzhiNTY3ZThUN3hfUmpR?oc=5",
+      "detail": "Shangbao Indonesia 2026-11-25报道印尼MIND ID出席矿业投资论坛，主推镍和锡供应链。内容与棕榈油基本面无关，属干扰性资讯，对棕榈油价格无直接影响。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
-    "support": 8377.0,
-    "resistance": 8504.0
+    "support": 8335.0,
+    "resistance": 8536.0
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于给定实时盘口（realtime 价 8478.0、ticktime 11:30:00、+1.72%，live）与延迟的 1H/2H/4H K 线及日线数据，1 小时最新 K 线停留在 11-26 23:00、4 小时最新量能仅 1764，属延迟/不完整样本，不可当作刚刚成交的实时盘口。P0 为连续合约分析口径，并非可直接下单的具体月份合约；contract_bridge 显示 mapping_verified=false、roll_state=urgent、最高持仓主力为 P2705 而 P0 价更贴近 P2701，下单前必须在交易软件对主力月份、价差与流动性二次确认。model_validation 状态 rejected（样本外无优势），历史结果不代表未来，本分析不将任何命中率、胜率或历史表现包装为未来概率。舆情均来自给定搜索结果，事实、市场预期与推断已作区分。以上为行情与舆情解读，不构成投资建议，交易者需自行承担风险。",
+  "risk_note": "【数据时效】本分析基准时刻为北京时间2026-11-27 13:33:18（UTC 05:33:18）。realtime 为本次实时输入（live），价8511.0、ticktime 13:33:13、涨跌幅+2.11%为当前基准；1H/4H/2H K线 updated_at_utc 05:13:42 约延迟20分钟且末根bar未收盘，只能作方向参考；日线最新2026-11-26收盘延迟一日；新闻最新约2026-11-25 13:29 UTC有延迟。所有入场、止损、目标均以realtime.price=8511为基准，不得用日线close或小时close替代。【合约提示】P0为连续合约，不是可直接下单的具体月份；contract_bridge显示P2701（8511）与实时一致、P2705（8995）为最高持仓主力且为远月贴水（价差-484约-5.38%），roll_state=urgent临近换月、mapping_verified=false，执行前须人工复核主力/次主力流动性及换月跳空，下单软件二次确认具体月份。【模型提示】model_validation 状态 rejected（样本外77笔、胜率29.87%、期望-0.2393R），历史优势未被证实，不得将命中率/历史结果当作未来胜率或概率。【方向提示】偏多为1H+4H短线共振判断，日线仍空头（价低于MA10/20/60、RSI14 32.44弱势非超卖），当前实价卡在8524-8536密集压力带，证据强度中等（confidence 55，表示证据强度非胜率）。【其他】严格止损、控制仓位、注意换月与汇率、政策风险。本分析不构成投资建议。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-11-27T03:48:39+00:00",
+  "generated_at_utc": "2026-11-27T05:33:46+00:00",
   "latest_date": "2026-11-26",
-  "realtime_price": 8478.0,
-  "realtime_note": "实时行情截至 2026-11-27 11:30:00，当前价 8478，涨跌 +1.72%",
+  "realtime_price": 8511.0,
+  "realtime_note": "实时行情截至 2026-11-27 13:33:13，当前价 8511，涨跌 +2.11%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-11-27T03:47:56+00:00",
+    "fetched_at_utc": "2026-11-27T05:33:18+00:00",
     "market_trading_day": "2026-11-27",
-    "market_tick_time": "11:30:00",
+    "market_tick_time": "13:33:13",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
-  "news_summary": "[1] 印尼与欧盟历时十年经贸谈判正式落地 国内产业准备与应对挑战成为核心议题 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-11-22T09:02:00+00:00\nURL: https://news.google.com/rss/articles/CBMihAFBVV95cUxNUTdDMm1JMnh6clFVSWNfaHVPcEE5MEJBMGFnQm53cXdGYUFYXzlrZEQ0X0dqR1JKdnFMVXJpcUNnMDdPM0lQb1VTa3ZMaUphempYam5GU1NoMjg3SnM2aWZfTWJzaUhxMVR4NEZfRFBmaGdfdGdGaEFaeVFWaVJWLTRnVlE?oc=5\n摘要: 印尼与欧盟历时十年经贸谈判正式落地 国内产业准备与应对挑战成为核心议题 Shangbao Indonesia\n\n[2] 欧盟与印度尼西亚签署贸易协议，取消大部分关税 提供者 Investing.com - 英为财情 Investing.com\n来源: 英为财情 Investing.com\n发布时间UTC: 2026-11-23T05:58:00+00:00\nURL: https://news.google.com/rss/articles/CBMicEFVX3lxTE5mUUxad2NOUHZNNVBvdW1PbW9EYjdoNEVOZE9hTXpoSGtSTGtPQm9zVnNmNkhRd1FGYVJGTjlDUURXSlZmd1Fkd2tRMUcxR1RrRzc5eWRIbnJ1dkFqVWt1X3lNRXBDSnNEWHpFZ09BTVI?oc=5\n摘要: 欧盟与印度尼西亚签署贸易协议，取消大部分关税 提供者 Investing.com 英为财情 Investing.com\n\n[3] 印尼棕榈油出口新费用细节曝光，成本结构将如何重塑？ - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-11-25T13:29:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE5LTERGa25uLUEtMW1jaUtlUU9keHNxcWtiTC1DQlZ6QkxXNnc3SjdtZzhKcURaZmpOV2ctM0l4SEE1ZTlBTFp5U1pnWllMZmZBa3NsNlEyRFpZOXM?oc=5\n摘要: 印尼棕榈油出口新费用细节曝光，成本结构将如何重塑？ 汇通财经\n\n[4] 印尼盾兑美元跌破18,300印尼盾，创历史新低 - IDNFinancials\n来源: IDNFinancials\n发布时间UTC: 2026-11-25T07:40:00+00:00\nURL: https://news.google.com/rss/articles/CBMinwJBVV95cUxQckJyVXhlUzlib3ljRk9sdERITUtWWkEyOF9xXzF5aHlfZFQtWHFhWVBNcVVRMHlyUGJPTWVfUmhMWDhXWFhwMVVzZXBIVFliLWY4RDlRTW5ZYU9UeVc0OTVyWVEzc2pDaGNHSnFoNVpyYktrcEpZaWEzUUpjSzNkN1Zwc04tZ2RJWXVKdWxUbE1VWTRQRTdBX2YzLXlSS1Q5LUFibkE5cE5ma2JnR2I2WUk3ZDhqTlgwVWVYSDZydUhkdGNjMTNOdk9DVUw2ZTVDWTAtdnA4UmZoeml1TEZnSEcyVEdidkdPVGZfeXJGaHVaV1pFczk4MWpweGt5M3ZXdGEwMHltS2NsRFdTb3VKaFVWOGVfVS1wUHFmU19ybw?oc=5\n摘要: 印尼盾兑美元跌破18,300印尼盾，创历史新低 IDNFinancials\n\n[5] 【MPOB 6月月报前瞻】6月库存恐创历史同期新高，关注MPOB报告带来的预期差！-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-11-21T04:14:11+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9EejEyU3d6NzVUQ19OMGlQdFp2OFpGRFNiUU9Ed2JTaWpFVm9sYWNQNnJFZzJKTUxyOHNVM09GZHJ1dk5kRk1LbmlqU2MxVlU?oc=5\n摘要: 【MPOB 6月月报前瞻】6月库存恐创历史同期新高，关注MPOB报告带来的预期差！-市场参考 金十数据\n\n[6] 吉隆坡棕榈油连跌五日，豁免再实施已无用？_外汇动态报道 - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-11-23T07:24:01+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTE1uTjBCWnl1RWtwbVdKVXRXV3lBYXNkS005bERIVEhmWUVTMnNDdFppOVV1SFdzVzRwb2M5TXNNaTVJN3lpSzFVbTNYWlFZUVYyUy1wU1B0c3hRZw?oc=5\n摘要: 吉隆坡棕榈油连跌五日，豁免再实施已无用？_外汇动态报道 汇通财经\n\n[7] 华泰期货：马棕减产预期升温，油脂板块探底回升 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-11-25T01:38:56+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNdnNHLU1JYW4xS3diMWNOTDNScm1kd3ZCeUVaV2ZqQ21iM2lOOGNPc0hsblhTNHkwQ1ZYbzdzR25UR2RrT0c2NWJLZlVTLXplN1VjQXI3dVp0Z09jZ3JyTXVJSktzb2c1QWlKbmpMT1E0OWE2YmxHcHQ0QmFPWmpuOUZSUTBBOEhNOGlKbg?oc=5\n摘要: 华泰期货：马棕减产预期升温，油脂板块探底回升 新浪财经\n\n[8] 棕油出口免税错失救市良机 业界:如今落实恐难见效 - e南洋\n来源: e南洋\n发布时间UTC: 2026-11-23T09:09:20+00:00\nURL: https://news.google.com/rss/articles/CBMiSkFVX3lxTE1QZ2ZvWTNXTVZINEpCM1AwaDgtNUthQVA0blMzZ2xDcHRxZ2liM2tFNTFCV0RkT1VxS2lJWjlTQlF0ai1sQWJMcGhB?oc=5\n摘要: 棕油出口免税错失救市良机 业界:如今落实恐难见效 e南洋\n\n[9] 印尼MIND ID出席2026年东盟矿业投资论坛 重点展示镍和锡供应链从上游到下游一体化布局 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-11-25T09:46:00+00:00\nURL: https://news.google.com/rss/articles/CBMid0FVX3lxTE53VkVLNGN4bm5JdDBfV3BaZ1dZdW1OaElsQUYwSWgwM0taMGpJbWhVaWpsZV9xeldlOFZ6TndKQlpodEFBeTNCYVpuYjBqT2dMc29GVHZQa3lRemN5dG1XODlHbG9hT1VURzhiNTY3ZThUN3hfUmpR?oc=5\n摘要: 印尼MIND ID出席2026年东盟矿业投资论坛 重点展示镍和锡供应链从上游到下游一体化布局 Shangbao Indonesia\n\n[10] 【市场聚焦】棕榈油：近期预期调整 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-11-20T07:15:38+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNMFZSamRkOUM0S25hYU5PazN2VGcwR0xiVFo0eDFCQWlMaDU1dHZWbU9XbU1GektxVm5vVDVydzQ1Z0FKNklXYXd6aDJ6YmZvTEc3bFFKVFN2LW84dlpBWFZHX2g2eU9mWXNkU0k3ZE9lQUlYd1htNE5Lc045aG5CcGNJRC04bUNQSHFudA?oc=5\n摘要: 【市场聚焦】棕榈油：近期预期调整 新浪财经",
+  "news_summary": "[1] 【MPOB 6月月报前瞻】6月库存恐创历史同期新高，关注MPOB报告带来的预期差！-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-11-21T04:14:11+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9EejEyU3d6NzVUQ19OMGlQdFp2OFpGRFNiUU9Ed2JTaWpFVm9sYWNQNnJFZzJKTUxyOHNVM09GZHJ1dk5kRk1LbmlqU2MxVlU?oc=5\n摘要: 【MPOB 6月月报前瞻】6月库存恐创历史同期新高，关注MPOB报告带来的预期差！-市场参考 金十数据\n\n[2] 吉隆坡棕榈油连跌五日，豁免再实施已无用？_外汇动态报道 - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-11-23T07:24:01+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTE1uTjBCWnl1RWtwbVdKVXRXV3lBYXNkS005bERIVEhmWUVTMnNDdFppOVV1SFdzVzRwb2M5TXNNaTVJN3lpSzFVbTNYWlFZUVYyUy1wU1B0c3hRZw?oc=5\n摘要: 吉隆坡棕榈油连跌五日，豁免再实施已无用？_外汇动态报道 汇通财经\n\n[3] 华泰期货：马棕减产预期升温，油脂板块探底回升 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-11-25T01:38:56+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNdnNHLU1JYW4xS3diMWNOTDNScm1kd3ZCeUVaV2ZqQ21iM2lOOGNPc0hsblhTNHkwQ1ZYbzdzR25UR2RrT0c2NWJLZlVTLXplN1VjQXI3dVp0Z09jZ3JyTXVJSktzb2c1QWlKbmpMT1E0OWE2YmxHcHQ0QmFPWmpuOUZSUTBBOEhNOGlKbg?oc=5\n摘要: 华泰期货：马棕减产预期升温，油脂板块探底回升 新浪财经\n\n[4] 棕油出口免税错失救市良机 业界:如今落实恐难见效 - e南洋\n来源: e南洋\n发布时间UTC: 2026-11-23T09:09:20+00:00\nURL: https://news.google.com/rss/articles/CBMiY0FVX3lxTE96VjE0RHZmRXpseUVBVDF6QTVvRElFNHZ4LUc1Zm9ETEhraDJhelpHUnZpZXJvOEIzdFU0bkx0RmpnUVFBVGhub0J0SFZmLXlTa3NuZ2U4SWx2TWFrZGxKdzVwQQ?oc=5\n摘要: 棕油出口免税错失救市良机 业界:如今落实恐难见效 e南洋\n\n[5] 印尼与欧盟历时十年经贸谈判正式落地 国内产业准备与应对挑战成为核心议题 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-11-22T09:02:00+00:00\nURL: https://news.google.com/rss/articles/CBMihAFBVV95cUxNUTdDMm1JMnh6clFVSWNfaHVPcEE5MEJBMGFnQm53cXdGYUFYXzlrZEQ0X0dqR1JKdnFMVXJpcUNnMDdPM0lQb1VTa3ZMaUphempYam5GU1NoMjg3SnM2aWZfTWJzaUhxMVR4NEZfRFBmaGdfdGdGaEFaeVFWaVJWLTRnVlE?oc=5\n摘要: 印尼与欧盟历时十年经贸谈判正式落地 国内产业准备与应对挑战成为核心议题 Shangbao Indonesia\n\n[6] 印尼棕榈油出口新费用细节曝光，成本结构将如何重塑？ - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-11-25T13:29:00+00:00\nURL: https://news.google.com/rss/articles/CBMiW0FVX3lxTE5LTERGa25uLUEtMW1jaUtlUU9keHNxcWtiTC1DQlZ6QkxXNnc3SjdtZzhKcURaZmpOV2ctM0l4SEE1ZTlBTFp5U1pnWllMZmZBa3NsNlEyRFpZOXM?oc=5\n摘要: 印尼棕榈油出口新费用细节曝光，成本结构将如何重塑？ 汇通财经\n\n[7] 欧盟与印度尼西亚签署贸易协议，取消大部分关税 提供者 Investing.com - 英为财情 Investing.com\n来源: 英为财情 Investing.com\n发布时间UTC: 2026-11-23T05:58:00+00:00\nURL: https://news.google.com/rss/articles/CBMicEFVX3lxTE5mUUxad2NOUHZNNVBvdW1PbW9EYjdoNEVOZE9hTXpoSGtSTGtPQm9zVnNmNkhRd1FGYVJGTjlDUURXSlZmd1Fkd2tRMUcxR1RrRzc5eWRIbnJ1dkFqVWt1X3lNRXBDSnNEWHpFZ09BTVI?oc=5\n摘要: 欧盟与印度尼西亚签署贸易协议，取消大部分关税 提供者 Investing.com 英为财情 Investing.com\n\n[8] 印尼盾兑美元跌破18,300印尼盾，创历史新低 - IDNFinancials\n来源: IDNFinancials\n发布时间UTC: 2026-11-25T07:40:00+00:00\nURL: https://news.google.com/rss/articles/CBMinwJBVV95cUxQckJyVXhlUzlib3ljRk9sdERITUtWWkEyOF9xXzF5aHlfZFQtWHFhWVBNcVVRMHlyUGJPTWVfUmhMWDhXWFhwMVVzZXBIVFliLWY4RDlRTW5ZYU9UeVc0OTVyWVEzc2pDaGNHSnFoNVpyYktrcEpZaWEzUUpjSzNkN1Zwc04tZ2RJWXVKdWxUbE1VWTRQRTdBX2YzLXlSS1Q5LUFibkE5cE5ma2JnR2I2WUk3ZDhqTlgwVWVYSDZydUhkdGNjMTNOdk9DVUw2ZTVDWTAtdnA4UmZoeml1TEZnSEcyVEdidkdPVGZfeXJGaHVaV1pFczk4MWpweGt5M3ZXdGEwMHltS2NsRFdTb3VKaFVWOGVfVS1wUHFmU19ybw?oc=5\n摘要: 印尼盾兑美元跌破18,300印尼盾，创历史新低 IDNFinancials\n\n[9] 印尼MIND ID出席2026年东盟矿业投资论坛 重点展示镍和锡供应链从上游到下游一体化布局 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-11-25T09:46:00+00:00\nURL: https://news.google.com/rss/articles/CBMid0FVX3lxTE53VkVLNGN4bm5JdDBfV3BaZ1dZdW1OaElsQUYwSWgwM0taMGpJbWhVaWpsZV9xeldlOFZ6TndKQlpodEFBeTNCYVpuYjBqT2dMc29GVHZQa3lRemN5dG1XODlHbG9hT1VURzhiNTY3ZThUN3hfUmpR?oc=5\n摘要: 印尼MIND ID出席2026年东盟矿业投资论坛 重点展示镍和锡供应链从上游到下游一体化布局 Shangbao Indonesia\n\n[10] 【市场聚焦】棕榈油：近期预期调整 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-11-20T07:15:38+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNMFZSamRkOUM0S25hYU5PazN2VGcwR0xiVFo0eDFCQWlMaDU1dHZWbU9XbU1GektxVm5vVDVydzQ1Z0FKNklXYXd6aDJ6YmZvTEc3bFFKVFN2LW84dlpBWFZHX2g2eU9mWXNkU0k3ZE9lQUlYd1htNE5Lc045aG5CcGNJRC04bUNQSHFudA?oc=5\n摘要: 【市场聚焦】棕榈油：近期预期调整 新浪财经",
   "symbol": "P0",
   "instrument_name": "棕榈油",
-  "api_latency_seconds": 42.5,
+  "api_latency_seconds": 28.0,
   "token_usage": {
-    "prompt_tokens": 15670,
-    "completion_tokens": 6198,
-    "total_tokens": 21868,
+    "prompt_tokens": 15689,
+    "completion_tokens": 6006,
+    "total_tokens": 21695,
     "prompt_tokens_details": {
-      "cached_tokens": 2688
+      "cached_tokens": 768
     },
-    "prompt_cache_hit_tokens": 2688,
-    "prompt_cache_miss_tokens": 12982
+    "prompt_cache_hit_tokens": 768,
+    "prompt_cache_miss_tokens": 14921
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-11-27T03:48:39+00:00",
-    "score": 65,
-    "status": "blocked",
-    "label": "规则接管",
-    "execution_allowed": false,
-    "evidence_confidence": 52,
-    "issues": [
-      {
-        "code": "false_rsi_oversold",
-        "severity": "high",
-        "message": "文本声称 RSI 超卖，但日线 RSI 为 32.4。"
-      }
-    ],
+    "checked_at_utc": "2026-11-27T05:33:46+00:00",
+    "score": 100,
+    "status": "passed",
+    "label": "通过",
+    "execution_allowed": true,
+    "evidence_confidence": 55,
+    "issues": [],
     "facts": {
-      "realtime_price": 8478.0,
+      "realtime_price": 8511.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-11-27T03:47:56+00:00",
-      "realtime_market_tick_time": "11:30:00",
+      "realtime_fetched_at_utc": "2026-11-27T05:33:18+00:00",
+      "realtime_market_tick_time": "13:33:13",
       "daily_rsi14": 32.44,
-      "one_hour_boll_position": "上轨上方",
-      "four_hour_boll_position": "中轨下方",
+      "one_hour_boll_position": "中轨上方",
+      "four_hour_boll_position": "中轨上方",
       "realtime_trading_day_label": "2026-11-27",
       "realtime_label_is_future": false
     }
@@ -193,16 +208,16 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-11-27T03:47:56+00:00",
+    "realtime_fetched_at_utc": "2026-11-27T05:33:18+00:00",
     "realtime_market_trading_day": "2026-11-27",
-    "realtime_market_tick_time": "11:30:00",
+    "realtime_market_tick_time": "13:33:13",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
-    "daily_updated_at_utc": "2026-11-26T23:29:08+00:00",
+    "daily_updated_at_utc": "2026-11-27T05:13:42+00:00",
     "daily_fetch_status": "live",
-    "intraday_updated_at_utc": "2026-11-26T23:29:08+00:00",
-    "news_updated_at_utc": "2026-11-26T23:29:07+00:00",
-    "contract_bridge_updated_at_utc": "2026-11-26T23:29:07+00:00"
+    "intraday_updated_at_utc": "2026-11-27T05:13:42+00:00",
+    "news_updated_at_utc": "2026-11-27T05:13:37+00:00",
+    "contract_bridge_updated_at_utc": "2026-11-27T05:13:38+00:00"
   }
 }

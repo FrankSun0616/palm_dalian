@@ -1,169 +1,170 @@
 {
-  "summary": "基准时刻北京时间2026-11-27 10:04:50，实时输入为 live：Y0 连续合约最新价 realtime.price=8310，盘口 ticktime=10:04:41，涨跌幅 +1.29%（昨结 8204）。该实时价对应 contract_bridge 中的主力 Y2705（映射已校验 mapping_verified=true），但 roll_state=urgent（临近换月，次主力 Y2701 持仓比 0.9157、价差 263 远月升水），实际下单必须在软件二次确认月份。注意尺度冲突：缓存内 1 小时/4 小时/日线 K 线截至 2026-11-26，而 11 月 27 日实时价 8310 已明显高于 11-26 日线 close 8477 的下一档参考——两者不在同一坐标系（连续合约换月跳空），因此日内布林与均线判断以实时价 8310 为当前基准，历史 K 线仅做结构与动能参考。结论：日线仍为空头排列（ma10>ma20>ma60 依次下行、rsi14=37.38），但短周期出现实时 +1.29% 反抽，属空头趋势中的修复反弹，fit 为震荡偏多但不追高，等回踩确认。model_validation 状态 rejected（样本外无优势），不具备概率优势背书，不构成投资建议。",
-  "bias": "震荡",
+  "summary": "本次分析基准为北京时间2026-11-27 10:39:30（盘中），实时抓取状态 live：Y0 连续合约实时价8330、盘口 ticktime 10:39:24、涨跌幅+1.54%（对 prev_settlement 8204），实时买8328/卖8330。关键异常：夜盘21:00后价从8477区跳空下行至8246一带后反弹至8330，而1小时/4小时缓存K线（最新时间2026-11-26 23:00/2026-11-27 11:15标签）收盘仍在8276水平，已明显落后于实时价8330，属延迟数据，故日内判断以实时价8330为基准、K线仅作结构参考。1小时价昨日跌破布林下轨后出现超跌修复信号（1小时RSI 30.53偏低），4小时价处于中轨下方且触及下轨8247.54附近（4小时RSI 27.26超卖），日线价8330远低于MA10 8536.9、MA20 8675、MA60 8881.72，日线RSI 37.38偏弱但未超卖。多周期共振：日线偏空、4小时超跌反弹、1小时修复，属弱反弹而非趋势反转。连续合约映射实际主力为Y2705（价格持仓一致，mapping_verified=true），但roll_state=urgent、次主力Y2701持仓比0.9101、价差+251远月升水，换月剧烈，下单须人工复核具体月份。历史日线基准模型状态 rejected（样本外无优势），不提供概率背书。综合建议：偏空背景下的超跌反弹，日内以反弹高空或观望为主，不宜追多突破。",
+  "bias": "偏空",
   "analysis": [
-    "实时基准：realtime.price=8310、ticktime=10:04:41、涨跌幅+1.29%，这是本次唯一实时盘口；1 小时/4 小时/日线 K 线均截至 2026-11-26（延迟约 11 小时，属缓存），不能当作刚刚成交的实时价，日内布林位置与入场区间一律以 8310 为基准。",
-    "1 小时布林：缓存 1H（11-26 23:00）上轨 8584.97/中轨 8449.8/下轨 8314.63，带宽 3.2% 偏窄，当时收盘 8276 处“跌破下轨”且 1 小时 RSI 30.53 接近超卖；实时价 8310 已回到下轨 8314.63 附近，属超跌后向中轨方向的初次修复，未有效站上中轨。",
-    "4 小时布林：4H 上轨 8780.16/中轨 8513.85/下轨 8247.54，带宽 6.26%，缓存收盘 8276 位于下轨上方、中轨下方，4H RSI 27.26 超卖、ADX 39.87 显示下行趋势强；实时 8310 仍在中轨下方，反弹属弱势反抽，中轨 8513.85 是上方第一道硬阻力。",
-    "日线布林/均线：日线均线空头排列 ma10=8536.9>ma20=8675.0>ma60=8881.72 且逐级下行，日线 RSI14=37.38 未进入超卖；日线近 20 日高点9125、低点8380，11-21 至 11-26 收盘自 8420 抬升至 8477 后，实时 8310 反映的是换月/新主力下的低位反抽，日线格局仍是下跌中继修复而非反转。",
-    "趋势与量能：20 日量比 0.81 显示日线量能萎缩，缓存 1H/4H volume_ratio20 近 0（收盘后零星量），不可用于判断抢筹；实时成交 70270、持仓 387160（对应 Y2705），增仓上行说明短线多头有介入，但需盘中量能持续放大才可确认，否则易回落。",
-    "支撑压力：下方支撑先看 4H 下轨 8247.54 与实时日内低 8240，再看日线近 20 日低 8380 的下方延展区；上方压力依次为 1H 中轨 8449.8、4H 中轨 8513.85、日线 ma10 8536.9，突破 8513-8536 才谈得上短周期转强。",
-    "多周期共振：日线偏空、4H 偏空（中轨下方+超卖）、1H 超跌修复（下轨附近），三尺度未形成同向共振，属“空头背景下的短线反弹”，适合轻仓、快进快出、区间思维，不宜重仓追多或逆势抄底。",
-    "换月与执行：Y0 映射主力 Y2705（mapping_verified=true），次主力 Y2701 报价 8573、升水 263、持仓比 0.9157，roll_state=urgent；连续合约仅作分析口径，实盘务必在大商所下单软件核对 Y2705/Y2701 的实际流动性与价差，避免在换月窗口被价差与滑点损耗。"
+    "实时价定位：Y0连续合约实时价8330、ticktime 10:39:24、涨跌幅+1.54%，买卖盘8328/8330，但该价仍显著低于日线MA10 8536.9与MA20 8675，说明反弹发生在中期下行结构内，属修复性反抽。",
+    "1小时布林：缓存1小时K线（最新2026-11-26 23:00，已延迟）close 8276、上轨8584.97/中轨8449.8/下轨8314.63，昨日已跌破下轨，实时价8330刚回到下轨附近上方，1小时RSI 30.53偏低，属超跌后的下轨回归而非上破中轨。",
+    "4小时布林：4小时上轨8780.16/中轨8513.85/下轨8247.54、带宽0.0626，现价8330位于中轨下方、贴近下轨8247.54上方，4小时RSI 27.26超卖、ADX 39.87显示下行趋势较强，反弹首压为中轨8513.85。",
+    "日线布林/均线：日线close 8477（2026-11-26）、实时8330低于MA10 8536.9、MA20 8675、MA60 8881.72，均线空头排列，日线RSI 37.38偏弱但未到超卖，布林下轨未在数据中直接给出，价格处通道中下段。",
+    "趋势：4小时ADX 39.87、2小时ADX 37.1表明下行趋势动能明确，1小时EMA20 8435.44向下、4小时EMA20 8505.92向下，短中期均线均压制反弹，趋势未反转。",
+    "量能：日线volume 201160、volume_ratio_20d 0.81属缩量，夜盘跳空下行后实时volume 78199显示换月移仓活跃；1小时/4小时缓存volume_ratio20为0.0系数据拼接问题，不能据此判断放量，需以实盘为准。",
+    "支撑压力：下方支撑看夜盘低点8246与4小时下轨8247.54（共振）、再下看日线low20 8380已失守后的8230一带；上方压力先看1小时下轨8314.63与前下影8332，再看1小时中轨8449.8、4小时中轨8513.85。",
+    "换月结构：contract_bridge显示主力Y2705价格8330与Y0一致，次主力Y2701价8581、价差+251（远月升水3.01%）、持仓比0.9101，roll_state=urgent临近换月，Y0连续报价随主力切换可能产生跳空，日内点位在具体月份合约上需重算。"
   ],
   "intraday_strategy": {
-    "bias": "震荡偏多（区间反弹，不追高）",
-    "entry": "8300-8315（以实时 8310 为中枢，回踩 8305 附近分批轻仓；若能站稳 8315 再考虑小幅加仓）",
-    "stop": "8235（跌破实时日内低 8240 与 4H 下轨 8247.54 下方，确认反弹失败即离场）",
-    "take_profit": "第一目标 8440-8450（1H 中轨 8449.8 附近），第二目标 8505-8515（4H 中轨 8513.85 附近，不恋战）",
-    "invalidation": "若价格重新跌破 8240 且 1 小时收盘站不回 8260，或反弹至 8449.8 前量能明显萎缩、冲高回落，则日内多头逻辑失效；反之若直接跳空高开冲 8513 以上而无回踩，不追，等待回踩确认。",
-    "notes": "适用时段：今日午盘 13:30-15:00 与今晚夜盘 21:00-23:00 关注回踩 8305 附近的轻仓做多机会；早盘 09:00-11:30 已过半，若未在 8310 附近介入则不追。以 1 小时+4 小时为主导，区间高抛低吸，止损用收盘价确认，单笔风险控制在账户 0.5% 以内。注意 Y0 为连续合约口径，实盘请在软件确认主力月份（当前映射 Y2705，但 roll_state=urgent 临近换月）。"
+    "bias": "偏空（超跌反弹中的高空，不追多）",
+    "entry": "8350-8380反抽区轻仓试空（以实时价8330为基准，反弹至1小时布林中轨8449.8之前的次级压力带）；若直接下破8246不追空，等回抽8250-8270再考虑",
+    "stop": "8420（1小时EMA20 8435.44下方，日线缩量反弹若站上则空单逻辑失效）",
+    "take_profit": "第一目标8260（夜盘低点/4小时下轨8247.54上沿），第二目标8210（前结算8204附近）",
+    "invalidation": "实时价重新站上1小时布林中轨8449.8并伴随放量，或换月跳空使主力合约切换导致价格口径断裂时，策略作废",
+    "notes": "适用时段：午盘13:30-15:00为主观察窗口，今晚夜盘21:00开盘若受CBOT大豆回落拖累反抽无力可延续；因1小时/4小时K线为延迟缓存数据，盘中以实时盘口8330为准动态修正；roll_state=urgent，下单前必须在交易软件二次确认具体月份合约（建议核对Y2705/DCE页面报价与流动性），连续合约不可直接下单。"
   },
   "decision_frame": {
-    "confidence": 45,
-    "regime": "日线空头趋势中的短周期超跌反弹（震荡修复）",
-    "edge": "仅存在 1H 超跌回归中轨的短线修复机会，4H 与日线仍偏空，多周期未共振，edge 偏弱",
-    "no_trade_condition": "① contract_bridge 的 mapping_verified=false 或换月导致主力月份与报价不一致未人工复核；② 开盘即跳空高开超过 8449.8 而无回踩，首目标盈亏比低于 1.5；③ 跌破 8240 无法收回；④ 日线量能持续萎缩且 1H 无法站上 8314（下轨）上方。满足任一即观望。",
+    "confidence": 52,
+    "regime": "日线下行趋势中的超跌反弹（4小时超卖、1小时修正），中期偏空格局未改",
+    "edge": "4小时RSI 27.26超卖+现价贴近下轨8247.54的反弹修复，配合日线均线空头，形成反弹高空的结构性小优势；但日线基准模型rejected、历史优势未证实，且换月urgent带来口径风险，优势有限",
+    "no_trade_condition": "1）contract_bridge.mapping_verified虽为true但roll_state=urgent，若下单前未人工复核Y2705/Y2701流动性则不得交易；2）若实时价放量站上1小时布林中轨8449.8，空头逻辑失效转观望；3）日元月开盘跳空导致Y0连续与Y2705价差异常扩大超过50点，暂停；4）首目标盈亏比按8350入场、8420止损、8260首目标计算约1.3倍低于1.5，故首目标不改时须以观望或更优入场价（≥8390）才执行，否则不交易",
     "long_case": {
-      "trigger": "价格回踩 8305-8310 区间获得支撑，1 小时收盘站稳 8314.63（1H 下轨）上方且量能不缩",
-      "entry_zone": "8300-8315",
-      "stop": "8235",
+      "trigger": "实时价站稳8314.63（1小时下轨）并放量突破8332前高且回踩不破8300",
+      "entry_zone": "8300-8320回踩确认",
+      "stop": "8246（夜盘低点）",
       "targets": [
-        "第一 8449.8，第二 8513.85"
+        "8449.8",
+        "8513.85"
       ],
-      "invalidation": "1 小时收盘跌破 8240 或反弹至 8449.8 前缩量走弱",
-      "risk_reward": "以 8310 入场、止损 8235（风险 75）、首目标 8449.8（空间约 140），盈亏比约 1.87，满足 1.5 底线但需精准回踩"
+      "invalidation": "跌破8246且30分钟不收回",
+      "risk_reward": "约2.2（以8310入场、8246止损、8449.8首目标计）"
     },
     "short_case": {
-      "trigger": "反弹至 8449.8-8513.85 阻力区无法突破，1 小时出现放量长上影或 MACD 顶背离",
-      "entry_zone": "8449-8513",
-      "stop": "8540（日线 ma10 8536.9 上方）",
+      "trigger": "反抽8350-8380承压且1小时未站上8449.8，或直接下破8246后回抽8250-8270",
+      "entry_zone": "8350-8380",
+      "stop": "8420",
       "targets": [
-        "第一 8310，第二 8247.54"
+        "8260",
+        "8210"
       ],
-      "invalidation": "4 小时收盘站上 8513.85 中轨并加速",
-      "risk_reward": "以 8480 入场、止损 8540（风险 60）、首目标 8310（空间约 170），盈亏比约 2.8，但逆日线空头趋势做多为前提，本方案为空头背景下的顺日线反弹做空备选，日内主导仍以低多为主"
+      "invalidation": "放量站上8449.8",
+      "risk_reward": "约1.3-1.7（8350入场/8420止损/8260首目标约1.3，需等更好入场价提升至1.5以上）"
     },
     "event_risks": [
-      "① 美国大豆优良率低于预期引发的天气炒作（金十 11-21）与 CBOT 大豆触及近四周高位后回落（11-25），外盘天气升水若有反复将放大内盘豆油波动；② 换月窗口 Y2705/Y2701 价差 263 升水，主力流动性切换期盘口冲击与滑点风险；③ 11-26 夜盘 22:00 出现 8246 的低开，需警惕新主力低位波动放大；④ 印尼大豆进口监管表态为政策面扰动，暂无定量影响。"
+      "CBOT大豆触及近四周高位后回落，外盘回落可能压制内盘反弹",
+      "美国大豆优良率低于预期引发的天气炒作，若升温则支撑豆类，反抽可能上破压力",
+      "主力Y2705临近换月（roll_state=urgent），连续合约报价口径与流动性突变风险",
+      "中国1.1亿吨大豆进口与进博会进口旺盛叙事，中期影响偏中性但对节奏无明确方向"
     ],
     "data_limits": [
-      "① 1 小时/4 小时/日线 K 线均截至 2026-11-26（缓存，延迟约 11 小时），布林轨与 RSI 为历史计算，实时价 8310 与缓存 close 存在换月口径差异，位置判断以实时价为基准、历史轨为参考；② Y0 为连续合约，历史含换月跳空，回测不代表具体月份；③ model_validation 状态 rejected，样本外无优势，不能作为概率依据；④ 舆情均为给定搜索结果，未含当日盘中新增信息。本分析不构成投资建议。"
+      "1小时/4小时K线最新时间滞后于实时盘口，缓存收盘8276与实时8330存在约54点差异，K线仅作结构参考，不可当作实时成交",
+      "日线数据为2026-11-26收盘，实时价为2026-11-27盘中，二者混用需谨慎",
+      "日线基准模型status=rejected，样本外胜率38.96%、期望-0.0362R，历史优势未被证实，不代表未来概率",
+      "舆情发布时间跨2026-11-20至11-26，部分为过去事件，且多为大豆/宏观题材，无豆油专项数据",
+      "连续合约回测无法替代具体月份合约，点位需在Y2705上复核"
     ]
   },
   "news_impact": [
-    "[利多] 金十数据 11-21 报道美国大豆、玉米首份优良率双双低于预期，天气炒作窗口或开启：优良率偏低意味着美豆单产存在下调预期，抬升外盘大豆成本端，通过进口成本传导至国内豆油，对豆油构成成本支撑，但当前内盘日线仍空头，利多体现为反弹动能而非趋势反转。",
-    "[利空] 汇通财经 11-26 报道 CBOT 豆粕再创月内新高、大豆触及一个月高位，但英为财情 11-25 同时指出 CBOT 大豆在触及近四周高位后回落：外盘冲高回落说明天气升水存在兑现与获利了结，短期对豆油由成本推动转为压制，内盘反弹持续性存疑。",
-    "[中性] 光大期货 11-24 与 11-25 农产品日报（新浪财经）例行更新：日报多为机构对油脂油料基差、库存与压榨的描述性跟踪，未见方向性极端信号，对日内豆油影响中性，可作为基本面交叉验证来源。",
-    "[中性] 第一财经 11-20 进博会中国贸易专题：进口旺盛的表态属宏观贸易叙事，未提供豆油具体数据，逻辑上指向大豆进口维持高位、压榨供给充足，对豆油偏中性略空，但不构成短线交易信号。",
-    "[中性] Sohu 11-20 关于中国年进口约1.1亿吨大豆、榨油副产物价值的科普性文章：属结构性产业叙事，无新增价格变量，对日内豆油无直接方向影响，仅提示豆粕/豆油比价关系的基本面背景。",
-    "[中性] Shangbao Indonesia 11-24 报道印尼拟加强大豆进口监管、贸易部长称无意限制进口量：政策表态克制，未形成实质贸易流变化，对国内豆油影响中性，需跟踪后续细则。",
-    "[中性] IndexBox 11-25 美国玉米大豆小麦 2026 回顾与 2027 前景、Sohu 11-25 干散货出口增18.5%：均为年度视角与航运需求叙事，时间尺度长于日内，对当下豆油盘面影响有限，仅作中期供需与物流成本参考。"
+    "[利多] 美国首份大豆玉米优良率双双低于预期，天气炒作窗口或开启，若美豆减产预期升温将通过进口成本传导支撑豆油，但需注意当前CBOT大豆在触及近四周高位后已回落，利多存在被消化的风险。",
+    "[利空] CBOT大豆期货在触及近四周高位后回落（英为财情），外盘回调直接压制国内豆油反弹空间，与当前Y0超跌反抽但日线均线空头的格局一致，是日内高空逻辑的外部依仗之一。",
+    "[中性] CBOT豆粕再创月内新高、大豆触及一个月高位，欧盟毁林新规与加工停机双重驱动（汇通财经），对豆油而言压榨利润与豆粕跷跷板效应方向不明，暂视为题材扰动而非趋势驱动。",
+    "[中性] 中国每年进口约1.1亿吨大豆，进口旺盛叙事（第一财经、搜狐）反映长期供应充足，对豆油构成中期供应宽松背景，但短期不构成明确方向信号。",
+    "[中性] 印尼拟加强大豆进口监管但贸易部长称无意限制进口量，属区域贸易政策扰动，对国内豆油直接影响有限，更多为情绪面。",
+    "[利多/中性] 中国干散货出口大增18.5%（搜狐）反映航运与贸易活跃，对油脂物流成本影响间接，暂不作方向依据；整体舆情缺乏豆油专项库存与压榨数据，消息面证据强度有限。"
   ],
   "news_articles": [
     {
       "title": "【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考",
       "source": "金十数据",
       "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5",
-      "detail": "报道美国大豆、玉米首份优良率双双低于市场预期，提出天气炒作窗口或已开启。优良率偏低强化美豆单产下调预期，抬升外盘大豆成本。该逻辑通过进口成本传导至国内豆油，构成成本端支撑，但需外盘持续走强才能兑现。",
+      "detail": "报道指出美国大豆与玉米首份优良率双双低于市场预期。市场预期这可能开启天气炒作窗口，若后续产区天气不利，美豆单产与产量预期或下调。逻辑上通过进口大豆成本抬升传导至国内豆油，属成本端潜在利多，但目前仅为预期，尚需后续报告验证。",
       "impact": "利多"
     },
     {
       "title": "CBOT大豆期货在触及近四周高位后回落",
       "source": "英为财情 Investing.com",
       "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9JTDcxSGlQOGhnSmFKOTQ3VS1UX1JjRVhiMFFZaWFGQ3BFc1JGMWUwQTVFS2lkNTBCaTA4WmpIMGNtRUFpV3RFVFJMazN3ekFJbkZSQnliWGxfUW9XeFhGUXpGUVNrR0tjUHZjZjdZVlRMbUhHeWc?oc=5",
-      "detail": "CBOT 大豆期货在触及近四周高位后回落，显示前期天气升水出现获利了结。外盘冲高回落削弱成本端推动的持续性。对内盘豆油而言，短线反弹动能可能受抑，需观察外盘能否重新站稳高位。",
+      "detail": "CBOT大豆在触及近四周高位后出现回落，显示美豆短线冲高动能减弱。外盘回撤通常通过进口成本与盘面比价压制国内豆油。该信息与Y0日线均线空头排列、反弹承压的判断方向一致。",
       "impact": "利空"
     },
     {
       "title": "CBOT农产品分析：豆粕再创月内新高，大豆触及一个月高位，欧盟毁林新规与加工停机的双重驱动",
       "source": "汇通财经",
       "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5NdTFkcmVRdVVhZlQtaW1IZHlkRG1GdUhGV1hLcHRhaGNZdFd5U3MwMC1ibnUxOTRPSGpkM1B5UjVoUlU5MDVjaXpqb08zRURfWVo4ajBmSTlQZw?oc=5",
-      "detail": "汇通财经报道 CBOT 豆粕再创月内新高、大豆触及一个月高位，驱动包括欧盟毁林新规与加工停机。豆粕强势与大豆走高对油脂油料板块情绪偏暖。但需注意该报道时间晚于部分交易时段，盘面可能已部分计价。",
-      "impact": "利多"
-    },
-    {
-      "title": "光大期货：11月25日农产品日报",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNN1FxSjMwUjY0bUxLMnNXeXF6QXN2dGx0NTFuOF90S3FPd0tWZnpDblplN1dadVNJMTQ4Z2RHdFBfZ1VPcUVJSm1aX0tqMV9NRWRiZjMySFExODl2ZzBMUExUQ3BDbHB0U3dhSHNXd09yZzZYU0dKZG9RVDcyV25tNF9taXdXVU9LdVBQRw?oc=5",
-      "detail": "光大期货 11 月 25 日农产品日报，按日跟踪油脂油料基差、库存与压榨情况。日报属机构例行复盘，提供基本面交叉验证但对日内方向影响中性。具体数据需以原文为准。",
-      "impact": "中性"
-    },
-    {
-      "title": "光大期货：农产品类日报11.24",
-      "source": "新浪财经",
-      "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQWTl6SWtXZnlNN1lXZFYxSklTYVZUZGZ6WFJ3UUVSTFZPMUxmMVg1X3pzWnN5T24tTi02NnVtVXp0ZXlCMlA1VDRUTHBzbUpfajAwZDVGRzM3c3VuZ3JhN01HTU5yWDZ1Q0V1cWJYMlAwd1NaWUFPQjJBU3NLQWlSSzM3dTdCeHBhLXhCMlo1cDFiY0JwblJFbG5saU8zZHJjTEU1V21RWGMxLWVmaGRBdA?oc=5",
-      "detail": "光大期货 11 月 24 日农产品日报，跟踪油脂油料板块基本面与盘面变化。作为机构日报，信息偏描述性，未见方向性极端判断。对日内豆油交易影响中性，适合做背景参考。",
-      "impact": "中性"
-    },
-    {
-      "title": "进博会里的中国贸易：进口旺盛，谁挑大梁？",
-      "source": "第一财经",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1iQjQtbTZreVpFU01yMnc2V1I0dFZvbGlRVlA1QUgtOWloczdzQVNFb2lpLU9ONHlxQUxKdlFHVUsyNDc5MVlsOE5vWmFiaWNiWF9V?oc=5",
-      "detail": "第一财经进博会专题指出中国进口旺盛，涉及大豆等大宗商品。进口维持高位意味着国内大豆供给与压榨开机充足，对豆油供给端偏宽松。属宏观贸易叙事，对日内价格无直接交易信号。",
+      "detail": "报道称豆粕再创月内新高，大豆触及一个月高位，驱动因素包括欧盟毁林新规与加工停机。豆粕走强可能提升压榨利润并间接影响豆油供应节奏，但二者存在跷跷板效应，对豆油方向影响偏中性，需结合油粕比观察。",
       "impact": "中性"
     },
     {
       "title": "中国每年进口1.1亿吨大豆，真为了榨油？榨剩的渣才是要命的东西",
       "source": "Sohu",
       "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1OeUhxRjE3TUZiZjJuUXd6bmE5RkR5VzU4Tkp2dTE3RzNsYW95Z1NyV09EMmFpWkZXWVVVVHlvYWtpdkg2VlpacU1QSlVpYUZtRlV3?oc=5",
-      "detail": "文章指出中国每年进口约1.1亿吨大豆，强调榨油副产物豆粕才是核心。该叙事提示豆油与豆粕的比价与压榨利润关系，但无新增价格变量。对日内豆油影响中性，属产业背景科普。",
+      "detail": "文章讨论中国年进口约1.1亿吨大豆的用途结构，强调豆粕需求为主、豆油为辅。庞大的进口体量意味着国内大豆与油脂供应整体充裕，对豆油构成中期供应宽松背景，但短期无明确方向指引。",
+      "impact": "中性"
+    },
+    {
+      "title": "进博会里的中国贸易：进口旺盛，谁挑大梁？",
+      "source": "第一财经",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1iQjQtbTZreVpFU01yMnc2V1I0dFZvbGlRVlA1QUgtOWloczdzQVNFb2lpLU9ONHlxQUxKdlFHVUsyNDc5MVlsOE5vWmFiaWNiWF9V?oc=5",
+      "detail": "进博会报道显示中国进口整体旺盛，农产品为主要进口品类之一。进口活跃反映国内需求韧性，但也意味着油脂油料供给充足，对豆油价格影响偏中性，需结合库存与消费数据判断。",
       "impact": "中性"
     },
     {
       "title": "印尼拟加强大豆进口监管 贸易部长称无意限制进口量",
       "source": "Shangbao Indonesia",
       "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTFB3Q3p4dVFOY21XUmdSTVZTdnVuMk9qemw2WlRQX24tZ01DWDdiOFYtNDA2NVdpd1JJVzZkY1JuZGxsMVFLVEZsV2dQWVVza0dFZjZ1TUMxQXRsLTVQT3F1Mm55WW1hYXlnQUFBX2tKLTQ2OWJCejNv?oc=5",
-      "detail": "印尼贸易部长表示拟加强大豆进口监管但无意限制进口量。表态克制，短期内不会造成实际贸易流收紧。对全球大豆及国内豆油影响偏中性，需跟踪后续政策细则是否落地。",
+      "detail": "印尼拟加强大豆进口监管，但贸易部长表示无意限制进口量。该政策表态缓和了区域供应收紧预期，对国际大豆贸易影响有限。对国内豆油属间接中性信息，不构成明确驱动。",
       "impact": "中性"
     },
     {
       "title": "出口大增18.5%！中国正在改写干散货航运的需求逻辑",
       "source": "Sohu",
       "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNYnZielRValVUWUVyY05XQUFxbHJ0WENyLS1FUnp5dzdhOW13ZnZZVVZOaUEyZVE4cW1vRXIzaUphbUNVTGFkTTFZS2xfSVJvN01ueWtObFkzQlNReHF6ZVc1MDdlS0RlTWtfdFVwX1pCTGpCWlVqNEMxRG5FandNdE93LXBPcW04b2xLcg?oc=5",
-      "detail": "文章指出中国干散货出口大增 18.5%，讨论航运需求逻辑变化。该信息指向物流与运价层面，时间尺度长于日内，对豆油盘面直接影响有限。可作为中期进口与运输成本背景参考。",
+      "detail": "报道称中国干散货出口大增18.5%，正在改写航运需求逻辑。航运与物流活跃度上行可能影响大宗商品运输成本与节奏。对豆油为间接的宏观中性信息，不构成价格方向依据。",
+      "impact": "中性"
+    },
+    {
+      "title": "光大期货：11月25日农产品日报",
+      "source": "新浪财经",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNN1FxSjMwUjY0bUxLMnNXeXF6QXN2dGx0NTFuOF90S3FPd0tWZnpDblplN1dadVNJMTQ4Z2RHdFBfZ1VPcUVJSm1aX0tqMV9NRWRiZjMySFExODl2ZzBMUExUQ3BDbHB0U3dhSHNXd09yZzZYU0dKZG9RVDcyV25tNF9taXdXVU9LdVBQRw?oc=5",
+      "detail": "光大期货11月25日农产品日报汇总当日农产品盘面与基本面动向，为过去时点的机构观点。可作为豆油与相关油料的机构情绪参考，但非实时信号，需结合当日盘口判断。",
       "impact": "中性"
     },
     {
       "title": "美国玉米、大豆和小麦市场：2026年回顾与2027年前景",
       "source": "IndexBox",
-      "url": "https://news.google.com/rss/articles/CBMivwFVX3lxTE9OSDRYOTZuejd4RzFUdG9qclJlRDRaTWRtaHhwVGVBaFViUmtYc2VNV3M0dTZqQVUycHlxTWdsaTFiblJfNGl0b3VMZElERFZwS1N3a244UVpxVG9DcnBzT1hUWEo0dkhQc25VMUR3RW9vY0hJajdCWWFhV1BmV185djdidkhpUk1YSUdpb2dSS2hBbkx1ajhjZFU4YlBQbXEyaUIxMDY4UmxBOUVlYlpndUhQbGVSNmRjNmx1Wkp4MA?oc=5",
-      "detail": "IndexBox 发布美国玉米、大豆和小麦 2026 年回顾与 2027 年前景。年度视角的供需展望对长期定价有参考意义，但对日内豆油交易影响有限。不宜据此做短线方向判断。",
+      "url": "https://news.google.com/rss/articles/CBMivwFVX3lxTE9OSDRYOTZuejd4RzFUdG9qclJlRDRaTWRtaHhwVGVBaFViUmtYc2VNV3M0dTZqQVUycHlxRWdsaTFiblJfNGl0b3VMZElERFZwS1N3a244UVpxVG9DcnBzT1hUWEo0dkhQc25VMUR3RW9vY0hJajdCWWFhV1BmV185djdidkhpUk1YSUdpb2dSS2hBbkx1ajhjZFU4YlBQbXEyaUIxMDY4UmxBOUVlYlpndUhQbGVSNmRjNmx1Wkp4MA?oc=5",
+      "detail": "IndexBox报告回顾2026年美国玉米、大豆和小麦市场并展望2027年前景。属于中长期基本面综述，对豆油提供远月成本与供需框架参考。对当前日内交易方向指引有限，偏中性。",
       "impact": "中性"
     }
   ],
   "watch_levels": {
     "support": 8247.54,
-    "resistance": 8513.85
+    "resistance": 8449.8
   },
   "normalization_warnings": [],
-  "risk_note": "本分析基于用户给定数据与舆情，不构成投资建议。关键风险：① Y0 为连续合约分析口径，contract_bridge 显示主力映射 Y2705，但 roll_state=urgent（临近换月，次主力 Y2701 持仓比 0.9157、价差 263 远月升水），实盘下单必须在大连商品交易所下单软件二次确认具体月份与流动性，连续合约价格不可直接当作某月合约报价下单。② 1 小时/4 小时/日线 K 线为截至 2026-11-26 的缓存数据（延迟约 11 小时），实时价 8310 与缓存 close 存在换月口径差异，布林与 RSI 为历史计算，仅作参考。③ model_validation 状态 rejected，历史样本外无优势，任何命中率、胜率不构成未来概率。④ 舆情时间为 11-20 至 11-26，已发生事件用过去时描述，未含盘中新增信息。⑤ 大商所交易时段以早盘 09:00-11:30、午盘 13:30-15:00、夜盘 21:00-23:00 为准，隔夜与外盘天气题材波动可能放大跳空风险。",
+  "risk_note": "本分析为基于给定行情与舆情的辅助研究，不构成投资建议。Y0为连续合约分析口径，不可直接下单，实际交易须在交易软件核对主力Y2705（次主力Y2701，价差+251远月升水、roll_state=urgent临近换月）的报价与流动性并二次确认。1小时/4小时K线为延迟缓存数据，实时价8330、ticktime 10:39:24、+1.54%为本次 live 输入，盘中点位随盘口变动。日线基准模型status=rejected，历史胜率与期望均为过去样本外结果，不代表未来概率。隔夜外盘、天气炒作与换月跳空均可能使策略失效，严格执行止损。",
   "source": "DeepSeek API",
   "model": "deepseek-v4-flash",
   "thinking_mode": "disabled",
   "reasoning_effort": null,
   "deepseek_mode": "no-thinking",
   "status": "ok",
-  "generated_at_utc": "2026-11-27T02:05:19+00:00",
+  "generated_at_utc": "2026-11-27T02:39:57+00:00",
   "latest_date": "2026-11-26",
-  "realtime_price": 8310.0,
-  "realtime_note": "实时行情截至 2026-11-27 10:04:41，当前价 8310，涨跌 +1.29%",
+  "realtime_price": 8330.0,
+  "realtime_note": "实时行情截至 2026-11-27 10:39:24，当前价 8330，涨跌 +1.54%",
   "realtime_input": {
     "status": "live",
-    "fetched_at_utc": "2026-11-27T02:04:50+00:00",
+    "fetched_at_utc": "2026-11-27T02:39:30+00:00",
     "market_trading_day": "2026-11-27",
-    "market_tick_time": "10:04:41",
+    "market_tick_time": "10:39:24",
     "source": "Sina Market Center live request",
     "cached_quote_used": false
   },
   "news_summary": "[1] 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 - 金十数据\n来源: 金十数据\n发布时间UTC: 2026-11-21T05:56:53+00:00\nURL: https://news.google.com/rss/articles/CBMiT0FVX3lxTE9Bb0JOZmcyTEI5MGpOanRtOG5uNXA5ZF9RbG53eEc4SXNsZ2JDZVN6dlM1MUlJdzNRR0tGSHp6aFU0Q1lFZDVUTExubDNKZHc?oc=5\n摘要: 【美国天气炒作攻略】大豆玉米首份优良率双双低于预期，天气炒作窗口或已开启？-市场参考 金十数据\n\n[2] 中国每年进口1.1亿吨大豆，真为了榨油？榨剩的渣才是要命的东西 - Sohu\n来源: Sohu\n发布时间UTC: 2026-11-20T14:08:00+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1OeUhxRjE3TUZiZjJuUXd6bmE5RkR5VzU4Tkp2dTE3RzNsYW95Z1NyV09EMmFpWkZXWVVVVHlvYWtpdkg2VlpacU1QSlVpYUZtRlV3?oc=5\n摘要: 中国每年进口1.1亿吨大豆，真为了榨油？榨剩的渣才是要命的东西 Sohu\n\n[3] 进博会里的中国贸易：进口旺盛，谁挑大梁？ - 第一财经\n来源: 第一财经\n发布时间UTC: 2026-11-20T04:30:51+00:00\nURL: https://news.google.com/rss/articles/CBMiU0FVX3lxTE1iQjQtbTZreVpFU01yMnc2V1I0dFZvbGlRVlA1QUgtOWloczdzQVNFb2lpLU9ONHlxQUxKdlFHVUsyNDc5MVlsOE5vWmFiaWNiWF9V?oc=5\n摘要: 进博会里的中国贸易：进口旺盛，谁挑大梁？ 第一财经\n\n[4] 光大期货：11月25日农产品日报 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-11-25T01:29:43+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNN1FxSjMwUjY0bUxLMnNXeXF6QXN2dGx0NTFuOF90S3FPd0tWZnpDblplN1dadVNJMTQ4Z2RHdFBfZ1VPcUVJSm1aX0tqMV9NRWRiZjMySFExODl2ZzBMUExUQ3BDbHB0U3dhSHNXd09yZzZYU0dKZG9RVDcyV25tNF9taXdXVU9LdVBQRw?oc=5\n摘要: 光大期货：11月25日农产品日报 新浪财经\n\n[5] 印尼拟加强大豆进口监管 贸易部长称无意限制进口量 - Shangbao Indonesia\n来源: Shangbao Indonesia\n发布时间UTC: 2026-11-24T12:06:00+00:00\nURL: https://news.google.com/rss/articles/CBMid0FVX3lxTFB3Q3p4dVFOY21XUmdSTVZTdnVuMk9qemw2WlRQX24tZ01DWDdiOFYtNDA2NVdpd1JJVzZkY1JuZGxsMVFLVEZsV2dQWVVza0dFZjZ1TUMxQXRsLTVQT3F1Mm55WW1hYXlnQUFBX2tKLTQ2OWJCejNv?oc=5\n摘要: 印尼拟加强大豆进口监管 贸易部长称无意限制进口量 Shangbao Indonesia\n\n[6] 光大期货：农产品类日报11.24 - 新浪财经\n来源: 新浪财经\n发布时间UTC: 2026-11-25T02:34:18+00:00\nURL: https://news.google.com/rss/articles/CBMisAFBVV95cUxQWTl6SWtXZnlNN1lXZFYxSklTYVZUZGZ6WFJ3UUVSTFZPMUxmMVg1X3pzWnN5T24tTi02NnVtVXp0ZXlCMlA1VDRUTHBzbUpfajAwZDVGRzM3c3VuZ3JhN01HTU5yWDZ1Q0V1cWJYMlAwd1NaWUFPQjJBU3NLQWlSSzM3dTdCeHBhLXhCMlo1cDFiY0JwblJFbG5saU8zZHJjTEU1V21RWGMxLWVmaGRBdA?oc=5\n摘要: 光大期货：农产品类日报11.24 新浪财经\n\n[7] 出口大增18.5%！中国正在改写干散货航运的需求逻辑 - Sohu\n来源: Sohu\n发布时间UTC: 2026-11-25T23:47:11+00:00\nURL: https://news.google.com/rss/articles/CBMijAFBVV95cUxNYnZielRValVUWUVyY05XQUFxbHJ0WENyLS1FUnp5dzdhOW13ZnZZVVZOaUEyZVE4cW1vRXIzaUphbUNVTGFkTTFZS2xfSVJvN01ueWtObFkzQlNReHF6ZVc1MDdlS0RlTWtfdFVwX1pCTGpCWlVqNEMxRG5FandNdE93LXBPcW04b2xLcg?oc=5\n摘要: 出口大增18.5%！中国正在改写干散货航运的需求逻辑 Sohu\n\n[8] 美国玉米、大豆和小麦市场：2026年回顾与2027年前景 - 新闻和统计 - IndexBox\n来源: IndexBox\n发布时间UTC: 2026-11-25T13:42:39+00:00\nURL: https://news.google.com/rss/articles/CBMivwFBVV95cUxOSDRYOTZuejd4RzFUdG9qclJlRDRaTWRtaHhwVGVBaFViUmtYc2VNV3M0dTZqQVUycHlxTWdsaTFiblJfNGl0b3VMZElERFZwS1N3a244UVpxVG9DcnBzT1hUWEo0dkhQc25VMUR3RW9vY0hJajdCWWFhV1BmV185djdidkhpUk1YSUdpb2dSS2hBbkx1ajhjZFU4YlBQbXEyaUIxMDY4UmxBOUVlYlpndUhQbGVSNmRjNmx1Wkp4MA?oc=5\n摘要: 美国玉米、大豆和小麦市场：2026年回顾与2027年前景 - 新闻和统计 IndexBox\n\n[9] CBOT大豆期货在触及近四周高位后回落 提供者 Investing.com - 英为财情 Investing.com\n来源: 英为财情 Investing.com\n发布时间UTC: 2026-11-25T14:31:00+00:00\nURL: https://news.google.com/rss/articles/CBMidkFVX3lxTE9JTDcxSGlQOGhnSmFKOTQ3VS1UX1JjRVhiMFFZaWFGQ3BFc1JGMWUwQTVFS2lkNTBCaTA4WmpIMGNtRUFpV3RFVFJMazN3ekFJbkZSQnliWGxfUW9XeFhGUXpGUVNrR0tjUHZjZjdZVlRMbUhHeWc?oc=5\n摘要: CBOT大豆期货在触及近四周高位后回落 提供者 Investing.com 英为财情 Investing.com\n\n[10] CBOT农产品分析：豆粕再创月内新高，大豆触及一个月高位，欧盟毁林新规与加工停机的双重驱动 - 汇通财经\n来源: 汇通财经\n发布时间UTC: 2026-11-26T01:18:35+00:00\nURL: https://news.google.com/rss/articles/CBMiWkFVX3lxTE5NdTFkcmVRdVVhZlQtaW1IZHlkRG1GdUhGV1hLcHRhaGNZdFd5U3MwMC1ibnUxOTRPSGpkM1B5UjVoUlU5MDVjaXpqb08zRURfWVo4ajBmSTlQZw?oc=5\n摘要: CBOT农产品分析：豆粕再创月内新高，大豆触及一个月高位，欧盟毁林新规与加工停机的双重驱动 汇通财经",
   "symbol": "Y0",
   "instrument_name": "豆油",
-  "api_latency_seconds": 29.1,
+  "api_latency_seconds": 27.6,
   "token_usage": {
     "prompt_tokens": 15531,
-    "completion_tokens": 5297,
-    "total_tokens": 20828,
+    "completion_tokens": 4702,
+    "total_tokens": 20233,
     "prompt_tokens_details": {
       "cached_tokens": 2560
     },
@@ -172,26 +173,20 @@
   },
   "integrity": {
     "version": "deterministic-integrity-v2",
-    "checked_at_utc": "2026-11-27T02:05:19+00:00",
-    "score": 85,
-    "status": "caution",
-    "label": "仅供参考",
-    "execution_allowed": false,
-    "evidence_confidence": 45,
-    "issues": [
-      {
-        "code": "low_evidence_confidence",
-        "severity": "medium",
-        "message": "AI 自评证据强度仅 45/100。"
-      }
-    ],
+    "checked_at_utc": "2026-11-27T02:39:57+00:00",
+    "score": 100,
+    "status": "passed",
+    "label": "通过",
+    "execution_allowed": true,
+    "evidence_confidence": 52,
+    "issues": [],
     "facts": {
-      "realtime_price": 8310.0,
+      "realtime_price": 8330.0,
       "realtime_fetch_status": "live",
-      "realtime_fetched_at_utc": "2026-11-27T02:04:50+00:00",
-      "realtime_market_tick_time": "10:04:41",
+      "realtime_fetched_at_utc": "2026-11-27T02:39:30+00:00",
+      "realtime_market_tick_time": "10:39:24",
       "daily_rsi14": 37.38,
-      "one_hour_boll_position": "下轨下方",
+      "one_hour_boll_position": "中轨下方",
       "four_hour_boll_position": "中轨下方",
       "realtime_trading_day_label": "2026-11-27",
       "realtime_label_is_future": false
@@ -200,9 +195,9 @@
   "analysis_pipeline": "live-quote-plus-cached-bars-v2",
   "input_freshness": {
     "realtime_fetch_status": "live",
-    "realtime_fetched_at_utc": "2026-11-27T02:04:50+00:00",
+    "realtime_fetched_at_utc": "2026-11-27T02:39:30+00:00",
     "realtime_market_trading_day": "2026-11-27",
-    "realtime_market_tick_time": "10:04:41",
+    "realtime_market_tick_time": "10:39:24",
     "realtime_source": "Sina Market Center live request",
     "realtime_fetch_error": null,
     "cached_realtime_available_but_not_used": true,
